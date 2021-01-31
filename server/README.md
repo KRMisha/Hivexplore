@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [Python 3](https://www.python.org/downloads/)
+- [Python >= 3.8](https://www.python.org/downloads/)
 - Install the required packages with a venv: `make venv`
 
 ## Usage

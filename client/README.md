@@ -1,5 +1,14 @@
 # Client
 
+## Prerequisites
+
+- [Node.js](https://nodejs.org/en/)
+- [Vue CLI](https://cli.vuejs.org/):
+
+    ```
+    npm install -g @vue/cli
+    ```
+
 ## Project setup
 ```
 npm install

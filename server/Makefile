@@ -7,7 +7,7 @@ venv:
 	./$(VENV)/bin/pip install -r requirements.txt
 
 run:
-	./main.py
+	./server/main.py
 
 test:
 	pytest

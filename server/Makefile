@@ -13,7 +13,7 @@ test:
 	pytest
 
 lint:
-	flake8
+	pylint server tests
 
 format:
 	yapf --in-place --parallel --recursive .

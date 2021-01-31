@@ -20,5 +20,6 @@ Commands:
 - `make run`
 - `make test`
 - `make lint`
+- `make typecheck`
 - `make format`
 - `make help`

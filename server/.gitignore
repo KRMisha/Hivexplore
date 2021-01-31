@@ -1,0 +1,11 @@
+# Compiled bytecode
+__pycache__/
+
+# Virtual environment
+.venv/
+
+# Tests
+.pytest_cache/
+
+# Mypy
+.mypy_cache/

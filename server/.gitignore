@@ -6,3 +6,6 @@ __pycache__/
 
 # Tests
 .pytest_cache/
+
+# Mypy
+.mypy_cache/

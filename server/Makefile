@@ -1,6 +1,6 @@
 VENV := .venv
 
-.PHONY: venv run test lint format help
+.PHONY: venv run test lint typecheck format help
 
 venv:
 	python3 -m venv $(VENV)
@@ -15,6 +15,9 @@ test:
 lint:
 	pylint server tests
 
+typecheck:
+	mypy .
+
 format:
 	yapf --in-place --parallel --recursive .
 
@@ -23,8 +26,9 @@ help:
 	Usage: make target...\n\
 	\n\
 	Targets:\n\
-	  venv      Create a new virtual environment\n\
-	  run       Run program\n\
-	  test      Test program\n\
-	  lint      Lint code with pylint\n\
-	  format    Format code with yapf\n"
+	  venv         Create a new virtual environment\n\
+	  run          Run program\n\
+	  test         Test program\n\
+	  lint         Lint code with pylint\n\
+	  typecheck    Type-check code with mypy\n\
+	  format       Format code with yapf\n"

@@ -16,7 +16,7 @@ lint:
 	flake8
 
 format:
-	black -l 140 .
+	yapf --in-place --parallel --recursive .
 
 help:
 	@printf "\
@@ -27,4 +27,4 @@ help:
 	  run       Run program\n\
 	  test      Test program\n\
 	  lint      Lint code with pylint\n\
-	  format    Format code with autopep8\n"
+	  format    Format code with yapf\n"

@@ -7,7 +7,7 @@
 
 ## Usage
 
-Activate the venv before running any commands:
+The virtual environment must be activated once per shell session before running any command:
 ```sh
 # Unix:
 source .venv/bin/activate

@@ -10,30 +10,35 @@
     npm install -g @vue/cli
     ```
 
-## Project setup
+## Setup
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+## Usage
+
+### Compile and hot-reload for development
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Compile and minify for production
 ```
 npm run build
 ```
 
-### Run your unit tests
+### Run unit tests
 ```
 npm run test:unit
 ```
 
-### Lints and fixes files
+### Lint and fix files
 ```
 npm run lint
 ```
 
+> Note: this will also format files automatically.
+
 ### Customize configuration
+
 See [Configuration Reference](https://cli.vuejs.org/config/).

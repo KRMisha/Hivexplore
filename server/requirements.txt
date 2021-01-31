@@ -1,4 +1,4 @@
 mypy
 pylint
-yapf
 pytest==6.2.2
+yapf

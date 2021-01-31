@@ -1,25 +1,25 @@
 {
-	"folders": [
-		{
-			"name": "root",
-			"path": "."
+    "folders": [
+        {
+            "name": "root",
+            "path": "."
         },
         {
-			"path": "client"
+            "path": "client"
         },
         {
-			"path": "server"
+            "path": "server"
         }
-	],
-	"settings": {
+    ],
+    "settings": {
         "files.insertFinalNewline": true,
         "files.trimFinalNewlines": true
     },
-	"extensions": {
-		"recommendations": [
-			"EditorConfig.EditorConfig",
-			"ms-python.python",
-			"octref.vetur"
-		]
-	}
+    "extensions": {
+        "recommendations": [
+            "EditorConfig.EditorConfig",
+            "ms-python.python",
+            "octref.vetur"
+        ]
+    }
 }

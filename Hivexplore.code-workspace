@@ -9,6 +9,12 @@
         },
         {
             "path": "server"
+        },
+        {
+            "path": "drone"
+        },
+        {
+            "path": "argos"
         }
     ],
     "settings": {

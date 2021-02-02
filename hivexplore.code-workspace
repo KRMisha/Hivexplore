@@ -19,6 +19,7 @@
         "recommendations": [
             "EditorConfig.EditorConfig",
             "ms-python.python",
+            "msjsdiag.debugger-for-chrome",
             "octref.vetur"
         ]
     }

@@ -37,17 +37,26 @@
  */
 using namespace argos;
 
+enum class DroneState
+{
+        OnGround,
+        Takeoff,
+        WaitTakeoff,
+        ForwardMovement,
+        WaitForwardMovement,
+        BrakeMovement,
+        WaitBrakeMovement,
+        Rotate,
+        WaitRotation,
+        StopRotation,
+        WaitStopRotation
+};
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
 class CCrazyflieAlgorithm : public CCI_Controller
 {
 public:
-    /* Class constructor. */
-    CCrazyflieAlgorithm();
-    /* Class destructor. */
-    virtual ~CCrazyflieAlgorithm() {}
-
     /*
      * This function initializes the controller.
      * The 't_node' variable points to the <parameters> section in the XML
@@ -79,7 +88,7 @@ public:
     /*
      * This function lifts the drone from the ground
      */
-    bool fly();
+    void takeoff();
 
     /*
      * This function returns the drone to the ground
@@ -91,30 +100,38 @@ public:
      */
     void flyTowardsCenter();
 
+    // Log the sensor data
+    void logData();
+
 private:
     /* Pointer to the crazyflie distance sensor */
-    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
+    CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
 
     /* Pointer to the position actuator */
-    CCI_QuadRotorPositionActuator* m_pcPropellers;
+    CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
 
     /* Pointer to the range and bearing actuator */
-    CCI_RangeAndBearingActuator* m_pcRABA;
+    CCI_RangeAndBearingActuator* m_pcRABA = nullptr;
 
     /* Pointer to the range and bearing sensor */
-    CCI_RangeAndBearingSensor* m_pcRABS;
+    CCI_RangeAndBearingSensor* m_pcRABS = nullptr;
 
     /* Pointer to the positioning sensor */
-    CCI_PositioningSensor* m_pcPos;
+    CCI_PositioningSensor* m_pcPos = nullptr;
 
     /* Pointer to the battery sensor */
-    CCI_BatterySensor* m_pcBattery;
+    CCI_BatterySensor* m_pcBattery = nullptr;
 
     /* The random number generator */
-    CRandom::CRNG* m_pcRNG;
+    CRandom::CRNG* m_pcRNG = nullptr;
 
     /* Current step */
-    uint m_uiCurrentStep;
+    std::uint64_t m_uiCurrentStep = 0;
+
+    CVector3 m_initialPosition;
+    CVector3 m_lastReferencePosition;
+    CRadians m_lastReferenceYaw;
+    DroneState m_currentState = DroneState::OnGround;
 };
 
 #endif

@@ -7,20 +7,10 @@
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
 
+#include <type_traits>
+#include <unordered_map>
 /****************************************/
 /****************************************/
-
-CCrazyflieAlgorithm::CCrazyflieAlgorithm()
-    : m_pcDistance(NULL)
-    , m_pcPropellers(NULL)
-    , m_pcRNG(NULL)
-    , m_pcRABA(NULL)
-    , m_pcRABS(NULL)
-    , m_pcPos(NULL)
-    , m_pcBattery(NULL)
-    , m_uiCurrentStep(0)
-{
-}
 
 /****************************************/
 /****************************************/
@@ -72,92 +62,138 @@ void CCrazyflieAlgorithm::Init(TConfigurationNode& t_node)
 
 void CCrazyflieAlgorithm::ControlStep()
 {
-    enum class State
+    // logData();
+
+    // Takeoff constants
+    static constexpr double targetDroneHeight = 0.5;
+    static constexpr double targetDroneHeightEpsilon = 0.05;
+
+    // Forward movement constants
+    static constexpr double distanceToTravel = 0.1;
+    static constexpr double distanceToTravelEpsilon = 0.05;
+    static constexpr double breakingAcuracyEpsilon = 0.02;
+
+    // Rotation constants
+    static const CRadians rotationAngle = CRadians::PI / 4;
+    static const CRadians rotationAngleEpsilon = CRadians::PI / 64;
+
+    switch (m_currentState)
     {
-        SearchingForForwardWall,
-        StopAfterWallFound,
-        RotationAfterStop
+    case DroneState::OnGround:
+        m_initialPosition = m_pcPos->GetReading().Position;
+        m_currentState = DroneState::Takeoff;
+        break;
+    case DroneState::Takeoff:
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, targetDroneHeight));
+        m_currentState = DroneState::WaitTakeoff;
+        break;
+    case DroneState::WaitTakeoff:
+        if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon)
+        {
+            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+            m_currentState = DroneState::ForwardMovement;
+        }
+        break;
+    case DroneState::ForwardMovement:
+        m_pcPropellers->SetRelativePosition(CVector3(distanceToTravel, 0.0, 0.0));
+        m_lastReferencePosition = m_pcPos->GetReading().Position;
+        m_currentState = DroneState::WaitForwardMovement;
+        break;
+    case DroneState::WaitForwardMovement:
+        // If we detect a wall in front of us
+        if ((++m_pcDistance->GetReadingsMap().begin())->second >= 0)
+        {
+            m_currentState = DroneState::BrakeMovement;
+        }
+        // If we finished traveling
+        else if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon)
+        {
+            m_currentState = DroneState::ForwardMovement;
+        }
+        break;
+    case DroneState::BrakeMovement:
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        m_lastReferencePosition = m_pcPos->GetReading().Position;
+        m_currentState = DroneState::WaitBrakeMovement;
+        break;
+    case DroneState::WaitBrakeMovement:
+        if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() <= breakingAcuracyEpsilon)
+        {
+            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+            m_currentState = DroneState::Rotate;
+        }
+        m_lastReferencePosition = m_pcPos->GetReading().Position;
+        break;
+    case DroneState::Rotate:
+        if ((++m_pcDistance->GetReadingsMap().begin())->second < 0)
+        {
+            m_currentState = DroneState::ForwardMovement;
+        }
+        else
+        {
+            CRadians angle;
+            CVector3 vector;
+            m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+            m_lastReferenceYaw = angle;
+            m_pcPropellers->SetRelativeYaw(rotationAngle);
+            m_currentState = DroneState::WaitRotation;
+        }
+        break;
+    case DroneState::WaitRotation:
+        {
+            CRadians angle;
+            CVector3 vector;
+            m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+
+            if (std::abs((angle - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue())
+            {
+                m_currentState = DroneState::Rotate;
+            }
+        }
+        break;
+    case DroneState::StopRotation:
+        m_pcPropellers->SetRelativeYaw(CRadians(0));
+        m_currentState = DroneState::WaitStopRotation;
+        break;
+    case DroneState::WaitStopRotation:
+        {
+            CRadians angle;
+            CVector3 vector;
+            m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+
+            if (std::abs((angle - m_lastReferenceYaw).GetValue()) <= rotationAngleEpsilon.GetValue())
+            {
+                m_currentState = DroneState::ForwardMovement;
+            }
+        }
+        break;
+    }
+
+    static std::unordered_map<DroneState, std::string> droneStateNames= 
+    {
+        {DroneState::OnGround, "OnGround"},
+        {DroneState::Takeoff, "Takeoff"},
+        {DroneState::WaitTakeoff, "WaitTakeoff"},
+        {DroneState::ForwardMovement, "ForwardMovement"},
+        {DroneState::WaitForwardMovement, "WaitForwardMovement"},
+        {DroneState::BrakeMovement, "BrakeMovement"},
+        {DroneState::WaitBrakeMovement, "WaitBrakeMovement"},
+        {DroneState::Rotate, "Rotate"},
+        {DroneState::WaitRotation, "WaitRotation"},
+        {DroneState::StopRotation, "StopRotation"},
+        {DroneState::WaitStopRotation, "WaitStopRotation"}
     };
+    LOG << "Current state: " << droneStateNames[m_currentState] << std::endl;
 
-    static State state = State::SearchingForForwardWall;
-    static float lastSensorValue = -2;
-
-    // Look battery level
-    const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
-    LOG << "Battery level: " << sBatRead.AvailableCharge << std::endl;
-
-    // Look here for documentation on the distance sensor:
-    // /root/argos3/src/plugins/robots/crazyflie/control_interface/ci_crazyflie_distance_scanner_sensor.h Read distance sensor
-    CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = m_pcDistance->GetReadingsMap();
-    auto iterDistRead = sDistRead.begin();
-    if (sDistRead.size() == 4)
-    {
-        LOG << "Front dist: " << (iterDistRead++)->second << std::endl;
-        LOG << "Left dist: " << (iterDistRead++)->second << std::endl;
-        LOG << "Back dist: " << (iterDistRead++)->second << std::endl;
-        LOG << "Right dist: " << (iterDistRead)->second << std::endl;
-    }
-
-    auto forwardSensorValue = (++sDistRead.begin())->second;
-
-    switch (state)
-    {
-    case State::SearchingForForwardWall:
-    {
-        if (sDistRead.begin()->second > 0)
-        {
-            m_pcPropellers->SetRelativePosition(CVector3(0, 0.5, 0));
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_SIX / 4);
-        }
-        else if (forwardSensorValue > 0)
-        {
-            lastSensorValue = forwardSensorValue;
-            m_pcPropellers->SetRelativePosition(CVector3(-0.2, 0, 0));
-            state = State::StopAfterWallFound;
-        }
-        else
-        {
-            m_pcPropellers->SetRelativePosition(CVector3(0.5, 0, 0));
-        }
-    }
-    break;
-    case State::StopAfterWallFound:
-        if (std::abs(forwardSensorValue - lastSensorValue) < 1 || forwardSensorValue < 0 || forwardSensorValue < lastSensorValue)
-        {
-            state = State::RotationAfterStop;
-        }
-        lastSensorValue = forwardSensorValue;
-        break;
-    case State::RotationAfterStop:
-        if (forwardSensorValue > 0)
-        {
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_SIX / 3);
-        }
-        else
-        {
-            state = State::SearchingForForwardWall;
-        }
-        break;
-    }
-
-    LOG << "Height: " << m_pcPos->GetReading().Position.GetZ() << std::endl;
     m_uiCurrentStep++;
 }
 
 /****************************************/
 /****************************************/
 
-bool CCrazyflieAlgorithm::fly()
+void CCrazyflieAlgorithm::takeoff()
 {
-    CVector3 cPos = m_pcPos->GetReading().Position;
-    if (2.f - cPos.GetZ() < 0.01f)
-    {
-        return false;
-    }
-    cPos.SetZ(2.0f);
-    // cPos.SetX(2.0f);
-    m_pcPropellers->SetAbsolutePosition(cPos);
-    return true;
+    m_pcPropellers->SetRelativePosition(CVector3(0, 0, 2));
 }
 
 /****************************************/
@@ -202,6 +238,47 @@ void CCrazyflieAlgorithm::Reset()
 
 /****************************************/
 /****************************************/
+
+
+void CCrazyflieAlgorithm::logData()
+{
+    // Battery Sensor
+    LOG << "Battery level: " << m_pcBattery->GetReading().AvailableCharge << std::endl;
+
+    // Distance Sensors
+    auto iterDistRead = m_pcDistance->GetReadingsMap().begin();
+    if (m_pcDistance->GetReadingsMap().size() == 4)
+    {
+        LOG << "Front dist: " << (iterDistRead++)->second << std::endl;
+        LOG << "Left dist: " << (iterDistRead++)->second << std::endl;
+        LOG << "Back dist: " << (iterDistRead++)->second << std::endl;
+        LOG << "Right dist: " << (iterDistRead)->second << std::endl;
+    }
+
+    // Position Sensor
+    LOG << "PosSens Pos X: " << m_pcPos->GetReading().Position.GetX() << std::endl;
+    LOG << "PosSens Pos Y: " << m_pcPos->GetReading().Position.GetY() << std::endl;
+    LOG << "PosSens Pos Z: " << m_pcPos->GetReading().Position.GetZ() << std::endl;
+
+    CRadians angle;
+    CVector3 vector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+    LOG << "PosSens Angle X: " << vector.GetX() << std::endl;
+    LOG << "PosSens Angle Y: " << vector.GetY() << std::endl;
+    LOG << "PosSens Angle Z: " << vector.GetZ() << std::endl;
+    LOG << "PosSens Angle Angle: " << angle << std::endl;
+
+    // Range & bearing sensors
+    auto rangeAndBearingReadings = m_pcRABS->GetReadings();
+    std::uint16_t i = 0;
+    for (auto it = rangeAndBearingReadings.begin(); it != rangeAndBearingReadings.end(); ++it)
+    {
+        i++;
+        LOG << "RABS #" << i << " HorizBearing: " << it->HorizontalBearing << std::endl;
+        LOG << "RABS #" << i << " VertBearing: " << it->VerticalBearing << std::endl;
+        LOG << "RABS #" << i << " Range: " << it->Range << std::endl;
+    }
+}
 
 /*
  * This statement notifies ARGoS of the existence of the controller.

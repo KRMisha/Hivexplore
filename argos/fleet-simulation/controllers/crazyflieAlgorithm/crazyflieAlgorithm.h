@@ -40,82 +40,81 @@ using namespace argos;
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
-class CCrazyflieAlgorithm : public CCI_Controller {
-
+class CCrazyflieAlgorithm : public CCI_Controller
+{
 public:
+    /* Class constructor. */
+    CCrazyflieAlgorithm();
+    /* Class destructor. */
+    virtual ~CCrazyflieAlgorithm() {}
 
-   /* Class constructor. */
-   CCrazyflieAlgorithm();
-   /* Class destructor. */
-   virtual ~CCrazyflieAlgorithm() {}
+    /*
+     * This function initializes the controller.
+     * The 't_node' variable points to the <parameters> section in the XML
+     * file in the <controllers><footbot_foraging_controller> section.
+     */
+    virtual void Init(TConfigurationNode& t_node);
 
-   /*
-    * This function initializes the controller.
-    * The 't_node' variable points to the <parameters> section in the XML
-    * file in the <controllers><footbot_foraging_controller> section.
-    */
-   virtual void Init(TConfigurationNode& t_node);
+    /*
+     * This function is called once every time step.
+     * The length of the time step is set in the XML file.
+     */
+    virtual void ControlStep();
 
-   /*
-    * This function is called once every time step.
-    * The length of the time step is set in the XML file.
-    */
-   virtual void ControlStep();
+    /*
+     * This function resets the controller to its state right after the
+     * Init().
+     * It is called when you press the reset button in the GUI.
+     */
+    virtual void Reset();
 
-   /*
-    * This function resets the controller to its state right after the
-    * Init().
-    * It is called when you press the reset button in the GUI.
-    */
-   virtual void Reset();
+    /*
+     * Called to cleanup what done by Init() when the experiment finishes.
+     * In this example controller there is no need for clean anything up,
+     * so the function could have been omitted. It's here just for
+     * completeness.
+     */
+    virtual void Destroy() {}
 
-   /*
-    * Called to cleanup what done by Init() when the experiment finishes.
-    * In this example controller there is no need for clean anything up,
-    * so the function could have been omitted. It's here just for
-    * completeness.
-    */
-   virtual void Destroy() {}
+    /*
+     * This function lifts the drone from the ground
+     */
+    bool fly();
 
-   /*
-    * This function lifts the drone from the ground
-    */
-   bool fly();
+    /*
+     * This function returns the drone to the ground
+     */
+    bool land();
 
-   /*
-    * This function returns the drone to the ground
-    */
-   bool land();
+    /*
+     * This function returns the drone to the ground
+     */
+    void flyTowardsCenter();
 
-   /*
-    * This function returns the drone to the ground
-    */
-   void flyTowardsCenter();
 private:
-
-   /* Pointer to the crazyflie distance sensor */
-   CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
+    /* Pointer to the crazyflie distance sensor */
+    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
 
     /* Pointer to the position actuator */
-   CCI_QuadRotorPositionActuator* m_pcPropellers;
-   
-   /* Pointer to the range and bearing actuator */
-   CCI_RangeAndBearingActuator*  m_pcRABA;
+    CCI_QuadRotorPositionActuator* m_pcPropellers;
 
-   /* Pointer to the range and bearing sensor */
-   CCI_RangeAndBearingSensor* m_pcRABS;
+    /* Pointer to the range and bearing actuator */
+    CCI_RangeAndBearingActuator* m_pcRABA;
 
-   /* Pointer to the positioning sensor */
-   CCI_PositioningSensor* m_pcPos;
+    /* Pointer to the range and bearing sensor */
+    CCI_RangeAndBearingSensor* m_pcRABS;
 
-   /* Pointer to the battery sensor */
-   CCI_BatterySensor* m_pcBattery;
+    /* Pointer to the positioning sensor */
+    CCI_PositioningSensor* m_pcPos;
 
-   /* The random number generator */
-   CRandom::CRNG* m_pcRNG;
+    /* Pointer to the battery sensor */
+    CCI_BatterySensor* m_pcBattery;
 
-   /* Current step */
-   uint m_uiCurrentStep;
+    /* The random number generator */
+    CRandom::CRNG* m_pcRNG;
+
+    /* Current step */
+    uint m_uiCurrentStep;
 };
 
 #endif

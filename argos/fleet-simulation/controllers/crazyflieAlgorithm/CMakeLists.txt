@@ -1,0 +1,5 @@
+add_library(crazyflieAlgorithm SHARED crazyflieAlgorithm.h crazyflieAlgorithm.cpp)
+target_link_libraries(crazyflieAlgorithm
+  argos3core_simulator
+  argos3plugin_simulator_crazyflie
+  argos3plugin_simulator_genericrobot)

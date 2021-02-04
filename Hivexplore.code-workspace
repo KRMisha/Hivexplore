@@ -1,0 +1,32 @@
+{
+    "folders": [
+        {
+            "name": "root",
+            "path": "."
+        },
+        {
+            "path": "client"
+        },
+        {
+            "path": "server"
+        },
+        {
+            "path": "drone"
+        },
+        {
+            "path": "argos"
+        }
+    ],
+    "settings": {
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true
+    },
+    "extensions": {
+        "recommendations": [
+            "EditorConfig.EditorConfig",
+            "ms-python.python",
+            "msjsdiag.debugger-for-chrome",
+            "octref.vetur"
+        ]
+    }
+}

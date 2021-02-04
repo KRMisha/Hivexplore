@@ -42,8 +42,6 @@
 
     </controllers>
 
-
-
     <!-- *********************** -->
     <!-- * Arena configuration * -->
     <!-- *********************** -->
@@ -62,9 +60,9 @@
         </box>
 
         <distribute>
-            <position method="constant" values="0,0,0.01" />
-            <orientation method="constant" values="0,0,0" />
-            <entity quantity="1" max_trials="100">
+            <position method="uniform" min="-1,-1,0" max="1,1,0" />
+            <orientation method="uniform" min="0,0,0" max="180,0,0" />
+            <entity quantity="2" max_trials="100">
                 <crazyflie id="s">
                     <controller config="ssc" />
                     <battery model="time_motion" delta="1e-3" pos_delta="1e-3"  orient_delta="1e-3"/>
@@ -75,8 +73,8 @@
         <distribute>
             <position method="uniform" min="-5,-5,0" max="5,5,0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
-            <entity quantity="30" max_trials="100">
-                <box id="b" size="0.3,0.3,1" movable="false" />
+            <entity quantity="5" max_trials="100">
+                <box id="b" size="0.2,2,2" movable="false" />
             </entity>
         </distribute>
     </arena>

@@ -32,14 +32,14 @@ RUN cd argos3/build_simulator && \
     make install && \
     . ./argos_post_install.sh
 
-# Build ARGoS examples
-RUN mkdir simulation && cd simulation && mkdir build
+WORKDIR /simulation
 
 COPY ./simulation /simulation
 
-RUN cd simulation/build && \
+# Build simulation controller
+RUN mkdir -p build && \
+    cd build && \
     cmake -DCMAKE_BUILD_TYPE=Debug .. && \
     make -j$(nproc)
 
-WORKDIR /simulation
 CMD ["argos3", "-c", "experiments/crazyflieAlgorithm.argos"]

@@ -3,6 +3,7 @@
 ## Prerequisites
 
 - [Python >= 3.8](https://www.python.org/downloads/)
+- Make
 
 ## Setup
 

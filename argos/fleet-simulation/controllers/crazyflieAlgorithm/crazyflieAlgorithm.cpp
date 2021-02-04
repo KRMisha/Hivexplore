@@ -66,16 +66,16 @@ void CCrazyflieAlgorithm::ControlStep()
 
     // Takeoff constants
     static constexpr double targetDroneHeight = 0.5;
-    static constexpr double targetDroneHeightEpsilon = 0.05;
+    static constexpr double targetDroneHeightEpsilon = 0.005;
 
     // Forward movement constants
-    static constexpr double distanceToTravel = 0.1;
-    static constexpr double distanceToTravelEpsilon = 0.05;
-    static constexpr double breakingAcuracyEpsilon = 0.02;
+    static constexpr double distanceToTravel = 0.07;
+    static constexpr double distanceToTravelEpsilon = 0.005;
+    static constexpr double breakingAcuracyEpsilon = 0.002;
 
     // Rotation constants
-    static const CRadians rotationAngle = CRadians::PI / 4;
-    static const CRadians rotationAngleEpsilon = CRadians::PI / 64;
+    static const CRadians rotationAngle = CRadians::PI / 8;
+    static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
 
     switch (m_currentState)
     {
@@ -169,7 +169,7 @@ void CCrazyflieAlgorithm::ControlStep()
         break;
     }
 
-    static std::unordered_map<DroneState, std::string> droneStateNames= 
+    static std::unordered_map<DroneState, std::string> droneStateNames=
     {
         {DroneState::OnGround, "OnGround"},
         {DroneState::Takeoff, "Takeoff"},

@@ -34,7 +34,7 @@ RUN cd argos3/build_simulator && \
 
 WORKDIR /simulation
 
-COPY ./simulation /simulation
+COPY ./simulation .
 
 # Build simulation controller
 RUN mkdir -p build && \

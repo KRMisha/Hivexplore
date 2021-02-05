@@ -42,4 +42,4 @@ RUN mkdir -p build && \
     cmake -DCMAKE_BUILD_TYPE=Debug .. && \
     make -j$(nproc)
 
-CMD ["argos3", "-c", "experiments/crazyflieAlgorithm.argos"]
+CMD ["argos3", "-c", "experiments/hivexplore.argos"]

@@ -1,5 +1,5 @@
 /* Include the controller definition */
-#include "crazyflieAlgorithm.h"
+#include "crazyflie.h"
 /* Function definitions for XML parsing */
 #include <argos3/core/utility/configuration/argos_configuration.h>
 /* 2D vector definition */
@@ -15,7 +15,7 @@
 /****************************************/
 /****************************************/
 
-void CCrazyflieAlgorithm::Init(TConfigurationNode& t_node)
+void CCrazyflieController::Init(TConfigurationNode& t_node)
 {
     try
     {
@@ -60,7 +60,7 @@ void CCrazyflieAlgorithm::Init(TConfigurationNode& t_node)
 /****************************************/
 /****************************************/
 
-void CCrazyflieAlgorithm::ControlStep()
+void CCrazyflieController::ControlStep()
 {
     // logData();
 
@@ -191,7 +191,7 @@ void CCrazyflieAlgorithm::ControlStep()
 /****************************************/
 /****************************************/
 
-void CCrazyflieAlgorithm::takeoff()
+void CCrazyflieController::takeoff()
 {
     m_pcPropellers->SetRelativePosition(CVector3(0, 0, 2));
 }
@@ -199,7 +199,7 @@ void CCrazyflieAlgorithm::takeoff()
 /****************************************/
 /****************************************/
 
-bool CCrazyflieAlgorithm::land()
+bool CCrazyflieController::land()
 {
     CVector3 cPos = m_pcPos->GetReading().Position;
     if (Abs(cPos.GetZ()) < 0.01f)
@@ -215,7 +215,7 @@ bool CCrazyflieAlgorithm::land()
 /****************************************/
 /****************************************/
 
-void CCrazyflieAlgorithm::flyTowardsCenter()
+void CCrazyflieController::flyTowardsCenter()
 {
     CVector3 center(0, 0, 0);
     auto vectorToCenter = center - m_pcPos->GetReading().Position;
@@ -232,7 +232,7 @@ void CCrazyflieAlgorithm::flyTowardsCenter()
 /****************************************/
 /****************************************/
 
-void CCrazyflieAlgorithm::Reset()
+void CCrazyflieController::Reset()
 {
 }
 
@@ -240,7 +240,7 @@ void CCrazyflieAlgorithm::Reset()
 /****************************************/
 
 
-void CCrazyflieAlgorithm::logData()
+void CCrazyflieController::logData()
 {
     // Battery Sensor
     LOG << "Battery level: " << m_pcBattery->GetReading().AvailableCharge << std::endl;
@@ -290,4 +290,4 @@ void CCrazyflieAlgorithm::logData()
  * class to instantiate.
  * See also the XML configuration files for an example of how this is used.
  */
-REGISTER_CONTROLLER(CCrazyflieAlgorithm, "crazyflie_sensing_controller")
+REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_sensing_controller")

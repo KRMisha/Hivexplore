@@ -54,7 +54,7 @@ enum class DroneState
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
-class CCrazyflieAlgorithm : public CCI_Controller
+class CCrazyflieController : public CCI_Controller
 {
 public:
     /*

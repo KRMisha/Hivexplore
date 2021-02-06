@@ -1,3 +1,4 @@
+cflib
 mypy
 pylint
 pytest==6.2.2

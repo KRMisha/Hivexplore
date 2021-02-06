@@ -19,14 +19,16 @@
     ],
     "settings": {
         "files.insertFinalNewline": true,
-        "files.trimFinalNewlines": true
+        "files.trimFinalNewlines": true,
+        "git.detectSubmodules": false
     },
     "extensions": {
         "recommendations": [
             "EditorConfig.EditorConfig",
             "ms-python.python",
             "msjsdiag.debugger-for-chrome",
-            "octref.vetur"
+            "octref.vetur",
+            "xaver.clang-format"
         ]
     }
 }

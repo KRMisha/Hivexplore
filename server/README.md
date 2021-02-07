@@ -23,6 +23,7 @@ source .venv/bin/activate
 ```
 
 ### Linux
+
 The following steps make it possible to use the USB Radio without being root.
 ```
 sudo groupadd plugdev

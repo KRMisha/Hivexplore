@@ -1,4 +1,4 @@
-cflib
+cflib==0.1.13.1
 mypy
 pylint
 pytest==6.2.2

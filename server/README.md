@@ -22,7 +22,7 @@ source .venv/bin/activate
 .venv\Scripts\activate.bat on Windows
 ```
 
-## Linux
+### Linux
 The following steps make it possible to use the USB Radio without being root.
 ```
 sudo groupadd plugdev

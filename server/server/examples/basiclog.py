@@ -1,3 +1,5 @@
+#source: https://github.com/bitcraze/crazyflie-lib-python/blob/0.1.13.1/examples/basiclog.py
+
 # -*- coding: utf-8 -*-
 #
 #     ||          ____  _ __

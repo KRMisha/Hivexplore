@@ -1,4 +1,4 @@
-#source: https://github.com/bitcraze/crazyflie-lib-python/blob/0.1.13.1/examples/basiclog.py
+# Source: https://github.com/bitcraze/crazyflie-lib-python/blob/0.1.13.1/examples/basiclog.py
 
 # -*- coding: utf-8 -*-
 #
@@ -72,10 +72,10 @@ class LoggingExample:
         print('Connected to %s' % link_uri)
 
         # The definition of the logconfig can be made before connecting
-        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=10)
-        self._lg_stab.add_variable('stabilizer.roll', 'float')
-        self._lg_stab.add_variable('stabilizer.pitch', 'float')
-        self._lg_stab.add_variable('stabilizer.yaw', 'float')
+        self._lg_stab = LogConfig(name='Battery', period_in_ms=10)
+        self._lg_stab.add_variable('pm.batteryLevel', 'float')
+        #self._lg_stab.add_variable('stabilizer.pitch', 'float')
+        #self._lg_stab.add_variable('stabilizer.yaw', 'float')
 
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we

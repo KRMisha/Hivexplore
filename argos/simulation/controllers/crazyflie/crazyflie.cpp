@@ -169,10 +169,10 @@ void CCrazyflieController::Reset() {
 /****************************************/
 
 void CCrazyflieController::LogData() {
-    // Battery Sensor
+    // Battery sensor
     LOG << "Battery level: " << m_pcBattery->GetReading().AvailableCharge << std::endl;
 
-    // Distance Sensors
+    // Distance sensors
     auto iterDistRead = m_pcDistance->GetReadingsMap().begin();
     if (m_pcDistance->GetReadingsMap().size() == 4) {
         LOG << "Front dist: " << (iterDistRead++)->second << std::endl;
@@ -181,7 +181,7 @@ void CCrazyflieController::LogData() {
         LOG << "Right dist: " << (iterDistRead)->second << std::endl;
     }
 
-    // Position Sensor
+    // Position sensor
     LOG << "PosSens Pos X: " << m_pcPos->GetReading().Position.GetX() << std::endl;
     LOG << "PosSens Pos Y: " << m_pcPos->GetReading().Position.GetY() << std::endl;
     LOG << "PosSens Pos Z: " << m_pcPos->GetReading().Position.GetZ() << std::endl;
@@ -215,4 +215,4 @@ void CCrazyflieController::LogData() {
  * class to instantiate.
  * See also the XML configuration files for an example of how this is used.
  */
-REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_sensing_controller")
+REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

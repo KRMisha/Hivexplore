@@ -21,7 +21,7 @@
     <!-- *************** -->
     <controllers>
 
-        <crazyflie_sensing_controller id="ssc" library="build/controllers/crazyflie/libcrazyflie">
+        <crazyflie_controller id="ssc" library="build/controllers/crazyflie/libcrazyflie">
 
             <actuators>
                 <range_and_bearing implementation="default" />
@@ -38,7 +38,7 @@
             <params>
             </params>
 
-        </crazyflie_sensing_controller>
+        </crazyflie_controller>
 
     </controllers>
 

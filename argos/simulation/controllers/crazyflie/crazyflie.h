@@ -86,7 +86,7 @@ public:
     /*
      * This function logs all the sensors's data
      */
-    void logData();
+    void LogData();
 
 private:
     /* Pointer to the crazyflie distance sensor */

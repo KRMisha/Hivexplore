@@ -50,7 +50,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 /****************************************/
 
 void CCrazyflieController::ControlStep() {
-    // logData();
+    LogData();
 
     // Takeoff constants
     static constexpr double targetDroneHeight = 0.5;
@@ -168,7 +168,7 @@ void CCrazyflieController::Reset() {
 /****************************************/
 /****************************************/
 
-void CCrazyflieController::logData() {
+void CCrazyflieController::LogData() {
     // Battery Sensor
     LOG << "Battery level: " << m_pcBattery->GetReading().AvailableCharge << std::endl;
 

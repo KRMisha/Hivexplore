@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 
-<!-- *************************************************** -->
-<!-- * A fully commented XML is diffusion_1.xml. Refer * -->
-<!-- * to it to have full information about what       * -->
-<!-- * these options mean.                             * -->
-<!-- *************************************************** -->
+<!-- **************************************************************************** -->
+<!-- * Configuration file reference: https://www.argos-sim.info/user_manual.php * -->
+<!-- * Detailed example: `experiments/diffusion_1.argos` of                     * -->
+<!-- * https://github.com/ilpincy/argos3-examples                               * -->
+<!-- **************************************************************************** -->
 
 <argos-configuration>
 

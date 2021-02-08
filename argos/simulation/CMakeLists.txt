@@ -40,3 +40,5 @@ link_directories(${ARGOS_LIBRARY_DIRS})
 
 # Descend into the controllers directory
 add_subdirectory(controllers)
+
+add_subdirectory(loop_functions)

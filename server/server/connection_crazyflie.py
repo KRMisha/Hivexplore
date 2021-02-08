@@ -30,13 +30,8 @@ class ConnectionCrazyflie:
     def _connected(self, link_uri):
         print('Connected to %s' % link_uri)
         self.is_connected = True
-        try:
-            log.start_logging(self._cf)
-        #change print messages
-        except KeyError:
-            print('Log configuration error')
-        except AttributeError:
-            print('Bad configuration')
+       
+        self._log.start_logging()
 
         timer = Timer(TIMER, self._cf.close_link)
         timer.start()

@@ -127,7 +127,8 @@ void CCrazyflieController::ControlStep() {
         if (std::abs((angle - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
             m_currentState = DroneState::Rotate;
         }
-    } break;
+        break;
+    }
     case DroneState::StopRotation:
         m_pcPropellers->SetRelativeYaw(CRadians(0));
         m_currentState = DroneState::WaitStopRotation;
@@ -140,7 +141,8 @@ void CCrazyflieController::ControlStep() {
         if (std::abs((angle - m_lastReferenceYaw).GetValue()) <= rotationAngleEpsilon.GetValue()) {
             m_currentState = DroneState::ForwardMovement;
         }
-    } break;
+        break;
+    }
     }
 
     static std::unordered_map<DroneState, std::string> droneStateNames = {{DroneState::OnGround, "OnGround"},

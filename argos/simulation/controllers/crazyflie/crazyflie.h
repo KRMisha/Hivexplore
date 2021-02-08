@@ -37,25 +37,23 @@
  */
 using namespace argos;
 
-enum class DroneState
-{
-        OnGround,
-        Takeoff,
-        WaitTakeoff,
-        ForwardMovement,
-        WaitForwardMovement,
-        BrakeMovement,
-        WaitBrakeMovement,
-        Rotate,
-        WaitRotation,
-        StopRotation,
-        WaitStopRotation
+enum class DroneState {
+    OnGround,
+    Takeoff,
+    WaitTakeoff,
+    ForwardMovement,
+    WaitForwardMovement,
+    BrakeMovement,
+    WaitBrakeMovement,
+    Rotate,
+    WaitRotation,
+    StopRotation,
+    WaitStopRotation
 };
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
-class CCrazyflieController : public CCI_Controller
-{
+class CCrazyflieController : public CCI_Controller {
 public:
     /*
      * This function initializes the controller.

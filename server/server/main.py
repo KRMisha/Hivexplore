@@ -6,12 +6,6 @@ import time
 import cflib
 from connection_crazyflie import ConnectionCrazyflie
 
-print('Hello world!')
-
-#setup connection
-#setup logging
-#get battery
-
 if __name__ == '__main__':
 
     cflib.crtp.init_drivers(enable_debug_driver=False)

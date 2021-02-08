@@ -3,11 +3,11 @@ from threading import Timer
 from cflib.crazyflie import Crazyflie
 import log
 
-#Only output errors from the logging framework
+# Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
 
-#This was inspired by the basiclog example
-#Source: https://github.com/bitcraze/crazyflie-lib-python/blob/master/examples/basiclog.py
+# This was inspired by the basiclog example
+# Source: https://github.com/bitcraze/crazyflie-lib-python/blob/master/examples/basiclog.py
 
 TIMER = 10
 
@@ -30,7 +30,7 @@ class ConnectionCrazyflie:
     def _connected(self, link_uri):
         print('Connected to %s' % link_uri)
         self.is_connected = True
-       
+
         self._log.start_logging()
 
         timer = Timer(TIMER, self._cf.close_link)

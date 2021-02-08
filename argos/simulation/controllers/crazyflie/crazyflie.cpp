@@ -162,43 +162,6 @@ void CCrazyflieController::ControlStep() {
 /****************************************/
 /****************************************/
 
-void CCrazyflieController::takeoff() {
-    m_pcPropellers->SetRelativePosition(CVector3(0, 0, 2));
-}
-
-/****************************************/
-/****************************************/
-
-bool CCrazyflieController::land() {
-    CVector3 cPos = m_pcPos->GetReading().Position;
-    if (Abs(cPos.GetZ()) < 0.01f) {
-        return false;
-    }
-    cPos.SetZ(0.0f);
-    cPos.SetX(0.0f);
-    m_pcPropellers->SetAbsolutePosition(cPos);
-    return true;
-}
-
-/****************************************/
-/****************************************/
-
-void CCrazyflieController::flyTowardsCenter() {
-    CVector3 center(0, 0, 0);
-    auto vectorToCenter = center - m_pcPos->GetReading().Position;
-    auto normalizedVector = vectorToCenter.Normalize();
-
-    CVector3 direction;
-    direction.SetX(normalizedVector.GetX());
-    direction.SetY(normalizedVector.GetX());
-    direction.SetZ(normalizedVector.GetX());
-    LOG << "Unit Vector | X: " << direction.GetX() << " | Y: " << direction.GetY() << " | Z: " << direction.GetZ() << std::endl;
-    m_pcPropellers->SetAbsolutePosition(direction);
-}
-
-/****************************************/
-/****************************************/
-
 void CCrazyflieController::Reset() {
 }
 

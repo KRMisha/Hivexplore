@@ -84,21 +84,8 @@ public:
     virtual void Destroy() {}
 
     /*
-     * This function lifts the drone from the ground
+     * This function logs all the sensors's data
      */
-    void takeoff();
-
-    /*
-     * This function returns the drone to the ground
-     */
-    bool land();
-
-    /*
-     * This function returns the drone to the ground
-     */
-    void flyTowardsCenter();
-
-    // Log the sensor data
     void logData();
 
 private:

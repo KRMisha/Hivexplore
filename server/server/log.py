@@ -9,7 +9,7 @@ class Log:
         self._crazyflie = crazyflie
         self._lg = LogConfig(name = 'DroneData', period_in_ms = PERIOD)
         self._lg.add_variable('pm.vbat')
-        
+
     def start_logging(self):
         try:
             self._crazyflie.log.add_config(self._lg)
@@ -24,12 +24,20 @@ class Log:
             print('Could not add log configuration')
 
     def log_data(self, timestamp, data, logconf):
-        # Temporary diplay of battery TO DO: change firmware to send formatted battery?
-        batteryLevel = (data['pm.vbat'] - 3.0)/ (4.23 - 3.0) * 100.0
-        print('Battery Level: %.2f' % (batteryLevel)) 
-        
-        # To print all log variables from log configuration     
-        #print('[%d][%s]: %s' % (timestamp, logconf.name, data))
+        battery_level = self.format_battery_level(data['pm.vbat'])
+        print('Battery Level: %.2f' % (battery_level))
+
+        # To print all log variables from log configuration
+        # print('[%d][%s]: %s' % (timestamp, logconf.name, data))
 
     def log_error(self, timestamp, msg, logconf):
         print('[%d]: Logging error of %d: %s'% (timestamp, logconf.name, msg))
+
+    def format_battery_level(self, voltage):
+        # Temporary diplay of battery TO DO: change firmware to send formatted battery?
+        battery_level = (voltage - 3.0)/ (4.23 - 3.0) * 100.0
+        if battery_level < 0.0:
+            battery_level = 0.0
+        elif battery_level > 100.0:
+            battery_level = 100.0
+        return battery_level

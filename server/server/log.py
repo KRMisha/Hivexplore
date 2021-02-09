@@ -1,17 +1,15 @@
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
-from log_configurations.log_config_wrapper import LogConfigWrapper 
+from log_configurations.log_config_wrapper import LogConfigWrapper
 from log_configurations.log_health import LogHealth
 from log_configurations.log_stabilizer import LogStabilizer
 
-class Log:
 
+class Log:
     def __init__(self, crazyflie: Crazyflie):
         self._crazyflie = crazyflie
 
-        self._log_config_wrappers = []
-        self._log_config_wrappers.append(LogHealth()) 
-        self._log_config_wrappers.append(LogStabilizer())
+        self._log_config_wrappers = [LogHealth(), LogStabilizer()]
 
     def start_logging(self):
         try:
@@ -22,9 +20,8 @@ class Log:
                 log_config.data_received_cb.add_callback(config_wrapper.log_data)
                 log_config.error_cb.add_callback(config_wrapper.log_error)
                 log_config.start()
-        
+
         except KeyError as e:
-            print('Could not start logging data,'
-                  '{} was not found in TOC'.format(str(e)))
+            print('Could not start logging data,' '{} was not found in the Crazyflie table of content'.format(str(e)))
         except AttributeError as e:
-            print('Could not add log configuration,''error: {}'.format(str(e)))
+            print('Could not add log configuration,' 'error: {}'.format(str(e)))

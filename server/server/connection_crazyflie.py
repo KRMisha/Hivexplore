@@ -11,21 +11,21 @@ logging.basicConfig(level=logging.ERROR)
 
 TIMER = 10
 
-class ConnectionCrazyflie:
 
+class ConnectionCrazyflie:
     def __init__(self, link_uri):
-        self._cf = Crazyflie(rw_cache='./cache')
-        self._log = log.Log(self._cf)
+        self._crazyflie = Crazyflie(rw_cache='./cache')
+        self._log = log.Log(self._crazyflie)
         self.is_connected = False
 
-        self._cf.connected.add_callback(self._connected)
-        self._cf.disconnected.add_callback(self._disconnected)
-        self._cf.connection_failed.add_callback(self._connection_failed)
-        self._cf.connection_lost.add_callback(self._connection_lost)
+        self._crazyflie.connected.add_callback(self._connected)
+        self._crazyflie.disconnected.add_callback(self._disconnected)
+        self._crazyflie.connection_failed.add_callback(self._connection_failed)
+        self._crazyflie.connection_lost.add_callback(self._connection_lost)
 
         print('Connection to %s' % link_uri)
 
-        self._cf.open_link(link_uri)
+        self._crazyflie.open_link(link_uri)
 
     def _connected(self, link_uri):
         print('Connected to %s' % link_uri)
@@ -33,7 +33,7 @@ class ConnectionCrazyflie:
 
         self._log.start_logging()
 
-        timer = Timer(TIMER, self._cf.close_link)
+        timer = Timer(TIMER, self._crazyflie.close_link)
         timer.start()
 
     def _disconnected(self, link_uri):
@@ -45,5 +45,5 @@ class ConnectionCrazyflie:
         self.is_connected = False
 
     def _connection_lost(self, link_uri, msg):
-        print('Connection to %s lost: %s' %(link_uri, msg))
+        print('Connection to %s lost: %s' % (link_uri, msg))
         self.is_connected = False

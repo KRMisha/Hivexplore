@@ -6,20 +6,21 @@ import time
 import cflib
 from connection_crazyflie import ConnectionCrazyflie
 
-if __name__ == '__main__':
+
+def main():
 
     cflib.crtp.init_drivers(enable_debug_driver=False)
 
     print('Scanning interfaces for Crazyflies...')
-    available = cflib.crtp.scan_interfaces()
+    available_interfaces = cflib.crtp.scan_interfaces()
 
     print('Crazyflies found:')
-    for i in available:
-        print(i[0])
+    for available_interface in available_interfaces:
+        print(available_interface[0])
 
-    crazyflies:list = []
-    if len(available) > 0:
-        for crazyflie in available:
+    crazyflies = []
+    if len(available_interfaces) > 0:
+        for crazyflie in available_interfaces:
             crazyflies.append(ConnectionCrazyflie(crazyflie[0]))
     else:
         print('No Crazyflies found, cannot run example')
@@ -29,3 +30,7 @@ if __name__ == '__main__':
     # are just waiting until we are disconnected.
     while crazyflies[0].is_connected:
         time.sleep(1)
+
+
+if __name__ == '__main__':
+    main()

@@ -26,6 +26,7 @@
         "recommendations": [
             "EditorConfig.EditorConfig",
             "ms-python.python",
+            "ms-vscode.cpptools",
             "msjsdiag.debugger-for-chrome",
             "octref.vetur",
             "xaver.clang-format"

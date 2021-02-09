@@ -2,6 +2,8 @@ from cflib.crazyflie.log import LogConfig
 
 class LogConfigWrapper:
 
+    PERIOD = 1000
+    
     def __init__(self):
         self._logConfig: LogConfig
 

@@ -1,4 +1,5 @@
-FROM ubuntu:latest
+# Install stage
+FROM ubuntu:20.04 AS install
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -32,13 +33,15 @@ RUN cd argos3/build_simulator && \
     make install && \
     . ./argos_post_install.sh
 
-WORKDIR /simulation
+WORKDIR /hivexplore
 
-COPY ./simulation .
+# Production stage
+FROM install as production
 
-# Build simulation controller
-RUN mkdir -p build && \
-    cd build && \
+COPY simulation .
+
+# Build simulation
+RUN mkdir -p build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Debug .. && \
     make -j$(nproc)
 

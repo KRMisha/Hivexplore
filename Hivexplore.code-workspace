@@ -26,6 +26,7 @@
         "recommendations": [
             "EditorConfig.EditorConfig",
             "ms-python.python",
+            "ms-vscode-remote.remote-containers",
             "ms-vscode.cpptools",
             "msjsdiag.debugger-for-chrome",
             "octref.vetur",

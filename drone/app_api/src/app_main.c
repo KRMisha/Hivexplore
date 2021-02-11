@@ -49,7 +49,17 @@
 #define DEBUG_MODULE "APPAPI"
 
 void appMain() {
-    // Do not run this app
+    DEBUG_PRINT("Waiting for activation ...\n");
+
+    while (1) {
+        vTaskDelay(M2T(2000));
+        DEBUG_PRINT("Hello World!\n");
+    }
+   /*
+
+   List of available functions :
+
+   // Do not run this app
     ASSERT_FAILED();
 
     // LED sequencer
@@ -132,4 +142,5 @@ void appMain() {
         appchannelReceivePacket(buffer, APPCHANNEL_MTU, APPCHANNEL_WAIT_FOREVER);
         appchannelHasOverflowOccured();
     }
+    */
 }

@@ -24,11 +24,12 @@
  * maxSonar.c - Implementation for the MaxSonar MB1040 (LV-MaxSonar-EZ04)
  */
 
-#include "maxsonar.h"
 #include <stddef.h>
+
 #include "config.h"
-#include "deck.h"
 #include "log.h"
+#include "maxsonar.h"
+#include "deck.h"
 
 #define IN2MM(x) ((x)*25.4f)
 

@@ -2,6 +2,7 @@
 #define __MAC_H__
 
 #include <stdint.h>
+
 #include "locodeck.h"
 
 // Packet format with compressed PAN and 64Bit addresses

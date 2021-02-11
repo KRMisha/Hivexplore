@@ -26,8 +26,8 @@
 #ifndef _CRTP_LOCALIZATION_SERVICE_H_
 #define _CRTP_LOCALIZATION_SERVICE_H_
 
-#include "pulse_processor.h"
 #include "stabilizer_types.h"
+#include "pulse_processor.h"
 
 /**
  * CRTP external position data struct

@@ -33,8 +33,8 @@
 #ifndef __MOTORS_H__
 #define __MOTORS_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "config.h"
 /* ST includes */
 #include "stm32fxxx.h"

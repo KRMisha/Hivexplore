@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef enum {
     MEM_TYPE_EEPROM = 0x00,

@@ -25,12 +25,15 @@
 /* app_channel.c: App realtime communication channel with the ground */
 
 #include "app_channel.h"
+
 #include <string.h>
+
 #include "FreeRTOS.h"
+#include "semphr.h"
+#include "queue.h"
+
 #include "crtp.h"
 #include "platformservice.h"
-#include "queue.h"
-#include "semphr.h"
 
 static SemaphoreHandle_t sendMutex;
 

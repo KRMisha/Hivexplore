@@ -31,9 +31,9 @@
 #ifdef DEBUG_QUEUE_MONITOR
 
 #include <stdbool.h>
-#include "cfassert.h"
-#include "debug.h"
 #include "timers.h"
+#include "debug.h"
+#include "cfassert.h"
 
 #define MAX_NR_OF_QUEUES 20
 #define TIMER_PERIOD M2T(10000)

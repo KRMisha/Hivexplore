@@ -27,16 +27,17 @@
 #include <stdbool.h>
 
 /* FreeRtos includes */
+#include "FreeRTOS.h"
 #include <stdint.h>
 #include <string.h>
-#include "FreeRTOS.h"
-#include "app_channel.h"
+
 #include "config.h"
 #include "crtp.h"
-#include "platform.h"
 #include "platformservice.h"
 #include "syslink.h"
 #include "version.h"
+#include "platform.h"
+#include "app_channel.h"
 
 static bool isInit = false;
 

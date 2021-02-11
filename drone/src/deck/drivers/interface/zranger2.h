@@ -27,8 +27,8 @@
 #ifndef _ZRANGER2_H_
 #define _ZRANGER2_H_
 
-#include "deck_core.h"
 #include "stabilizer_types.h"
+#include "deck_core.h"
 
 void zRanger2Init(DeckInfo* info);
 

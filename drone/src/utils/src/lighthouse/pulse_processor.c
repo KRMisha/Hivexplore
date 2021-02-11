@@ -27,9 +27,9 @@
  */
 
 #include "pulse_processor.h"
-#include "cf_math.h"
 #include "pulse_processor_v1.h"
 #include "pulse_processor_v2.h"
+#include "cf_math.h"
 
 /**
  * @brief Apply calibration data to the raw angles and write it to the correctedAngles member.

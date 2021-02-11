@@ -34,8 +34,8 @@ THE SOFTWARE.
 #ifndef _AK8963_H_
 #define _AK8963_H_
 
-#include <stdint.h>
 #include "i2cdev.h"
+#include <stdint.h>
 
 #define AK8963_ADDRESS_00 0x0C
 #define AK8963_ADDRESS_01 0x0D

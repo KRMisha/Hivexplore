@@ -63,8 +63,8 @@ extern "C" {
 #include <bmi160_math.h>
 #else
 #include <math.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 #endif
 
 /*********************** User function prototypes ************************/

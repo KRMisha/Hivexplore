@@ -23,16 +23,19 @@
  *
  *
  */
-#include "commander.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
-#include "cf_math.h"
+#include "task.h"
+#include "queue.h"
+
+#include "commander.h"
 #include "crtp_commander.h"
 #include "crtp_commander_high_level.h"
+
+#include "cf_math.h"
 #include "param.h"
-#include "queue.h"
 #include "static_mem.h"
-#include "task.h"
 
 static bool isInit;
 const static setpoint_t nullSetpoint;

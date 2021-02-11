@@ -27,18 +27,20 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "FreeRTOS.h"
+
+#include "stm32fxxx.h"
 #include "config.h"
+#include "motors.h"
 #include "debug.h"
 #include "deck.h"
-#include "extrx.h"
-#include "motors.h"
-#include "msp.h"
 #include "param.h"
+#include "extrx.h"
 #include "pm.h"
-#include "stm32fxxx.h"
-#include "task.h"
 #include "uart1.h"
+#include "msp.h"
+
+#include "FreeRTOS.h"
+#include "task.h"
 
 #define BIGQUAD_BAT_VOLT_PIN DECK_GPIO_MISO
 #define BIGQUAD_BAT_VOLT_MULT 7.8f

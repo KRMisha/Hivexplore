@@ -29,15 +29,16 @@
  *              page 69, with a Ts of 28.5 samples, 12-bit, and ADC@12
  *              the highest impedance to use is 25.2kOhm.
  */
-#include "adc.h"
-#include "FreeRTOS.h"
-#include "imu.h"
-#include "nvicconf.h"
-#include "pm.h"
-#include "semphr.h"
-#include "static_mem.h"
 #include "stm32fxxx.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
+#include "adc.h"
+#include "pm.h"
+#include "nvicconf.h"
+#include "imu.h"
+#include "static_mem.h"
 
 // PORT A
 #define GPIO_VBAT GPIO_Pin_3

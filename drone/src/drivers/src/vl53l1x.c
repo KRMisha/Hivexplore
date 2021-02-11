@@ -31,14 +31,15 @@
  * @brief  Code function definitions for Crazyflie
  *
  */
-#include "vl53l1x.h"
-#include <stdint.h>
 #include <stdio.h> // sprintf(), vsnprintf(), printf()
+#include <stdint.h>
 #include <string.h> // strncpy(), strnlen()
+
 #include "FreeRTOS.h"
+#include "task.h"
 #include "debug.h"
 #include "i2cdev.h"
-#include "task.h"
+#include "vl53l1x.h"
 
 #ifdef PAL_EXTENDED
 #include "vl53l1_register_strings.h"

@@ -33,10 +33,11 @@
 
 /* Project includes */
 #include "config.h"
-#include "led.h"
 #include "platform.h"
 #include "system.h"
 #include "usec_time.h"
+
+#include "led.h"
 
 /* ST includes */
 #include "stm32fxxx.h"

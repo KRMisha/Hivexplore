@@ -25,18 +25,20 @@
  * lighthouse_position_est.c - position estimaton for the lighthouse system
  */
 
-#include "lighthouse_position_est.h"
-#include "cf_math.h"
+#include "stabilizer_types.h"
 #include "estimator.h"
 #include "estimator_kalman.h"
+#include "math.h"
+#include "cf_math.h"
+
+#include "log.h"
+#include "param.h"
+#include "statsCnt.h"
+#include "mem.h"
+
+#include "lighthouse_position_est.h"
 #include "lighthouse_geometry.h"
 #include "lighthouse_state.h"
-#include "log.h"
-#include "math.h"
-#include "mem.h"
-#include "param.h"
-#include "stabilizer_types.h"
-#include "statsCnt.h"
 
 // lighthouseBaseStationsGeometry has been moved to lighthouse_core.c
 

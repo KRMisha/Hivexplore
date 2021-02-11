@@ -26,9 +26,10 @@
 
 #define DEBUG_MODULE "DECK_DRIVERS"
 
-#include "deck.h"
 #include <stdlib.h>
 #include <string.h>
+
+#include "deck.h"
 #include "debug.h"
 
 #ifdef DEBUG

@@ -24,9 +24,10 @@
  * num.c - 16bit floating point handling functions
  */
 
-#include "num.h"
 #include <math.h>
 #include <stdint.h>
+
+#include "num.h"
 
 /* Half precision floating point **********************************************
  *

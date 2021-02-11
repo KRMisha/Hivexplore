@@ -32,9 +32,10 @@
  */
 #define DEBUG_MODULE "AK8963"
 
-#include "ak8963.h"
 #include "FreeRTOS.h"
 #include "task.h"
+
+#include "ak8963.h"
 
 // TA: Maybe not so good to bring in these dependencies...
 #include "debug.h"

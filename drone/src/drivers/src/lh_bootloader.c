@@ -25,11 +25,13 @@
  */
 #define DEBUG_MODULE "LHBL"
 
-#include "lh_bootloader.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
-#include "debug.h"
 #include "task.h"
+
+#include "lh_bootloader.h"
+#include "debug.h"
 
 #define LH_I2C_ADDR 0x2F
 #define LH_FW_SIZE 0x020000

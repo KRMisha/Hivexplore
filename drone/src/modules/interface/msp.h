@@ -33,8 +33,8 @@
 
 #ifndef MSP_H_
 #define MSP_H_
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /**
  * Function signature for a response callback to be provided by a client

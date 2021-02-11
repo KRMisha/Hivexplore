@@ -24,6 +24,7 @@
  * uart1.c - uart1 driver
  */
 #include <string.h>
+
 #include "stm32fxxx.h"
 
 /*FreeRtos includes*/
@@ -32,13 +33,15 @@
 #include "semphr.h"
 
 /*ST includes */
-#include "cfassert.h"
+#include "stm32fxxx.h"
+
 #include "config.h"
 #include "nvic.h"
+#include "uart1.h"
+#include "cfassert.h"
+#include "config.h"
 #include "nvicconf.h"
 #include "static_mem.h"
-#include "stm32fxxx.h"
-#include "uart1.h"
 
 /** This uart is conflicting with SPI2 DMA used in sensors_bmi088_spi_bmp388.c
  *  which is used in CF-Bolt. So for other products this can be enabled.

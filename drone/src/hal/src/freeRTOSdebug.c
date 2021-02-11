@@ -23,15 +23,17 @@
  *
  * debug.c - Various debug functions
  */
-#include "FreeRTOS.h"
 #include <stdint.h>
+
 #include "FreeRTOSConfig.h"
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include "config.h"
 #include "debug.h"
-#include "led.h"
 #include "nvicconf.h"
+#include "led.h"
 #include "power_distribution.h"
-#include "task.h"
 
 uint32_t traceTickCount;
 

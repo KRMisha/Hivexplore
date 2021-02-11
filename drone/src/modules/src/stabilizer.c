@@ -25,29 +25,34 @@
  */
 #define DEBUG_MODULE "STAB"
 
-#include "stabilizer.h"
 #include <math.h>
+
 #include "FreeRTOS.h"
-#include "collision_avoidance.h"
-#include "commander.h"
-#include "controller.h"
-#include "crtp_localization_service.h"
-#include "debug.h"
-#include "estimator.h"
-#include "log.h"
-#include "motors.h"
-#include "param.h"
-#include "pm.h"
-#include "power_distribution.h"
-#include "quatcompress.h"
-#include "rateSupervisor.h"
-#include "sensors.h"
-#include "sitaw.h"
-#include "static_mem.h"
-#include "statsCnt.h"
-#include "system.h"
 #include "task.h"
+
+#include "system.h"
+#include "log.h"
+#include "param.h"
+#include "debug.h"
+#include "motors.h"
+#include "pm.h"
+
+#include "stabilizer.h"
+
+#include "sensors.h"
+#include "commander.h"
+#include "crtp_localization_service.h"
+#include "sitaw.h"
+#include "controller.h"
+#include "power_distribution.h"
+#include "collision_avoidance.h"
+
+#include "estimator.h"
 #include "usddeck.h"
+#include "quatcompress.h"
+#include "statsCnt.h"
+#include "static_mem.h"
+#include "rateSupervisor.h"
 
 static bool isInit;
 static bool emergencyStop = false;

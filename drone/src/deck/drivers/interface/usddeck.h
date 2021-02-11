@@ -1,8 +1,8 @@
 #ifndef __USDDECK_H__
 #define __USDDECK_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 enum usddeckLoggingMode_e {
     usddeckLoggingMode_Disabled = 0,

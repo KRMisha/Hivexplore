@@ -29,6 +29,7 @@
 
 /* FreeRtos includes */
 #include "FreeRTOS.h"
+
 #include "crtp.h"
 #include "crtpservice.h"
 

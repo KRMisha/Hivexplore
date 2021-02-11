@@ -25,8 +25,9 @@
 /* app_channel.h: App realtime communication channel with the ground */
 #pragma once
 
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdbool.h>
+
 #include "crtp.h"
 
 #define APPCHANNEL_WAIT_FOREVER (-1)

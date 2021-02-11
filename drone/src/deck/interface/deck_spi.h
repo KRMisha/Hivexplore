@@ -26,8 +26,8 @@
 #ifndef SPI_H_
 #define SPI_H_
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 // Based on 84MHz peripheral clock

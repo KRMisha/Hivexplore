@@ -24,12 +24,14 @@
  * led.c - LED handing functions
  */
 #include <stdbool.h>
+
 #include "stm32fxxx.h"
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
-#include "led.h"
 #include "task.h"
+
+#include "led.h"
 
 static GPIO_TypeDef* led_port[] = {
     [LED_BLUE_L] = LED_GPIO_PORT_BLUE,

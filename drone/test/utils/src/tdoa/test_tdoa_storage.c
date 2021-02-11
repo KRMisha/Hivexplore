@@ -25,10 +25,12 @@
  */
 
 // File under test
+#include "tdoaStorage.h"
+
+#include "unity.h"
+
 #include <string.h>
 #include "mock_clockCorrectionEngine.h"
-#include "tdoaStorage.h"
-#include "unity.h"
 
 #define TOF_VALIDITY_PERIOD (2 * 1000)
 #define REMOTE_DATA_VALIDITY_PERIOD 30

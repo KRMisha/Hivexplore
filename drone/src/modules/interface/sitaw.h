@@ -27,8 +27,9 @@
 #ifndef __SITAW_H__
 #define __SITAW_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "stabilizer_types.h"
 
 void sitAwInit(void);
@@ -45,9 +46,8 @@ void sitAwUpdateSetpoint(setpoint_t* setpoint, const sensorData_t* sensorData, c
 #define SITAW_FF_TRIGGER_COUNT 15 /* The number of consecutive tests for Free Fall to be detected. Configured for 250Hz testing. */
 
 /* Configuration options for the 'At Rest' detection. */
-#define SITAW_AR_THRESHOLD \
-    0.05 /* The default tolerance for AccZ deviations from 1 and AccX, AccY deviations from 0, indicating At Rest. \
-          */
+#define SITAW_AR_THRESHOLD 0.05 /* The default tolerance for AccZ deviations from 1 and AccX, AccY deviations from 0, indicating At Rest. \
+                                 */
 #define SITAW_AR_TRIGGER_COUNT 500 /* The number of consecutive tests for At Rest to be detected. Configured for 250Hz testing. */
 
 /* Configuration options for the 'Tumbled' detection. */

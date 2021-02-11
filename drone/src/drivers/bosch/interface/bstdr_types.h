@@ -82,8 +82,8 @@
 #ifndef __BSTDR_TYPES_H__
 #define __BSTDR_TYPES_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /*!
  * @brief Enumeration for function return codes

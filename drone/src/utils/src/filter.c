@@ -24,9 +24,10 @@
  * filter.h - Filtering functions
  */
 
-#include "filter.h"
 #include <math.h>
 #include <stdlib.h>
+
+#include "filter.h"
 #include "physicalConstants.h"
 
 /**

@@ -28,12 +28,15 @@
 #include "deck.h"
 
 /*ST includes */
+#include "stm32fxxx.h"
+#include "config.h"
+
 #include "FreeRTOS.h"
+#include "semphr.h"
+
 #include "cfassert.h"
 #include "config.h"
 #include "nvicconf.h"
-#include "semphr.h"
-#include "stm32fxxx.h"
 
 // Alternative SPI
 #define SPI SPI3

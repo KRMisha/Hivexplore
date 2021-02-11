@@ -1,11 +1,13 @@
 // File under test pulse_processor_v1.c
+#include "pulse_processor_v1.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include "mock_lighthouse_calibration.h"
-#include "mock_ootx_decoder.h"
-#include "mock_pulse_processor.h"
-#include "pulse_processor_v1.h"
 #include "unity.h"
+
+#include "mock_pulse_processor.h"
+#include "mock_ootx_decoder.h"
+#include "mock_lighthouse_calibration.h"
 
 #define FRAME_LENGTH 200000 // 8.333ms
 #define SWEEP_MAX_WIDTH 512 // 20us

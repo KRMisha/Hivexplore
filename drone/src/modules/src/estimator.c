@@ -1,7 +1,8 @@
 #define DEBUG_MODULE "ESTIMATOR"
-#include "estimator.h"
-#include "cfassert.h"
 #include "debug.h"
+
+#include "cfassert.h"
+#include "estimator.h"
 #include "estimator_complementary.h"
 #include "estimator_kalman.h"
 

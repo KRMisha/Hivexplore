@@ -26,15 +26,19 @@
  *  and param api
  */
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
-#include "FreeRTOS.h"
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "app.h"
+
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include "debug.h"
+
 #include "log.h"
 #include "param.h"
-#include "task.h"
 
 #define DEBUG_MODULE "INTERNLOGPARAM"
 

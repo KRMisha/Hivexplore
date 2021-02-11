@@ -25,8 +25,8 @@
 
 #ifndef COMMANDER_H_
 #define COMMANDER_H_
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "config.h"
 #include "stabilizer_types.h"
 

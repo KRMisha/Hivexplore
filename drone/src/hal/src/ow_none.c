@@ -25,10 +25,12 @@
  */
 #define DEBUG_MODULE "OW"
 
-#include "ow.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
 #include "semphr.h"
+
+#include "ow.h"
 
 void owInit() {
     owCommonInit();

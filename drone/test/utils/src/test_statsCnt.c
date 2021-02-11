@@ -27,6 +27,7 @@
 
 // File under test
 #include "statsCnt.h"
+
 #include "unity.h"
 
 // Helpers

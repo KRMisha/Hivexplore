@@ -24,10 +24,11 @@
  * TestEprintf.c - Unit tests for printing of formatted strings
  */
 
+#include "unity.h"
+#include "eprintf.h"
+
 #include <stdarg.h>
 #include <string.h>
-#include "eprintf.h"
-#include "unity.h"
 
 static int putcMock(int c);
 static void verifyStdio(char* format, ...);

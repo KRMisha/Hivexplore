@@ -26,11 +26,12 @@
 
 #define DEBUG_MODULE "PLATFORM"
 
-#include "platform.h"
 #include <string.h>
-#include "debug.h"
+
+#include "platform.h"
 #include "exti.h"
 #include "nvic.h"
+#include "debug.h"
 
 static platformConfig_t configs[] = {
     {

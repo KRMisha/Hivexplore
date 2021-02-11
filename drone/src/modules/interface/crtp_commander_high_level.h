@@ -41,7 +41,9 @@ Header file for high-level commander that computes smooth setpoints based on hig
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "math3d.h"
+
 #include "stabilizer_types.h"
 
 #define NUM_TRAJECTORY_DEFINITIONS 10

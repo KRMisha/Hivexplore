@@ -1,8 +1,8 @@
 #ifndef __TDOA_ENGINE_H__
 #define __TDOA_ENGINE_H__
 
-#include "tdoaStats.h"
 #include "tdoaStorage.h"
+#include "tdoaStats.h"
 
 typedef void (*tdoaEngineSendTdoaToEstimator)(tdoaMeasurement_t* tdoaMeasurement, const uint8_t idA, const uint8_t idB);
 

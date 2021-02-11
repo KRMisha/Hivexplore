@@ -26,8 +26,8 @@
 #ifndef __PCA9555_H__
 #define __PCA9555_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define PCA9555_DEFAULT_ADDRESS 0b0100000
 

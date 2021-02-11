@@ -36,13 +36,14 @@ propellers and motors)
  * Support to use this controller as an attitude-only controller for manual flight
 */
 
-#include "controller_mellinger.h"
 #include <math.h>
+
+#include "param.h"
 #include "log.h"
 #include "math3d.h"
-#include "param.h"
-#include "physicalConstants.h"
 #include "position_controller.h"
+#include "controller_mellinger.h"
+#include "physicalConstants.h"
 
 static float g_vehicleMass = CF_MASS;
 static float massThrust = 132000;

@@ -38,13 +38,14 @@
 #include <string.h>
 // Scheduler include files.
 #include "FreeRTOS.h"
+#include "task.h"
 #include "queue.h"
 #include "semphr.h"
+
 #include "stm32fxxx.h"
-#include "task.h"
 // Application includes.
-#include "config.h"
 #include "i2c_drv.h"
+#include "config.h"
 #include "nvicconf.h"
 
 // DEBUG

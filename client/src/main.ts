@@ -1,7 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import PrimeVue from 'primevue/config';
-import Card from 'primevue/card';
 import Button from 'primevue/button';
 
 import 'primevue/resources/themes/md-dark-indigo/theme.css';

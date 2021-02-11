@@ -22,7 +22,7 @@
         "files.trimFinalNewlines": true,
         "git.detectSubmodules": false,
         "files.associations": {
-            "**/drone/*.h": "c"
+            "drone/**.h": "c"
         }
     },
     "extensions": {

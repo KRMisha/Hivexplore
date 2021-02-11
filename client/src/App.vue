@@ -1,17 +1,26 @@
 <template>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+    <button @click="batteryLevel++">
+        click
+    </button>        
+    <Drone :battery="batteryLevel"/>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { defineComponent, ref } from 'vue';
+import Drone from './components/Drone.vue';
 
 export default defineComponent({
     name: 'App',
     components: {
-        HelloWorld,
+        Drone
     },
+    setup() {
+        const batteryLevel = ref(0);
+
+        return {
+            batteryLevel
+        };
+    }
 });
 </script>
 

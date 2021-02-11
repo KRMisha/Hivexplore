@@ -1,7 +1,5 @@
 <template>
-    <div>
-        BatteryLevel: {{ battery }}
-    </div>
+    <div>BatteryLevel: {{ battery }}</div>
 </template>
 
 <script lang="ts">

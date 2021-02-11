@@ -10,7 +10,7 @@ import 'primeicons/primeicons.css';
 
 const app = createApp(App);
 
-app.use(PrimeVue, {ripple: true});
+app.use(PrimeVue, { ripple: true });
 app.component('Button', Button);
 
-app.mount("#app");
+app.mount('#app');

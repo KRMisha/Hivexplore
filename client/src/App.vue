@@ -1,8 +1,8 @@
 <template>
     <Button @click="batteryLevel++">
         click
-    </Button>        
-    <Drone :battery="batteryLevel"/>
+    </Button>
+    <Drone :battery="batteryLevel" />
 </template>
 
 <script lang="ts">

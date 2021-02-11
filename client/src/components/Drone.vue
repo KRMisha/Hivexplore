@@ -5,13 +5,12 @@
         </template>
         <template #content>
             <div class="p-text-center">Drone Battery:</div>
-            <Knob v-model="battery" readonly :size="64"/>
+            <Knob v-model="battery" readonly :size="64" />
             <Divider />
             <div class="p-text-center">Drone Led:</div>
-            <InputSwitch v-model="isLedOn" @change="changeLedStatus"/>
+            <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
         </template>
     </Card>
-
 </template>
 
 <script lang="ts">
@@ -26,7 +25,7 @@ export default defineComponent({
     data() {
         return {
             isLedOn: false
-        }
+        };
     },
     methods: {
         changeLedStatus() {

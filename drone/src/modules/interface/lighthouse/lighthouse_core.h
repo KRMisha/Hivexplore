@@ -29,6 +29,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "pulse_processor.h"
 
 typedef struct {

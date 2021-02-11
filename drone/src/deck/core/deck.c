@@ -26,8 +26,9 @@
 
 #define DEBUG_MODULE "DECK_CORE"
 
-#include "deck.h"
 #include <string.h>
+
+#include "deck.h"
 #include "debug.h"
 
 #ifdef DEBUG

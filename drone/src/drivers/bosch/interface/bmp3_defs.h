@@ -58,11 +58,11 @@
 /********************************************************/
 /* header includes */
 #ifdef __KERNEL__
-#include <linux/kernel.h>
 #include <linux/types.h>
+#include <linux/kernel.h>
 #else
-#include <stddef.h>
 #include <stdint.h>
+#include <stddef.h>
 #endif
 
 /*************************** Common macros   *****************************/

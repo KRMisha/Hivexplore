@@ -24,11 +24,11 @@
  * outlierFilter.c: Outlier rejection filter for the LPS system
  */
 
-#include "outlierFilter.h"
 #include <math.h>
-#include "debug.h"
-#include "log.h"
+#include "outlierFilter.h"
 #include "stabilizer_types.h"
+#include "log.h"
+#include "debug.h"
 
 #define BUCKET_ACCEPTANCE_LEVEL 3
 #define MAX_BUCKET_FILL 10

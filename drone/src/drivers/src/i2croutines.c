@@ -19,12 +19,14 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32fxxx.h"
 #include "i2croutines.h"
+
 #include "FreeRTOS.h"
+#include "semphr.h"
+
 #include "i2cdev.h"
 #include "nvicconf.h"
-#include "semphr.h"
-#include "stm32fxxx.h"
 
 extern xSemaphoreHandle i2cdevDmaEventI2c1;
 extern xSemaphoreHandle i2cdevDmaEventI2c2;

@@ -25,9 +25,11 @@
  */
 #define DEBUG_MODULE "PCA95X4"
 
-#include "pca95x4.h"
-#include "debug.h"
 #include "i2cdev.h"
+
+#include "pca95x4.h"
+
+#include "debug.h"
 
 static uint8_t devAddr;
 static I2C_Dev* I2Cx;

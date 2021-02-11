@@ -27,8 +27,9 @@
 Log statistics for the tdoa engine
 */
 
-#include "tdoaStats.h"
 #include <string.h>
+
+#include "tdoaStats.h"
 
 #define STATS_INTERVAL 500
 

@@ -31,15 +31,19 @@
 #define DEBUG_MODULE "NRF"
 
 #include "nrf24l01.h"
+
 #include <stdbool.h>
 #include <string.h>
+
 #include "cfassert.h"
 
 /* ST includes */
+#include "stm32fxxx.h"
+
 #include "debug.h"
 #include "exti.h"
+
 #include "nRF24L01reg.h"
-#include "stm32fxxx.h"
 
 /* Defines for the SPI and GPIO pins used to drive the SPI Flash */
 #define RADIO_GPIO_CS GPIO_Pin_12

@@ -28,8 +28,9 @@
 #ifndef __DECK_CODE_H__
 #define __DECK_CODE_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "estimator.h"
 
 /* Maximum number of decks that can be enumerated */

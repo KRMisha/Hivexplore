@@ -23,14 +23,16 @@
  *
  *
  */
-#include "crtp_commander.h"
 #include <math.h>
 #include <stdbool.h>
-#include "FreeRTOS.h"
+
+#include "crtp_commander.h"
+
 #include "commander.h"
 #include "crtp.h"
-#include "num.h"
 #include "param.h"
+#include "FreeRTOS.h"
+#include "num.h"
 
 #define MIN_THRUST 1000
 #define MAX_THRUST 60000

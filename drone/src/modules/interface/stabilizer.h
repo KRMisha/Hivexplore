@@ -28,6 +28,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "estimator.h"
 
 #define EMERGENCY_STOP_TIMEOUT_DISABLED (-1)

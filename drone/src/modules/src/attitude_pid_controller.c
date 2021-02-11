@@ -24,11 +24,13 @@
  * attitude_pid_controller.c: Attitude controler using PID correctors
  */
 #include <stdbool.h>
+
 #include "FreeRTOS.h"
+
 #include "attitude_controller.h"
-#include "log.h"
-#include "param.h"
 #include "pid.h"
+#include "param.h"
+#include "log.h"
 
 #define ATTITUDE_LPF_CUTOFF_FREQ 15.0f
 #define ATTITUDE_LPF_ENABLE false

@@ -26,8 +26,8 @@
  * @copyright Copyright (c) 2019 Bitcraze AB
  */
 
-#include "static_mem.h"
 #include <FreeRTOS.h>
+#include "static_mem.h"
 
 /**
  * @brief configSUPPORT_STATIC_ALLOCATION is set to 1, so the application must provide an

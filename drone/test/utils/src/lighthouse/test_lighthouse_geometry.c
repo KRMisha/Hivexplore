@@ -1,8 +1,10 @@
+#include "lighthouse_geometry.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include "lighthouse_geometry.h"
-#include "mock_cfassert.h"
 #include "unity.h"
+
+#include "mock_cfassert.h"
 
 // Build the arm dsp math lib and use the "real thing" instead of mocking calls to it
 // @BUILD_LIB ARM_DSP_MATH

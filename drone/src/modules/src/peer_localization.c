@@ -1,8 +1,8 @@
-#include "peer_localization.h"
-#include "FreeRTOS.h"
 #include "config.h"
 #include "debug.h"
+#include "FreeRTOS.h"
 #include "task.h"
+#include "peer_localization.h"
 
 void peerLocalizationInit() {
     // All other_positions[in].id will be set to zero due to static initialization.

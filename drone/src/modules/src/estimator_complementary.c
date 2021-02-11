@@ -25,16 +25,18 @@
  * estimator_complementary.c - a complementary estimator
  */
 
-#include "estimator_complementary.h"
+#include "stm32f4xx.h"
+
 #include "FreeRTOS.h"
-#include "position_estimator.h"
 #include "queue.h"
-#include "sensfusion6.h"
-#include "sensors.h"
+
 #include "stabilizer.h"
+#include "estimator_complementary.h"
+#include "sensfusion6.h"
+#include "position_estimator.h"
+#include "sensors.h"
 #include "stabilizer_types.h"
 #include "static_mem.h"
-#include "stm32f4xx.h"
 
 #define ATTITUDE_UPDATE_RATE RATE_250_HZ
 #define ATTITUDE_UPDATE_DT 1.0 / ATTITUDE_UPDATE_RATE

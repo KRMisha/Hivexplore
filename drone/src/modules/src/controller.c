@@ -1,10 +1,11 @@
 #define DEBUG_MODULE "CONTROLLER"
-#include "controller.h"
-#include "cfassert.h"
-#include "controller_indi.h"
-#include "controller_mellinger.h"
-#include "controller_pid.h"
 #include "debug.h"
+
+#include "cfassert.h"
+#include "controller.h"
+#include "controller_pid.h"
+#include "controller_mellinger.h"
+#include "controller_indi.h"
 
 #define DEFAULT_CONTROLLER ControllerTypePID
 static ControllerType currentController = ControllerTypeAny;

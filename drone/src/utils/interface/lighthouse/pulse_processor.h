@@ -31,9 +31,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+#include "ootx_decoder.h"
 #include "lighthouse_calibration.h"
 #include "lighthouse_geometry.h"
-#include "ootx_decoder.h"
 
 #define PULSE_PROCESSOR_N_SWEEPS 2
 #define PULSE_PROCESSOR_N_BASE_STATIONS 2

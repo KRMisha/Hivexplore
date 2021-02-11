@@ -24,16 +24,17 @@
  * sitAw.h - Implementation of situation awareness.
  */
 
-#include "sitaw.h"
-#include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include "commander.h"
+#include <math.h>
+
 #include "log.h"
-#include "motors.h"
 #include "param.h"
-#include "stabilizer.h"
 #include "trigger.h"
+#include "sitaw.h"
+#include "commander.h"
+#include "stabilizer.h"
+#include "motors.h"
 
 /* Trigger object used to detect Free Fall situation. */
 static trigger_t sitAwFFAccWZ;

@@ -26,14 +26,15 @@
 
 #define DEBUG_MODULE "SYSLOAD"
 
-#include "sysload.h"
 #include <stdbool.h>
 #include "FreeRTOS.h"
-#include "cfassert.h"
+#include "timers.h"
 #include "debug.h"
+#include "cfassert.h"
 #include "param.h"
 #include "static_mem.h"
-#include "timers.h"
+
+#include "sysload.h"
 
 #define TIMER_PERIOD M2T(1000)
 

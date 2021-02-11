@@ -26,6 +26,7 @@
  */
 
 #include "usec_time.h"
+
 #include "nvicconf.h"
 #include "stm32fxxx.h"
 

@@ -28,9 +28,10 @@
 
 #pragma once
 
-#include <stdbool.h>
-#include <stddef.h>
 #include "kve/kve_common.h"
+
+#include <stddef.h>
+#include <stdbool.h>
 
 void kveDefrag(kveMemory_t* kve);
 

@@ -32,20 +32,25 @@
 #define DEBUG_MODULE "IMU"
 
 #include "sensors_bosch.h"
+
 #include <math.h>
-#include "FreeRTOS.h"
-#include "configblock.h"
-#include "debug.h"
-#include "filter.h"
-#include "imu.h"
-#include "ledseq.h"
-#include "nvicconf.h"
-#include "param.h"
-#include "semphr.h"
-#include "sound.h"
+
 #include "stm32fxxx.h"
-#include "system.h"
+
+#include "imu.h"
+
+#include "FreeRTOS.h"
+#include "semphr.h"
 #include "task.h"
+
+#include "system.h"
+#include "configblock.h"
+#include "param.h"
+#include "debug.h"
+#include "nvicconf.h"
+#include "ledseq.h"
+#include "sound.h"
+#include "filter.h"
 
 /* Bosch Sensortec Drivers */
 #include "bmi055.h"

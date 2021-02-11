@@ -30,20 +30,23 @@
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
-#include "config.h"
-#include "crtp.h"
+#include "task.h"
+#include "semphr.h"
 #include "queue.h"
 #include "queuemonitor.h"
-#include "radiolink.h"
-#include "semphr.h"
-#include "static_mem.h"
-#include "task.h"
-#include "usb.h"
-#include "usb_conf.h"
-#include "usb_dcd.h"
-#include "usbd_desc.h"
-#include "usbd_usr.h"
+
+#include "config.h"
 #include "usblink.h"
+#include "radiolink.h"
+#include "usb.h"
+
+#include "usbd_usr.h"
+#include "usb_conf.h"
+#include "usbd_desc.h"
+#include "usb_dcd.h"
+
+#include "crtp.h"
+#include "static_mem.h"
 
 NO_DMA_CCM_SAFE_ZERO_INIT __ALIGN_BEGIN USB_OTG_CORE_HANDLE USB_OTG_dev __ALIGN_END;
 

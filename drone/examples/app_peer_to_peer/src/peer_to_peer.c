@@ -26,15 +26,18 @@
  *  communication. Two crazyflies need this program in order to send and receive.
  */
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <string.h>
-#include "FreeRTOS.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+
 #include "app.h"
-#include "configblock.h"
-#include "radiolink.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
+
+#include "radiolink.h"
+#include "configblock.h"
 
 #define DEBUG_MODULE "P2P"
 #include "debug.h"

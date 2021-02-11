@@ -27,8 +27,9 @@
 #ifndef __SITAW_H__
 #define __SITAW_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "stabilizer_types.h"
 
 void sitAwInit(void);

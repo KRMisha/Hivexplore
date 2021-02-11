@@ -1,8 +1,8 @@
 #ifndef __TDOA_STORAGE_H__
 #define __TDOA_STORAGE_H__
 
-#include "clockCorrectionEngine.h"
 #include "stabilizer_types.h"
+#include "clockCorrectionEngine.h"
 
 #define ANCHOR_STORAGE_COUNT 16
 #define REMOTE_ANCHOR_DATA_COUNT 16

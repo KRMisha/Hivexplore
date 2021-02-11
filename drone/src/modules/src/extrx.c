@@ -27,15 +27,16 @@
 
 /* FreeRtos includes */
 #include "FreeRTOS.h"
-#include "commander.h"
-#include "config.h"
-#include "cppm.h"
-#include "nvicconf.h"
-#include "queue.h"
-#include "stm32fxxx.h"
-#include "system.h"
 #include "task.h"
+#include "queue.h"
+
+#include "stm32fxxx.h"
+#include "config.h"
+#include "system.h"
+#include "nvicconf.h"
+#include "commander.h"
 #include "uart1.h"
+#include "cppm.h"
 
 #define DEBUG_MODULE "EXTRX"
 #include "debug.h"

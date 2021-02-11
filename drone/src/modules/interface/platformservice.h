@@ -28,6 +28,7 @@
 #define __PLATFORMSERVICE_H__
 
 #include <stdbool.h>
+
 #include "crtp.h"
 
 /**

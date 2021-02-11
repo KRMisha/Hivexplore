@@ -29,6 +29,7 @@
 
 // For true and false
 #include <stdbool.h>
+
 #include "stm32fxxx.h"
 
 #define LOW 0x0

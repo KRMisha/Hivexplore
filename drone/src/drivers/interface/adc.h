@@ -29,8 +29,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "FreeRTOS.h"
-#include "config.h"
 #include "semphr.h"
+#include "config.h"
 
 /******** Defines ********/
 

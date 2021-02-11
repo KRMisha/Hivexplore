@@ -26,11 +26,13 @@
 
 #define DEBUG_MODULE "VLX"
 
-#include "vl53l0x.h"
 #include "FreeRTOS.h"
-#include "debug.h"
-#include "i2cdev.h"
 #include "task.h"
+
+#include "debug.h"
+
+#include "i2cdev.h"
+#include "vl53l0x.h"
 
 // Record the current time to check an upcoming timeout against
 #define startTimeout() (dev->timeout_start_ms = xTaskGetTickCount())

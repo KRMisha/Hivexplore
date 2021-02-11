@@ -29,9 +29,9 @@
 #ifndef _VL53L1X_H_
 #define _VL53L1X_H_
 
-#include "vl53l1_api.h"
 #include "vl53l1_ll_def.h"
 #include "vl53l1_platform_user_data.h"
+#include "vl53l1_api.h"
 
 #ifdef __cplusplus
 extern "C" {

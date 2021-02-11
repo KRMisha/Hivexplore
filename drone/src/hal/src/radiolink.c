@@ -24,24 +24,25 @@
  * radiolink.c - Radio link layer
  */
 
-#include <stdint.h>
 #include <string.h>
+#include <stdint.h>
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+#include "queue.h"
+
 #include "config.h"
-#include "configblock.h"
+#include "radiolink.h"
+#include "syslink.h"
 #include "crtp.h"
+#include "configblock.h"
+#include "log.h"
 #include "led.h"
 #include "ledseq.h"
-#include "log.h"
-#include "queue.h"
 #include "queuemonitor.h"
-#include "radiolink.h"
-#include "semphr.h"
 #include "static_mem.h"
-#include "syslink.h"
-#include "task.h"
 
 #define RADIOLINK_TX_QUEUE_SIZE (1)
 #define RADIOLINK_CRTP_QUEUE_SIZE (5)

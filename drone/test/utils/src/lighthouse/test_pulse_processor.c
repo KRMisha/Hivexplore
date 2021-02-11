@@ -1,9 +1,11 @@
 // File under test pulse_processor.c
+#include "pulse_processor.h"
+
+#include "unity.h"
+
 #include "mock_lighthouse_calibration.h"
 #include "mock_pulse_processor_v1.h"
 #include "mock_pulse_processor_v2.h"
-#include "pulse_processor.h"
-#include "unity.h"
 
 void setUp(void) {
 }

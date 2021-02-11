@@ -24,18 +24,20 @@
  * proximity.c - Implementation of hardware abstraction layer for proximity sensors
  */
 
-#include "proximity.h"
 #include <string.h>
 #include "FreeRTOS.h"
+#include "task.h"
+
 #include "config.h"
 #include "deck.h"
-#include "log.h"
+#include "proximity.h"
 #include "maxsonar.h"
-#include "param.h"
-#include "static_mem.h"
-#include "stm32fxxx.h"
 #include "system.h"
-#include "task.h"
+#include "param.h"
+#include "log.h"
+
+#include "stm32fxxx.h"
+#include "static_mem.h"
 
 /* Flag indicating if the proximityInit() function has been called or not. */
 static bool isInit = false;

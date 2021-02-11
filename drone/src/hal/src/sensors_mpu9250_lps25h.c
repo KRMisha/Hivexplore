@@ -27,25 +27,29 @@
  */
 
 #include "sensors_mpu9250_lps25h.h"
+
 #include <math.h>
 #include <stm32f4xx.h>
-#include "FreeRTOS.h"
-#include "ak8963.h"
-#include "configblock.h"
-#include "debug.h"
-#include "filter.h"
-#include "imu.h"
-#include "ledseq.h"
-#include "log.h"
+
 #include "lps25h.h"
 #include "mpu6500.h"
-#include "nvicconf.h"
-#include "param.h"
+#include "ak8963.h"
+
+#include "FreeRTOS.h"
 #include "semphr.h"
-#include "sound.h"
-#include "static_mem.h"
-#include "system.h"
 #include "task.h"
+
+#include "system.h"
+#include "configblock.h"
+#include "param.h"
+#include "log.h"
+#include "debug.h"
+#include "imu.h"
+#include "nvicconf.h"
+#include "ledseq.h"
+#include "sound.h"
+#include "filter.h"
+#include "static_mem.h"
 
 /**
  * Enable 250Hz digital LPF mode. However does not work with

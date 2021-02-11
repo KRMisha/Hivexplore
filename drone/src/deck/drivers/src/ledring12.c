@@ -24,20 +24,24 @@
  * ledring12.c: RGB Ring 12 Leds effects/driver
  */
 
-#include <math.h>
 #include <stdint.h>
+#include <math.h>
 #include <string.h>
-#include "FreeRTOS.h"
+
+#include "stm32fxxx.h"
+
 #include "deck.h"
-#include "log.h"
-#include "mem.h"
+
+#include "FreeRTOS.h"
+#include "timers.h"
+
+#include "ws2812.h"
+#include "worker.h"
 #include "param.h"
 #include "pm.h"
+#include "log.h"
 #include "pulse_processor.h"
-#include "stm32fxxx.h"
-#include "timers.h"
-#include "worker.h"
-#include "ws2812.h"
+#include "mem.h"
 
 #define DEBUG_MODULE "LED"
 #include "debug.h"

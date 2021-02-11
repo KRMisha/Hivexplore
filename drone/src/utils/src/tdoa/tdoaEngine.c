@@ -45,11 +45,12 @@ The implementation must handle
 #include <string.h>
 
 #define DEBUG_MODULE "TDOA_ENGINE"
-#include "clockCorrectionEngine.h"
 #include "debug.h"
-#include "physicalConstants.h"
+
 #include "tdoaEngine.h"
 #include "tdoaStats.h"
+#include "clockCorrectionEngine.h"
+#include "physicalConstants.h"
 
 #define MEASUREMENT_NOISE_STD 0.15f
 

@@ -32,30 +32,34 @@
 
 #define DEBUG_MODULE "uSD"
 
-#include "usddeck.h"
-#include <ctype.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
-#include "FreeRTOS.h"
-#include "crc_bosch.h"
-#include "debug.h"
-#include "deck.h"
-#include "fatfs_sd.h"
-#include "ff.h"
-#include "led.h"
-#include "log.h"
-#include "mem.h"
-#include "param.h"
-#include "queue.h"
-#include "semphr.h"
-#include "sensors.h"
-#include "static_mem.h"
-#include "statsCnt.h"
+#include <stdlib.h>
+#include <ctype.h>
 #include "stm32fxxx.h"
-#include "system.h"
+
+#include "FreeRTOS.h"
+#include "queue.h"
 #include "task.h"
 #include "timers.h"
+#include "semphr.h"
+
+#include "ff.h"
+#include "fatfs_sd.h"
+
+#include "deck.h"
+#include "usddeck.h"
+#include "system.h"
+#include "sensors.h"
+#include "debug.h"
+#include "led.h"
+
+#include "statsCnt.h"
+#include "log.h"
+#include "param.h"
+#include "crc_bosch.h"
+#include "static_mem.h"
+#include "mem.h"
 
 // Hardware defines
 #ifdef USDDECK_USE_ALT_PINS_AND_SPI

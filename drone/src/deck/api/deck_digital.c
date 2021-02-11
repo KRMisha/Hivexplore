@@ -25,6 +25,7 @@
  */
 
 #include "deck.h"
+
 #include "stm32fxxx.h"
 
 void pinMode(const deckPin_t pin, const uint32_t mode) {

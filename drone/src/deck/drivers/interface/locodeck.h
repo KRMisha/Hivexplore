@@ -35,7 +35,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
+
 #include "FreeRTOS.h"
+
 #include "libdw1000.h"
 #include "stabilizer_types.h"
 

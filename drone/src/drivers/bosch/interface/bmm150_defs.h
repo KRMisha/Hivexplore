@@ -59,8 +59,8 @@
 #ifdef __KERNEL__
 #include <linux/types.h>
 #else
-#include <stddef.h>
 #include <stdint.h>
+#include <stddef.h>
 #endif
 
 /*********************************************************************/

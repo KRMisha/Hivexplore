@@ -24,9 +24,10 @@
  *                       trajectories
  */
 
-#include "pptraj_compressed.h"
 #include <stdint.h>
 #include <string.h>
+
+#include "pptraj_compressed.h"
 
 // In the stored version, we store durations in milliseconds, hence this factor
 #define STORED_DURATION_SCALE 1000.0

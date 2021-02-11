@@ -26,16 +26,18 @@
  */
 #define DEBUG_MODULE "I2CDEV"
 
-#include "i2cdev.h"
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "FreeRTOS.h"
-#include "debug.h"
-#include "i2c_drv.h"
-#include "nvicconf.h"
-#include "queue.h"
 #include "semphr.h"
 #include "task.h"
+#include "queue.h"
+
+#include "i2cdev.h"
+#include "i2c_drv.h"
+#include "nvicconf.h"
+#include "debug.h"
 
 int i2cdevInit(I2C_Dev* dev) {
     i2cdrvInit(dev);

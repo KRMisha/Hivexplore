@@ -27,8 +27,8 @@
 #define CRTP_COMMANDER_H_
 
 #include <stdint.h>
-#include "crtp.h"
 #include "stabilizer_types.h"
+#include "crtp.h"
 
 void crtpCommanderInit(void);
 void crtpCommanderRpytDecodeSetpoint(setpoint_t* setpoint, CRTPPacket* pk);

@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include <stdio.h>
 #include "pptraj.h"
+#include <stdio.h>
 
 enum piecewise_traj_storage_type {
     PPTRAJ_STORAGE_CONSTANT = 0,

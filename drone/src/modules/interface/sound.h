@@ -27,8 +27,8 @@
 #ifndef __SOUND_H__
 #define __SOUND_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define SND_OFF 0
 #define FACTORY_TEST 1

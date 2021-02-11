@@ -24,8 +24,10 @@
  * led.c - LED handing functions
  */
 #include "led.h"
-#include <stdbool.h>
+
 #include "motors.h"
+
+#include <stdbool.h>
 #include "stm32fxxx.h"
 
 /*FreeRtos includes*/

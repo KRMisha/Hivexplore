@@ -1,13 +1,15 @@
 
-#include "controller_pid.h"
-#include "attitude_controller.h"
-#include "log.h"
-#include "math3d.h"
-#include "param.h"
-#include "position_controller.h"
-#include "sensfusion6.h"
 #include "stabilizer.h"
 #include "stabilizer_types.h"
+
+#include "attitude_controller.h"
+#include "sensfusion6.h"
+#include "position_controller.h"
+#include "controller_pid.h"
+
+#include "log.h"
+#include "param.h"
+#include "math3d.h"
 
 #define ATTITUDE_UPDATE_DT (float)(1.0f / ATTITUDE_RATE)
 

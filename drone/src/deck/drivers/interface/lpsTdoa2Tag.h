@@ -1,8 +1,9 @@
 #ifndef __LPS_TDOA2_TAG_H__
 #define __LPS_TDOA2_TAG_H__
 
-#include "libdw1000.h"
 #include "locodeck.h"
+#include "libdw1000.h"
+
 #include "mac.h"
 
 extern uwbAlgorithm_t uwbTdoa2TagAlgorithm;

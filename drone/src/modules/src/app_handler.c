@@ -24,12 +24,15 @@
  */
 /* app_handler.c: App layer handling function implementation */
 
-#include "app.h"
 #include <stdbool.h>
+
 #include "FreeRTOS.h"
-#include "static_mem.h"
-#include "system.h"
 #include "task.h"
+
+#include "system.h"
+#include "static_mem.h"
+
+#include "app.h"
 
 #ifndef APP_STACKSIZE
 #define APP_STACKSIZE 300

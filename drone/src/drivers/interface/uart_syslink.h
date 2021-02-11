@@ -27,6 +27,7 @@
 #define UART_SYSLINK_H_
 
 #include <stdbool.h>
+
 #include "crtp.h"
 #include "eprintf.h"
 #include "syslink.h"

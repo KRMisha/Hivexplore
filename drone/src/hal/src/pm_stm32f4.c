@@ -24,21 +24,23 @@
  * pm.c - Power Management driver and functions.
  */
 
-#include "pm.h"
-#include <stdbool.h>
-#include <string.h>
-#include "FreeRTOS.h"
-#include "commander.h"
-#include "config.h"
-#include "deck.h"
-#include "led.h"
-#include "ledseq.h"
-#include "log.h"
-#include "sound.h"
-#include "static_mem.h"
 #include "stm32fxxx.h"
-#include "system.h"
+#include <string.h>
+#include <stdbool.h>
+
+#include "FreeRTOS.h"
 #include "task.h"
+
+#include "config.h"
+#include "system.h"
+#include "pm.h"
+#include "led.h"
+#include "log.h"
+#include "ledseq.h"
+#include "commander.h"
+#include "sound.h"
+#include "deck.h"
+#include "static_mem.h"
 
 typedef struct _PmSyslinkInfo {
     union {

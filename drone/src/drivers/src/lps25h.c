@@ -28,12 +28,13 @@
  */
 #define DEBUG_MODULE "LPS25H"
 
-#include "lps25h.h"
 #include "FreeRTOS.h"
+#include "task.h"
+
+#include "lps25h.h"
+#include "i2cdev.h"
 #include "debug.h"
 #include "eprintf.h"
-#include "i2cdev.h"
-#include "task.h"
 
 static uint8_t devAddr;
 static I2C_Dev* I2Cx;

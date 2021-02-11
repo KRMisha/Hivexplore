@@ -28,13 +28,15 @@
  */
 #define DEBUG_MODULE "EEPROM"
 
-#include "eeprom.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
+#include "task.h"
+
+#include "eeprom.h"
 #include "debug.h"
 #include "eprintf.h"
 #include "mem.h"
-#include "task.h"
 
 #ifdef EEPROM_RUN_WRITE_READ_TEST
 static bool eepromTestWriteRead(void);

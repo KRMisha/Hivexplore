@@ -24,10 +24,10 @@
  * trigger.c - Implementation of trigger mechanism.
  */
 
-#include "trigger.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include "stm32fxxx.h"
+#include "trigger.h"
 
 /**
  * Initialize a trigger object.

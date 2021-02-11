@@ -24,21 +24,24 @@
  * crtp.c - CrazyRealtimeTransferProtocol stack
  */
 
-#include <errno.h>
 #include <stdbool.h>
+#include <errno.h>
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
-#include "cfassert.h"
+#include "task.h"
+#include "semphr.h"
+#include "queue.h"
+
 #include "config.h"
+
 #include "crtp.h"
 #include "info.h"
-#include "log.h"
-#include "queue.h"
+#include "cfassert.h"
 #include "queuemonitor.h"
-#include "semphr.h"
 #include "static_mem.h"
-#include "task.h"
+
+#include "log.h"
 
 static bool isInit;
 

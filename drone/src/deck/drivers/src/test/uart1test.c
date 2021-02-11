@@ -25,16 +25,18 @@
  */
 #define DEBUG_MODULE "U1T"
 
-#include "uart1.h"
 #include <stdint.h>
 #include <string.h>
+
 #include "FreeRTOS.h"
+#include "task.h"
+
+#include "stm32fxxx.h"
+#include "system.h"
 #include "config.h"
 #include "debug.h"
 #include "deck.h"
-#include "stm32fxxx.h"
-#include "system.h"
-#include "task.h"
+#include "uart1.h"
 
 // Hardware configuration
 static bool isInit;

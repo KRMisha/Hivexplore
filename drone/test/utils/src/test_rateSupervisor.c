@@ -27,6 +27,7 @@
 
 // File under test
 #include "rateSupervisor.h"
+
 #include "unity.h"
 
 static rateSupervisor_t context;

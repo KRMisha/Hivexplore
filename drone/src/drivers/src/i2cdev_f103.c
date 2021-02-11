@@ -25,14 +25,19 @@
  * i2cdev.c - Functions to write to I2C devices
  */
 
-#include "i2cdev.h"
-#include <stdbool.h>
 #include <stdint.h>
-#include "FreeRTOS.h"
-#include "i2croutines.h"
+#include <stdbool.h>
+
+#include "i2cdev.h"
+
 #include "nvicconf.h"
+
+#include "FreeRTOS.h"
 #include "semphr.h"
+
 #include "stm32f10x.h"
+
+#include "i2croutines.h"
 
 #define I2C_TIMEOUT 5
 #define I2CDEV_CLK_TS (1000000 / 100000)

@@ -1,10 +1,12 @@
 // File under test pulse_processor_v2.c
+#include "pulse_processor_v2.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include "mock_lighthouse_calibration.h"
-#include "mock_ootx_decoder.h"
-#include "pulse_processor_v2.h"
 #include "unity.h"
+
+#include "mock_ootx_decoder.h"
+#include "mock_lighthouse_calibration.h"
 
 // Functions under test
 void clearWorkspace(pulseProcessorV2PulseWorkspace_t* pulseWorkspace);

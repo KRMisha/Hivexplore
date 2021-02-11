@@ -25,23 +25,26 @@
  */
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 /* FreeRtos includes */
 #include "FreeRTOS.h"
-#include "assert.h"
-#include "console.h"
-#include "crtp.h"
-#include "debug.h"
-#include "log.h"
-#include "mem.h"
-#include "param.h"
-#include "semphr.h"
-#include "static_mem.h"
-#include "system.h"
 #include "task.h"
+#include "semphr.h"
+
+#include "mem.h"
+#include "crtp.h"
+#include "system.h"
+
+#include "console.h"
+#include "assert.h"
+#include "debug.h"
+
+#include "log.h"
+#include "param.h"
+#include "static_mem.h"
 
 #if 0
 #define MEM_DEBUG(fmt, ...) DEBUG_PRINT("D/log " fmt, ##__VA_ARGS__)

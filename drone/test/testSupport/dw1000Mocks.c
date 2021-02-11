@@ -1,7 +1,8 @@
 #include "dw1000Mocks.h"
+
 #include <string.h>
-#include "mock_libdw1000.h"
 #include "unity.h"
+#include "mock_libdw1000.h"
 
 // dwGetData mock /////////////////////////////////////////////////////////////
 

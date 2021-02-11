@@ -30,10 +30,11 @@
 #include <stdbool.h>
 
 /* ST includes */
-#include "debug.h"
+#include "stm32fxxx.h"
+
 #include "motors.h"
 #include "pm.h"
-#include "stm32fxxx.h"
+#include "debug.h"
 
 // FreeRTOS includes
 #include "task.h"

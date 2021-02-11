@@ -23,13 +23,18 @@
  *
  * sleepus.h: Micro second sleep
  */
-#include "sleepus.h"
-#include <stdbool.h>
 #include <stdint.h>
-#include "FreeRTOS.h"
+#include <stdbool.h>
+
+#include "sleepus.h"
+
 #include "config.h"
+
 #include "stm32f4xx.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
+
 #include "usec_time.h"
 
 #define TICK_PER_US (FREERTOS_MCU_CLOCK_HZ / (8 * 1e6))

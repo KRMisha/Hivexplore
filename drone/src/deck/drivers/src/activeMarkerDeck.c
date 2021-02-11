@@ -25,14 +25,15 @@
  * activeMarkerDeck.c - Deck driver for the Active marker deck
  */
 
+#include "stm32fxxx.h"
 #include "FreeRTOS.h"
+#include "task.h"
+
+#include "system.h"
 #include "deck.h"
-#include "i2cdev.h"
 #include "log.h"
 #include "param.h"
-#include "stm32fxxx.h"
-#include "system.h"
-#include "task.h"
+#include "i2cdev.h"
 
 #define DEBUG_MODULE "ACTIVE_MARKER"
 #include "debug.h"

@@ -29,12 +29,14 @@
 #define DEBUG_MODULE "UART-TEST"
 
 #include <stdint.h>
+
 #include "FreeRTOS.h"
+#include "task.h"
+
+#include "stm32fxxx.h"
 #include "config.h"
 #include "debug.h"
 #include "deck.h"
-#include "stm32fxxx.h"
-#include "task.h"
 #include "uart1.h"
 #include "uart2.h"
 

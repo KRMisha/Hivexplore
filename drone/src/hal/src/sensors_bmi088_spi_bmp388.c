@@ -27,28 +27,33 @@
 
 #define DEBUG_MODULE "IMU"
 
-#include "sensors_bmi088_spi_bmp388.h"
 #include <math.h>
 #include <string.h>
+
+#include "stm32fxxx.h"
+
+#include "sensors_bmi088_spi_bmp388.h"
+#include "imu.h"
+
 #include "FreeRTOS.h"
+#include "semphr.h"
+#include "task.h"
+
+#include "system.h"
+#include "configblock.h"
+#include "param.h"
+#include "log.h"
+#include "debug.h"
+#include "imu.h"
+#include "nvicconf.h"
+#include "ledseq.h"
+#include "sound.h"
+#include "filter.h"
+#include "i2cdev.h"
 #include "bmi088.h"
 #include "bmp3.h"
 #include "bstdr_types.h"
-#include "configblock.h"
-#include "debug.h"
-#include "filter.h"
-#include "i2cdev.h"
-#include "imu.h"
-#include "ledseq.h"
-#include "log.h"
-#include "nvicconf.h"
-#include "param.h"
-#include "semphr.h"
-#include "sound.h"
 #include "static_mem.h"
-#include "stm32fxxx.h"
-#include "system.h"
-#include "task.h"
 
 /* Defines for the SPI and GPIO pins used to drive the SPI Flash */
 #define BMI088_ACC_GPIO_CS GPIO_Pin_1

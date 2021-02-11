@@ -26,13 +26,16 @@
  * ledseq.c - LED sequence handler
  */
 
-#include "ledseq.h"
 #include <stdbool.h>
+
+#include "ledseq.h"
+
 #include "FreeRTOS.h"
-#include "led.h"
+#include "timers.h"
 #include "semphr.h"
 #include "static_mem.h"
-#include "timers.h"
+
+#include "led.h"
 
 #ifdef CALIBRATED_LED_MORSE
 #define DOT 100

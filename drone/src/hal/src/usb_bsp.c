@@ -28,10 +28,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usb_bsp.h"
+#include "usbd_conf.h"
+
+#include "stm32fxxx.h"
+
 #include "config.h"
 #include "nvicconf.h"
-#include "stm32fxxx.h"
-#include "usbd_conf.h"
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
  * @{

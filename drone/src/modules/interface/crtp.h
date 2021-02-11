@@ -27,8 +27,8 @@
 #ifndef CRTP_H_
 #define CRTP_H_
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define CRTP_MAX_DATA_SIZE 30
 

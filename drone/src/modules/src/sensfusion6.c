@@ -23,8 +23,9 @@
  *
  *
  */
-#include "sensfusion6.h"
 #include <math.h>
+
+#include "sensfusion6.h"
 #include "log.h"
 #include "param.h"
 #include "physicalConstants.h"

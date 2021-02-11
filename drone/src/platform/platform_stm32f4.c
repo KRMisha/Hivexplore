@@ -25,8 +25,8 @@
  *
  */
 
-#include "platform.h"
 #include <string.h>
+#include "platform.h"
 
 #define PLATFORM_INFO_OTP_NR_OF_BLOCKS 16
 #define PLATFORM_INFO_OTP_BLOCK_LEN 32

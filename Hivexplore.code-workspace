@@ -20,7 +20,10 @@
     "settings": {
         "files.insertFinalNewline": true,
         "files.trimFinalNewlines": true,
-        "git.detectSubmodules": false
+        "git.detectSubmodules": false,
+        "files.associations": {
+            "drone/**.h": "c"
+        }
     },
     "extensions": {
         "recommendations": [

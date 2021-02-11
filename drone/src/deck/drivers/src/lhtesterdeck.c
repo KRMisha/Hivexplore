@@ -32,11 +32,12 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "FreeRTOS.h"
-#include "deck.h"
-#include "param.h"
 #include "stm32fxxx.h"
+#include "FreeRTOS.h"
 #include "timers.h"
+
+#include "param.h"
+#include "deck.h"
 
 static bool isInit;
 

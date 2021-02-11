@@ -27,8 +27,8 @@ SOFTWARE.
 
 */
 
-#include <math.h>
 #include <stdint.h>
+#include <math.h>
 
 // assumes input quaternion is normalized. will fail if not.
 static inline uint32_t quatcompress(float const q[4]) {

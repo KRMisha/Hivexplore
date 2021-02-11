@@ -26,8 +26,8 @@
 #ifndef __BUZZER_H__
 #define __BUZZER_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /** Functionpointers used to control the buzzer */
 struct buzzerControl {

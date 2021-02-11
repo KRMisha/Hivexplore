@@ -24,16 +24,17 @@
  * deck_ow.c - Functions to decode the decks oneWire memory content
  */
 
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 #define DEBUG_MODULE "DECK_INFO"
 
+#include "deck.h"
+
+#include "ow.h"
 #include "crc.h"
 #include "debug.h"
-#include "deck.h"
-#include "ow.h"
 #include "static_mem.h"
 
 #ifdef DEBUG

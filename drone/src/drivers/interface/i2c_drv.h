@@ -2,8 +2,8 @@
 #define I2C_H
 
 #include "FreeRTOS.h"
-#include "queue.h"
 #include "semphr.h"
+#include "queue.h"
 /* ST includes */
 #include "stm32fxxx.h"
 

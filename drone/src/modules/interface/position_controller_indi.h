@@ -35,11 +35,11 @@
 #define POSITION_INDI_FILT_CUTOFF 8.0f
 
 #include "controller_indi.h"
-#include "filter.h"
-#include "log.h"
-#include "math3d.h"
-#include "param.h"
 #include "stabilizer_types.h"
+#include "filter.h"
+#include "math3d.h"
+#include "log.h"
+#include "param.h"
 
 struct Vectr {
     float x;

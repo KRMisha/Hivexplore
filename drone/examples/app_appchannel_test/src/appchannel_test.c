@@ -27,6 +27,7 @@
 
 #include "app.h"
 #include "app_channel.h"
+
 #include "debug.h"
 
 #define DEBUG_MODULE "HELLOWORLD"

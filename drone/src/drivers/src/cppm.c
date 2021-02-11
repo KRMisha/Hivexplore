@@ -26,14 +26,15 @@
  */
 
 /* FreeRtos includes */
-#include "cppm.h"
 #include "FreeRTOS.h"
-#include "commander.h"
-#include "nvicconf.h"
-#include "queue.h"
-#include "static_mem.h"
-#include "stm32fxxx.h"
 #include "task.h"
+#include "queue.h"
+
+#include "stm32fxxx.h"
+#include "cppm.h"
+#include "nvicconf.h"
+#include "commander.h"
+#include "static_mem.h"
 
 #define DEBUG_MODULE "CPPM"
 #include "debug.h"

@@ -24,13 +24,15 @@
  * position_estimator_altitude.c: Altitude-only position estimator
  */
 
-#include "position_estimator.h"
-#include "FreeRTOS.h"
-#include "log.h"
-#include "num.h"
-#include "param.h"
 #include "stm32f4xx.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
+
+#include "log.h"
+#include "param.h"
+#include "num.h"
+#include "position_estimator.h"
 
 #define G 9.81f;
 

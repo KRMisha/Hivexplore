@@ -24,13 +24,16 @@
  * worker.c - Worker system that can execute asynchronous actions in tasks
  */
 #include "worker.h"
+
 #include <errno.h>
+
 #include "FreeRTOS.h"
-#include "console.h"
+#include "task.h"
 #include "queue.h"
 #include "queuemonitor.h"
 #include "static_mem.h"
-#include "task.h"
+
+#include "console.h"
 
 #define WORKER_QUEUE_LENGTH 5
 

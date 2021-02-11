@@ -27,8 +27,8 @@
 
 #pragma once
 
-#include "lighthouse_geometry.h"
 #include "pulse_processor.h"
+#include "lighthouse_geometry.h"
 
 void lighthousePositionEstInit();
 

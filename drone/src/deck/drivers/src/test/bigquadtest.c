@@ -26,14 +26,16 @@
 #define DEBUG_MODULE "BQ-TEST"
 
 #include <stdint.h>
+
 #include "FreeRTOS.h"
+#include "task.h"
+
+#include "stm32fxxx.h"
 #include "config.h"
 #include "debug.h"
 #include "deck.h"
 #include "deck_test.h"
 #include "param.h"
-#include "stm32fxxx.h"
-#include "task.h"
 
 #define VBAT_TEST_VOLTAGE_LOW (3.0 / ((1.0 + 69.0 + 10.0) / 10.0) * 0.95) /* 0.35625 */
 #define VBAT_TEST_VOLTAGE_HIGH (3.0 / ((1.0 + 69.0 + 10.0) / 10.0) * 1.05) /* 0.39375 */

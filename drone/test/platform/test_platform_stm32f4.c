@@ -1,9 +1,10 @@
 // File under test platform_stm32f4.c
 
 // @MODULE "platform_stm32f4.c"
-#include <string.h>
 #include "platform.h" // @NO_MODULE
+
 #include "unity.h"
+#include <string.h>
 
 #define PLATFORM_INFO_OTP_NR_OF_BLOCKS 16
 #define PLATFORM_INFO_OTP_BLOCK_LEN 32

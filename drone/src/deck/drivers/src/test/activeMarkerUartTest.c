@@ -26,11 +26,14 @@
  */
 
 #include <stdbool.h>
+
 #include "FreeRTOS.h"
-#include "debug.h"
-#include "deck.h"
-#include "param.h"
 #include "task.h"
+
+#include "param.h"
+#include "debug.h"
+
+#include "deck.h"
 #include "uart1.h"
 
 #define DEBUG_MODULE "ActiveMarkerDeckUartTest"

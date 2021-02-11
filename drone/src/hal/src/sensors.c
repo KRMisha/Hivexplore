@@ -28,8 +28,8 @@
 #define DEBUG_MODULE "SENSORS"
 
 #include "sensors.h"
-#include "debug.h"
 #include "platform.h"
+#include "debug.h"
 
 // https://gcc.gnu.org/onlinedocs/cpp/Stringizing.html
 #define xstr(s) str(s)

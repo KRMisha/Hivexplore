@@ -1,18 +1,20 @@
 // File under test lighthouse_core.c
-#include <stdbool.h>
 #include "lighthouse_core.h"
-#include "mock_cfassert.h"
-#include "mock_crtp_localization_service.h"
-#include "mock_lighthouse_deck_flasher.h"
-#include "mock_lighthouse_position_est.h"
+
+#include "unity.h"
+#include "mock_system.h"
 #include "mock_pulse_processor.h"
 #include "mock_pulse_processor_v1.h"
 #include "mock_pulse_processor_v2.h"
+#include "mock_lighthouse_deck_flasher.h"
+#include "mock_lighthouse_position_est.h"
+#include "mock_uart1.h"
 #include "mock_statsCnt.h"
 #include "mock_storage.h"
-#include "mock_system.h"
-#include "mock_uart1.h"
-#include "unity.h"
+#include "mock_cfassert.h"
+#include "mock_crtp_localization_service.h"
+
+#include <stdbool.h>
 
 static void uart1SetSequence(char* sequence, int length);
 static emptySequence[] = {0};

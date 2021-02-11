@@ -25,22 +25,24 @@
  */
 #define DEBUG_MODULE "SL"
 
-#include "syslink.h"
 #include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
+#include <stdint.h>
+
 #include "FreeRTOS.h"
-#include "config.h"
-#include "configblock.h"
-#include "debug.h"
-#include "ow.h"
-#include "pm.h"
-#include "queue.h"
-#include "radiolink.h"
-#include "semphr.h"
-#include "static_mem.h"
 #include "task.h"
+#include "queue.h"
+#include "semphr.h"
+
+#include "config.h"
+#include "debug.h"
+#include "syslink.h"
+#include "radiolink.h"
 #include "uart_syslink.h"
+#include "configblock.h"
+#include "pm.h"
+#include "ow.h"
+#include "static_mem.h"
 
 #ifdef UART2_LINK_COMM
 #include "uart2.h"

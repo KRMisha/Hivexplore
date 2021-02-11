@@ -41,19 +41,22 @@ The implementation must handle
 
 */
 
-#include "lpsTdoa3Tag.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
-#include "estimator.h"
-#include "libdw1000.h"
-#include "mac.h"
 #include "task.h"
+
+#include "lpsTdoa3Tag.h"
 #include "tdoaEngineInstance.h"
 #include "tdoaStats.h"
+#include "estimator.h"
+
+#include "libdw1000.h"
+#include "mac.h"
 
 #define DEBUG_MODULE "TDOA3"
-#include "cfassert.h"
 #include "debug.h"
+#include "cfassert.h"
 
 // Positions for sent LPP packets
 #define LPS_TDOA3_TYPE 0

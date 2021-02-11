@@ -24,20 +24,26 @@
  */
 /* uwb_twr_anchor.c: Uwb two way ranging anchor implementation */
 
-#include "lpsTwrTag.h"
-#include <math.h>
 #include <string.h>
-#include "FreeRTOS.h"
-#include "cf_math.h"
-#include "configblock.h"
-#include "crtp_localization_service.h"
-#include "estimator.h"
-#include "log.h"
+#include <math.h>
+
+#include "lpsTwrTag.h"
 #include "lpsTdma.h"
-#include "physicalConstants.h"
-#include "stabilizer_types.h"
-#include "static_mem.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
+
+#include "log.h"
+#include "crtp_localization_service.h"
+
+#include "stabilizer_types.h"
+#include "estimator.h"
+#include "cf_math.h"
+
+#include "physicalConstants.h"
+#include "configblock.h"
+#include "lpsTdma.h"
+#include "static_mem.h"
 
 #define ANTENNA_OFFSET 154.6 // In meter
 

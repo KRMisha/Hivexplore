@@ -28,17 +28,20 @@
 
 #define DEBUG_MODULE "MR"
 
-#include <stdlib.h>
-#include "FreeRTOS.h"
+#include "system.h"
 #include "debug.h"
-#include "i2cdev.h"
 #include "log.h"
 #include "pca95x4.h"
+#include "vl53l1x.h"
 #include "range.h"
 #include "static_mem.h"
-#include "system.h"
+
+#include "i2cdev.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
-#include "vl53l1x.h"
+
+#include <stdlib.h>
 
 static bool isInit = false;
 static bool isTested = false;

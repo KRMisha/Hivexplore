@@ -27,11 +27,12 @@
 #ifndef __AMG8833_H__
 #define __AMG8833_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "i2cdev.h"
-#include "num.h"
 #include "task.h"
+#include "num.h"
 
 #define MINTEMP 22
 #define MAXTEMP 34

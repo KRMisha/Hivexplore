@@ -28,8 +28,8 @@
 #define DEBUG_MODULE "PLATFORM"
 
 #include "platform.h"
-#include "debug.h"
 #include "radiolink.h"
+#include "debug.h"
 
 // Define to decrease the nRF51 Tx power to reduce interference
 #ifndef PLATFORM_NRF51_LOW_INTERFERENCE_TX_POWER_DBM

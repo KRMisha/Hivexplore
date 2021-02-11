@@ -57,14 +57,17 @@
 
 #include "kalman_core.h"
 #include "cfassert.h"
-#include "debug.h"
-#include "lighthouse_calibration.h"
-#include "log.h"
-#include "math3d.h"
+
 #include "outlierFilter.h"
-#include "param.h"
 #include "physicalConstants.h"
+
+#include "log.h"
+#include "param.h"
+#include "math3d.h"
+#include "debug.h"
 #include "static_mem.h"
+
+#include "lighthouse_calibration.h"
 
 // #define DEBUG_STATE_CHECK
 

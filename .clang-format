@@ -35,15 +35,6 @@ DerivePointerAlignment: false
 DisableFormat: false
 FixNamespaceComments: true
 ForEachMacros:
-IncludeBlocks: Merge
-IncludeCategories:
-  - Regex:           '^<[^\/]*>'
-    Priority:        1
-  - Regex:           '^<.*\/.*>'
-    Priority:        2
-  - Regex:           '^".*"'
-    Priority:        3
-IncludeIsMainRegex: ''
 IndentCaseLabels: false
 IndentPPDirectives: None
 IndentWidth: 4
@@ -63,7 +54,7 @@ PenaltyExcessCharacter: 500
 PenaltyReturnTypeOnItsOwnLine: 1000
 PointerAlignment: Left
 ReflowComments: true
-SortIncludes: true
+SortIncludes: false
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: false

@@ -23,16 +23,21 @@
  * along with lpsTdoa2Tag.c.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lpsTdoa2Tag.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
-#include "cfassert.h"
-#include "estimator.h"
+#include "task.h"
+
 #include "log.h"
 #include "param.h"
-#include "physicalConstants.h"
+#include "lpsTdoa2Tag.h"
+
 #include "stabilizer_types.h"
-#include "task.h"
+#include "cfassert.h"
+
+#include "estimator.h"
+
+#include "physicalConstants.h"
 #include "tdoaEngineInstance.h"
 
 #if ANCHOR_STORAGE_COUNT < LOCODECK_NR_OF_TDOA2_ANCHORS

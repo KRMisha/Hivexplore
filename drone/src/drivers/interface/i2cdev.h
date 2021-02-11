@@ -28,8 +28,9 @@
 #ifndef __I2CDEV_H__
 #define __I2CDEV_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "i2c_drv.h"
 
 #define I2CDEV_I2C1_PIN_SDA GPIO_Pin_7

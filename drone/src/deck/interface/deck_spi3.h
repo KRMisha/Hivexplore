@@ -26,8 +26,8 @@
 #ifndef SPI3_H_
 #define SPI3_H_
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 #define SPI3_BAUDRATE_21MHZ SPI_BaudRatePrescaler_2 // 21MHz

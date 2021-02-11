@@ -28,10 +28,12 @@
 #include <string.h>
 
 // ST lib includes
-#include "FreeRTOS.h"
-#include "nvicconf.h"
-#include "semphr.h"
 #include "stm32fxxx.h"
+
+#include "nvicconf.h"
+
+#include "FreeRTOS.h"
+#include "semphr.h"
 
 //#define TIM1_CCR1_Address 0x40012C34	// physical memory address of Timer 3 CCR1 register
 

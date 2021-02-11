@@ -25,22 +25,24 @@
  */
 #define DEBUG_MODULE "GTGPS"
 
-#include <math.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include "FreeRTOS.h"
+#include <stdio.h>
+
+#include "stm32fxxx.h"
 #include "config.h"
 #include "console.h"
+#include "uart1.h"
 #include "debug.h"
 #include "deck.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
 #include "log.h"
 #include "param.h"
-#include "queue.h"
-#include "stm32fxxx.h"
-#include "task.h"
-#include "uart1.h"
 
 static bool isInit;
 

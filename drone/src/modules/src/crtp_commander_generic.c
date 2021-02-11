@@ -23,16 +23,18 @@
  *
  *
  */
-#include "crtp_commander.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include "FreeRTOS.h"
+
+#include "crtp_commander.h"
+
 #include "commander.h"
+#include "param.h"
 #include "crtp.h"
 #include "num.h"
-#include "param.h"
 #include "quatcompress.h"
+#include "FreeRTOS.h"
 
 /* The generic commander format contains a packet type and data that has to be
  * decoded into a setpoint_t structure. The aim is to make it future-proof

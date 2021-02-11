@@ -26,27 +26,31 @@
 
 #define DEBUG_MODULE "IMU"
 
-#include "sensors_bmi088_bmp388.h"
 #include <math.h>
+
+#include "sensors_bmi088_bmp388.h"
+#include "stm32fxxx.h"
+
+#include "imu.h"
+
 #include "FreeRTOS.h"
+#include "semphr.h"
+#include "task.h"
+
+#include "system.h"
+#include "configblock.h"
+#include "param.h"
+#include "log.h"
+#include "debug.h"
+#include "nvicconf.h"
+#include "ledseq.h"
+#include "sound.h"
+#include "filter.h"
+#include "i2cdev.h"
 #include "bmi088.h"
 #include "bmp3.h"
 #include "bstdr_types.h"
-#include "configblock.h"
-#include "debug.h"
-#include "filter.h"
-#include "i2cdev.h"
-#include "imu.h"
-#include "ledseq.h"
-#include "log.h"
-#include "nvicconf.h"
-#include "param.h"
-#include "semphr.h"
-#include "sound.h"
 #include "static_mem.h"
-#include "stm32fxxx.h"
-#include "system.h"
-#include "task.h"
 
 #define GYRO_ADD_RAW_AND_VARIANCE_LOG_VALUES
 

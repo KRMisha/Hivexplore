@@ -1,8 +1,10 @@
 // File under test pptraj.h and pptraj_compressed.h
-#include <stdlib.h>
-#include <string.h>
 #include "pptraj.h"
 #include "pptraj_compressed.h"
+
+#include <stdlib.h>
+#include <string.h>
+
 #include "unity.h"
 
 // #define SHOW_OUTPUT

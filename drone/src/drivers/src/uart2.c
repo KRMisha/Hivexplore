@@ -30,14 +30,16 @@
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
-#include "cfassert.h"
-#include "config.h"
-#include "nvic.h"
-#include "nvicconf.h"
 #include "queue.h"
 #include "semphr.h"
-#include "static_mem.h"
+
+#include "config.h"
+#include "nvic.h"
 #include "uart2.h"
+#include "cfassert.h"
+#include "config.h"
+#include "nvicconf.h"
+#include "static_mem.h"
 
 #ifdef UART2_LINK_COMM
 #include "queuemonitor.h"

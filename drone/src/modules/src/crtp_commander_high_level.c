@@ -37,23 +37,23 @@ High-level commander: computes smooth setpoints based on high-level inputs
 such as: take-off, landing, polynomial trajectories.
 */
 
+#include <string.h>
 #include <errno.h>
 #include <math.h>
-#include <string.h>
 
 /* FreeRtos includes */
 #include "FreeRTOS.h"
-#include "semphr.h"
 #include "task.h"
+#include "semphr.h"
 
 // Crazyswarm includes
 #include "crtp.h"
 #include "crtp_commander_high_level.h"
-#include "log.h"
-#include "mem.h"
-#include "param.h"
 #include "planner.h"
+#include "log.h"
+#include "param.h"
 #include "static_mem.h"
+#include "mem.h"
 
 // Local types
 enum TrajectoryLocation_e {

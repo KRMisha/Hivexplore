@@ -31,16 +31,18 @@
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
-#include "cfassert.h"
-#include "config.h"
-#include "crtp.h"
-#include "nvicconf.h"
-#include "queue.h"
-#include "queuemonitor.h"
-#include "semphr.h"
-#include "static_mem.h"
 #include "task.h"
+#include "semphr.h"
+#include "queue.h"
+
+#include "config.h"
 #include "uart_syslink.h"
+#include "crtp.h"
+#include "cfassert.h"
+#include "nvicconf.h"
+#include "config.h"
+#include "queuemonitor.h"
+#include "static_mem.h"
 
 #define UARTSLK_DATA_TIMEOUT_MS 1000
 #define UARTSLK_DATA_TIMEOUT_TICKS (UARTSLK_DATA_TIMEOUT_MS / portTICK_RATE_MS)

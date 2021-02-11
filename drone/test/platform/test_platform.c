@@ -1,7 +1,8 @@
 // File under test platform.c
-#include <string.h>
 #include "platform.h"
+
 #include "unity.h"
+#include <string.h>
 
 static char actualDeviceType[100];
 

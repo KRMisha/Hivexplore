@@ -27,11 +27,14 @@
  */
 
 #include "storage.h"
-#include "FreeRTOS.h"
-#include "eeprom.h"
-#include "i2cdev.h"
+
 #include "kve/kve.h"
+
+#include "FreeRTOS.h"
 #include "semphr.h"
+
+#include "i2cdev.h"
+#include "eeprom.h"
 
 #define TRACE_MEMORY_ACCESS 0
 

@@ -80,8 +80,9 @@
  */
 
 #include "bstdr_comm_support.h"
-#include "FreeRTOS.h"
+
 #include "stm32fxxx.h"
+#include "FreeRTOS.h"
 #include "task.h"
 
 // TA: Maybe not so good to bring in these dependencies...

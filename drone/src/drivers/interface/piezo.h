@@ -33,8 +33,8 @@
 #ifndef __PIEZO_H__
 #define __PIEZO_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "config.h"
 
 /******** Defines ********/

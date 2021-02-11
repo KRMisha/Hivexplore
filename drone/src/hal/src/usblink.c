@@ -24,20 +24,23 @@
  * syslink.c: nRF24L01 implementation of the CRTP link
  */
 
-#include "usblink.h"
 #include <stdbool.h>
 #include <string.h>
-#include "FreeRTOS.h"
+
 #include "config.h"
-#include "configblock.h"
+#include "usblink.h"
 #include "crtp.h"
+#include "configblock.h"
 #include "ledseq.h"
 #include "pm.h"
+
+#include "FreeRTOS.h"
+#include "task.h"
 #include "queue.h"
 #include "queuemonitor.h"
 #include "semphr.h"
 #include "static_mem.h"
-#include "task.h"
+
 #include "usb.h"
 
 static bool isInit = false;

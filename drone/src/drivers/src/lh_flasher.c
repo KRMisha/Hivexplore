@@ -25,13 +25,17 @@
  */
 #define DEBUG_MODULE "LHFLASH"
 
-#include "lh_flasher.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
-#include "debug.h"
-#include "deck.h"
-#include "log.h"
 #include "task.h"
+
+#include "lh_flasher.h"
+#include "debug.h"
+
+#include "deck.h"
+
+#include "log.h"
 
 #define STR2(x) #x
 #define STR(x) STR2(x)

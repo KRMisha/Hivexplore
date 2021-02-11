@@ -1,12 +1,14 @@
 SIM_DIR := simulation
 CMAKE_BUILD_DIR := $(SIM_DIR)/build
 
-LOCAL_ARGOS_VSCODE_CONFIG := $$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/imageConfigs/hivexplore%2fargos%3adev.json
+LOCAL_ARGOS_VSCODE_CONFIG_DIR := $$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/imageConfigs
+LOCAL_ARGOS_VSCODE_CONFIG := $(LOCAL_ARGOS_VSCODE_CONFIG_DIR)/hivexplore%2fargos%3adev.json
 
 .PHONY: copy-config clean-config image image-prod start start-prod cmake build run clean format help
 
 # Commands for use outside the container dev environment
 copy-config:
+	mkdir -p $(LOCAL_ARGOS_VSCODE_CONFIG_DIR)
 	cp argos-devcontainer.json $(LOCAL_ARGOS_VSCODE_CONFIG)
 
 clean-config:

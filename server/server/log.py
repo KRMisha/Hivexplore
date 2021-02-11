@@ -21,7 +21,7 @@ class Log:
                 log_config.error_cb.add_callback(config_wrapper.log_error)
                 log_config.start()
 
-        except KeyError as e:
-            print('Could not start logging data,' '{} was not found in the Crazyflie table of content'.format(str(e)))
-        except AttributeError as e:
-            print('Could not add log configuration,' 'error: {}'.format(str(e)))
+        except KeyError as key_error:
+            print(f'Could not start logging data, {str(key_error)} was not found in the Crazyflie TOC')
+        except AttributeError as attribute_error:
+            print(f'Could not add log configuration, error: {str(attribute_error)}')

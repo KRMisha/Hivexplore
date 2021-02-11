@@ -2,7 +2,7 @@
     <Button @click="batteryLevel++">
         click
     </Button>
-    <Drone :battery="batteryLevel" />
+    <Drone :battery="batteryLevel" @changeLedStatus="changeLedStatus"/>
 </template>
 
 <script lang="ts">
@@ -13,6 +13,11 @@ export default defineComponent({
     name: 'App',
     components: {
         Drone
+    },
+    methods: {
+        changeLedStatus(isLedOn: boolean) {
+            console.log(isLedOn);
+        }
     },
     setup() {
         const batteryLevel = ref(0);

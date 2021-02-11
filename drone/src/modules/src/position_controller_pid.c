@@ -24,13 +24,15 @@
  * position_estimator_pid.c: PID-based implementation of the position controller
  */
 
-#include "position_controller.h"
 #include <math.h>
+#include "num.h"
+
 #include "commander.h"
 #include "log.h"
-#include "num.h"
 #include "param.h"
 #include "pid.h"
+#include "num.h"
+#include "position_controller.h"
 
 struct pidInit_s {
     float kp;

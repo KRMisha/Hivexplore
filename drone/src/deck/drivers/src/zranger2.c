@@ -26,20 +26,23 @@
 
 #define DEBUG_MODULE "ZR2"
 
-#include "zranger2.h"
 #include "FreeRTOS.h"
-#include "cf_math.h"
+#include "task.h"
+
 #include "config.h"
-#include "debug.h"
 #include "deck.h"
-#include "i2cdev.h"
+#include "system.h"
+#include "debug.h"
 #include "log.h"
 #include "param.h"
 #include "range.h"
 #include "static_mem.h"
-#include "system.h"
-#include "task.h"
+
+#include "i2cdev.h"
+#include "zranger2.h"
 #include "vl53l1x.h"
+
+#include "cf_math.h"
 
 // Measurement noise model
 static const float expPointA = 2.5f;

@@ -26,21 +26,25 @@
  *             sure they are compiled in CI.
  */
 
-#include "app.h"
-#include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "app.h"
+
 #include "FreeRTOS.h"
-#include "app_channel.h"
-#include "crtp_commander_high_level.h"
+#include "task.h"
+
 #include "debug.h"
+
 #include "ledseq.h"
+#include "crtp_commander_high_level.h"
 #include "locodeck.h"
-#include "log.h"
 #include "mem.h"
+#include "log.h"
 #include "param.h"
 #include "pm.h"
-#include "task.h"
+#include "app_channel.h"
 
 #define DEBUG_MODULE "APPAPI"
 

@@ -26,12 +26,12 @@
 
 #define DEBUG_MODULE "SYS"
 
-#include "cfassert.h"
 #include <stdint.h>
 #include "FreeRTOS.h"
-#include "debug.h"
+#include "cfassert.h"
 #include "led.h"
 #include "power_distribution.h"
+#include "debug.h"
 
 #define MAGIC_ASSERT_INDICATOR 0x2f8a001f
 

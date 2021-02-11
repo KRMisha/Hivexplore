@@ -41,9 +41,9 @@
  * with the highest priority is run.
  */
 
-#include <led.h>
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
+#include <led.h>
 
 #define LEDSEQ_CHARGE_CYCLE_TIME_500MA 1000
 #define LEDSEQ_CHARGE_CYCLE_TIME_MAX 500

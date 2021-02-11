@@ -24,8 +24,8 @@
  * configblock.h - Simple static implementation of the config block
  */
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifndef __CONFIGBLOCK_H__
 #define __CONFIGBLOCK_H__

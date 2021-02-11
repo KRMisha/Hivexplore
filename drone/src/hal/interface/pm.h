@@ -28,8 +28,8 @@
 #define PM_H_
 
 #include "adc.h"
-#include "deck.h"
 #include "syslink.h"
+#include "deck.h"
 
 #ifndef CRITICAL_LOW_VOLTAGE
 #define PM_BAT_CRITICAL_LOW_VOLTAGE 3.0f

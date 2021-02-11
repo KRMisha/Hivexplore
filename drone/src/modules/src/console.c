@@ -29,8 +29,9 @@
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
-#include "crtp.h"
 #include "semphr.h"
+
+#include "crtp.h"
 
 #ifdef STM32F40_41xxx
 #include "stm32f4xx.h"

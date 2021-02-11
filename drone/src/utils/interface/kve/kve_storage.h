@@ -34,9 +34,10 @@
 
 #pragma once
 
+#include "kve/kve_common.h"
+
 #include <stddef.h>
 #include <stdint.h>
-#include "kve/kve_common.h"
 
 #define KVE_STORAGE_IS_VALID(a) (a != SIZE_MAX)
 

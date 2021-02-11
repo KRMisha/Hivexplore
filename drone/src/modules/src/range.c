@@ -24,11 +24,13 @@
  * ranges.c: Centralize range measurements for different directions
  *           and make them available as log
  */
-#include "range.h"
 #include <stdint.h>
-#include "estimator.h"
+
 #include "log.h"
+
+#include "range.h"
 #include "stabilizer_types.h"
+#include "estimator.h"
 
 static uint16_t ranges[RANGE_T_END] = {
     0,

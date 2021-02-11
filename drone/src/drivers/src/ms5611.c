@@ -29,13 +29,15 @@
  */
 #define DEBUG_MODULE "MS5611"
 
-#include "ms5611.h"
 #include "FreeRTOS.h"
+#include "task.h"
+
+#include "ms5611.h"
+#include "i2cdev.h"
 #include "debug.h"
 #include "eprintf.h"
-#include "i2cdev.h"
+
 #include "math.h"
-#include "task.h"
 
 #define EXTRA_PRECISION 5 // trick to add more precision to the pressure and temp readings
 #define CONVERSION_TIME_MS 10 // conversion time in milliseconds. 10 is minimum

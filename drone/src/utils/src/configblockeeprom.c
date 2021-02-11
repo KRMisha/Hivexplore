@@ -25,15 +25,16 @@
  */
 #define DEBUG_MODULE "CFGBLK"
 
-#include "config.h"
-#include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
+#include <stdbool.h>
 #include <unistd.h>
-#include "configblock.h"
+#include <string.h>
+
+#include "config.h"
 #include "debug.h"
-#include "eeprom.h"
 #include "i2cdev.h"
+#include "configblock.h"
+#include "eeprom.h"
 
 /* Internal format of the config block */
 #define MAGIC 0x43427830

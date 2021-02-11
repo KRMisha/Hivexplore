@@ -23,19 +23,20 @@
  *
  * param.h - Crazy parameter system source file.
  */
-#include <errno.h>
 #include <string.h>
+#include <errno.h>
 
 /* FreeRtos includes */
 #include "FreeRTOS.h"
-#include "config.h"
-#include "console.h"
-#include "crc.h"
-#include "crtp.h"
-#include "debug.h"
-#include "param.h"
-#include "static_mem.h"
 #include "task.h"
+
+#include "config.h"
+#include "crtp.h"
+#include "param.h"
+#include "crc.h"
+#include "console.h"
+#include "debug.h"
+#include "static_mem.h"
 
 #if 0
 #define PARAM_DEBUG(fmt, ...) DEBUG_PRINT("D/param " fmt, ##__VA_ARGS__)

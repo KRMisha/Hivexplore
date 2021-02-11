@@ -25,30 +25,36 @@
  * lighthouse_core.c - central part of the lighthouse positioning system
  */
 
+#include "stm32fxxx.h"
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "FreeRTOS.h"
+
+#include "system.h"
 #include "log.h"
 #include "param.h"
 #include "statsCnt.h"
-#include "stm32fxxx.h"
-#include "system.h"
-#include "task.h"
 
 #define DEBUG_MODULE "LH"
-#include "crtp_localization_service.h"
 #include "debug.h"
-#include "lighthouse_core.h"
-#include "lighthouse_deck_flasher.h"
-#include "lighthouse_position_est.h"
+#include "uart1.h"
+#include "crtp_localization_service.h"
+
 #include "pulse_processor.h"
 #include "pulse_processor_v1.h"
 #include "pulse_processor_v2.h"
-#include "static_mem.h"
+
+#include "lighthouse_deck_flasher.h"
+#include "lighthouse_position_est.h"
+#include "lighthouse_core.h"
+
 #include "storage.h"
+
 #include "test_support.h"
-#include "uart1.h"
+#include "static_mem.h"
 
 static const uint32_t MAX_WAIT_TIME_FOR_HEALTH_MS = 4000;
 

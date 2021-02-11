@@ -27,11 +27,12 @@
  */
 
 #include "pulse_processor_v2.h"
-#include <math.h>
+
 #include <string.h>
-#include "debug.h"
+#include <math.h>
 #include "math3d.h"
 #include "test_support.h"
+#include "debug.h"
 
 static const uint32_t MAX_TICKS_SENSOR_TO_SENSOR = 10000;
 static const uint32_t MAX_TICKS_BETWEEN_SWEEP_STARTS_TWO_BLOCKS = 10;

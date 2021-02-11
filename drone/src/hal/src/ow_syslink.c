@@ -25,12 +25,14 @@
  */
 #define DEBUG_MODULE "OW"
 
-#include "ow.h"
 #include <string.h>
+
 #include "FreeRTOS.h"
+#include "semphr.h"
+
+#include "ow.h"
 #include "assert.h"
 #include "debug.h"
-#include "semphr.h"
 
 static xSemaphoreHandle waitForReply;
 static xSemaphoreHandle lockCmdBuf;

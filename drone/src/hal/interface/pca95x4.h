@@ -26,8 +26,8 @@
 #ifndef __PCA95X4_H__
 #define __PCA95X4_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define PCA95X4_DEFAULT_ADDRESS 0b0100000
 

@@ -26,13 +26,16 @@
  *   2 seconds.
  */
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
-#include "FreeRTOS.h"
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "app.h"
-#include "debug.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
+
+#include "debug.h"
 
 #define DEBUG_MODULE "HELLOWORLD"
 

@@ -24,12 +24,14 @@
  * swd.c - Low level SWD functionality
  */
 #include <stdbool.h>
+
 #include "stm32fxxx.h"
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
-#include "swd.h"
 #include "task.h"
+
+#include "swd.h"
 
 static bool isInit = false;
 

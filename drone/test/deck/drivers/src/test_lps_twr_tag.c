@@ -1,14 +1,16 @@
 // File under test lpsTwrTag.h
+#include "lpsTwrTag.h"
+
 #include <string.h>
+#include "unity.h"
+#include "mock_libdw1000.h"
+#include "mock_cfassert.h"
+#include "mock_locodeck.h"
+#include "mock_configblock.h"
+
 #include "crtp_localization_serviceMocks.h"
 #include "dw1000Mocks.h"
-#include "lpsTwrTag.h"
-#include "mock_cfassert.h"
-#include "mock_configblock.h"
-#include "mock_libdw1000.h"
-#include "mock_locodeck.h"
 #include "physicalConstants.h"
-#include "unity.h"
 
 // #include "mock_arm_math.h"
 
@@ -22,8 +24,9 @@ void arm_mean_f32(float32_t* pSrc, uint32_t blockSize, float32_t* pResult) {
     *pResult = 0.0;
 }
 
-#include "freertosMocks.h"
 #include "mock_estimator.h"
+
+#include "freertosMocks.h"
 
 static dwDevice_t dev;
 static lpsTwrAlgoOptions_t options;

@@ -1,5 +1,5 @@
-#include "num.h"
 #include "unity.h"
+#include "num.h"
 
 void testThatLimitUint16NotLimitInRange() {
     // Fixture

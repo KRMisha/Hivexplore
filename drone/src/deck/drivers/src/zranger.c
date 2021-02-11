@@ -26,19 +26,22 @@
 
 #define DEBUG_MODULE "VLX"
 
-#include "zranger.h"
 #include "FreeRTOS.h"
-#include "cf_math.h"
-#include "debug.h"
+#include "task.h"
+
 #include "deck.h"
-#include "i2cdev.h"
+#include "system.h"
+#include "debug.h"
 #include "log.h"
 #include "param.h"
 #include "range.h"
 #include "static_mem.h"
-#include "system.h"
-#include "task.h"
+
+#include "i2cdev.h"
+#include "zranger.h"
 #include "vl53l0x.h"
+
+#include "cf_math.h"
 
 // Measurement noise model
 static const float expPointA = 1.0f;

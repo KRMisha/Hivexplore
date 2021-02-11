@@ -27,8 +27,8 @@
 
 #pragma once
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
     uint32_t count;

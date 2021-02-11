@@ -31,9 +31,9 @@
  */
 
 #include "msp.h"
-#include "commander.h"
 #include "debug.h"
 #include "sensfusion6.h"
+#include "commander.h"
 
 // MSP command IDs
 #define MSP_STATUS 101

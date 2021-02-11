@@ -29,9 +29,10 @@
  *
  * lighthouse_ootx.c: lighthouse positioning ootx (slow) data receiver
  */
-#include "ootx_decoder.h"
 #include <stdbool.h>
 #include <stdint.h>
+
+#include "ootx_decoder.h"
 
 // #include "debug.h"
 

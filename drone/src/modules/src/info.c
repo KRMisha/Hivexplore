@@ -24,17 +24,18 @@
  * info.c - Receive information requests and send them back to the client
  */
 
-#include <math.h>
 #include <string.h>
+#include <math.h>
 
 /*FreeRtos includes*/
 #include "FreeRTOS.h"
+#include "task.h"
+
 #include "crtp.h"
 #include "info.h"
+#include "version.h"
 #include "pm.h"
 #include "static_mem.h"
-#include "task.h"
-#include "version.h"
 
 // CPUID access
 static const unsigned int* CpuId = (unsigned int*)0x1FFFF7E8;

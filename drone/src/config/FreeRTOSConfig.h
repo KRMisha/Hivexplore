@@ -55,8 +55,9 @@
 #define FREERTOS_CONFIG_H
 
 #include <stdint.h>
-#include "cfassert.h"
+
 #include "config.h"
+#include "cfassert.h"
 /*-----------------------------------------------------------
  * Application specific definitions.
  *

@@ -27,8 +27,8 @@
 #ifndef __TRIGGER_H__
 #define __TRIGGER_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Trigger function type. */
 typedef enum {

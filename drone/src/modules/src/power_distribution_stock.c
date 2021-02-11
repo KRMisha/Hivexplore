@@ -26,13 +26,14 @@
 #define DEBUG_MODULE "PWR_DIST"
 
 #include "power_distribution.h"
+
 #include <string.h>
-#include "debug.h"
 #include "log.h"
-#include "motors.h"
-#include "num.h"
 #include "param.h"
+#include "num.h"
 #include "platform.h"
+#include "motors.h"
+#include "debug.h"
 
 static bool motorSetEnable = false;
 

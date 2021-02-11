@@ -26,9 +26,10 @@
  * Original author: James A. Preiss, University of Southern California, 2020.
  */
 
-#include "collision_avoidance.h"
 #include <float.h>
 #include <string.h> // for memset
+
+#include "collision_avoidance.h"
 #include "peer_localization.h"
 
 // See header for API comments.
@@ -235,9 +236,10 @@ void collisionAvoidanceUpdateSetpointCore(collision_avoidance_params_t const* pa
 #ifdef CRAZYFLIE_FW
 
 #include "FreeRTOS.h"
-#include "log.h"
-#include "param.h"
 #include "task.h"
+
+#include "param.h"
+#include "log.h"
 
 static uint8_t collisionAvoidanceEnable = 0;
 

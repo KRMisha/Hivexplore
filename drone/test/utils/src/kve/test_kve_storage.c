@@ -1,6 +1,7 @@
-#include <string.h>
 #include "kve/kve_storage.h"
+
 #include "unity.h"
+#include <string.h>
 
 #define TEST_MEMORY_SIZE 100
 

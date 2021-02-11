@@ -23,11 +23,12 @@
  *
  * nvic.c - Contains all Cortex-M3 processor exceptions handlers
  */
-#include "cfassert.h"
 #include "exti.h"
 #include "led.h"
 #include "motors.h"
 #include "power_distribution.h"
+#include "cfassert.h"
+
 #include "uart1.h"
 #define UART_PRINT uart1Printf
 

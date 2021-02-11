@@ -25,19 +25,21 @@
  */
 
 #include <stdbool.h>
+
 #include "config.h"
-#include "console.h"
+
 #include "crtp.h"
-#include "crtp_localization_service.h"
+#include "console.h"
 #include "crtpservice.h"
-#include "eskylink.h"
-#include "log.h"
 #include "param.h"
-#include "platformservice.h"
-#include "radiolink.h"
-#include "syslink.h"
+#include "log.h"
+#include "eskylink.h"
 #include "uart_syslink.h"
+#include "radiolink.h"
 #include "usblink.h"
+#include "platformservice.h"
+#include "syslink.h"
+#include "crtp_localization_service.h"
 
 static bool isInit;
 

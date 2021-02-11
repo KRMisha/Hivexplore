@@ -27,26 +27,28 @@
 /* The TOC logic is mainly based on param.c
  * FIXME: See if we can factorise the TOC code */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
+#include <errno.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 /* FreeRtos includes */
 #include "FreeRTOS.h"
-#include "cfassert.h"
-#include "config.h"
-#include "console.h"
-#include "crc.h"
-#include "crtp.h"
-#include "debug.h"
-#include "log.h"
-#include "num.h"
-#include "semphr.h"
-#include "static_mem.h"
 #include "task.h"
 #include "timers.h"
+#include "semphr.h"
+
+#include "config.h"
+#include "crtp.h"
+#include "log.h"
+#include "crc.h"
 #include "worker.h"
+#include "num.h"
+
+#include "console.h"
+#include "cfassert.h"
+#include "debug.h"
+#include "static_mem.h"
 
 #if 0
 #define LOG_DEBUG(fmt, ...) DEBUG_PRINT("D/log " fmt, ##__VA_ARGS__)

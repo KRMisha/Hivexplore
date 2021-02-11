@@ -26,14 +26,14 @@
 #ifndef __CONTROLLER_INDI_H__
 #define __CONTROLLER_INDI_H__
 
-#include "attitude_controller.h"
+#include "stabilizer_types.h"
 #include "filter.h"
-#include "log.h"
 #include "math3d.h"
+#include "log.h"
 #include "param.h"
 #include "position_controller.h"
+#include "attitude_controller.h"
 #include "position_controller_indi.h"
-#include "stabilizer_types.h"
 
 #define ATTITUDE_UPDATE_DT (float)(1.0f / ATTITUDE_RATE)
 

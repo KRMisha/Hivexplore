@@ -25,15 +25,16 @@
 /* pwm3901.c: PMW3901 driver */
 #define DEBUG_MODULE "PMW"
 
-#include "pmw3901.h"
 #include "FreeRTOS.h"
-#include "debug.h"
+#include "task.h"
+
+#include "pmw3901.h"
 #include "deck.h"
+#include "debug.h"
+#include "system.h"
 #include "log.h"
 #include "param.h"
 #include "sleepus.h"
-#include "system.h"
-#include "task.h"
 
 static bool isInit = false;
 

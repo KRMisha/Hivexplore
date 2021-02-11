@@ -23,9 +23,11 @@
  *
  *
  */
-#include "crtp_commander.h"
 #include <stdbool.h>
 #include <stddef.h>
+
+#include "crtp_commander.h"
+
 #include "cfassert.h"
 #include "commander.h"
 #include "crtp.h"

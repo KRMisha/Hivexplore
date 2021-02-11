@@ -8,9 +8,9 @@
 /*-----------------------------------------------------------------------*/
 
 #include "diskio.h" /* FatFs lower layer API */
-#include "cfassert.h"
-#include "fatfs_sd.h"
 #include "ff.h"
+#include "fatfs_sd.h"
+#include "cfassert.h"
 
 ///* Make driver structure */
 DISKIO_LowLevelDriver_t FATFS_LowLevelDrivers[FF_VOLUMES];

@@ -30,12 +30,14 @@
  * lighthouse.c: lighthouse tracking system receiver
  */
 
-#include "FreeRTOS.h"
-#include "config.h"
 #include "deck.h"
-#include "lighthouse_core.h"
 #include "param.h"
+
+#include "config.h"
+#include "FreeRTOS.h"
 #include "task.h"
+
+#include "lighthouse_core.h"
 
 static bool isInit = false;
 

@@ -1,8 +1,9 @@
 #ifndef __LPS_TWR_TAG_H__
 #define __LPS_TWR_TAG_H__
 
-#include "libdw1000.h"
 #include "locodeck.h"
+#include "libdw1000.h"
+
 #include "mac.h"
 
 #define LPS_TWR_POLL 0x01 // Poll is initiated by the tag

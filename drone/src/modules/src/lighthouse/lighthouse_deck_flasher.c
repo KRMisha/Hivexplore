@@ -26,8 +26,8 @@
  * Lighthouse deck
  */
 
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define DEBUG_MODULE "LHFL"
 #include "debug.h"

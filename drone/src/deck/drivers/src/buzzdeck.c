@@ -26,11 +26,13 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "buzzer.h"
+#include "stm32fxxx.h"
+
 #include "deck.h"
 #include "param.h"
+
+#include "buzzer.h"
 #include "piezo.h"
-#include "stm32fxxx.h"
 
 static bool isInit;
 

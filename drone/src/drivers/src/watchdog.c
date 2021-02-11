@@ -26,8 +26,8 @@
  */
 #define DEBUG_MODULE "SYS"
 
-#include "watchdog.h"
 #include "debug.h"
+#include "watchdog.h"
 
 bool watchdogNormalStartTest(void) {
     bool wasNormalStart = true;

@@ -24,8 +24,8 @@
  * pca9685.c: 12-bit, 16-channel PWM servo (, LED, ESC, ...) driver
  */
 
-#include "pca9685.h"
 #include "i2cdev.h"
+#include "pca9685.h"
 #include "math.h" // fmax, fmin
 
 // the pca9685 uses 8-bit internal addresses.
@@ -142,10 +142,10 @@ bool pca9685setDurations(int addr, int chanBegin, int nChan, uint16_t const* dur
 //
 
 #include "FreeRTOS.h"
-#include "config.h"
-#include "queue.h"
-#include "static_mem.h"
 #include "task.h"
+#include "queue.h"
+#include "config.h"
+#include "static_mem.h"
 
 struct asyncRequest {
     int addr;

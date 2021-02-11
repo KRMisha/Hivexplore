@@ -25,8 +25,8 @@
  *
  */
 
-#include "platform.h"
 #include <string.h>
+#include "platform.h"
 
 static const platformConfig_t* active_config = 0;
 

@@ -32,26 +32,30 @@
 
 #define DEBUG_MODULE "DWM"
 
-#include "locodeck.h"
 #include <stdint.h>
 #include <string.h>
+#include "stm32fxxx.h"
+
 #include "FreeRTOS.h"
-#include "debug.h"
+#include "semphr.h"
+#include "task.h"
+#include "queue.h"
+
 #include "deck.h"
-#include "estimator.h"
+#include "system.h"
+#include "debug.h"
 #include "log.h"
+#include "param.h"
+#include "nvicconf.h"
+#include "estimator.h"
+#include "statsCnt.h"
+#include "mem.h"
+
+#include "locodeck.h"
+
 #include "lpsTdoa2Tag.h"
 #include "lpsTdoa3Tag.h"
 #include "lpsTwrTag.h"
-#include "mem.h"
-#include "nvicconf.h"
-#include "param.h"
-#include "queue.h"
-#include "semphr.h"
-#include "statsCnt.h"
-#include "stm32fxxx.h"
-#include "system.h"
-#include "task.h"
 
 #define CS_PIN DECK_GPIO_IO1
 

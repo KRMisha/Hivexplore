@@ -27,12 +27,15 @@
 #include "deck.h"
 
 /*ST includes */
+#include "stm32fxxx.h"
+#include "config.h"
+
 #include "FreeRTOS.h"
+#include "semphr.h"
+
 #include "cfassert.h"
 #include "config.h"
 #include "nvicconf.h"
-#include "semphr.h"
-#include "stm32fxxx.h"
 
 #define SPI SPI1
 #define SPI_CLK RCC_APB2Periph_SPI1

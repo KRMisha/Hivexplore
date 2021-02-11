@@ -23,11 +23,13 @@
  *
  * deck_test.c - Test utility functions for testing decks.
  */
-#include "deck.h"
 #include <string.h>
-#include "debug.h"
-#include "deck_test.h"
+
 #include "stm32fxxx.h"
+
+#include "deck.h"
+#include "deck_test.h"
+#include "debug.h"
 
 #ifndef DECK_TEST_PRINT_ALL_FAILED
 #define STATUS_EVAL (*status)

@@ -28,15 +28,18 @@
 
 #define DEBUG_MODULE "OA"
 
-#include <stdlib.h>
-#include "FreeRTOS.h"
+#include "system.h"
 #include "debug.h"
-#include "i2cdev.h"
 #include "log.h"
 #include "pca95x4.h"
-#include "system.h"
-#include "task.h"
 #include "vl53l0x.h"
+
+#include "i2cdev.h"
+
+#include "FreeRTOS.h"
+#include "task.h"
+
+#include <stdlib.h>
 
 static bool isInit = false;
 static bool isTested = false;

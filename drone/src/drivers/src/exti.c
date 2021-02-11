@@ -23,11 +23,13 @@
  *
  * exti.c - Unified implementation of the exti interrupts
  */
-#include "exti.h"
 #include <stdbool.h>
-#include "nrf24l01.h"
-#include "nvicconf.h"
+
 #include "stm32fxxx.h"
+
+#include "exti.h"
+#include "nvicconf.h"
+#include "nrf24l01.h"
 
 static bool isInit;
 

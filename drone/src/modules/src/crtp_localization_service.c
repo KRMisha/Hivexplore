@@ -23,24 +23,31 @@
  *
  *
  */
-#include "crtp.h"
-#include <stdint.h>
 #include <string.h>
+#include <stdint.h>
+
 #include "FreeRTOS.h"
-#include "configblock.h"
-#include "crtp_localization_service.h"
-#include "estimator.h"
-#include "lighthouse_core.h"
-#include "locodeck.h"
-#include "log.h"
-#include "num.h"
-#include "param.h"
-#include "peer_localization.h"
-#include "quatcompress.h"
-#include "stabilizer.h"
-#include "stabilizer_types.h"
 #include "task.h"
+
+#include "crtp.h"
+#include "crtp_localization_service.h"
+#include "log.h"
+#include "param.h"
+
+#include "stabilizer_types.h"
+#include "stabilizer.h"
+#include "configblock.h"
 #include "worker.h"
+#include "lighthouse_core.h"
+
+#include "locodeck.h"
+
+#include "estimator.h"
+#include "quatcompress.h"
+
+#include "peer_localization.h"
+
+#include "num.h"
 
 #define NBR_OF_RANGES_IN_PACKET 5
 #define NBR_OF_SWEEPS_IN_PACKET 2

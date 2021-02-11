@@ -25,6 +25,7 @@
  */
 
 #include "deck.h"
+
 #include "stm32fxxx.h"
 
 static uint32_t stregResolution;

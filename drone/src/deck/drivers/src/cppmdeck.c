@@ -27,12 +27,13 @@
 
 #include <stdint.h>
 #include <string.h>
+
+#include "stm32fxxx.h"
 #include "config.h"
 #include "debug.h"
 #include "deck.h"
 #include "extrx.h"
 #include "param.h"
-#include "stm32fxxx.h"
 
 // Hardware configuration
 static bool isInit;

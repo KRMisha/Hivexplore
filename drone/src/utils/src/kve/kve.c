@@ -1,9 +1,11 @@
 
 #include "kve/kve.h"
+#include "kve/kve_storage.h"
+
+#include "debug.h"
+
 #include <stdbool.h>
 #include <string.h>
-#include "debug.h"
-#include "kve/kve_storage.h"
 
 #define VERSION_ADDRESS (0)
 #define FIRST_ITEM_ADDRESS (1)

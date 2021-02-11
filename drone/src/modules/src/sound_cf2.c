@@ -28,15 +28,17 @@
 
 /* FreeRtos includes */
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "FreeRTOS.h"
-#include "buzzer.h"
-#include "config.h"
-#include "log.h"
-#include "param.h"
-#include "sound.h"
 #include "timers.h"
+
+#include "config.h"
+#include "param.h"
+#include "log.h"
+#include "sound.h"
+#include "buzzer.h"
 
 /**
  * Credit to http://tny.cz/e525c1b2 for supplying the tones

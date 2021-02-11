@@ -27,10 +27,11 @@
  */
 
 #include "pulse_processor_v1.h"
-#include <math.h>
+
 #include <string.h>
-#include "physicalConstants.h"
+#include <math.h>
 #include "test_support.h"
+#include "physicalConstants.h"
 
 // Decoding contants
 // Times are expressed in a 24MHz clock

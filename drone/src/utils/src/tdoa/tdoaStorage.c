@@ -31,6 +31,7 @@ Data storage encapsulation for the TDoA engine
 
 #define DEBUG_MODULE "TDOA_STORAGE"
 #include "debug.h"
+
 #include "tdoaStorage.h"
 
 // All times in milli seconds

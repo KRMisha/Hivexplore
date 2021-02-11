@@ -29,8 +29,9 @@
 #include <stdbool.h>
 
 /* ST includes */
-#include "piezo.h"
 #include "stm32fxxx.h"
+
+#include "piezo.h"
 
 // FreeRTOS includes
 #include "FreeRTOS.h"

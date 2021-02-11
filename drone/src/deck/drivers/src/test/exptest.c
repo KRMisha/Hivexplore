@@ -26,12 +26,14 @@
 #define DEBUG_MODULE "ET"
 
 #include <stdint.h>
+
+#include "stm32fxxx.h"
 #include "config.h"
 #include "debug.h"
 #include "deck.h"
 #include "deck_test.h"
+
 #include "sensors.h"
-#include "stm32fxxx.h"
 
 // Hardware configuration
 #define ET_GPIO_PERIF (RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC)

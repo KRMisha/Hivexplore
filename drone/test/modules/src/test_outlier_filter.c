@@ -1,7 +1,9 @@
 // File under test outlierFilter.h
-#include "mock_cfassert.h"
 #include "outlierFilter.h"
+
 #include "unity.h"
+
+#include "mock_cfassert.h"
 
 static tdoaMeasurement_t tdoa;
 

@@ -28,6 +28,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "usbd_conf.h"
 
 #define USB_RX_TX_PACKET_SIZE (64)

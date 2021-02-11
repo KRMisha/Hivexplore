@@ -26,9 +26,9 @@
  */
 
 #include "pid.h"
-#include <float.h>
-#include <math.h>
 #include "num.h"
+#include <math.h>
+#include <float.h>
 
 void pidInit(PidObject* pid, const float desired, const float kp, const float ki, const float kd, const float dt, const float samplingRate,
              const float cutoffFreq, bool enableDFilter) {

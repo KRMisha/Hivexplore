@@ -56,21 +56,24 @@
  *
  */
 
-#include "estimator_kalman.h"
-#include "FreeRTOS.h"
 #include "kalman_core.h"
+#include "estimator_kalman.h"
 #include "kalman_supervisor.h"
-#include "log.h"
-#include "param.h"
-#include "physicalConstants.h"
+
+#include "FreeRTOS.h"
 #include "queue.h"
-#include "rateSupervisor.h"
+#include "task.h"
 #include "semphr.h"
 #include "sensors.h"
 #include "static_mem.h"
-#include "statsCnt.h"
+
 #include "system.h"
-#include "task.h"
+#include "log.h"
+#include "param.h"
+#include "physicalConstants.h"
+
+#include "statsCnt.h"
+#include "rateSupervisor.h"
 
 #define DEBUG_MODULE "ESTKALMAN"
 #include "debug.h"

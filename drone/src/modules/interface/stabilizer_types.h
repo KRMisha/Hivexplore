@@ -26,8 +26,8 @@
 #ifndef __STABILIZER_TYPES_H__
 #define __STABILIZER_TYPES_H__
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "imu_types.h"
 #include "lighthouse_calibration.h"
 

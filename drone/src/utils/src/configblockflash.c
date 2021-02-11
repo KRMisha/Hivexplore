@@ -25,10 +25,11 @@
  */
 #define DEBUG_MODULE "CFGBLK"
 
-#include "config.h"
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
+
+#include "config.h"
 #include "configblock.h"
 #include "debug.h"
 

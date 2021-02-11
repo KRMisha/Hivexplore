@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Main module.
-"""
+
 import time
 import cflib
 from connection_crazyflie import ConnectionCrazyflie

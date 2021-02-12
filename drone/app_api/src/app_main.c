@@ -51,15 +51,17 @@
 void appMain() {
     DEBUG_PRINT("Waiting for activation ...\n");
 
-    while (1) {
+    while (true) {
         vTaskDelay(M2T(2000));
         DEBUG_PRINT("Hello World!\n");
+        ledSet(LED_RED_L, true);
+
     }
-   /*
+    /*
 
-   List of available functions :
+    List of available functions :
 
-   // Do not run this app
+    // Do not run this app
     ASSERT_FAILED();
 
     // LED sequencer

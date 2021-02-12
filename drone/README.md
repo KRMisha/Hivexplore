@@ -59,7 +59,7 @@ Verify the toolchain installation with `arm-none-eabi-gcc --version`
 
 ## Compiling
 
-**Note**: The following steps can be done in the app_api directory to flash the drone with the app_main or in any of the examples' directories.
+**Note**: The following steps can be done in the app_api directory to flash the drone with the app_main or in any of the examples' directories. They can also be done in the firmware's main folder to flash the Crazyflie with the default firmware.
 
 ### Crazyflie 2.X
 
@@ -110,10 +110,6 @@ More information can be found on the
 To flash the drone using the using the wireless bootloader
 ```
 make cload
-```
-To flash the drone using OpenOCD, (OpenOCD can be installed with the command sudo apt install openocd)
-```
-make flash
 ```
 ## Make targets:
 

@@ -55,7 +55,6 @@ void appMain() {
         vTaskDelay(M2T(2000));
         DEBUG_PRINT("Hello World!\n");
         ledSet(LED_RED_L, true);
-
     }
     /*
 

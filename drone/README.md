@@ -59,7 +59,7 @@ Verify the toolchain installation with `arm-none-eabi-gcc --version`
 
 ## Compiling
 
-**Note**: the following steps can be done in the app_api directory to flash the drone with the app_main or in any of the examples' directories  (but not in the main folder of the crazyflie firmware).
+**Note**: The following steps can be done in the app_api directory to flash the drone with the app_main or in any of the examples' directories  (but not in the main folder of the crazyflie firmware).
 
 ### Crazyflie 2.X
 

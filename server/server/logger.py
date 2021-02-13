@@ -5,7 +5,7 @@ from log_configurations.log_health import LogHealth
 from log_configurations.log_stabilizer import LogStabilizer
 
 
-class Log:
+class Logger:
     def __init__(self, crazyflie: Crazyflie):
         self._crazyflie = crazyflie
 
@@ -20,7 +20,6 @@ class Log:
                 log_config.data_received_cb.add_callback(config_wrapper.log_data)
                 log_config.error_cb.add_callback(config_wrapper.log_error)
                 log_config.start()
-
         except KeyError as key_error:
             print(f'Could not start logging data, {str(key_error)} was not found in the Crazyflie TOC')
         except AttributeError as attribute_error:

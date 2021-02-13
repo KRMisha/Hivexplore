@@ -19,7 +19,6 @@ async def get_battery_handler(websocket, path):
 async def toggle_led_handler(websocket, path):
     async for message in websocket:
         print(message)
-        print(path)
 
 
 async def socket_handler(websocket, path):

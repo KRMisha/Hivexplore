@@ -17,24 +17,24 @@ export default defineComponent({
     },
     setup() {
         const batteryLevel = ref(0);
-        const connection = new WebSocket(serverUrl);
+        const socket = new WebSocket(serverUrl);
 
-        connection.onopen = (event: Event) => {
+        socket.onopen = (event: Event) => {
             console.log('Connection sucessful');
         }
 
-        connection.onmessage = (event: MessageEvent) => {
+        socket.onmessage = (event: MessageEvent) => {
             console.log(event.data);
             batteryLevel.value = +event.data;
         }
 
         function changeLedStatus(isLedOn: boolean) {
-            connection.send(`${isLedOn}`);
+            socket.send(`${isLedOn}`);
         }
 
         return {
             batteryLevel,
-            connection,
+            socket,
             changeLedStatus
         };
     },

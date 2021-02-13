@@ -6,7 +6,7 @@
 import { defineComponent, ref } from 'vue';
 import Drone from './components/Drone.vue';
 
-const ipAddress = 'ws://127.0.0.1';
+const ipAddress = 'ws:localhost';
 const port      = '5678';
 const serverUrl = ipAddress + ':' + port;
 

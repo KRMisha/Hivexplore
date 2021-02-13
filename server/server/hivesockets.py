@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 
-IP_ADDRESS = "127.0.0.1"
+IP_ADDRESS = "localhost"
 PORT = 5678
 
 

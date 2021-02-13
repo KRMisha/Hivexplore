@@ -4,14 +4,15 @@ from server.log_configurations.base_log_config import BaseLogConfig
 class BatteryLogConfig(BaseLogConfig):
     def __init__(self):
         super().__init__()
-        self._logConfig = LogConfig(name='DroneHealth', period_in_ms=BaseLogConfig.PERIOD_MS)
+        self._logConfig = LogConfig(name='BatteryLevel', period_in_ms=BaseLogConfig.PERIOD_MS)
         self._logConfig.add_variable('pm.vbat')
 
     def log_data(self, timestamp, data, logconf):
-        battery_level = self.convert_voltage_to_percentage(data['pm.vbat'])
+        battery_level = self.get_battery_percentage(data['pm.vbat'])
         print(f'Battery level: {battery_level:.2f}')
 
-    def convert_voltage_to_percentage(self, voltage):
+    @staticmethod
+    def get_battery_percentage(voltage):
         MIN_VOLTAGE = 3.0
         MAX_VOLTAGE = 4.23
         MAX_BATTERY_LEVEL = 100

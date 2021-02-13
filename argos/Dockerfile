@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     doxygen \
     graphviz graphviz-dev \
     asciidoc \
-    clang-format
+    clang clang-format
 
 # Build ARGoS from source
 RUN git clone https://github.com/MISTLab/argos3.git && \

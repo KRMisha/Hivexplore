@@ -20,12 +20,15 @@ export default defineComponent({
         const socket = new WebSocket(serverUrl);
 
         socket.onopen = (event: Event) => {
-            console.log('Connection sucessful');
+            console.log('Connection successful');
         }
 
         socket.onmessage = (event: MessageEvent) => {
-            console.log(event.data);
             batteryLevel.value = +event.data;
+        }
+
+        socket.onclose = (event: CloseEvent) => {
+            console.log('Connection closed');
         }
 
         function changeLedStatus(isLedOn: boolean) {

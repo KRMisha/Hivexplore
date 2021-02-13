@@ -6,6 +6,8 @@ PORT = 5678
 
 
 # The following was inspired by: https://websockets.readthedocs.io/en/stable/intro.html#common-patterns
+
+# TODO: Get this information from the drones
 async def get_battery_handler(websocket, path):
     battery = 0
     while True:
@@ -16,6 +18,7 @@ async def get_battery_handler(websocket, path):
         await asyncio.sleep(1)
 
 
+# TODO: Forward this command to the drone
 async def toggle_led_handler(websocket, path):
     async for message in websocket:
         print(message)
@@ -39,6 +42,6 @@ def start_hive_server():
 def main():
     start_hive_server()
 
-
+# TODO: Remove this to integrate it with the drones
 if __name__ == '__main__':
     main()

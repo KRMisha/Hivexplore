@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.ERROR)
 TIMER = 10
 
 
-class ConnectionCrazyflie:
+class CrazyflieConnection:
     def __init__(self, link_uri):
         self._crazyflie = Crazyflie(rw_cache='./cache')
         self._log = Logger(self._crazyflie)

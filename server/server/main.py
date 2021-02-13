@@ -2,11 +2,10 @@
 
 import time
 import cflib
-from connection_crazyflie import ConnectionCrazyflie
+from server.crazyflie_connection import CrazyflieConnection
 
 
 def main():
-
     cflib.crtp.init_drivers(enable_debug_driver=False)
 
     print('Scanning interfaces for Crazyflies...')
@@ -19,7 +18,7 @@ def main():
     crazyflies = []
     if len(available_interfaces) > 0:
         for crazyflie in available_interfaces:
-            crazyflies.append(ConnectionCrazyflie(crazyflie[0]))
+            crazyflies.append(CrazyflieConnection(crazyflie[0]))
     else:
         print('No Crazyflies found, cannot run example')
 

@@ -9,11 +9,11 @@ class BatteryLogConfig(BaseLogConfig):
         self.log_config.add_variable('pm.vbat')
 
     def log_data(self, timestamp, data, logconf):
-        battery_level = self.get_battery_percentage(data['pm.vbat'])
+        battery_level = self._get_battery_percentage(data['pm.vbat'])
         print(f'Battery level: {battery_level:.2f}')
 
     @staticmethod
-    def get_battery_percentage(voltage):
+    def _get_battery_percentage(voltage):
         MIN_VOLTAGE = 3.0
         MAX_VOLTAGE = 4.23
         MAX_BATTERY_LEVEL = 100

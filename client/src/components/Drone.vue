@@ -1,5 +1,13 @@
+<style scoped>
+.drone-card {
+    width: 25rem;
+    margin: auto;
+    margin-bottom: 2em;
+}
+</style>
+
 <template>
-    <Card style="width: 25rem; margin: auto; margin-bottom: 2em;">
+    <Card class="drone-card">
         <template #title>
             Drone
         </template>

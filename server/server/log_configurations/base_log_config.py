@@ -1,5 +1,6 @@
 from cflib.crazyflie.log import LogConfig
 
+
 class BaseLogConfig:
 
     PERIOD_MS = 1000

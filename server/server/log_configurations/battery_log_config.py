@@ -1,6 +1,7 @@
 from cflib.crazyflie.log import LogConfig
 from server.log_configurations.base_log_config import BaseLogConfig
 
+
 class BatteryLogConfig(BaseLogConfig):
     def __init__(self):
         super().__init__()

@@ -2,6 +2,7 @@ from cflib.crazyflie import Crazyflie
 from server.log_configurations.battery_log_config import BatteryLogConfig
 from server.log_configurations.stabilizer_log_config import StabilizerLogConfig
 
+
 class Logger:
     def __init__(self, crazyflie: Crazyflie):
         self._crazyflie = crazyflie

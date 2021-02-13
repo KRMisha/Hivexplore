@@ -4,8 +4,8 @@ from server.log_configurations.base_log_config import BaseLogConfig
 class BatteryLogConfig(BaseLogConfig):
     def __init__(self):
         super().__init__()
-        self._logConfig = LogConfig(name='BatteryLevel', period_in_ms=BaseLogConfig.PERIOD_MS)
-        self._logConfig.add_variable('pm.vbat')
+        self.log_config = LogConfig(name='BatteryLevel', period_in_ms=BaseLogConfig.PERIOD_MS)
+        self.log_config.add_variable('pm.vbat')
 
     def log_data(self, timestamp, data, logconf):
         battery_level = self.get_battery_percentage(data['pm.vbat'])

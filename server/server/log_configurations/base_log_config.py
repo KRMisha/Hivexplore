@@ -5,7 +5,7 @@ class BaseLogConfig:
     PERIOD_MS = 1000
 
     def __init__(self):
-        self._logConfig: LogConfig
+        self.log_config: LogConfig
 
     def log_data(self, timestamp, data, logconf):
         print(f'[{timestamp}][{logconf.name}]: {data}')

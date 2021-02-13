@@ -23,7 +23,7 @@ class CrazyflieConnection:
         self._crazyflie.connection_failed.add_callback(self._connection_failed)
         self._crazyflie.connection_lost.add_callback(self._connection_lost)
 
-        print(f'Connection to {link_uri}')
+        print(f'Connecting to {link_uri}')
 
         self._crazyflie.open_link(link_uri)
 

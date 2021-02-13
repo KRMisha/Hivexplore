@@ -48,18 +48,35 @@
 
 #define DEBUG_MODULE "APPAPI"
 
+struct ledPacketRX {
+    bool led_green_l_on;
+    bool led_red_l_on;
+} __attribute__((packed));
+
+struct ackPacketTX {
+    bool ack;
+} __attribute__((packed));
+
+
 void appMain() {
-    DEBUG_PRINT("Waiting for activation ...\n");
 
-    while (true) {
-        vTaskDelay(M2T(2000));
-        DEBUG_PRINT("Hello World!\n");
-        ledSet(LED_RED_L, true);
+    struct ledPacketRX rxPacket;
+    struct ackPacketTX txPacket;
+
+    while (1) {
+        if (appchannelReceivePacket(&rxPacket, sizeof(rxPacket), APPCHANNEL_WAIT_FOREVER)) {
+            DEBUG_PRINT("App channel received led green left: %d, led red left: %d \n", (bool)rxPacket.led_green_l_on, (bool)rxPacket.led_red_l_on);
+
+            ledSet(LED_GREEN_L, rxPacket.led_green_l_on);
+            ledSet(LED_RED_L, rxPacket.led_red_l_on);
+
+            txPacket.ack = true;
+
+            appchannelSendPacket(&txPacket, sizeof(txPacket));
+        }
     }
+
     /*
-
-    List of available functions :
-
     // Do not run this app
     ASSERT_FAILED();
 

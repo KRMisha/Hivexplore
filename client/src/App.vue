@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onUnmounted, ref } from 'vue';
 import Drone from './components/Drone.vue';
 
 const ipAddress = 'ws:localhost';
@@ -34,6 +34,10 @@ export default defineComponent({
         function changeLedStatus(isLedOn: boolean) {
             socket.send(`${isLedOn}`);
         }
+
+        onUnmounted(() => {
+            socket.close();
+        });
 
         return {
             batteryLevel,

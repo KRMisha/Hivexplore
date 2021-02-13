@@ -15,10 +15,8 @@ def main():
     for available_interface in available_interfaces:
         print(available_interface[0])
 
-    crazyflies = []
     if len(available_interfaces) > 0:
-        for crazyflie in available_interfaces:
-            crazyflies.append(CrazyflieConnection(crazyflie[0]))
+        crazyflies = [CrazyflieConnection(crazyflie[0]) for crazyflie in available_interfaces]
     else:
         print('No Crazyflies found, cannot run example')
 

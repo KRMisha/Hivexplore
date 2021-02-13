@@ -1,15 +1,13 @@
 from cflib.crazyflie import Crazyflie
-from cflib.crazyflie.log import LogConfig
-from log_configurations.log_config_wrapper import LogConfigWrapper
-from log_configurations.log_health import LogHealth
-from log_configurations.log_stabilizer import LogStabilizer
-
+#from cflib.crazyflie.log import LogConfig
+#from server.log_configurations.base_log_config import BaseLogConfig
+from server.log_configurations.battery_log_config import BatteryLogConfig
+from server.log_configurations.stabilizer_log_config import StabilizerLogConfig
 
 class Logger:
     def __init__(self, crazyflie: Crazyflie):
         self._crazyflie = crazyflie
-
-        self._log_config_wrappers = [LogHealth(), LogStabilizer()]
+        self._log_config_wrappers = [BatteryLogConfig(), StabilizerLogConfig()]
 
     def start_logging(self):
         try:

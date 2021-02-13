@@ -11,9 +11,8 @@ PORT = 5678
 async def get_battery_handler(websocket, path):
     battery = 0
     while True:
-        if battery == 100:
-            battery = 0
-        battery = battery + 1
+        battery %= 100
+        battery += 1
         await websocket.send(str(battery))
         await asyncio.sleep(1)
 

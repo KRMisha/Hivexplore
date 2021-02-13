@@ -3,4 +3,4 @@ mypy
 pylint
 pytest==6.2.2
 yapf
-websockets
+websockets==8.1

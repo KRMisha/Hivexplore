@@ -1,7 +1,7 @@
 import logging
 from threading import Timer
 from cflib.crazyflie import Crazyflie
-from logger import Logger
+from server.logger import Logger
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)

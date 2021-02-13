@@ -9,7 +9,7 @@ class LogHealth(LogConfigWrapper):
 
     def log_data(self, timestamp, data, logconf):
         battery_level = self.convert_voltage_to_percentage(data['pm.vbat'])
-        print(f'Battery Level: {battery_level:.2f}')
+        print(f'Battery level: {battery_level:.2f}')
 
     def convert_voltage_to_percentage(self, voltage):
         MIN_VOLTAGE = 3.0

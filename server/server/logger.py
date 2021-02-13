@@ -21,6 +21,6 @@ class Logger:
                 log_config.error_cb.add_callback(config_wrapper.log_error)
                 log_config.start()
         except KeyError as key_error:
-            print(f'Could not start logging data, {str(key_error)} was not found in the Crazyflie TOC')
+            print(f'Could not start logging data, {key_error} was not found in the Crazyflie TOC')
         except AttributeError as attribute_error:
-            print(f'Could not add log configuration, error: {str(attribute_error)}')
+            print(f'Could not add log configuration, error: {attribute_error}')

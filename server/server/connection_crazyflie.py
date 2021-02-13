@@ -23,12 +23,12 @@ class ConnectionCrazyflie:
         self._crazyflie.connection_failed.add_callback(self._connection_failed)
         self._crazyflie.connection_lost.add_callback(self._connection_lost)
 
-        print(f'Connection to {str(link_uri)}')
+        print(f'Connection to {link_uri}')
 
         self._crazyflie.open_link(link_uri)
 
     def _connected(self, link_uri):
-        print(f'Connected to {str(link_uri)}')
+        print(f'Connected to {link_uri}')
         self.is_connected = True
 
         self._log.start_logging()
@@ -37,13 +37,13 @@ class ConnectionCrazyflie:
         timer.start()
 
     def _disconnected(self, link_uri):
-        print(f'Disconnected from {str(link_uri)}')
+        print(f'Disconnected from {link_uri}')
         self.is_connected = False
 
     def _connection_failed(self, link_uri, msg):
-        print(f'Connection to {str(link_uri)} failed: {str(msg)}')
+        print(f'Connection to {link_uri} failed: {msg}')
         self.is_connected = False
 
     def _connection_lost(self, link_uri, msg):
-        print(f'Connection to {str(link_uri)} lost: {str(msg)}')
+        print(f'Connection to {link_uri} lost: {msg}')
         self.is_connected = False

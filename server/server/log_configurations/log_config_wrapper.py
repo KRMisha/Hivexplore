@@ -9,7 +9,7 @@ class LogConfigWrapper:
         self._logConfig: LogConfig
 
     def log_data(self, timestamp, data, logconf):
-        print(f'[{timestamp}][{str(logconf.name)}]: {str(data)}')
+        print(f'[{timestamp}][{logconf.name}]: {data}')
 
     def log_error(self, logconf, msg):
-        print(f'Error when logging {str(logconf.name)}: {str(msg)}')
+        print(f'Error when logging {logconf.name}: {msg}')

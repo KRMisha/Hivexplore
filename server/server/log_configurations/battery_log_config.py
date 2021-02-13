@@ -1,10 +1,10 @@
 from cflib.crazyflie.log import LogConfig
-from .log_config_wrapper import LogConfigWrapper
+from server.log_configurations.base_log_config import BaseLogConfig
 
-
-class LogHealth(LogConfigWrapper):
+class BatteryLogConfig(BaseLogConfig):
     def __init__(self):
-        self._logConfig = LogConfig(name='DroneHealth', period_in_ms=LogConfigWrapper.PERIOD_MS)
+        super().__init__()
+        self._logConfig = LogConfig(name='DroneHealth', period_in_ms=BaseLogConfig.PERIOD_MS)
         self._logConfig.add_variable('pm.vbat')
 
     def log_data(self, timestamp, data, logconf):

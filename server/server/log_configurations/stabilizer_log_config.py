@@ -1,10 +1,10 @@
 from cflib.crazyflie.log import LogConfig
-from .log_config_wrapper import LogConfigWrapper
+from server.log_configurations.base_log_config import BaseLogConfig
 
-
-class LogStabilizer(LogConfigWrapper):
+class StabilizerLogConfig(BaseLogConfig):
     def __init__(self):
-        self._logConfig = LogConfig(name='Stabilizer', period_in_ms=LogConfigWrapper.PERIOD_MS)
+        super().__init__()
+        self._logConfig = LogConfig(name='Stabilizer', period_in_ms=BaseLogConfig.PERIOD_MS)
         self._logConfig.add_variable('stabilizer.roll', 'float')
         self._logConfig.add_variable('stabilizer.pitch', 'float')
         self._logConfig.add_variable('stabilizer.yaw', 'float')

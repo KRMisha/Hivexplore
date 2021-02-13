@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
     name: 'Drone',
@@ -22,9 +22,11 @@ export default defineComponent({
         battery: Number
     },
     emits: ['changeLedStatus'],
-    data() {
+    setup() {
+        const isLedOn = ref(false);
+
         return {
-            isLedOn: false
+            isLedOn
         };
     },
     methods: {

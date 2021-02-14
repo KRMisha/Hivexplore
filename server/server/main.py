@@ -18,7 +18,8 @@ def main():
     if len(available_interfaces) > 0:
         crazyflies = [CrazyflieConnection(crazyflie[0]) for crazyflie in available_interfaces]
     else:
-        print('No Crazyflies found, cannot run example')
+        # TODO: Decide on appropriate handling
+        print('No Crazyflies found, cannot control hive')
 
     # The Crazyflie lib doesn't contain anything to keep the application alive,
     # so this is where your application should do something. In our case we

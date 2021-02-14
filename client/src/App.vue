@@ -1,27 +1,49 @@
 <template>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+    <Drone :battery="batteryLevel" @changeLedStatus="changeLedStatus" />
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { defineComponent, onUnmounted, ref } from 'vue';
+import Drone from './components/Drone.vue';
+
+const serverIpAddress = 'ws:localhost';
+const serverPort = '5678';
+const serverUrl = serverIpAddress + ':' + serverPort;
 
 export default defineComponent({
     name: 'App',
     components: {
-        HelloWorld,
+        Drone,
+    },
+    setup() {
+        const batteryLevel = ref(0);
+        const socket = new WebSocket(serverUrl);
+
+        socket.onopen = (event: Event) => {
+            console.log('Connection successful');
+        };
+
+        socket.onmessage = (event: MessageEvent) => {
+            batteryLevel.value = +event.data;
+        };
+
+        socket.onclose = (event: CloseEvent) => {
+            console.log('Connection closed');
+        };
+
+        function changeLedStatus(isLedOn: boolean) {
+            socket.send(`${isLedOn}`);
+        }
+
+        onUnmounted(() => {
+            socket.close();
+        });
+
+        return {
+            batteryLevel,
+            socket,
+            changeLedStatus,
+        };
     },
 });
 </script>
-
-<style lang="scss">
-#app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
-}
-</style>

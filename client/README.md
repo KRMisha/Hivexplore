@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/en/)
+- [Node.js >= 12](https://nodejs.org/en/)
 - [npm](https://www.npmjs.com/)
 - [Vue CLI](https://cli.vuejs.org/):
 

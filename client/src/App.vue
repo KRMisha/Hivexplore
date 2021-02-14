@@ -7,13 +7,13 @@ import { defineComponent, onUnmounted, ref } from 'vue';
 import Drone from './components/Drone.vue';
 
 const ipAddress = 'ws:localhost';
-const port      = '5678';
+const port = '5678';
 const serverUrl = ipAddress + ':' + port;
 
 export default defineComponent({
     name: 'App',
     components: {
-        Drone
+        Drone,
     },
     setup() {
         const batteryLevel = ref(0);
@@ -21,15 +21,15 @@ export default defineComponent({
 
         socket.onopen = (event: Event) => {
             console.log('Connection successful');
-        }
+        };
 
         socket.onmessage = (event: MessageEvent) => {
             batteryLevel.value = +event.data;
-        }
+        };
 
         socket.onclose = (event: CloseEvent) => {
             console.log('Connection closed');
-        }
+        };
 
         function changeLedStatus(isLedOn: boolean) {
             socket.send(`${isLedOn}`);
@@ -42,9 +42,8 @@ export default defineComponent({
         return {
             batteryLevel,
             socket,
-            changeLedStatus
+            changeLedStatus,
         };
     },
 });
-
 </script>

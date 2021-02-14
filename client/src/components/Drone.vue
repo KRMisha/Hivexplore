@@ -19,21 +19,21 @@ import { defineComponent, ref } from 'vue';
 export default defineComponent({
     name: 'Drone',
     props: {
-        battery: Number
+        battery: Number,
     },
     emits: ['changeLedStatus'],
     setup() {
         const isLedOn = ref(false);
 
         return {
-            isLedOn
+            isLedOn,
         };
     },
     methods: {
         changeLedStatus() {
             this.$emit('changeLedStatus', this.isLedOn);
-        }
-    }
+        },
+    },
 });
 </script>
 

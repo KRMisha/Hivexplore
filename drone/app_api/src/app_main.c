@@ -49,10 +49,10 @@
 #define DEBUG_MODULE "APPAPI"
 
 void appMain() {
-    paramVarId_t isM4LedOn = paramGetVarId("hivexplore", "isM4LedOn");
+    paramVarId_t isM1LedOn = paramGetVarId("hivexplore", "isM1LedOn");
 
     while (true) {
-       ledSet(LED_GREEN_L, (bool)paramGetUint(isM4LedOn));
+       ledSet(LED_GREEN_R, (bool)paramGetUint(isM1LedOn));
     }
 
     /*

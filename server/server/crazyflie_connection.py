@@ -1,5 +1,4 @@
 import logging
-from threading import Timer
 from cflib.crazyflie import Crazyflie
 from server.logger import Logger
 
@@ -8,8 +7,6 @@ logging.basicConfig(level=logging.ERROR)
 
 # This was inspired by the basiclog example
 # Source: https://github.com/bitcraze/crazyflie-lib-python/blob/master/examples/basiclog.py
-
-TIMER = 10
 
 
 class CrazyflieConnection:
@@ -30,11 +27,7 @@ class CrazyflieConnection:
     def _connected(self, link_uri):
         print(f'Connected to {link_uri}')
         self.is_connected = True
-
         self._log.start_logging()
-
-        timer = Timer(TIMER, self._crazyflie.close_link)
-        timer.start()
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')

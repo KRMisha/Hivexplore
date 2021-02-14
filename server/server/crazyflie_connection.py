@@ -30,7 +30,8 @@ class CrazyflieConnection:
     def _connected(self, link_uri):
         print(f'Connected to {link_uri}')
         self.is_connected = True
-        self._logger.start_logging()
+        #self._logger.start_logging()
+        self._param_manager.led_param.set_led_enabled(False)
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')

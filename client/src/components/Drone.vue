@@ -1,11 +1,3 @@
-<style scoped>
-.drone-card {
-    width: 25rem;
-    margin: auto;
-    margin-bottom: 2em;
-}
-</style>
-
 <template>
     <Card class="drone-card">
         <template #title>
@@ -44,3 +36,11 @@ export default defineComponent({
     }
 });
 </script>
+
+<style scoped lang="scss">
+.drone-card {
+    width: 25rem;
+    margin: auto;
+    margin-bottom: 2em;
+}
+</style>

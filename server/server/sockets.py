@@ -41,6 +41,7 @@ def start_hive_server():
 def main():
     start_hive_server()
 
+
 # TODO: Remove this to integrate it with the drones
 if __name__ == '__main__':
     main()

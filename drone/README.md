@@ -114,6 +114,8 @@ flash      : Flash .elf using OpenOCD
 halt       : Halt the target using OpenOCD
 reset      : Reset the target using OpenOCD
 openocd    : Launch OpenOCD
+
+format     : Format source files
 ```
 
 ## Unit testing

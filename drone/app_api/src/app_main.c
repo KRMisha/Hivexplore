@@ -51,10 +51,8 @@
 static bool isM1LedOn;
 
 void appMain() {
-    paramVarId_t isM1LedOn = paramGetVarId("hivexplore", "isM1LedOn");
-
     while (true) {
-        ledSet(LED_GREEN_R, (bool)paramGetUint(isM1LedOn));
+        ledSet(LED_GREEN_R, isM1LedOn);
     }
 
     /*

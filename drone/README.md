@@ -101,14 +101,17 @@ More information can be found on the
 
 ## Flashing
 
-1. The Crazyradio PA USB dongle must be plugged in
-2. The drone has to be in bootloader mode
-    - To put the drone in the bootloader mode, press and maintain the power button. When the blue LED M2 starts blinking, release the power button, the blue LED M3 should start blinking as well.
+1. Plug in the Crazyradio PA USB dongle
+2. Put the drone in bootloader mode:
+    1. Press and hold the power button
+    2. When the blue LED M2 starts blinking, release the power button
+    3. The blue LED M3 should now start blinking as well
+3. Flash the drone using the wireless bootloader
 
-To flash the drone using the using the wireless bootloader
-```
-make cload
-```
+    ```
+    make cload
+    ```
+
 ## Make targets:
 
 ```

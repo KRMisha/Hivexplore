@@ -10,7 +10,7 @@ class StabilizerLogConfig(BaseLogConfig):
         self.log_config.add_variable('stabilizer.pitch', 'float')
         self.log_config.add_variable('stabilizer.yaw', 'float')
 
-    def log_data(self, timestamp, data, logconf):
+    def log_data_cb(self, timestamp, data, logconf):
         print(f'{logconf.name}')
         print(f'- Roll: {data["stabilizer.roll"]:.2f}')
         print(f'- Pitch: {data["stabilizer.pitch"]:.2f}')

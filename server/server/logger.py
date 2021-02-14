@@ -10,13 +10,9 @@ class Logger:
 
     def start_logging(self):
         try:
-            for config_wrapper in self._log_config_wrappers:
-                log_config = config_wrapper.log_config
-
-                self._crazyflie.log.add_config(log_config)
-                log_config.data_received_cb.add_callback(config_wrapper.log_data)
-                log_config.error_cb.add_callback(config_wrapper.log_error)
-                log_config.start()
+            for log_config_wrapper in self._log_config_wrappers:
+                self._crazyflie.log.add_config(log_config_wrapper.log_config)
+                log_config_wrapper.start()
         except KeyError as key_error:
             print(f'Could not start logging data, {key_error} was not found in the Crazyflie TOC')
         except AttributeError as attribute_error:

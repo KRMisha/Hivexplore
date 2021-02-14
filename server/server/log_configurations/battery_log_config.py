@@ -8,7 +8,7 @@ class BatteryLogConfig(BaseLogConfig):
         self.log_config = LogConfig(name='BatteryLevel', period_in_ms=BaseLogConfig.PERIOD_MS)
         self.log_config.add_variable('pm.vbat')
 
-    def log_data(self, timestamp, data, logconf):
+    def log_data_cb(self, timestamp, data, logconf):
         battery_level = self._get_battery_percentage(data['pm.vbat'])
         print(f'Battery level: {battery_level:.2f}')
 

@@ -48,6 +48,8 @@
 
 #define DEBUG_MODULE "APPAPI"
 
+static bool isM1LedOn;
+
 void appMain() {
     paramVarId_t isM1LedOn = paramGetVarId("hivexplore", "isM1LedOn");
 
@@ -141,3 +143,7 @@ void appMain() {
     }
     */
 }
+
+PARAM_GROUP_START(hivexplore)
+PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
+PARAM_GROUP_STOP(hivexplore)

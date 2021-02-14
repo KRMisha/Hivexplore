@@ -82,6 +82,7 @@ static bool canFly;
 static bool armed = ARM_INIT;
 static bool forceArm;
 static bool isInit;
+static bool isM4LedOn;
 
 STATIC_MEM_TASK_ALLOC(systemTask, SYSTEM_TASK_STACKSIZE);
 
@@ -304,6 +305,10 @@ PARAM_GROUP_START(system)
 PARAM_ADD(PARAM_INT8 | PARAM_RONLY, selftestPassed, &selftestPassed)
 PARAM_ADD(PARAM_INT8, forceArm, &forceArm)
 PARAM_GROUP_STOP(sytem)
+
+PARAM_GROUP_START(hivexplore)
+PARAM_ADD(PARAM_UINT8, isM4LedOn, &isM4LedOn)
+PARAM_GROUP_STOP(hivexplore)
 
 /* Loggable variables */
 LOG_GROUP_START(sys)

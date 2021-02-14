@@ -12,9 +12,8 @@ class BaseLogConfig:
         self.log_config.error_cb.add_callback(self.log_error_cb)
         self.log_config.start()
 
-    # pylint: disable=R0201
-    def log_data_cb(self, timestamp, data, logconf):
+    def log_data_cb(self, timestamp, data, logconf): # pylint: disable=no-self-use
         print(f'[{timestamp}][{logconf.name}]: {data}')
 
-    def log_error_cb(self, logconf, msg):
+    def log_error_cb(self, logconf, msg): # pylint: disable=no-self-use
         print(f'Error when logging {logconf.name}: {msg}')

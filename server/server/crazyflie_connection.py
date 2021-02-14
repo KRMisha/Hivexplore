@@ -1,6 +1,7 @@
 import logging
 from cflib.crazyflie import Crazyflie
 from server.logger import Logger
+from server.param_manager import ParamManager
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
@@ -12,7 +13,10 @@ logging.basicConfig(level=logging.ERROR)
 class CrazyflieConnection:
     def __init__(self, link_uri):
         self._crazyflie = Crazyflie(rw_cache='./cache')
+
         self._logger = Logger(self._crazyflie)
+        self._param_manager = ParamManager(self._crazyflie)
+
         self.is_connected = False
 
         self._crazyflie.connected.add_callback(self._connected)

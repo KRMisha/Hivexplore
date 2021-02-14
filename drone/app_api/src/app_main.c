@@ -48,18 +48,14 @@
 
 #define DEBUG_MODULE "APPAPI"
 
+static bool isM1LedOn;
+
 void appMain() {
-    DEBUG_PRINT("Waiting for activation ...\n");
-
     while (true) {
-        vTaskDelay(M2T(2000));
-        DEBUG_PRINT("Hello World!\n");
-        ledSet(LED_RED_L, true);
+        ledSet(LED_GREEN_R, isM1LedOn);
     }
+
     /*
-
-    List of available functions :
-
     // Do not run this app
     ASSERT_FAILED();
 
@@ -145,3 +141,7 @@ void appMain() {
     }
     */
 }
+
+PARAM_GROUP_START(hivexplore)
+PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
+PARAM_GROUP_STOP(hivexplore)

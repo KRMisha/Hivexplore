@@ -59,7 +59,7 @@ Verify the toolchain installation with `arm-none-eabi-gcc --version`
 
 ## Compiling
 
-**Note**: The following steps can be done in the app_api directory to flash the drone with the app_main or in any of the examples' directories. They can also be done in the firmware's main folder to flash the Crazyflie with the default firmware.
+**Note**: The following steps should be done in the app_api directory to flash the drone with the app_main or in any of the examples' directories. They can also be done in the firmware's main folder to flash the Crazyflie with the default firmware.
 
 ### Crazyflie 2.X
 
@@ -99,12 +99,10 @@ DEBUG=1
 More information can be found on the
 [Bitcraze documentation](https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/)
 
-## Flashing the drone with the Crazyradio PA
+## Flashing
 
-### Prerequisites
-
-- The Crazyradio PA USB dongle must be plugged in
-- The drone has to be in bootloader mode
+1. The Crazyradio PA USB dongle must be plugged in
+2. The drone has to be in bootloader mode
     - To put the drone in the bootloader mode, press and maintain the power button. When the blue LED M2 starts blinking, release the power button, the blue LED M3 should start blinking as well.
 
 To flash the drone using the using the wireless bootloader

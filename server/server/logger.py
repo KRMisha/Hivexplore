@@ -13,7 +13,7 @@ class Logger:
             for log_config in self._log_configs:
                 self._crazyflie.log.add_config(log_config.log_config)
                 log_config.start()
-        except KeyError as key_error:
-            print(f'Could not start logging data, {key_error} was not found in the Crazyflie TOC')
-        except AttributeError as attribute_error:
-            print(f'Could not add log configuration, error: {attribute_error}')
+        except KeyError as exc:
+            print(f'Could not start logging data, {exc} was not found in the Crazyflie TOC')
+        except AttributeError as exc:
+            print(f'Could not add log configuration, error: {exc}')

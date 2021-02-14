@@ -1,187 +1,187 @@
-# Eric Yihan Chen
-# The Automatic Coordination of Teams (ACT) Lab
-# University of Southern California
-# ericyihc@usc.edu
-'''
-    Simple example that connects to the first Crazyflie found, triggers
-    reading of rssi data and acknowledgement rate for every channel (0 to 125).
-    It finally sets the Crazyflie channel back to default, plots link
-    quality data, and offers good channel suggestion.
-    This script should be used on a Crazyflie with bluetooth disabled and RSSI
-    ack packet enabled to get RSSI feedback. To configure the Crazyflie in this
-    mode build the crazyflie2-nrf-firmware with
-    ```make BLE=0 CONFIG=-DRSSI_ACK_PACKET```.
-    See https://github.com/bitcraze/crazyflie-lib-python/issues/131 for more
-    informations.
-'''
-import argparse
+# -*- coding: utf-8 -*-
+#
+#     ||          ____  _ __
+#  +------+      / __ )(_) /_______________ _____  ___
+#  | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
+#  +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
+#   ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
+#
+#  Copyright (C) 2014 Bitcraze AB
+#
+#  Crazyflie Nano Quadcopter Client
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA  02110-1301, USA.
+"""
+Simple example that connects to the first Crazyflie found, triggers
+reading of all the parameters and displays their values. It then modifies
+one parameter and reads back it's value. Finally it disconnects.
+"""
+import logging
+import random
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
+import cflib.crtp
+from cflib.crazyflie import Crazyflie
 
-import cflib.drivers.crazyradio as crazyradio
+# Only output errors from the logging framework
+logging.basicConfig(level=logging.ERROR)
 
-def main():
-    radio = crazyradio.Crazyradio()
-    radio.set_channel(80)
-    radio.set_data_rate(radio.DR_2MPS)
 
-    packet_received = radio.send_packet([1, 0])
+class ParamExample:
+    """
+    Simple logging example class that logs the Stabilizer from a supplied
+    link uri and disconnects after 5s.
+    """
 
-    print(f'Did i receive? {packet_received.ack}')
-    print(f'What did i receive? {packet_received.data}')
-    #channel = 80
+    def __init__(self, link_uri):
+        """ Initialize and run the example with the specified link_uri """
 
-    time.sleep(5)
+        self._cf = Crazyflie(rw_cache='./cache')
 
-    packet_received = radio.send_packet([0, 1])
+        # Connect some callbacks from the Crazyflie API
+        self._cf.connected.add_callback(self._connected)
+        self._cf.disconnected.add_callback(self._disconnected)
+        self._cf.connection_failed.add_callback(self._connection_failed)
+        self._cf.connection_lost.add_callback(self._connection_lost)
 
-    print(f'Did i receive? {packet_received.ack}')
-    print(f'What did i receive? {packet_received.data}')
+        print('Connecting to %s' % link_uri)
 
-    time.sleep(5)
+        # Try to connect to the Crazyflie
+        self._cf.open_link(link_uri)
 
-    packet_received = radio.send_packet([1, 0])
+        # Variable used to keep main loop occupied until disconnect
+        self.is_connected = True
 
-    print(f'Did i receive? {packet_received.ack}')
-    print(f'What did i receive? {packet_received.data}')
+        self._param_check_list = []
+        self._param_groups = []
 
-    #radio.send_packet((0xff, 0x03, SET_RADIO_CHANNEL, channel))
+        random.seed()
+
+    def _connected(self, link_uri):
+        """ This callback is called form the Crazyflie API when a Crazyflie
+        has been connected and the TOCs have been downloaded."""
+        print('Connected to %s' % link_uri)
+
+        # Print the param TOC
+        p_toc = self._cf.param.toc.toc
+        for group in sorted(p_toc.keys()):
+            print('{}'.format(group))
+            for param in sorted(p_toc[group].keys()):
+                print('\t{}'.format(param))
+                self._param_check_list.append('{0}.{1}'.format(group, param))
+            self._param_groups.append('{}'.format(group))
+            # For every group, register the callback
+            self._cf.param.add_update_callback(group=group, name=None,
+                                               cb=self._param_callback)
+
+        # You can also register a callback for a specific group.name combo
+        self._cf.param.add_update_callback(group='cpu', name='flash',
+                                           cb=self._cpu_flash_callback)
+
+        print('')
+
+    def _cpu_flash_callback(self, name, value):
+        """Specific callback for the cpu.flash parameter"""
+        print('The connected Crazyflie has {}kb of flash'.format(value))
+
+    def _param_callback(self, name, value):
+        """Generic callback registered for all the groups"""
+        print('{0}: {1}'.format(name, value))
+
+        # Remove each parameter from the list and close the link when
+        # all are fetched
+        self._param_check_list.remove(name)
+        if len(self._param_check_list) == 0:
+            print('Have fetched all parameter values.')
+
+            # First remove all the group callbacks
+            for g in self._param_groups:
+                self._cf.param.remove_update_callback(group=g,
+                                                      cb=self._param_callback)
+
+            # Create a new random value [0.00,1.00] for pid_attitude.pitch_kd
+            # and set it
+            pkd = 1.0
+            print('')
+            print('Write: pid_attitude.pitch_kd={:.2f}'.format(pkd))
+            self._cf.param.add_update_callback(group='pid_attitude',
+                                               name='pitch_kd',
+                                               cb=self._a_pitch_kd_callback)
+            # When setting a value the parameter is automatically read back
+            # and the registered callbacks will get the updated value
+            self._cf.param.set_value('pid_attitude.pitch_kd',
+                                     '{:.2f}'.format(pkd))
+            # Create a new random value [0.00,1.00] for hivexplore.isM4LedOn
+            # and set it
+            led = 1
+            print('')
+            print(f'Write: hivexplore.isM4LedOn={led}')
+            self._cf.param.add_update_callback(group='hivexplore',
+                                               name='isM4LedOn',
+                                               cb=self._a_hivexplore_isM4LedOn_callback)
+            # When setting a value the parameter is automatically read back
+            # and the registered callbacks will get the updated value
+            self._cf.param.set_value('hivexplore.isM4LedOn',
+                                     f'{led}')
+
+
+    def _a_hivexplore_isM4LedOn_callback(self, name, value):
+        """Callback for pid_attitude.pitch_kd"""
+        print('Readback: {0}={1}'.format(name, value))
+
+        time.sleep(10)
+        # End the example by closing the link (will cause the app to quit)
+        self._cf.close_link()
+
+    def _a_pitch_kd_callback(self, name, value):
+        """Callback for pid_attitude.pitch_kd"""
+        print('Readback: {0}={1}'.format(name, value))
+
+    def _connection_failed(self, link_uri, msg):
+        """Callback when connection initial connection fails (i.e no Crazyflie
+        at the specified address)"""
+        print('Connection to %s failed: %s' % (link_uri, msg))
+        self.is_connected = False
+
+    def _connection_lost(self, link_uri, msg):
+        """Callback when disconnected after a connection has been made (i.e
+        Crazyflie moves out of range)"""
+        print('Connection to %s lost: %s' % (link_uri, msg))
+
+    def _disconnected(self, link_uri):
+        """Callback when the Crazyflie is disconnected (called in all cases)"""
+        print('Disconnected from %s' % link_uri)
+        self.is_connected = False
 
 
 if __name__ == '__main__':
-    main()
-"""
-# optional user input
-parser = argparse.ArgumentParser(description='Key variables')
-parser.add_argument(
-    '-try', '--try', dest='TRY', type=int, default=100,
-    help='the time to send data for each channel'
-)
-# by default my crazyflie uses channel 80
-parser.add_argument(
-    '-channel', '--channel', dest='channel', type=int,
-    default=80, help='the default channel in crazyflie'
-)
-# by default my crazyflie uses datarate 2M
-parser.add_argument(
-    '-rate', '--rate', dest='rate', type=int, default=2,
-    help='the default datarate in crazyflie'
-)
-parser.add_argument(
-    '-frac', '--fraction',  dest='fraction', type=float,
-    default=0.25, help='top fraction of suggested channels'
-)
-args = parser.parse_args()
+    # Initialize the low-level drivers (don't list the debug drivers)
+    cflib.crtp.init_drivers(enable_debug_driver=False)
+    # Scan for Crazyflies and use the first one found
+    print('Scanning interfaces for Crazyflies...')
+    available = cflib.crtp.scan_interfaces()
+    print('Crazyflies found:')
+    for i in available:
+        print(i[0])
 
-init_channel = args.channel
-TRY = args.TRY
-Fraction = args.fraction
-data_rate = args.rate
-
-radio.set_channel(init_channel)
-radio.set_data_rate(data_rate)
-SET_RADIO_CHANNEL = 1
-
-rssi_std = []
-rssi = []
-ack = []
-radio.set_arc(0)
-
-for channel in range(0, 126, 1):
-
-    # change Crazyflie channel
-    for x in range(50):
-        radio.send_packet((0xff, 0x03, SET_RADIO_CHANNEL, channel))
-
-    count = 0
-    temp = []
-
-    # change radio channel
-    radio.set_channel(channel)
-
-    for i in range(TRY):
-        pk = radio.send_packet((0xff, ))
-        if pk.ack:
-            count += 1
-        if pk.ack and len(pk.data) > 2 and \
-           pk.data[0] & 0xf3 == 0xf3 and pk.data[1] == 0x01:
-            # append rssi data
-            temp.append(pk.data[2])
-
-    ack_rate = count / TRY
-    rssi_avg = np.mean(temp)
-    std = np.std(temp)
-
-    rssi.append(rssi_avg)
-    ack.append(ack_rate)
-    rssi_std.append(std)
-
-    print('Channel', channel, 'ack_rate:', ack_rate,
-          'rssi average:', rssi_avg, 'rssi std:', std)
-
-# change channel back to default
-for x in range(50):
-    radio.send_packet((0xff, 0x03, SET_RADIO_CHANNEL, init_channel))
-
-# divide each std by 2 for plotting convenience
-rssi_std = [x / 2 for x in rssi_std]
-rssi_std = np.array(rssi_std)
-rssi = np.array(rssi)
-ack = np.array(ack)
-
-rssi_rank = []
-ack_rank = []
-
-# suggestion for rssi
-order = rssi.argsort()
-ranks = order.argsort()
-for x in range(int(125 * Fraction)):
-    for y in range(126):
-        if ranks[y] == x:
-            rssi_rank.append(y)
-
-# suggestion for ack
-order = ack.argsort()
-ranks = order.argsort()
-for x in range(126, 126 - int(125 * Fraction) - 1, -1):
-    for y in range(126):
-        if ranks[y] == x:
-            ack_rank.append(y)
-
-rssi_set = set(rssi_rank[0:int(125 * Fraction)])
-ack_set = set(ack_rank[0:int(125 * Fraction)])
-final_rank = rssi_set.intersection(ack_rank)
-print('\nSuggested Channels:')
-for x in final_rank:
-    print('\t', x)
-
-# graph 1 for ack
-x = np.arange(0, 126, 1)
-fig, ax1 = plt.subplots()
-ax1.axis([0, 125, 0, 1.25])
-ax1.plot(x, ack, 'b')
-ax1.set_xlabel('Channel')
-ax1.set_ylabel('Ack Rate', color='b')
-for tl in ax1.get_yticklabels():
-    tl.set_color('b')
-
-# graph 2 for rssi & rssi_std
-ax2 = ax1.twinx()
-ax2.grid(True)
-ax2.errorbar(x, rssi, yerr=rssi_std, fmt='r-')
-ax2.fill_between(x, rssi + rssi_std, rssi - rssi_std,
-                 facecolor='orange', edgecolor='k')
-ax2.axis([0, 125, 0, 90])
-plt.ylabel('RSSI Average', color='r')
-for tl in ax2.get_yticklabels():
-    tl.set_color('r')
-points = np.ones(100)
-for x in final_rank:
-    ax2.plot((x, x), (0, 100), linestyle='-',
-             color='cornflowerblue', linewidth=1)
-
-plt.show()
-
-"""
+    if len(available) > 0:
+        pe = ParamExample(available[0][0])
+        # The Crazyflie lib doesn't contain anything to keep the application
+        # alive, so this is where your application should do something. In our
+        # case we are just waiting until we are disconnected.
+        while pe.is_connected:
+            time.sleep(1)
+    else:
+        print('No Crazyflies found, cannot run example')

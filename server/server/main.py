@@ -20,6 +20,7 @@ def main():
     else:
         # TODO: Decide on appropriate handling
         print('No Crazyflies found, cannot control hive')
+        exit(1)
 
     # The Crazyflie lib doesn't contain anything to keep the application alive,
     # so this is where your application should do something. In our case we

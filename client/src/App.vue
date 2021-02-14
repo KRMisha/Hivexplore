@@ -6,9 +6,9 @@
 import { defineComponent, onUnmounted, ref } from 'vue';
 import Drone from './components/Drone.vue';
 
-const ipAddress = 'ws:localhost';
-const port = '5678';
-const serverUrl = ipAddress + ':' + port;
+const serverIpAddress = 'ws:localhost';
+const serverPort = '5678';
+const serverUrl = serverIpAddress + ':' + serverPort;
 
 export default defineComponent({
     name: 'App',

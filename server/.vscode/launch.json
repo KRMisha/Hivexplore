@@ -8,7 +8,7 @@
             "name": "Python",
             "type": "python",
             "request": "launch",
-            "module": "server.main",
+            "program": "server/main.py",
             "console": "integratedTerminal"
         }
     ]

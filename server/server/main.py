@@ -4,6 +4,7 @@ import sys
 import time
 import cflib
 from server.crazyflie_connection import CrazyflieConnection
+from server.sockets import SocketServer
 
 
 def main():
@@ -18,10 +19,13 @@ def main():
 
     if len(available_interfaces) > 0:
         crazyflies = [CrazyflieConnection(crazyflie[0]) for crazyflie in available_interfaces]
+        hive_server = SocketServer(crazyflies)
     else:
         # TODO: Decide on appropriate handling
         print('No Crazyflies found, cannot control hive')
         sys.exit(1)
+
+    hive_server.serve()
 
     # The Crazyflie lib doesn't contain anything to keep the application alive,
     # so this is where your application should do something. In our case we

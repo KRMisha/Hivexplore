@@ -6,11 +6,11 @@ from server.log_configurations.stabilizer_log_config import StabilizerLogConfig
 class Logger:
     def __init__(self, crazyflie: Crazyflie):
         self._crazyflie = crazyflie
-        self._log_configs = [BatteryLogConfig(), StabilizerLogConfig()]
+        self.log_configs = [BatteryLogConfig(), StabilizerLogConfig()]
 
     def start_logging(self):
         try:
-            for log_config in self._log_configs:
+            for log_config in self.log_configs:
                 self._crazyflie.log.add_config(log_config.log_config)
                 log_config.start()
         except KeyError as exc:

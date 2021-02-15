@@ -52,6 +52,7 @@ static bool isM1LedOn;
 
 void appMain() {
     while (true) {
+        vTaskDelay(M2T(500));
         ledSet(LED_GREEN_R, isM1LedOn);
     }
 

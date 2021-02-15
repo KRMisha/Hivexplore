@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from cflib.crazyflie import Crazyflie
 from server.logger import Logger
 from server.param_manager import ParamManager
@@ -43,3 +44,13 @@ class CrazyflieConnection:
     def _connection_lost(self, link_uri, msg):
         print(f'Connection to {link_uri} lost: {msg}')
         self.is_connected = False
+
+    def get_battery_percentage(self) -> Optional[int]:
+        if self.is_connected:
+            # TODO: Refactor so we don't have to use index 0
+            return self._logger.log_configs[0].battery_level
+        return None
+
+    def set_m1_led(self, value: bool) -> None:
+        if self.is_connected:
+            self._param_manager.led_param.set_led_enabled(value)

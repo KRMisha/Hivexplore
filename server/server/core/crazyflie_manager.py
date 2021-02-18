@@ -20,19 +20,19 @@ class CrazyflieManager:
             print(available_interface[0])
 
         if len(available_interfaces) > 0:
-            # for available_interface in available_interfaces[0]:
-            crazyflie = Crazyflie(rw_cache='./cache')
+            for available_interface in available_interfaces:
+                crazyflie = Crazyflie(rw_cache='./cache')
 
-            crazyflie.connected.add_callback(self._connected)
-            crazyflie.disconnected.add_callback(self._disconnected)
-            crazyflie.connection_failed.add_callback(self._connection_failed)
-            crazyflie.connection_lost.add_callback(self._connection_lost)
+                crazyflie.connected.add_callback(self._connected)
+                crazyflie.disconnected.add_callback(self._disconnected)
+                crazyflie.connection_failed.add_callback(self._connection_failed)
+                crazyflie.connection_lost.add_callback(self._connection_lost)
 
-            link_uri = available_interfaces[0][0]
-            print(f'Connecting to {link_uri}')
-            crazyflie.open_link(link_uri)
+                link_uri = available_interface[0]
+                print(f'Connecting to {link_uri}')
+                crazyflie.open_link(link_uri)
 
-            self._crazyflies[link_uri] = crazyflie
+                self._crazyflies[link_uri] = crazyflie
         else:
             # TODO: Decide on appropriate handling
             # (Loop until connected? Should we keep trying to detect new connections?)
@@ -48,24 +48,27 @@ class CrazyflieManager:
     # Setup
 
     def _setup_log(self, crazyflie: Crazyflie):
-        configs = [{
-            'log_config': LogConfig(name='BatteryLevel', period_in_ms=1000),
-            'data_callback': self._log_battery_callback,
-            'error_callback': self._log_error_callback,
-            'variables': ['pm.vbat']
-        }, {
-            'log_config': LogConfig(name='Stabilizer', period_in_ms=1000),
-            'data_callback': self._log_stabilizer_callback,
-            'error_callback': self._log_error_callback,
-            'variables': ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw']
-        }]
+        configs = [
+            {
+                'log_config': LogConfig(name='BatteryLevel', period_in_ms=1000),
+                'variables': ['pm.vbat'],
+                'data_callback': self._log_battery_callback,
+                'error_callback': self._log_error_callback,
+            },
+            {
+                'log_config': LogConfig(name='Stabilizer', period_in_ms=1000),
+                'variables': ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw'],
+                'data_callback': self._log_stabilizer_callback,
+                'error_callback': self._log_error_callback,
+            },
+        ]
 
         for config in configs:
             try:
-                crazyflie.log.add_config(config['log_config'])
                 for variable in config['variables']:
                     config['log_config'].add_variable(variable)
 
+                crazyflie.log.add_config(config['log_config'])
                 config['log_config'].data_received_cb.add_callback(config['data_callback'])
                 config['log_config'].error_cb.add_callback(config['error_callback'])
                 config['log_config'].start()
@@ -76,7 +79,7 @@ class CrazyflieManager:
 
     def _setup_param(self, crazyflie: Crazyflie):
         # TODO: Store param group, name, and callback in a member variable
-        self._crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
+        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
 
     # Connection callbacks
 

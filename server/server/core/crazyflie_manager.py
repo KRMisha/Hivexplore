@@ -6,6 +6,8 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.core.socket_server import SocketServer
 
+# pylint: disable=no-self-use
+
 
 class CrazyflieManager:
     def __init__(self, socket_server: SocketServer, enable_debug_driver: bool):
@@ -104,7 +106,7 @@ class CrazyflieManager:
         # TODO: Replace this with a proper message object
         self._socket_server.send(str(data['pm.batteryLevel']))
 
-    def _log_stabilizer_callback(self, timestamp, data, logconf):
+    def _log_stabilizer_callback(self, _timestamp, data, logconf):
         print(f'{logconf.name}')
         print(f'- Roll: {data["stabilizer.roll"]:.2f}')
         print(f'- Pitch: {data["stabilizer.pitch"]:.2f}')

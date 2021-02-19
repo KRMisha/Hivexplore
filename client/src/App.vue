@@ -40,13 +40,14 @@ export default defineComponent({
         };
 
         function changeLedStatus(isLedOn: boolean) {
+            // Convert date to local timezone by stripping the timezone offset
             const timestampUtc = new Date();
             const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
 
             const message = JSON.stringify({
                 event: 'set-led',
                 data: isLedOn,
-                timestamp: timestamp.toJSON().replace('Z', ''),
+                timestamp: timestamp.toJSON().replace('Z', ''), // Remove the trailing Z since the timestamp is not in UTC
             });
             socket.send(message);
         }

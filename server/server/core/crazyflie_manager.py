@@ -1,5 +1,6 @@
 from distutils.util import strtobool
 import sys
+from typing import Dict
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
@@ -9,7 +10,7 @@ from server.core.socket_server import SocketServer
 class CrazyflieManager:
     def __init__(self, socket_server: SocketServer, enable_debug_driver: bool):
         self._socket_server = socket_server
-        self._crazyflies = {}
+        self._crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     def start(self):

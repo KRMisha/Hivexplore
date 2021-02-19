@@ -1,4 +1,3 @@
-from distutils.util import strtobool
 import sys
 from typing import Dict
 import cflib
@@ -43,7 +42,7 @@ class CrazyflieManager:
             print('No Crazyflies found, cannot control hive')
             sys.exit(1)
 
-        self._socket_server.bind(self._set_led_enabled)
+        self._socket_server.bind('set-led', self._set_led_enabled)
 
     # Setup
 
@@ -78,7 +77,6 @@ class CrazyflieManager:
                 print(f'Could not add log configuration, error: {exc}')
 
     def _setup_param(self, crazyflie: Crazyflie):
-        # TODO: Store param group, name, and callback in a member variable
         crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
 
     # Connection callbacks
@@ -101,10 +99,9 @@ class CrazyflieManager:
     # Log callbacks
 
     def _log_battery_callback(self, _timestamp, data, _logconf):
-        print(f'Battery level: {data["pm.batteryLevel"]}')
-
-        # TODO: Replace this with a proper message object
-        self._socket_server.send(str(data['pm.batteryLevel']))
+        battery_level = data["pm.batteryLevel"]
+        print(f'Battery level: {battery_level}')
+        self._socket_server.send('battery-level', battery_level)
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
         print(f'{logconf.name}')
@@ -122,6 +119,6 @@ class CrazyflieManager:
 
     # Param assigning methods
 
-    def _set_led_enabled(self, is_enabled: str):
+    def _set_led_enabled(self, is_enabled: bool):
         for crazyflie in self._crazyflies.values():
-            crazyflie.param.set_value('hivexplore.isM1LedOn', strtobool(is_enabled))
+            crazyflie.param.set_value('hivexplore.isM1LedOn', is_enabled)

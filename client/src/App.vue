@@ -24,7 +24,15 @@ export default defineComponent({
         };
 
         socket.onmessage = (event: MessageEvent) => {
-            batteryLevel.value = +event.data;
+            const message = JSON.parse(event.data);
+            switch (message.event) {
+                case 'battery-level':
+                    batteryLevel.value = message.data;
+                    break;
+                default:
+                    console.warn(`Unknown socket event received: ${message.event}`);
+                    break;
+            }
         };
 
         socket.onclose = (event: CloseEvent) => {
@@ -32,7 +40,15 @@ export default defineComponent({
         };
 
         function changeLedStatus(isLedOn: boolean) {
-            socket.send(`${isLedOn}`);
+            const timestampUtc = new Date();
+            const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
+
+            const message = JSON.stringify({
+                event: 'set-led',
+                data: isLedOn,
+                timestamp: timestamp.toJSON().replace('Z', ''),
+            });
+            socket.send(message);
         }
 
         onUnmounted(() => {

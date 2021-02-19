@@ -1,14 +1,16 @@
 import asyncio
+from datetime import datetime
+import json
+from typing import Any, Callable, Dict, List
 import websockets
 
 IP_ADDRESS = 'localhost'
 PORT = 5678
 
 
-# TODO: Complete
 class SocketServer:
     def __init__(self):
-        self._callbacks = [] # TODO: Make this a dict to sort callbacks by message type (dict of lists)
+        self._callbacks: Dict[str, List[Callable]] = {}
         self._message_queue = asyncio.Queue()
 
     def serve(self):
@@ -16,12 +18,11 @@ class SocketServer:
         asyncio.get_event_loop().run_until_complete(server_instance)
         asyncio.get_event_loop().run_forever()
 
-    def send(self, message):
-        self._message_queue.put_nowait(message)
+    def send(self, event: str, data: Any):
+        self._message_queue.put_nowait({'event': event, 'data': data, 'timestamp': datetime.now().isoformat()})
 
-    # TODO: Add message type parameter
-    def bind(self, callback):
-        self._callbacks.append(callback)
+    def bind(self, event: str, callback: Callable[[Any], None]):
+        self._callbacks.setdefault(event, []).append(callback)
 
     async def _socket_handler(self, websocket, path):
         receive_task = asyncio.ensure_future(self._receive_handler(websocket, path))
@@ -32,11 +33,13 @@ class SocketServer:
             task.cancel()
 
     async def _receive_handler(self, websocket, _path):
-        async for message in websocket:
-            for callback in self._callbacks:
-                callback(message)
+        async for message_str in websocket:
+            message = json.loads(message_str)
+            for callback in self._callbacks.get(message['event'], []):
+                callback(message['data'])
 
     async def _send_handler(self, websocket, _path):
         while True:
             message = await self._message_queue.get()
-            await websocket.send(message)
+            message_str = json.dumps(message)
+            await websocket.send(message_str)

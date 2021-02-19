@@ -17,7 +17,7 @@ class SocketServer:
         asyncio.get_event_loop().run_forever()
 
     def send(self, message):
-        self._message_queue.put(message)
+        self._message_queue.put_nowait(message)
 
     # TODO: Add message type parameter
     def bind(self, callback):

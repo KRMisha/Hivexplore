@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 import sys
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -39,11 +40,7 @@ class CrazyflieManager:
             print('No Crazyflies found, cannot control hive')
             sys.exit(1)
 
-    # Param assigning methods
-
-    def set_led_enabled(self, is_enabled: bool):
-        for crazyflie in self._crazyflies.values():
-            crazyflie.param.set_value('hivexplore.isM1LedOn', str(int(is_enabled)))
+        self._socket_server.bind(self._set_led_enabled)
 
     # Setup
 
@@ -51,7 +48,7 @@ class CrazyflieManager:
         configs = [
             {
                 'log_config': LogConfig(name='BatteryLevel', period_in_ms=1000),
-                'variables': ['pm.vbat'],
+                'variables': ['pm.batteryLevel'],
                 'data_callback': self._log_battery_callback,
                 'error_callback': self._log_error_callback,
             },
@@ -100,17 +97,11 @@ class CrazyflieManager:
 
     # Log callbacks
 
-    def _log_battery_callback(self, timestamp, data, logconf):
-        MIN_VOLTAGE = 3.0
-        MAX_VOLTAGE = 4.23
-        MAX_BATTERY_LEVEL = 100
-        battery_level = (data['pm.vbat'] - MIN_VOLTAGE) / (MAX_VOLTAGE - MIN_VOLTAGE) * MAX_BATTERY_LEVEL
-        clamped_battery_level = max(0, min(battery_level, MAX_BATTERY_LEVEL))
-
-        print(f'Battery level: {clamped_battery_level:.2f}')
+    def _log_battery_callback(self, _timestamp, data, _logconf):
+        print(f'Battery level: {data["pm.batteryLevel"]}')
 
         # TODO: Replace this with a proper message object
-        self._socket_server.send(str(clamped_battery_level))
+        self._socket_server.send(str(data['pm.batteryLevel']))
 
     def _log_stabilizer_callback(self, timestamp, data, logconf):
         print(f'{logconf.name}')
@@ -125,3 +116,9 @@ class CrazyflieManager:
 
     def _param_update_callback(self, name, value):
         print(f'Readback: {name}={value}')
+
+    # Param assigning methods
+
+    def _set_led_enabled(self, is_enabled: str):
+        for crazyflie in self._crazyflies.values():
+            crazyflie.param.set_value('hivexplore.isM1LedOn', strtobool(is_enabled))

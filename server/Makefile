@@ -19,7 +19,7 @@ lint:
 	pylint server tests
 
 typecheck:
-	mypy .
+	mypy server tests
 
 format:
 	yapf --in-place --parallel --recursive .

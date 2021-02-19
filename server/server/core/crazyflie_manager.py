@@ -89,12 +89,15 @@ class CrazyflieManager:
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')
+        del self._crazyflies[link_uri]
 
     def _connection_failed(self, link_uri, msg):
         print(f'Connection to {link_uri} failed: {msg}')
+        del self._crazyflies[link_uri]
 
     def _connection_lost(self, link_uri, msg):
         print(f'Connection to {link_uri} lost: {msg}')
+        self._crazyflies.pop(link_uri, None) # Avoid double delete when Crazyflie disconnects
 
     # Log callbacks
 

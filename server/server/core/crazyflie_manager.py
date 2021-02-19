@@ -1,4 +1,5 @@
 import sys
+import time
 from typing import Dict
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -15,34 +16,35 @@ class CrazyflieManager:
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     def start(self):
-        print('Scanning interfaces for Crazyflies...')
-        available_interfaces = cflib.crtp.scan_interfaces()
-
-        print('Crazyflies found:')
-        for available_interface in available_interfaces:
-            print(available_interface[0])
-
-        if len(available_interfaces) > 0:
-            for available_interface in available_interfaces:
-                crazyflie = Crazyflie(rw_cache='./cache')
-
-                crazyflie.connected.add_callback(self._connected)
-                crazyflie.disconnected.add_callback(self._disconnected)
-                crazyflie.connection_failed.add_callback(self._connection_failed)
-                crazyflie.connection_lost.add_callback(self._connection_lost)
-
-                link_uri = available_interface[0]
-                print(f'Connecting to {link_uri}')
-                crazyflie.open_link(link_uri)
-
-                self._crazyflies[link_uri] = crazyflie
-        else:
-            # TODO: Decide on appropriate handling
-            # (Loop until connected? Should we keep trying to detect new connections?)
-            print('No Crazyflies found, cannot control hive')
-            sys.exit(1)
-
+        self._find_crazyflies()
         self._socket_server.bind('set-led', self._set_led_enabled)
+
+    def _find_crazyflies(self):
+        while len(self._crazyflies) == 0:
+            print('Scanning interfaces for Crazyflies...')
+            available_interfaces = cflib.crtp.scan_interfaces()
+
+            print('Crazyflies found:')
+            for available_interface in available_interfaces:
+                print(available_interface[0])
+
+            if len(available_interfaces) > 0:
+                for available_interface in available_interfaces:
+                    crazyflie = Crazyflie(rw_cache='./cache')
+
+                    crazyflie.connected.add_callback(self._connected)
+                    crazyflie.disconnected.add_callback(self._disconnected)
+                    crazyflie.connection_failed.add_callback(self._connection_failed)
+                    crazyflie.connection_lost.add_callback(self._connection_lost)
+
+                    link_uri = available_interface[0]
+                    print(f'Connecting to {link_uri}')
+                    crazyflie.open_link(link_uri)
+
+                    self._crazyflies[link_uri] = crazyflie
+            else:
+                print('No Crazyflies found, retrying after 5 seconds')
+                time.sleep(5)
 
     # Setup
 

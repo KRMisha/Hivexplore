@@ -49,6 +49,7 @@ class CrazyflieManager:
     # Setup
 
     def _setup_log(self, crazyflie: Crazyflie):
+        # Log config setup with the logged variables and success/error logging callbacks
         configs = [
             {
                 'log_config': LogConfig(name='BatteryLevel', period_in_ms=1000),

@@ -9,9 +9,6 @@ venv:
 run:
 	python3 -m server.main
 
-run-debug:
-	python3 -m server.main debug
-
 test:
 	pytest
 

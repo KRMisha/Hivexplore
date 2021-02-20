@@ -8,7 +8,7 @@ IP_ADDRESS = 'localhost'
 PORT = 5678
 
 
-class SocketServer:
+class WebSocketServer:
     def __init__(self):
         self._callbacks: Dict[str, List[Callable]] = {}
         self._message_queue = asyncio.Queue()

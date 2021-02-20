@@ -3,20 +3,20 @@ from typing import Dict
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
-from server.core.socket_server import SocketServer
+from server.core.web_socket_server import WebSocketServer
 
 # pylint: disable=no-self-use
 
 
 class CrazyflieManager:
-    def __init__(self, socket_server: SocketServer, enable_debug_driver: bool):
-        self._socket_server = socket_server
+    def __init__(self, web_socket_server: WebSocketServer, enable_debug_driver: bool):
+        self._web_socket_server = web_socket_server
         self._crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     def start(self):
         self._find_crazyflies()
-        self._socket_server.bind('set-led', self._set_led_enabled)
+        self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     def _find_crazyflies(self):
         while len(self._crazyflies) == 0:
@@ -106,7 +106,7 @@ class CrazyflieManager:
     def _log_battery_callback(self, _timestamp, data, _logconf):
         battery_level = data["pm.batteryLevel"]
         print(f'Battery level: {battery_level}')
-        self._socket_server.send('battery-level', battery_level)
+        self._web_socket_server.send('battery-level', battery_level)
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
         print(f'{logconf.name}')

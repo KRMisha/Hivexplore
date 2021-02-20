@@ -4,7 +4,10 @@ CMAKE_BUILD_DIR := $(SIM_DIR)/build
 LOCAL_ARGOS_VSCODE_CONFIG_DIR := $$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/imageConfigs
 LOCAL_ARGOS_VSCODE_CONFIG := $(LOCAL_ARGOS_VSCODE_CONFIG_DIR)/hivexplore%2fargos%3adev.json
 
-.PHONY: copy-config clean-config image image-prod start start-prod cmake build run clean format help
+.PHONY: all copy-config clean-config image image-prod start start-prod cmake build run clean format help
+
+# Default target for building
+all: build
 
 # Commands for use outside the container dev environment
 copy-config:
@@ -61,7 +64,7 @@ help:
 	\n\
 	  Commands for use inside the container dev environment:\n\
 	    cmake           Generate a Makefile with CMake\n\
-	    build           Build the ARGoS simulation with the generated CMake Makefile\n\
+	    build           Build the ARGoS simulation with the generated CMake Makefile (default target)\n\
 	    run             Build and run the ARGoS simulation\n\
 	    clean           Clean CMake build directory\n\
 	    format          Format code with clang-format\n"

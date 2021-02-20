@@ -42,6 +42,12 @@
 
     </controllers>
 
+    <!-- ****************** -->
+    <!-- * Loop functions * -->
+    <!-- ****************** -->
+    <loop_functions library="build/loop_functions/hivexplore_loop_functions/libhivexplore_loop_functions"
+                    label="hivexplore_loop_functions" />
+
     <!-- *********************** -->
     <!-- * Arena configuration * -->
     <!-- *********************** -->

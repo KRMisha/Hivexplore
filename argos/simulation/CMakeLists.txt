@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(argos3_examples)
+project(hivexplore_simulation)
 
 if(APPLE)
   option(ASAN "Use Clang Address Sanitizer in Debug builds")

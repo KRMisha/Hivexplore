@@ -1,9 +1,9 @@
 <template>
-    <Drone :battery="batteryLevel" />
+    <Drone />
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, ref } from 'vue';
+import { defineComponent, onUnmounted } from 'vue';
 import Drone from './components/Drone.vue';
 import SocketClient from './classes/socket-client';
 import { provide } from 'vue'
@@ -17,23 +17,13 @@ export default defineComponent({
         Drone,
     },
     setup() {
-        const batteryLevel = ref(0);
         const socket = new SocketClient(serverIpAddress, serverPort);
 
         provide('socket', socket);
 
-        socket.bind('battery-level', (message: any) => {
-            batteryLevel.value = message.data;
-        });
-
         onUnmounted(() => {
             socket.close();
         });
-
-        return {
-            batteryLevel,
-            socket,
-        };
     },
 });
 </script>

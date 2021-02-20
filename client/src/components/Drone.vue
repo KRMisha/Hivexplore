@@ -5,7 +5,7 @@
         </template>
         <template #content>
             <div class="p-text-center">Drone Battery:</div>
-            <Knob v-model="battery" readonly :size="64" />
+            <Knob v-model="batteryLevel" readonly :size="64" />
             <Divider />
             <div class="p-text-center">Drone Led:</div>
             <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
@@ -20,27 +20,22 @@ import SocketClient from './../classes/socket-client';
 
 export default defineComponent({
     name: 'Drone',
-    props: {
-        battery: Number,
-    },
     setup() {
-        const isLedOn = ref(false);
-
         const socket: SocketClient | undefined = inject('socket');
 
-        function changeLedStatus() {
-            // Convert date to local timezone by stripping the timezone offset
-            const timestampUtc = new Date();
-            const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
+        const batteryLevel = ref(0);
+        socket!.bind('battery-level', (message: number) => {
+            batteryLevel.value = message;
+        });
 
-            const message = {
-                data: isLedOn,
-                timestamp: timestamp.toJSON().replace('Z', ''), // Remove the trailing Z since the timestamp is not in UTC
-            };
-            socket!.send('set-led', message);
+        const isLedOn = ref(false);
+
+        function changeLedStatus() {
+            socket!.send('set-led', isLedOn.value);
         }
 
         return {
+            batteryLevel,
             isLedOn,
             changeLedStatus,
         };

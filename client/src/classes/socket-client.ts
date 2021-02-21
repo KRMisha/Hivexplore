@@ -1,6 +1,7 @@
 export default class SocketClient {
     private socket: WebSocket;
 
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     private callbacks: Map<string, Array<(data: any) => void>>;
 
     constructor(serverIpAddress: string, serverPort: string) {
@@ -33,6 +34,7 @@ export default class SocketClient {
         };
     }
 
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     bind(eventName: string, callback: (data: any) => void) {
         if (!this.callbacks.has(eventName)) {
             this.callbacks.set(eventName, []);
@@ -40,6 +42,7 @@ export default class SocketClient {
         this.callbacks.get(eventName)!.push(callback);
     }
 
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     send(eventName: string, data: any) {
         // Convert date to local timezone by stripping the timezone offset
         const timestampUtc = new Date();

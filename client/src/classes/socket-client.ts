@@ -1,16 +1,13 @@
+const serverUrl = 'ws:localhost:5678'
+
 export default class SocketClient {
-    private socket: WebSocket;
+    private socket: WebSocket = new WebSocket(serverUrl);
 
     // TODO refactor to fix no-explicit-any tslint error
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    private callbacks: Map<string, Array<(data: any) => void>>;
+    private callbacks: Map<string, Array<(data: any) => void>> = new Map();
 
-    constructor(serverIpAddress: string, serverPort: string) {
-        const serverUrl = serverIpAddress + ':' + serverPort;
-        this.socket = new WebSocket(serverUrl);
-
-        this.callbacks = new Map();
-
+    constructor() {
         this.socket.onmessage = (event: MessageEvent) => {
             const jsonContent = JSON.parse(event.data);
 

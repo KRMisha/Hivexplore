@@ -26,11 +26,11 @@ export default class SocketClient {
             }
         };
 
-        this.socket.onopen = (event: Event) => {
+        this.socket.onopen = () => {
             console.log(`Connection to ${serverUrl} successful`);
         };
 
-        this.socket.onclose = (event: CloseEvent) => {
+        this.socket.onclose = () => {
             console.log(`Connection to ${serverUrl} closed`);
         };
     }

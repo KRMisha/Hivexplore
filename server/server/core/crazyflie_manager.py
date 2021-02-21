@@ -132,7 +132,7 @@ class CrazyflieManager:
             'right': data["range.right"],
             'zrange': data["range.zrange"]
         }
-        self._map_generator.add_data(values)
+        self._map_generator.add_points(values)
         print(f'{logconf.name}')
         for key in values:
             print(f'- {key}: {data["range." + key]:.2f}')

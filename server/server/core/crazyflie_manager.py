@@ -124,7 +124,7 @@ class CrazyflieManager:
         print(f'- Yaw: {data["stabilizer.yaw"]:.2f}')
 
     def _log_range_callback(self, _timestamp, data, logconf):
-        values = {
+        measurements = {
             'front': data["range.front"],
             'back': data["range.back"],
             'up': data["range.up"],
@@ -132,10 +132,10 @@ class CrazyflieManager:
             'right': data["range.right"],
             'zrange': data["range.zrange"]
         }
-        self._map_generator.add_points(values)
+        self._map_generator.add_points(measurements)
         print(f'{logconf.name}')
-        for key in values:
-            print(f'- {key}: {data["range." + key]:.2f}')
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.2f}')
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

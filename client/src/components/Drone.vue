@@ -24,8 +24,8 @@ export default defineComponent({
         const socket: SocketClient | undefined = inject('socket');
 
         const batteryLevel = ref(0);
-        socket!.bind('battery-level', (message: number) => {
-            batteryLevel.value = message;
+        socket!.bind('battery-level', (updatedBatteryLevel: number) => {
+            batteryLevel.value = updatedBatteryLevel;
         });
 
         const isLedOn = ref(false);

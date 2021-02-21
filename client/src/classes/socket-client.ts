@@ -1,6 +1,7 @@
 export default class SocketClient {
     private socket: WebSocket;
 
+    // TODO refactor to fix no-explicit-any tslint error
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     private callbacks: Map<string, Array<(data: any) => void>>;
 
@@ -11,17 +12,17 @@ export default class SocketClient {
         this.callbacks = new Map();
 
         this.socket.onmessage = (event: MessageEvent) => {
-            const json = JSON.parse(event.data);
+            const jsonContent = JSON.parse(event.data);
 
-            const callbacks = this.callbacks.get(json.event);
+            const callbacks = this.callbacks.get(jsonContent.event);
 
             if (callbacks === undefined) {
-                console.warn(`Unknown socket event received: ${json.event}`);
+                console.warn(`Unknown socket event received: ${jsonContent.event}`);
                 return;
             }
 
             for (const callback of callbacks) {
-                callback(json.data);
+                callback(jsonContent.data);
             }
         };
 

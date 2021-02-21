@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { inject } from 'vue'
+import { inject } from 'vue';
 import SocketClient from './../classes/socket-client';
 
 export default defineComponent({

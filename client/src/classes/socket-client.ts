@@ -1,10 +1,9 @@
 export default class SocketClient {
+    private socket: WebSocket;
 
-    private socket : WebSocket;
+    private callbacks: Map<string, Array<(data: any) => void>>;
 
-    private callbacks: Map<String, Array<((data: any) => void)>>;
-
-    constructor(serverIpAddress: String, serverPort: String) {
+    constructor(serverIpAddress: string, serverPort: string) {
         const serverUrl = serverIpAddress + ':' + serverPort;
         this.socket = new WebSocket(serverUrl);
 
@@ -20,7 +19,7 @@ export default class SocketClient {
                 return;
             }
 
-            for (let callback of callbacks) {
+            for (const callback of callbacks) {
                 callback(json.data);
             }
         };
@@ -34,14 +33,14 @@ export default class SocketClient {
         };
     }
 
-    bind(eventName: String, callback: ((data: any) => void)) {
+    bind(eventName: string, callback: (data: any) => void) {
         if (!this.callbacks.has(eventName)) {
-            this.callbacks.set(eventName, new Array());
+            this.callbacks.set(eventName, []);
         }
         this.callbacks.get(eventName)!.push(callback);
     }
 
-    send(eventName: String, data: any) {
+    send(eventName: string, data: any) {
         // Convert date to local timezone by stripping the timezone offset
         const timestampUtc = new Date();
         const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);

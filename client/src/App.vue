@@ -6,7 +6,7 @@
 import { defineComponent, onUnmounted } from 'vue';
 import Drone from './components/Drone.vue';
 import SocketClient from './classes/socket-client';
-import { provide } from 'vue'
+import { provide } from 'vue';
 
 const serverIpAddress = 'ws:localhost';
 const serverPort = '5678';

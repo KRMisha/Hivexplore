@@ -1,9 +1,10 @@
-import time
+import asyncio
 from typing import Dict
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.core.web_socket_server import WebSocketServer
+from server import config
 
 # pylint: disable=no-self-use
 
@@ -14,20 +15,21 @@ class CrazyflieManager:
         self._crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
-    def start(self):
-        self._find_crazyflies()
+    async def start(self):
+        await self._find_crazyflies()
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
-    def _find_crazyflies(self):
+    async def _find_crazyflies(self):
+        timeout_s = config.BASE_CONNECTION_TIMEOUT_S
         while len(self._crazyflies) == 0:
             print('Scanning interfaces for Crazyflies...')
             available_interfaces = cflib.crtp.scan_interfaces()
 
-            print('Crazyflies found:')
-            for available_interface in available_interfaces:
-                print(available_interface[0])
-
             if len(available_interfaces) > 0:
+                print('Crazyflies found:')
+                for available_interface in available_interfaces:
+                    print(f'- {available_interface[0]}')
+
                 for available_interface in available_interfaces:
                     crazyflie = Crazyflie(rw_cache='./cache')
 
@@ -41,15 +43,17 @@ class CrazyflieManager:
                     crazyflie.open_link(link_uri)
 
                     self._crazyflies[link_uri] = crazyflie
+                timeout_s = config.BASE_CONNECTION_TIMEOUT_S
             else:
-                print('No Crazyflies found, retrying after 5 seconds')
-                time.sleep(5)
+                print(f'No Crazyflies found, retrying after {timeout_s} seconds')
+                await asyncio.sleep(timeout_s)
+                timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
 
     # Setup
 
     def _setup_log(self, crazyflie: Crazyflie):
         # Log config setup with the logged variables and success/error logging callbacks
-        configs = [
+        log_configs = [
             {
                 'log_config': LogConfig(name='BatteryLevel', period_in_ms=1000),
                 'variables': ['pm.batteryLevel'],
@@ -64,15 +68,15 @@ class CrazyflieManager:
             },
         ]
 
-        for config in configs:
+        for log_config in log_configs:
             try:
-                for variable in config['variables']:
-                    config['log_config'].add_variable(variable)
+                for variable in log_config['variables']:
+                    log_config['log_config'].add_variable(variable)
 
-                crazyflie.log.add_config(config['log_config'])
-                config['log_config'].data_received_cb.add_callback(config['data_callback'])
-                config['log_config'].error_cb.add_callback(config['error_callback'])
-                config['log_config'].start()
+                crazyflie.log.add_config(log_config['log_config'])
+                log_config['log_config'].data_received_cb.add_callback(log_config['data_callback'])
+                log_config['log_config'].error_cb.add_callback(log_config['error_callback'])
+                log_config['log_config'].start()
             except KeyError as exc:
                 print(f'Could not start logging data, {exc} was not found in the Crazyflie TOC')
             except AttributeError as exc:

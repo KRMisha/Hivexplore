@@ -17,8 +17,7 @@ class Server:
         self._crazyflie_manager = CrazyflieManager(self._web_socket_server, enable_debug_driver)
 
     def start(self):
-        self._crazyflie_manager.start()
-        asyncio.run(self._start_servers())
+        asyncio.run(self._start_tasks())
 
     # TODO: Remove
     async def _test(self):
@@ -26,9 +25,10 @@ class Server:
             await asyncio.sleep(1)
             self._unix_socket_server.send('test', 'test')
 
-    async def _start_servers(self):
+    async def _start_tasks(self):
         await asyncio.gather(
             self._web_socket_server.serve(),
             self._unix_socket_server.serve(),
+            self._crazyflie_manager.start(),
             self._test(),
         )

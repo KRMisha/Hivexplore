@@ -2,6 +2,7 @@ import asyncio
 import json
 import socket
 from typing import Any, Callable, Dict, List
+from server import config
 
 
 class UnixSocketError(Exception):
@@ -18,7 +19,7 @@ class UnixSocketServer:
         # Initialize message queue here since it must be created in the same event loop as asyncio.run()
         self._message_queue = asyncio.Queue()
 
-        timeout_s = 2
+        timeout_s = config.BASE_CONNECTION_TIMEOUT_S
         try:
             # Main loop
             while True:
@@ -27,13 +28,13 @@ class UnixSocketServer:
                     try:
                         await asyncio.get_event_loop().sock_connect(self._socket, '/tmp/hivexplore/socket.sock')
                         print('Connected to ARGoS')
-                        timeout_s = 2
+                        timeout_s = config.BASE_CONNECTION_TIMEOUT_S
                         break
                     except (FileNotFoundError, ConnectionRefusedError, socket.timeout) as exc:
                         print('UnixSocketServer connection error:', exc)
                         print(f'Connection to ARGoS failed, retrying after {timeout_s} seconds')
                         await asyncio.sleep(timeout_s)
-                        timeout_s *= 2
+                        timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
 
                 # Start send and receive handler tasks
                 tasks = [asyncio.create_task(task) for task in [self._receive_handler(), self._send_handler()]]

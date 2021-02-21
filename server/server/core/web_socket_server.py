@@ -18,6 +18,7 @@ class WebSocketServer:
         self._message_queue = asyncio.Queue()
 
         server = await websockets.serve(self._socket_handler, IP_ADDRESS, PORT)
+        print('WebSocketServer started')
         await server.wait_closed()
 
     def send(self, event: str, data: Any):

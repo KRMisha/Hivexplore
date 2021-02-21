@@ -3,7 +3,6 @@ const serverUrl = 'ws:localhost:5678'
 export default class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);
 
-    // TODO refactor to fix no-explicit-any tslint error
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     private callbacks: Map<string, Array<(data: any) => void>> = new Map();
 

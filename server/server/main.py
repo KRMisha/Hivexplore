@@ -5,10 +5,13 @@ from server.core.server import Server
 
 
 def main():
-    enable_debug_driver = 'debug' in sys.argv[1:]
+    try:
+        enable_debug_driver = 'debug' in sys.argv[1:]
 
-    server = Server(enable_debug_driver)
-    server.start()
+        server = Server(enable_debug_driver)
+        server.start()
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':

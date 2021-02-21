@@ -11,7 +11,7 @@ class Server:
     def __init__(self, enable_debug_driver):
         self._socket_server = SocketServer()
         self._map_generator = MapGenerator()
-        self._crazyflie_manager = CrazyflieManager(self._socket_server, enable_debug_driver)
+        self._crazyflie_manager = CrazyflieManager(self._socket_server, self._map_generator, enable_debug_driver)
 
     def start(self):
         self._crazyflie_manager.start()

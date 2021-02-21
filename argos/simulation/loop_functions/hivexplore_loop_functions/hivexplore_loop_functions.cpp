@@ -63,14 +63,27 @@ void CHivexploreLoopFunctions::Destroy() {
 }
 
 void CHivexploreLoopFunctions::PreStep() {
+    static int i = 0; // TODO: Remove
+
     // TODO: Empty out packets from the buffer in a while loop (while not -1) instead of just one per tick
-    char buffer[1000] = {};
+    // TODO: Avoid recreating buffer every tick
+    char buffer[4096] = {};
     ssize_t count = recv(m_dataSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
     if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
         perror("Unix socket recv");
     }
 
-    LOGERR << buffer;
+    // TODO: Send relevant messages
+    char allo[] = "allo";
+    if (++i % 1 == 0) {
+        count = send(m_dataSocket, allo, sizeof(allo), 0);
+        if (count == -1) {
+            perror("Unix socket send");
+        }
+    }
+
+    // TODO: Remove
+    std::cerr << buffer;
 }
 
 void CHivexploreLoopFunctions::PostExperiment() {

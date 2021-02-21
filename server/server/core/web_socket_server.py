@@ -39,7 +39,7 @@ class WebSocketServer:
                 for callback in self._callbacks.get(message['event'], []):
                     callback(message['data'])
             except (json.JSONDecodeError, KeyError) as exc:
-                print('SocketServer error: Invalid message received:', exc)
+                print('WebSocketServer error: Invalid message received:', exc)
 
     async def _send_handler(self, websocket, _path):
         while True:

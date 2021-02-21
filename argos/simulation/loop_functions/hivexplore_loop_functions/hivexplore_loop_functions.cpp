@@ -15,7 +15,7 @@ void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
     }
 
     // Create Unix domain socket
-    m_connectionSocket = socket(AF_UNIX, SOCK_STREAM, 0); // TODO: Replace SOCK_STREAM with SOCK_SEQPACKET
+    m_connectionSocket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (m_connectionSocket == -1) {
         perror("Unix socket creation");
         std::exit(EXIT_FAILURE);

@@ -51,22 +51,22 @@ class CrazyflieManager:
 
     def _setup_log(self, crazyflie: Crazyflie):
         # Log config setup with the logged variables and success/error logging callbacks
-        polling_pediod_ms = 1000
+        POLLING_PERIOD_MS = 1000
         configs = [
             {
-                'log_config': LogConfig(name='BatteryLevel', period_in_ms=polling_pediod_ms),
+                'log_config': LogConfig(name='BatteryLevel', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['pm.batteryLevel'],
                 'data_callback': self._log_battery_callback,
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Stabilizer', period_in_ms=polling_pediod_ms),
+                'log_config': LogConfig(name='Stabilizer', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw'],
                 'data_callback': self._log_stabilizer_callback,
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Range', period_in_ms=polling_pediod_ms),
+                'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange'],
                 'data_callback': self._log_range_callback,
                 'error_callback': self._log_error_callback,

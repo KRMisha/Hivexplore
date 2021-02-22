@@ -25,7 +25,7 @@ class CrazyflieManager:
         timeout_s = config.BASE_CONNECTION_TIMEOUT_S
         while len(self._crazyflies) == 0:
             print('Scanning interfaces for Crazyflies...')
-            available_interfaces = cflib.crtp.scan_interfaces()
+            available_interfaces = await asyncio.get_event_loop().run_in_executor(None, cflib.crtp.scan_interfaces)
 
             if len(available_interfaces) > 0:
                 print('Crazyflies found:')

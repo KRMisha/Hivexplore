@@ -2,12 +2,70 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 namespace {
     const char socketPath[] = "/tmp/hivexplore/socket.sock";
 }
 
 void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
+    LOGERR << "Init!\n";
+    Reset();
+}
+
+void CHivexploreLoopFunctions::Reset() {
+    LOGERR << "Reset!\n";
+    StartSocket();
+}
+
+void CHivexploreLoopFunctions::Destroy() {
+    LOGERR << "Destroy!\n";
+    // TODO: Add socket close and unlink? Check double-close error and see if PostExperiment is called before Destroy
+}
+
+void CHivexploreLoopFunctions::PreStep() {
+    static int i = 0; // TODO: Remove
+
+    while (true) {
+        static char buffer[4096] = {};
+        ssize_t count = recv(m_dataSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
+        if (count == -1) {
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                break;
+            }
+            // Reset simulation in case of socket error
+            perror("Unix socket recv");
+            LOGERR << "Restarting simulation...";
+            GetSimulator().Reset(); // TODO: Fix
+            break;
+        }
+
+        // TODO: Remove
+        std::cerr << buffer;
+    }
+
+    // TODO: Restart simulation (which will restart the connection) on broken pipe
+
+    // TODO: Send relevant messages
+    char allo[] = "allo";
+    if (++i % 1 == 0) {
+        ssize_t count = send(m_dataSocket, allo, sizeof(allo), 0);
+        if (count == -1) {
+            perror("Unix socket send");
+        }
+    }
+}
+
+void CHivexploreLoopFunctions::PostExperiment() {
+    LOGERR << "PostExperiment!\n";
+    close(m_connectionSocket);
+    close(m_dataSocket);
+    unlink(socketPath);
+}
+
+void CHivexploreLoopFunctions::StartSocket() {
     // Remove socket if it already exists
     if (unlink(socketPath) == -1 && errno != ENOENT) {
         perror("Unix socket unlink");
@@ -48,46 +106,6 @@ void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
     }
 
     std::cout << "Unix socket connection accepted\n";
-}
-
-void CHivexploreLoopFunctions::Reset() {
-    LOGERR << "Reset!\n";
-}
-
-void CHivexploreLoopFunctions::Destroy() {
-    LOGERR << "Destroy!\n";
-
-    close(m_connectionSocket);
-    close(m_dataSocket);
-    unlink(socketPath);
-}
-
-void CHivexploreLoopFunctions::PreStep() {
-    static int i = 0; // TODO: Remove
-
-    // TODO: Empty out packets from the buffer in a while loop (while not -1) instead of just one per tick
-    // TODO: Avoid recreating buffer every tick
-    char buffer[4096] = {};
-    ssize_t count = recv(m_dataSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
-    if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-        perror("Unix socket recv");
-    }
-
-    // TODO: Send relevant messages
-    char allo[] = "allo";
-    if (++i % 1 == 0) {
-        count = send(m_dataSocket, allo, sizeof(allo), 0);
-        if (count == -1) {
-            perror("Unix socket send");
-        }
-    }
-
-    // TODO: Remove
-    std::cerr << buffer;
-}
-
-void CHivexploreLoopFunctions::PostExperiment() {
-    LOGERR << "PostExperiment!\n";
 }
 
 REGISTER_LOOP_FUNCTIONS(CHivexploreLoopFunctions, "hivexplore_loop_functions")

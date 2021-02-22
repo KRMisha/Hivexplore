@@ -15,6 +15,8 @@ public:
     virtual void PostExperiment() override;
 
 private:
+    void StartSocket();
+
     int m_connectionSocket = -1;
     sockaddr_un m_socketName;
     int m_dataSocket = -1;

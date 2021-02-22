@@ -28,13 +28,13 @@ void CHivexploreLoopFunctions::Destroy() {
 
     // Close socket
     if (close(m_connectionSocket) == -1 && errno != EBADF) {
-        perror("Unix connection socket close");
+        std::perror("Unix connection socket close");
     }
     if (close(m_dataSocket) == -1 && errno != EBADF) {
-        perror("Unix connection socket close");
+        std::perror("Unix connection socket close");
     }
     if (unlink(socketPath) == -1 && errno != ENOENT) {
-        perror("Unix socket unlink");
+        std::perror("Unix socket unlink");
     }
 }
 
@@ -53,7 +53,7 @@ void CHivexploreLoopFunctions::PreStep() {
         } else if (count == -1) {
             // Restart simulation in case of socket error
             if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                perror("Unix socket recv");
+                std::perror("Unix socket recv");
                 Stop();
                 return;
             }
@@ -70,7 +70,7 @@ void CHivexploreLoopFunctions::PreStep() {
         ssize_t count = send(m_dataSocket, allo, sizeof(allo), MSG_DONTWAIT);
         if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
             // Restart simulation in case of socket error
-            perror("Unix socket send");
+            std::perror("Unix socket send");
             Stop();
         }
     }
@@ -88,27 +88,27 @@ void CHivexploreLoopFunctions::PostExperiment() {
 
     // Close socket
     if (close(m_connectionSocket) == -1) {
-        perror("Unix connection socket close");
+        std::perror("Unix connection socket close");
     }
     if (close(m_dataSocket) == -1) {
-        perror("Unix connection socket close");
+        std::perror("Unix connection socket close");
     }
     if (unlink(socketPath) == -1) {
-        perror("Unix socket unlink");
+        std::perror("Unix socket unlink");
     }
 }
 
 void CHivexploreLoopFunctions::StartSocket() {
     // Remove socket if it already exists
     if (unlink(socketPath) == -1 && errno != ENOENT) {
-        perror("Unix socket unlink");
+        std::perror("Unix socket unlink");
         std::exit(EXIT_FAILURE);
     }
 
     // Create Unix domain socket
     m_connectionSocket = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (m_connectionSocket == -1) {
-        perror("Unix socket creation");
+        std::perror("Unix socket creation");
         std::exit(EXIT_FAILURE);
     }
 
@@ -119,14 +119,14 @@ void CHivexploreLoopFunctions::StartSocket() {
 
     int ret = bind(m_connectionSocket, reinterpret_cast<const struct sockaddr*>(&m_socketName), sizeof(m_socketName));
     if (ret == -1) {
-        perror("Unix socket bind");
+        std::perror("Unix socket bind");
         std::exit(EXIT_FAILURE);
     }
 
     // Prepare to listen for connections
     ret = listen(m_connectionSocket, 1);
     if (ret == -1) {
-        perror("Unix socket listen");
+        std::perror("Unix socket listen");
         std::exit(EXIT_FAILURE);
     }
 
@@ -134,7 +134,7 @@ void CHivexploreLoopFunctions::StartSocket() {
     std::cout << "Waiting for Unix socket connection\n";
     m_dataSocket = accept(m_connectionSocket, nullptr, nullptr);
     if (m_dataSocket == -1) {
-        perror("Unix socket accept");
+        std::perror("Unix socket accept");
         std::exit(EXIT_FAILURE);
     }
 

@@ -14,7 +14,7 @@ class Server:
         self._web_socket_server = WebSocketServer()
         self._unix_socket_server = UnixSocketServer()
         self._map_generator = MapGenerator()
-        self._crazyflie_manager = CrazyflieManager(self._web_socket_server, enable_debug_driver)
+        self._crazyflie_manager = CrazyflieManager(self._web_socket_server, self._map_generator, enable_debug_driver)
 
     def start(self):
         asyncio.run(self._start_tasks())

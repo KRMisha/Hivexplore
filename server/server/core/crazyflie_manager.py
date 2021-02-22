@@ -4,14 +4,16 @@ import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.core.web_socket_server import WebSocketServer
+from server.core.map_generator import MapGenerator
 from server import config
 
 # pylint: disable=no-self-use
 
 
 class CrazyflieManager:
-    def __init__(self, web_socket_server: WebSocketServer, enable_debug_driver: bool):
+    def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
         self._web_socket_server = web_socket_server
+        self._map_generator = map_generator
         self._crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
@@ -53,19 +55,32 @@ class CrazyflieManager:
 
     def _setup_log(self, crazyflie: Crazyflie):
         # Log config setup with the logged variables and success/error logging callbacks
+        POLLING_PERIOD_MS = 1000
         log_configs = [
             {
-                'log_config': LogConfig(name='BatteryLevel', period_in_ms=1000),
+                'log_config': LogConfig(name='BatteryLevel', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['pm.batteryLevel'],
                 'data_callback': self._log_battery_callback,
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Stabilizer', period_in_ms=1000),
+                'log_config': LogConfig(name='Stabilizer', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw'],
                 'data_callback': self._log_stabilizer_callback,
                 'error_callback': self._log_error_callback,
             },
+            {
+                'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange'],
+                'data_callback': self._log_range_callback,
+                'error_callback': self._log_error_callback,
+            },
+            {
+                'log_config': LogConfig(name='Position', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
+                'data_callback': self._log_position_callback,
+                'error_callback': self._log_error_callback,
+            }
         ]
 
         for log_config in log_configs:
@@ -113,10 +128,35 @@ class CrazyflieManager:
         self._web_socket_server.send('battery-level', battery_level)
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
-        print(f'{logconf.name}')
+        print(logconf.name)
         print(f'- Roll: {data["stabilizer.roll"]:.2f}')
         print(f'- Pitch: {data["stabilizer.pitch"]:.2f}')
         print(f'- Yaw: {data["stabilizer.yaw"]:.2f}')
+
+    def _log_range_callback(self, _timestamp, data, logconf):
+        measurements = {
+            'front': data["range.front"],
+            'back': data["range.back"],
+            'up': data["range.up"],
+            'left': data["range.left"],
+            'right': data["range.right"],
+            'zrange': data["range.zrange"]
+        }
+        self._map_generator.add_points(measurements)
+        print(logconf.name)
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.2f}')
+
+    def _log_position_callback(self, _timestamp, data, logconf):
+        measurements = {
+           'x': data["stateEstimate.x"],
+           'y': data["stateEstimate.y"],
+           'z': data["stateEstimate.z"]
+        }
+        self._map_generator.add_position(measurements)
+        print(logconf.name)
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.6f}')
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

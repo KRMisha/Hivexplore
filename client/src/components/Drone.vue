@@ -5,7 +5,7 @@
         </template>
         <template #content>
             <div class="p-text-center">Drone Battery:</div>
-            <Knob v-model="battery" readonly :size="64" />
+            <Knob v-model="batteryLevel" readonly :size="64" />
             <Divider />
             <div class="p-text-center">Drone Led:</div>
             <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
@@ -15,24 +15,30 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { inject } from 'vue';
+import SocketClient from './../classes/socket-client';
 
 export default defineComponent({
     name: 'Drone',
-    props: {
-        battery: Number,
-    },
-    emits: ['changeLedStatus'],
     setup() {
+        const socket: SocketClient | undefined = inject('socket');
+
+        const batteryLevel = ref(0);
+        socket!.bind('battery-level', (updatedBatteryLevel: number) => {
+            batteryLevel.value = updatedBatteryLevel;
+        });
+
         const isLedOn = ref(false);
 
+        function changeLedStatus() {
+            socket!.send('set-led', isLedOn.value);
+        }
+
         return {
+            batteryLevel,
             isLedOn,
+            changeLedStatus,
         };
-    },
-    methods: {
-        changeLedStatus() {
-            this.$emit('changeLedStatus', this.isLedOn);
-        },
     },
 });
 </script>

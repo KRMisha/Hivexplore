@@ -18,8 +18,8 @@ class SocketServer:
         asyncio.get_event_loop().run_until_complete(server_instance)
         asyncio.get_event_loop().run_forever()
 
-    def send(self, event: str, data: Any):
-        self._message_queue.put_nowait({'event': event, 'data': data, 'timestamp': datetime.now().isoformat()})
+    def send(self, event: str, drone_id: int, data: Any):
+        self._message_queue.put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
 
     def bind(self, event: str, callback: Callable[[Any], None]):
         self._callbacks.setdefault(event, []).append(callback)

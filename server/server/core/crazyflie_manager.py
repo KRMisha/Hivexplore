@@ -121,13 +121,24 @@ class CrazyflieManager:
     def _log_battery_callback(self, _timestamp, data, _logconf):
         battery_level = data["pm.batteryLevel"]
         print(f'Battery level: {battery_level}')
-        self._socket_server.send('battery-level', battery_level)
+        # TODO: Retrieve drone ID and send it to the client
+        drone_id = 0
+        self._socket_server.send('battery-level', drone_id, battery_level)
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
+        measurements = {
+            'roll': data["stabilize.roll"],
+            'pitch': pitch = data["stabilize.pitch"],
+            'yaw': data["stabilize.yaw"],
+        }
+
         print(logconf.name)
-        print(f'- Roll: {data["stabilizer.roll"]:.2f}')
-        print(f'- Pitch: {data["stabilizer.pitch"]:.2f}')
-        print(f'- Yaw: {data["stabilizer.yaw"]:.2f}')
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.2f}')
+
+        # TODO: Retrieve drone ID and send it to the client
+        drone_id = 0
+        self._socket_server.send('stabilizer-data', drone_id, measurements)
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -143,6 +154,10 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
+        # TODO: Retrieve drone ID and send it to the client
+        drone_id = 0
+        self._socket_server.send('range-data', drone_id, measurements)
+
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
            'x': data["stateEstimate.x"],
@@ -153,6 +168,10 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
+
+        # TODO: Retrieve drone ID and send it to the client
+        drone_id = 0
+        self._socket_server.send('position-data', drone_id, measurements)
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

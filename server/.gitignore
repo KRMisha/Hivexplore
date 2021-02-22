@@ -10,8 +10,8 @@ __pycache__/
 # Mypy
 .mypy_cache/
 
-# Crazyflie cache
-cache/
-
 # Rope
 .ropeproject/
+
+# Crazyflie cache
+cache/

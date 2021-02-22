@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+
 class MapGenerator:
     def __init__(self):
         self._points: List[Dict[str, Any]] = []

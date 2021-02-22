@@ -80,7 +80,7 @@ class CrazyflieManager:
                 'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
                 'data_callback': self._log_position_callback,
                 'error_callback': self._log_error_callback,
-            }
+            },
         ]
 
         for log_config in log_configs:
@@ -140,7 +140,7 @@ class CrazyflieManager:
             'up': data["range.up"],
             'left': data["range.left"],
             'right': data["range.right"],
-            'zrange': data["range.zrange"]
+            'zrange': data["range.zrange"],
         }
         self._map_generator.add_points(measurements)
         print(logconf.name)
@@ -149,9 +149,9 @@ class CrazyflieManager:
 
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
-           'x': data["stateEstimate.x"],
-           'y': data["stateEstimate.y"],
-           'z': data["stateEstimate.z"]
+            'x': data["stateEstimate.x"],
+            'y': data["stateEstimate.y"],
+            'z': data["stateEstimate.z"],
         }
         self._map_generator.add_position(measurements)
         print(logconf.name)

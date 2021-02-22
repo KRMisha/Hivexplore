@@ -18,6 +18,7 @@ public:
 
 private:
     void StartSocket();
+    void Stop();
 
     int m_connectionSocket = -1;
     sockaddr_un m_socketName;

@@ -10,9 +10,11 @@ namespace {
     const char socketPath[] = "/tmp/hivexplore/socket.sock";
 }
 
+// TODO: Change LOGERR to LOG for non-error output once the controller output is removed to spam less
+
 void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
     LOGERR << "Init!\n";
-    Reset();
+    StartSocket();
 }
 
 void CHivexploreLoopFunctions::Reset() {
@@ -23,28 +25,38 @@ void CHivexploreLoopFunctions::Reset() {
 
 void CHivexploreLoopFunctions::Destroy() {
     LOGERR << "Destroy!\n";
-    // TODO: Add socket close and unlink? Check double-close error and see if PostExperiment is called before Destroy
+
+    // Close socket
+    if (close(m_connectionSocket) == -1 && errno != EBADF) {
+        perror("Unix connection socket close");
+    }
+    if (close(m_dataSocket) == -1 && errno != EBADF) {
+        perror("Unix connection socket close");
+    }
+    if (unlink(socketPath) == -1 && errno != ENOENT) {
+        perror("Unix socket unlink");
+    }
 }
 
 void CHivexploreLoopFunctions::PreStep() {
-    LOGERR << "PreStep!\n";
-
     static int i = 0; // TODO: Remove
 
     while (true) {
         static char buffer[4096] = {};
         ssize_t count = recv(m_dataSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
-        if (count == -1) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                break;
+
+        // Restart simulation if server disconnects
+        if (count == 0) {
+            std::cerr << "Unix socket connection closed\n";
+            Stop();
+            return;
+        } else if (count == -1) {
+            // Restart simulation in case of socket error
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                perror("Unix socket recv");
+                Stop();
+                return;
             }
-            // Reset simulation in case of socket error
-            perror("Unix socket recv");
-            std::cerr << "Restarting simulation...\n";
-            // m_isExperimentFinished = true;
-            // GetSimulator().Terminate();
-            // GetSimulator().Reset();
-            // GetSimulator().Execute();
             break;
         }
 
@@ -52,32 +64,38 @@ void CHivexploreLoopFunctions::PreStep() {
         std::cerr << buffer;
     }
 
-    // TODO: Restart simulation (which will restart the connection) on broken pipe
-
     // TODO: Send relevant messages
     char allo[] = "allo";
     if (++i % 1 == 0) {
-        ssize_t count = send(m_dataSocket, allo, sizeof(allo), 0);
-        if (count == -1) {
+        ssize_t count = send(m_dataSocket, allo, sizeof(allo), MSG_DONTWAIT);
+        if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+            // Restart simulation in case of socket error
             perror("Unix socket send");
+            Stop();
         }
     }
 }
 
 void CHivexploreLoopFunctions::PostStep() {
-    LOGERR << "PostStep!\n";
 }
 
 bool CHivexploreLoopFunctions::IsExperimentFinished() {
-    LOGERR << "IsExperimentFinished!\n";
     return m_isExperimentFinished;
 }
 
 void CHivexploreLoopFunctions::PostExperiment() {
-    LOGERR << "PostExperiment!\n";
-    close(m_connectionSocket);
-    close(m_dataSocket);
-    unlink(socketPath);
+    std::cerr << "PostExperiment!\n";
+
+    // Close socket
+    if (close(m_connectionSocket) == -1) {
+        perror("Unix connection socket close");
+    }
+    if (close(m_dataSocket) == -1) {
+        perror("Unix connection socket close");
+    }
+    if (unlink(socketPath) == -1) {
+        perror("Unix socket unlink");
+    }
 }
 
 void CHivexploreLoopFunctions::StartSocket() {
@@ -121,6 +139,14 @@ void CHivexploreLoopFunctions::StartSocket() {
     }
 
     std::cout << "Unix socket connection accepted\n";
+}
+
+void CHivexploreLoopFunctions::Stop() {
+    LOGERR << "Stopping simulation... Please do the following to restart the mission:\n"
+              "1. Press the restart button on the ARGoS client - the simulation will freeze\n"
+              "2. Restart the server\n"
+              "3. Press the play button on the ARGoS client\n";
+    m_isExperimentFinished = true;
 }
 
 REGISTER_LOOP_FUNCTIONS(CHivexploreLoopFunctions, "hivexplore_loop_functions")

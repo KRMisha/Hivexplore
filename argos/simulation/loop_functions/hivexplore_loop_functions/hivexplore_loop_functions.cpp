@@ -17,6 +17,7 @@ void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
 
 void CHivexploreLoopFunctions::Reset() {
     LOGERR << "Reset!\n";
+    m_isExperimentFinished = false;
     StartSocket();
 }
 
@@ -26,19 +27,24 @@ void CHivexploreLoopFunctions::Destroy() {
 }
 
 void CHivexploreLoopFunctions::PreStep() {
+    LOGERR << "PreStep!\n";
+
     static int i = 0; // TODO: Remove
 
     while (true) {
         static char buffer[4096] = {};
         ssize_t count = recv(m_dataSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
         if (count == -1) {
-            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 break;
             }
             // Reset simulation in case of socket error
             perror("Unix socket recv");
-            LOGERR << "Restarting simulation...";
-            GetSimulator().Reset(); // TODO: Fix
+            std::cerr << "Restarting simulation...\n";
+            // m_isExperimentFinished = true;
+            // GetSimulator().Terminate();
+            // GetSimulator().Reset();
+            // GetSimulator().Execute();
             break;
         }
 
@@ -56,6 +62,15 @@ void CHivexploreLoopFunctions::PreStep() {
             perror("Unix socket send");
         }
     }
+}
+
+void CHivexploreLoopFunctions::PostStep() {
+    LOGERR << "PostStep!\n";
+}
+
+bool CHivexploreLoopFunctions::IsExperimentFinished() {
+    LOGERR << "IsExperimentFinished!\n";
+    return m_isExperimentFinished;
 }
 
 void CHivexploreLoopFunctions::PostExperiment() {

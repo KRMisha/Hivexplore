@@ -12,6 +12,8 @@ public:
     virtual void Reset() override;
     virtual void Destroy() override;
     virtual void PreStep() override;
+    virtual void PostStep() override;
+    virtual bool IsExperimentFinished() override;
     virtual void PostExperiment() override;
 
 private:
@@ -20,6 +22,8 @@ private:
     int m_connectionSocket = -1;
     sockaddr_un m_socketName;
     int m_dataSocket = -1;
+
+    bool m_isExperimentFinished = false;
 };
 
 #endif

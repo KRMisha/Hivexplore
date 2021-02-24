@@ -1,40 +1,15 @@
-/*
- * AUTHORS: Carlo Pinciroli <cpinciro@ulb.ac.be>
- *          Pierre-Yves Lajoie <lajoie.py@gmail.com>
- *
- * An example crazyflie drones sensing.
- *
- * This controller is meant to be used with the XML file:
- *    experiments/foraging.argos
- */
-
 #ifndef CRAZYFLIE_SENSING_H
 #define CRAZYFLIE_SENSING_H
 
-/*
- * Include some necessary headers.
- */
-/* Definition of the CCI_Controller class. */
 #include <argos3/core/control_interface/ci_controller.h>
-/* Definition of the crazyflie distance sensor */
 #include <argos3/plugins/robots/crazyflie/control_interface/ci_crazyflie_distance_scanner_sensor.h>
-/* Definition of the crazyflie position actuator */
 #include <argos3/plugins/robots/generic/control_interface/ci_quadrotor_position_actuator.h>
-/* Definition of the crazyflie position sensor */
 #include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>
-/* Definition of the crazyflie range and bearing actuator */
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_actuator.h>
-/* Definition of the crazyflie range and bearing sensor */
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
-/* Definition of the crazyflie battery sensor */
 #include <argos3/plugins/robots/generic/control_interface/ci_battery_sensor.h>
-/* Definitions for random number generation */
-#include <argos3/core/utility/math/rng.h>
+#include <argos3/core/utility/math/rng.h> // TODO: Remove
 
-/*
- * All the ARGoS stuff in the 'argos' namespace.
- * With this statement, you save typing argos:: every time.
- */
 using namespace argos;
 
 enum class DroneState {
@@ -50,9 +25,7 @@ enum class DroneState {
     StopRotation,
     WaitStopRotation
 };
-/*
- * A controller is simply an implementation of the CCI_Controller class.
- */
+
 class CCrazyflieController : public CCI_Controller {
 public:
     /*

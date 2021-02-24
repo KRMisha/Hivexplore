@@ -20,9 +20,7 @@
     <!-- * Controllers * -->
     <!-- *************** -->
     <controllers>
-
         <crazyflie_controller id="ssc" library="build/controllers/crazyflie/libcrazyflie">
-
             <actuators>
                 <range_and_bearing implementation="default" />
                 <quadrotor_position implementation="default" />
@@ -37,9 +35,7 @@
 
             <params>
             </params>
-
         </crazyflie_controller>
-
     </controllers>
 
     <!-- ****************** -->

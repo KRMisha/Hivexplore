@@ -1,7 +1,6 @@
 #include "crazyflie.h"
 #include <type_traits>
 #include <unordered_map>
-#include <argos3/core/utility/configuration/argos_configuration.h>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 
@@ -137,6 +136,9 @@ void CCrazyflieController::ControlStep() {
 }
 
 void CCrazyflieController::Reset() {
+}
+
+void CCrazyflieController::Destroy() {
 }
 
 void CCrazyflieController::LogData() {

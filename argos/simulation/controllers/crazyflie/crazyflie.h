@@ -8,7 +8,6 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_actuator.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_battery_sensor.h>
-#include <argos3/core/utility/math/rng.h> // TODO: Remove
 
 using namespace argos;
 
@@ -28,40 +27,14 @@ enum class DroneState {
 
 class CCrazyflieController : public CCI_Controller {
 public:
-    /*
-     * This function initializes the controller.
-     * The 't_node' variable points to the <parameters> section in the XML
-     * file in the <controllers><footbot_foraging_controller> section.
-     */
     virtual void Init(TConfigurationNode& t_node);
-
-    /*
-     * This function is called once every time step.
-     * The length of the time step is set in the XML file.
-     */
     virtual void ControlStep();
-
-    /*
-     * This function resets the controller to its state right after the
-     * Init().
-     * It is called when you press the reset button in the GUI.
-     */
     virtual void Reset();
-
-    /*
-     * Called to cleanup what done by Init() when the experiment finishes.
-     * In this example controller there is no need for clean anything up,
-     * so the function could have been omitted. It's here just for
-     * completeness.
-     */
-    virtual void Destroy() {}
-
-    /*
-     * This function logs all the sensors's data
-     */
-    void LogData();
+    virtual void Destroy();
 
 private:
+    void LogData();
+
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;

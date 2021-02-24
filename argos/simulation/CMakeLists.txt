@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 project(hivexplore_simulation)
-
-set (CMAKE_CXX_STANDARD 17)
 
 if(APPLE)
   option(ASAN "Use Clang Address Sanitizer in Debug builds")

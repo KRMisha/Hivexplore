@@ -27,10 +27,10 @@ enum class DroneState {
 
 class CCrazyflieController : public CCI_Controller {
 public:
-    virtual void Init(TConfigurationNode& t_node);
-    virtual void ControlStep();
-    virtual void Reset();
-    virtual void Destroy();
+    virtual void Init(TConfigurationNode& t_node) override;
+    virtual void ControlStep() override;
+    virtual void Reset() override;
+    virtual void Destroy() override;
 
 private:
     void LogData();

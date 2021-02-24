@@ -26,8 +26,6 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
-    LogData();
-
     // Takeoff constants
     static constexpr double targetDroneHeight = 0.5;
     static constexpr double targetDroneHeightEpsilon = 0.005;
@@ -141,6 +139,21 @@ void CCrazyflieController::Reset() {
 void CCrazyflieController::Destroy() {
 }
 
+std::unordered_map<std::string, std::variant<std::uint8_t>> CCrazyflieController::GetLogData() {
+    // TODO: Add more log data to the map (match the names for keys from cflib) with code from LogData
+    return {
+        {"pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100)}
+    };
+}
+
+void CCrazyflieController::SetParamData(const std::string& param, std::variant<bool> value) {
+    if (param == "hivexplore.isM1LedOn") {
+        // TODO: Toggle LED (see CCI_LEDsActuator in footbot_foraging)
+        RLOG << "LED changed: " << std::get<bool>(value) << '\n';
+    }
+}
+
+// TODO: Remove to integrate in GetLogData
 void CCrazyflieController::LogData() {
     // Battery sensor
     LOG << "Battery level: " << m_pcBattery->GetReading().AvailableCharge << std::endl;

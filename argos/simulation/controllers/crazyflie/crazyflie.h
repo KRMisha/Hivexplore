@@ -1,6 +1,9 @@
 #ifndef CRAZYFLIE_SENSING_H
 #define CRAZYFLIE_SENSING_H
 
+#include <unordered_map>
+#include <variant>
+#include <string>
 #include <argos3/core/control_interface/ci_controller.h>
 #include <argos3/plugins/robots/crazyflie/control_interface/ci_crazyflie_distance_scanner_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_quadrotor_position_actuator.h>
@@ -32,8 +35,12 @@ public:
     virtual void Reset() override;
     virtual void Destroy() override;
 
+    // TODO: Add more types to the std::variant (check which types are used in the Crazyflie firmware for each log/param)
+    std::unordered_map<std::string, std::variant<std::uint8_t>> GetLogData();
+    void SetParamData(const std::string& param, std::variant<bool> value);
+
 private:
-    void LogData();
+    void LogData(); // TODO: Remove
 
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;

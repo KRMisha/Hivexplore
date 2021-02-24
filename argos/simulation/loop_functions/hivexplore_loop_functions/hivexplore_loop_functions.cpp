@@ -75,14 +75,30 @@ void CHivexploreLoopFunctions::PreStep() {
         std::cerr << buffer;
     }
 
-    // TODO: Send relevant messages
-    char allo[] = "allo";
-    if (++i % 1 == 0) {
-        ssize_t count = send(m_dataSocket, allo, sizeof(allo), MSG_DONTWAIT);
-        if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-            // Restart simulation in case of socket error
-            std::perror("Unix socket send");
-            Stop();
+    // Send log data to server from each Crazyflie every second
+    static constexpr std::uint8_t ticksPerSecond = 10;
+    if (GetSpace().GetSimulationClock() % ticksPerSecond == 0) {
+        for (const auto& controller : controllers) {
+            auto logData = controller.get().GetLogData();
+            for (const auto& [key, value] : logData) {
+                std::visit(
+                    [&key = std::as_const(key), &controller, this](const auto& value) {
+                        json packet = {
+                            {"variable", key},
+                            {"droneId", controller.get().GetId()},
+                            {"value", value},
+                        };
+                        std::string serializedPacket = packet.dump();
+
+                        ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
+                        if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+                            // Restart simulation in case of socket error
+                            std::perror("Unix socket send");
+                            Stop();
+                        }
+                    },
+                    value);
+            }
         }
     }
 }

@@ -166,16 +166,6 @@ void CCrazyflieController::LogData() {
     LOG << "PosSens Angle Y: " << vector.GetY() << std::endl;
     LOG << "PosSens Angle Z: " << vector.GetZ() << std::endl;
     LOG << "PosSens Angle Angle: " << angle << std::endl;
-
-    // Range & bearing sensors
-    auto rangeAndBearingReadings = m_pcRABS->GetReadings();
-    std::uint16_t i = 0;
-    for (auto it = rangeAndBearingReadings.begin(); it != rangeAndBearingReadings.end(); ++it) {
-        i++;
-        LOG << "RABS #" << i << " HorizBearing: " << it->HorizontalBearing << std::endl;
-        LOG << "RABS #" << i << " VertBearing: " << it->VerticalBearing << std::endl;
-        LOG << "RABS #" << i << " Range: " << it->Range << std::endl;
-    }
 }
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

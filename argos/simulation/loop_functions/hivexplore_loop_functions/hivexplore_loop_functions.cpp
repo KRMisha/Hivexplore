@@ -2,6 +2,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <argos3/plugins/robots/crazyflie/simulator/crazyflie_entity.h>
+#include "controllers/crazyflie/crazyflie.h"
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -39,8 +41,16 @@ void CHivexploreLoopFunctions::Destroy() {
 }
 
 void CHivexploreLoopFunctions::PreStep() {
-    static int i = 0; // TODO: Remove
+    // Get list of Crazyflie controllers
+    CSpace::TMapPerType& entities = GetSpace().GetEntitiesByType("crazyflie");
+    std::vector<std::reference_wrapper<CCrazyflieController>> controllers;
+    std::transform(entities.begin(), entities.end(), std::back_inserter(controllers), [](const auto& pair) {
+        CCrazyflieEntity& crazyflie = *any_cast<CCrazyflieEntity*>(pair.second);
+        CCrazyflieController& controller = dynamic_cast<CCrazyflieController&>(crazyflie.GetControllableEntity().GetController());
+        return std::ref(controller);
+    });
 
+    // Receive param data from server
     while (true) {
         static char buffer[4096] = {};
         ssize_t count = recv(m_dataSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
@@ -57,6 +67,7 @@ void CHivexploreLoopFunctions::PreStep() {
                 Stop();
                 return;
             }
+            // Loop until there is no more data to receive
             break;
         }
 

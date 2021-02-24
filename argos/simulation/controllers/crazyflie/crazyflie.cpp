@@ -139,11 +139,9 @@ void CCrazyflieController::Reset() {
 void CCrazyflieController::Destroy() {
 }
 
-std::unordered_map<std::string, std::variant<std::uint8_t>> CCrazyflieController::GetLogData() {
+std::unordered_map<std::string, std::variant<std::uint8_t>> CCrazyflieController::GetLogData() const {
     // TODO: Add more log data to the map (match the names for keys from cflib) with code from LogData
-    return {
-        {"pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100)}
-    };
+    return {{"pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100)}};
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, std::variant<bool> value) {

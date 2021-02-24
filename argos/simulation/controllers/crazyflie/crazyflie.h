@@ -62,29 +62,12 @@ public:
     void LogData();
 
 private:
-    /* Pointer to the crazyflie distance sensor */
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
-
-    /* Pointer to the position actuator */
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
-
-    /* Pointer to the range and bearing actuator */
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;
-
-    /* Pointer to the range and bearing sensor */
     CCI_RangeAndBearingSensor* m_pcRABS = nullptr;
-
-    /* Pointer to the positioning sensor */
     CCI_PositioningSensor* m_pcPos = nullptr;
-
-    /* Pointer to the battery sensor */
     CCI_BatterySensor* m_pcBattery = nullptr;
-
-    /* The random number generator */
-    CRandom::CRNG* m_pcRNG = nullptr;
-
-    /* Current step */
-    std::uint64_t m_uiCurrentStep = 0;
 
     CVector3 m_initialPosition;
     CVector3 m_lastReferencePosition;

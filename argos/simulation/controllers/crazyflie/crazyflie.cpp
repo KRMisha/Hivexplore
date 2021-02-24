@@ -22,11 +22,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
     } catch (CARGoSException& ex) {
         THROW_ARGOSEXCEPTION_NESTED("Error initializing the Crazyflie controller for robot \"" << GetId() << "\"", ex);
     }
-    /* Create a random number generator. We use the 'argos' category so
-       that creation, reset, seeding and cleanup are managed by ARGoS. */
-    m_pcRNG = CRandom::CreateRNG("argos");
 
-    m_uiCurrentStep = 0;
     Reset();
 }
 
@@ -138,8 +134,6 @@ void CCrazyflieController::ControlStep() {
                                                                           {DroneState::StopRotation, "StopRotation"},
                                                                           {DroneState::WaitStopRotation, "WaitStopRotation"}};
     LOG << "Current state: " << droneStateNames[m_currentState] << std::endl;
-
-    m_uiCurrentStep++;
 }
 
 void CCrazyflieController::Reset() {

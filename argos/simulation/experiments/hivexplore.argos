@@ -20,7 +20,7 @@
     <!-- * Controllers * -->
     <!-- *************** -->
     <controllers>
-        <crazyflie_controller id="ssc" library="build/controllers/crazyflie/libcrazyflie">
+        <crazyflie_controller id="cfc" library="build/controllers/crazyflie/libcrazyflie">
             <actuators>
                 <range_and_bearing implementation="default" />
                 <quadrotor_position implementation="default" />
@@ -66,8 +66,8 @@
             <orientation method="uniform" min="0,0,0" max="180,0,0" />
             <entity quantity="2" max_trials="100">
                 <crazyflie id="s">
-                    <controller config="ssc" />
-                    <battery model="time_motion" delta="1e-3" pos_delta="1e-3"  orient_delta="1e-3"/>
+                    <controller config="cfc" />
+                    <battery model="time_motion" delta="1e-3" pos_delta="1e-3" orient_delta="1e-3"/>
                 </crazyflie>
             </entity>
         </distribute>

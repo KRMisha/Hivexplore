@@ -53,6 +53,7 @@ void CHivexploreLoopFunctions::PreStep() {
     // Receive param data from server
     while (true) {
         static char buffer[4096] = {};
+        std::fill(std::begin(buffer), std::end(buffer), '\0');
         ssize_t count = recv(m_dataSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
 
         // Restart simulation if server disconnects
@@ -71,8 +72,22 @@ void CHivexploreLoopFunctions::PreStep() {
             break;
         }
 
-        // TODO: Remove
-        std::cerr << buffer;
+        try {
+            json packet = json::parse(buffer);
+
+            std::string droneId = packet["droneId"];
+            auto it = std::find_if(controllers.begin(), controllers.end(), [&droneId](const auto& controller) {
+                return controller.get().GetId() == droneId;
+            });
+            if (it != controllers.end()) {
+                it->get().SetParamData(packet["paramName"], packet["value"]);
+            } else {
+                LOGERR << "Unknown drone ID: " << droneId << '\n';
+            }
+        } catch (const json::exception& e) {
+            LOGERR << "JSON error: " << e.what() << '\n';
+            continue;
+        }
     }
 
     // Send log data to server from each Crazyflie every second
@@ -84,7 +99,7 @@ void CHivexploreLoopFunctions::PreStep() {
                 std::visit(
                     [&key = std::as_const(key), &controller, this](const auto& value) {
                         json packet = {
-                            {"variable", key},
+                            {"logName", key},
                             {"droneId", controller.get().GetId()},
                             {"value", value},
                         };
@@ -111,7 +126,7 @@ bool CHivexploreLoopFunctions::IsExperimentFinished() {
 }
 
 void CHivexploreLoopFunctions::PostExperiment() {
-    std::cerr << "PostExperiment!\n";
+    std::cerr << "PostExperiment!\n"; // TODO: Remove
 
     // Close socket
     if (close(m_connectionSocket) == -1) {

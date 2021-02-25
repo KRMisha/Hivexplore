@@ -17,18 +17,28 @@ class Server:
         self._crazyflie_manager = CrazyflieManager(self._web_socket_server, self._map_generator, enable_debug_driver)
 
     def start(self):
+        self._unix_socket_server.bind('pm.batteryLevel', self._mock_argos_battery_callback) # TODO: Remove
+
         asyncio.run(self._start_tasks())
 
     # TODO: Remove
-    async def _test(self):
+    async def _mock_argos_sending(self):
+        is_enabled = True
         while True:
+            await asyncio.sleep(4)
+            self._unix_socket_server.send('hivexplore.isM1LedOn', 's0', is_enabled)
             await asyncio.sleep(1)
-            self._unix_socket_server.send('test', 'test')
+            self._unix_socket_server.send('hivexplore.isM1LedOn', 's1', is_enabled)
+            is_enabled = not is_enabled
+
+    # TODO: Remove
+    def _mock_argos_battery_callback(self, drone_id, value):
+        print(f'Received battery level from drone {drone_id}: {value}')
 
     async def _start_tasks(self):
         await asyncio.gather(
             self._web_socket_server.serve(),
             self._unix_socket_server.serve(),
             self._crazyflie_manager.start(),
-            self._test(),
+            self._mock_argos_sending(),
         )

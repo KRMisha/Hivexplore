@@ -19,6 +19,7 @@ class CrazyflieManager:
 
     async def start(self):
         await self._find_crazyflies()
+        self._send_drone_ids()
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     async def _find_crazyflies(self):
@@ -49,6 +50,9 @@ class CrazyflieManager:
                 print(f'No Crazyflies found, retrying after {timeout_s} seconds')
                 await asyncio.sleep(timeout_s)
                 timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
+
+    def _send_drone_ids(self):
+        self._web_socket_server.send('drone-ids', None, (self._crazyflies.keys()))
 
     # Setup
 
@@ -103,13 +107,14 @@ class CrazyflieManager:
 
     def _connected(self, link_uri):
         print(f'Connected to {link_uri}')
-
         self._setup_log(self._crazyflies[link_uri])
         self._setup_param(self._crazyflies[link_uri])
+        self._send_drone_ids()
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')
         del self._crazyflies[link_uri]
+        self._send_drone_ids()
 
     def _connection_failed(self, link_uri, msg):
         print(f'Connection to {link_uri} failed: {msg}')

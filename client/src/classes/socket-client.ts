@@ -4,14 +4,14 @@ export default class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    private callbacks: Map<[string, number?], Array<(data: any) => void>> = new Map();
+    private callbacks: Map<string, Array<(data: any) => void>> = new Map();
 
     constructor() {
         this.socket.onmessage = (event: MessageEvent) => {
             const jsonContent = JSON.parse(event.data);
 
             const droneId = jsonContent.droneId === null ? undefined : jsonContent.droneId;
-            const callbacks = this.callbacks.get([jsonContent.event, droneId]);
+            const callbacks = this.callbacks.get(JSON.stringify([jsonContent.event, droneId]));
 
             if (callbacks === undefined) {
                 console.warn(`Unknown socket event received: ${jsonContent.event}`);
@@ -33,11 +33,11 @@ export default class SocketClient {
     }
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    bind(eventName: string, droneId: number | undefined, callback: (data: any) => void) {
-        if (!this.callbacks.has([eventName, droneId])) {
-            this.callbacks.set([eventName, droneId], []);
+    bind(eventName: string, droneId: string | undefined, callback: (data: any) => void) {
+        if (!this.callbacks.has(JSON.stringify([eventName, droneId]))) {
+            this.callbacks.set(JSON.stringify([eventName, droneId]), []);
         }
-        this.callbacks.get([eventName, droneId])!.push(callback);
+        this.callbacks.get(JSON.stringify([eventName, droneId]))!.push(callback);
     }
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any

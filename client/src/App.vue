@@ -1,6 +1,6 @@
 <template>
     <!-- TODO: Loop through available drones and give them their proper IDs -->
-    <Drone :droneId="0" />
+    <Drone droneId="test" />
 </template>
 
 <script lang="ts">

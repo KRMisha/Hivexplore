@@ -21,12 +21,13 @@ import SocketClient from './../classes/socket-client';
 export default defineComponent({
     name: 'Drone',
     props: {
-        droneId: Number,
+        droneId: String,
     },
     setup(props) {
         const socket: SocketClient | undefined = inject('socket');
 
         const batteryLevel = ref(0);
+        console.log(props.droneId);
         socket!.bind('battery-level', props.droneId, (updatedBatteryLevel: number) => {
             batteryLevel.value = updatedBatteryLevel;
         });

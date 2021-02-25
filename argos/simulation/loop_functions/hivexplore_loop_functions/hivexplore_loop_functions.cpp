@@ -10,7 +10,7 @@ using json = nlohmann::json;
 
 namespace {
     const char socketPath[] = "/tmp/hivexplore/socket.sock";
-}
+} // namespace
 
 void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
     StartSocket();

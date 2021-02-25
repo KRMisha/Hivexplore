@@ -12,22 +12,16 @@ namespace {
     const char socketPath[] = "/tmp/hivexplore/socket.sock";
 }
 
-// TODO: Change LOGERR to LOG for non-error output once the controller output is removed to spam less
-
 void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
-    LOGERR << "Init!\n";
     StartSocket();
 }
 
 void CHivexploreLoopFunctions::Reset() {
-    LOGERR << "Reset!\n";
     m_isExperimentFinished = false;
     StartSocket();
 }
 
 void CHivexploreLoopFunctions::Destroy() {
-    LOGERR << "Destroy!\n";
-
     // Close socket
     if (close(m_connectionSocket) == -1 && errno != EBADF) {
         std::perror("Unix connection socket close");
@@ -58,7 +52,7 @@ void CHivexploreLoopFunctions::PreStep() {
 
         // Restart simulation if server disconnects
         if (count == 0) {
-            std::cerr << "Unix socket connection closed\n";
+            LOGERR << "Unix socket connection closed\n";
             Stop();
             return;
         } else if (count == -1) {
@@ -126,8 +120,6 @@ bool CHivexploreLoopFunctions::IsExperimentFinished() {
 }
 
 void CHivexploreLoopFunctions::PostExperiment() {
-    std::cerr << "PostExperiment!\n"; // TODO: Remove
-
     // Close socket
     if (close(m_connectionSocket) == -1) {
         std::perror("Unix connection socket close");
@@ -184,10 +176,11 @@ void CHivexploreLoopFunctions::StartSocket() {
 }
 
 void CHivexploreLoopFunctions::Stop() {
-    LOGERR << "Stopping simulation... Please do the following to restart the mission:\n"
-              "1. Press the restart button on the ARGoS client - the simulation will freeze\n"
-              "2. Restart the server\n"
-              "3. Press the play button on the ARGoS client\n";
+    LOG << "Stopping simulation...\n"
+           "Please do the following to restart the mission:\n"
+           "1. Press the restart button on the ARGoS client - the simulation will freeze\n"
+           "2. Restart the server\n"
+           "3. Press the play button on the ARGoS client\n";
     m_isExperimentFinished = true;
 }
 

@@ -9,7 +9,7 @@ class UnixSocketError(Exception):
     pass
 
 
-class UnixSocketServer:
+class UnixSocketClient:
     def __init__(self):
         self._callbacks: Dict[str, List[Callable]] = {}
         self._message_queue = None
@@ -31,7 +31,7 @@ class UnixSocketServer:
                         timeout_s = config.BASE_CONNECTION_TIMEOUT_S
                         break
                     except (FileNotFoundError, ConnectionRefusedError, socket.timeout) as exc:
-                        print('UnixSocketServer connection error:', exc)
+                        print('UnixSocketClient connection error:', exc)
                         print(f'Connection to ARGoS failed, retrying after {timeout_s} seconds')
                         await asyncio.sleep(timeout_s)
                         timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
@@ -42,7 +42,7 @@ class UnixSocketServer:
                 try:
                     await asyncio.gather(*tasks)
                 except (UnixSocketError, ConnectionResetError) as exc:
-                    print('UnixSocketServer communication error:', exc)
+                    print('UnixSocketClient communication error:', exc)
                     for task in tasks:
                         task.cancel()
                     self._socket.close()
@@ -76,7 +76,7 @@ class UnixSocketServer:
                 for callback in self._callbacks.get(message['logName'], []):
                     callback(message['droneId'], message['value'])
             except (json.JSONDecodeError, KeyError) as exc:
-                print('UnixSocketServer error: Invalid message received:', exc)
+                print('UnixSocketClient error: Invalid message received:', exc)
 
     async def _send_handler(self):
         while True:

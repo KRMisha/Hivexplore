@@ -10,7 +10,7 @@ export default class SocketClient {
         this.socket.onmessage = (event: MessageEvent) => {
             const jsonContent = JSON.parse(event.data);
 
-            const droneId = jsonContent.droneId === null ? undefined : jsonContent.droneId;
+            const droneId = jsonContent.droneId ?? undefined;
             const callbacks = this.callbacks.get(JSON.stringify([jsonContent.event, droneId]));
 
             if (callbacks === undefined) {

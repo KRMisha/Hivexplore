@@ -122,7 +122,7 @@ class CrazyflieManager:
     # Log callbacks
 
     def _log_battery_callback(self, _timestamp, data, _logconf):
-        battery_level = data["pm.batteryLevel"]
+        battery_level = data['pm.batteryLevel']
         print(f'Battery level: {battery_level}')
         self._web_socket_server.send('battery-level', battery_level)
 
@@ -134,12 +134,12 @@ class CrazyflieManager:
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {
-            'front': data["range.front"],
-            'back': data["range.back"],
-            'up': data["range.up"],
-            'left': data["range.left"],
-            'right': data["range.right"],
-            'zrange': data["range.zrange"],
+            'front': data['range.front'],
+            'back': data['range.back'],
+            'up': data['range.up'],
+            'left': data['range.left'],
+            'right': data['range.right'],
+            'zrange': data['range.zrange'],
         }
         self._map_generator.add_points(measurements)
         print(logconf.name)
@@ -148,9 +148,9 @@ class CrazyflieManager:
 
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
-            'x': data["stateEstimate.x"],
-            'y': data["stateEstimate.y"],
-            'z': data["stateEstimate.z"],
+            'x': data['stateEstimate.x'],
+            'y': data['stateEstimate.y'],
+            'z': data['stateEstimate.z'],
         }
         self._map_generator.add_position(measurements)
         print(logconf.name)

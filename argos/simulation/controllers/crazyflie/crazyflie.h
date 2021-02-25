@@ -1,5 +1,5 @@
-#ifndef CRAZYFLIE_SENSING_H
-#define CRAZYFLIE_SENSING_H
+#ifndef CRAZYFLIE_H
+#define CRAZYFLIE_H
 
 #include <unordered_map>
 #include <variant>

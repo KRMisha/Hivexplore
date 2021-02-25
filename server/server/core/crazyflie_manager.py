@@ -125,9 +125,7 @@ class CrazyflieManager:
         battery_level = data['pm.batteryLevel']
         print(f'Battery level: {battery_level}')
 
-        # TODO: Retrieve drone ID and send it to the client
-        drone_id = 0
-        self._web_socket_server.send('battery-level', drone_id, battery_level)
+        self._web_socket_server.send('battery-level', logconf.cf._link_uri, battery_level)
 
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
@@ -141,9 +139,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
-        # TODO: Retrieve drone ID and send it to the client
-        drone_id = 0
-        self._web_socket_server.send('stabilizer-data', drone_id, measurements)
+        self._web_socket_server.send('stabilizer-data', logconf.cf._link_uri, measurements)
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -159,9 +155,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
-        # TODO: Retrieve drone ID and send it to the client
-        drone_id = 0
-        self._web_socket_server.send('range-data', drone_id, measurements)
+        self._web_socket_server.send('range-data', logconf.cf._link_uri, measurements)
 
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -174,9 +168,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
 
-        # TODO: Retrieve drone ID and send it to the client
-        drone_id = 0
-        self._web_socket_server.send('position-data', drone_id, measurements)
+        self._web_socket_server.send('position-data', logconf.cf._link_uri, measurements)
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

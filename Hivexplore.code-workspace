@@ -23,6 +23,10 @@
         "git.detectSubmodules": false,
         "files.associations": {
             "drone/**.h": "c"
+        },
+        "search.exclude": {
+            "**/.mypy_cache": true,
+            "**/.venv": true
         }
     },
     "extensions": {

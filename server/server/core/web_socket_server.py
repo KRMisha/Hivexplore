@@ -8,15 +8,18 @@ IP_ADDRESS = 'localhost'
 PORT = 5678
 
 
-class SocketServer:
+class WebSocketServer:
     def __init__(self):
         self._callbacks: Dict[str, List[Callable]] = {}
+        self._message_queue = None
+
+    async def serve(self):
+        # Initialize message queue here since it must be created in the same event loop as asyncio.run()
         self._message_queue = asyncio.Queue()
 
-    def serve(self):
-        server_instance = websockets.serve(self._socket_handler, IP_ADDRESS, PORT)
-        asyncio.get_event_loop().run_until_complete(server_instance)
-        asyncio.get_event_loop().run_forever()
+        server = await websockets.serve(self._socket_handler, IP_ADDRESS, PORT)
+        print('WebSocketServer started')
+        await server.wait_closed()
 
     def send(self, event: str, drone_id: int, data: Any):
         self._message_queue.put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
@@ -25,12 +28,15 @@ class SocketServer:
         self._callbacks.setdefault(event, []).append(callback)
 
     async def _socket_handler(self, websocket, path):
-        receive_task = asyncio.ensure_future(self._receive_handler(websocket, path))
-        send_task = asyncio.ensure_future(self._send_handler(websocket, path))
+        print('New client connected:', websocket.origin)
+        receive_task = asyncio.create_task(self._receive_handler(websocket, path))
+        send_task = asyncio.create_task(self._send_handler(websocket, path))
 
         _done, pending = await asyncio.wait([receive_task, send_task], return_when=asyncio.FIRST_COMPLETED)
         for task in pending:
             task.cancel()
+
+        print('Client disconnected:', websocket.origin)
 
     async def _receive_handler(self, websocket, _path):
         async for message_str in websocket:
@@ -39,7 +45,7 @@ class SocketServer:
                 for callback in self._callbacks.get(message['event'], []):
                     callback(message['data'])
             except (json.JSONDecodeError, KeyError) as exc:
-                print('SocketServer error: Invalid message received:', exc)
+                print('WebSocketServer error: Invalid message received:', exc)
 
     async def _send_handler(self, websocket, _path):
         while True:

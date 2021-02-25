@@ -1,10 +1,15 @@
 SIM_DIR := simulation
 CMAKE_BUILD_DIR := $(SIM_DIR)/build
 
+HIVEXPLORE_SOCKET_DIR := /tmp/hivexplore
+
 LOCAL_ARGOS_VSCODE_CONFIG_DIR := $$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/imageConfigs
 LOCAL_ARGOS_VSCODE_CONFIG := $(LOCAL_ARGOS_VSCODE_CONFIG_DIR)/hivexplore%2fargos%3adev.json
 
-.PHONY: copy-config clean-config image image-prod start start-prod cmake build run clean format help
+.PHONY: all copy-config clean-config image image-prod start start-prod cmake build run clean format help
+
+# Default target for building
+all: build
 
 # Commands for use outside the container dev environment
 copy-config:
@@ -21,10 +26,12 @@ image-prod:
 	docker build -t hivexplore/argos .
 
 start:
-	x11docker --hostdisplay -- "-v \"$$(pwd)/..\":/hivexplore" hivexplore/argos:dev
+	mkdir -p $(HIVEXPLORE_SOCKET_DIR)
+	x11docker --hostdisplay -- "-v \"$$(pwd)/..\":/hivexplore -v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos:dev
 
 start-prod:
-	x11docker --hostdisplay -i hivexplore/argos
+	mkdir -p $(HIVEXPLORE_SOCKET_DIR)
+	x11docker --hostdisplay -i -- "-v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos
 
 # Commands for use inside the container dev environment
 cmake: $(CMAKE_BUILD_DIR)/Makefile
@@ -61,7 +68,7 @@ help:
 	\n\
 	  Commands for use inside the container dev environment:\n\
 	    cmake           Generate a Makefile with CMake\n\
-	    build           Build the ARGoS simulation with the generated CMake Makefile\n\
+	    build           Build the ARGoS simulation with the generated CMake Makefile (default target)\n\
 	    run             Build and run the ARGoS simulation\n\
 	    clean           Clean CMake build directory\n\
 	    format          Format code with clang-format\n"

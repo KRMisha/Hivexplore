@@ -10,14 +10,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
         m_pcPropellers = GetActuator<CCI_QuadRotorPositionActuator>("quadrotor_position");
         m_pcRABA = GetActuator<CCI_RangeAndBearingActuator>("range_and_bearing");
         m_pcRABS = GetSensor<CCI_RangeAndBearingSensor>("range_and_bearing");
-        try {
-            m_pcPos = GetSensor<CCI_PositioningSensor>("positioning");
-        } catch (const CARGoSException& e) {
-        }
-        try {
-            m_pcBattery = GetSensor<CCI_BatterySensor>("battery");
-        } catch (const CARGoSException& e) {
-        }
+        m_pcPos = GetSensor<CCI_PositioningSensor>("positioning");
+        m_pcBattery = GetSensor<CCI_BatterySensor>("battery");
     } catch (CARGoSException& e) {
         THROW_ARGOSEXCEPTION_NESTED("Error initializing the Crazyflie controller for robot \"" << GetId() << "\"", e);
     }

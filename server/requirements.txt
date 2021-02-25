@@ -2,5 +2,6 @@ cflib==0.1.13.1
 mypy
 pylint
 pytest==6.2.2
-yapf
+rope
 websockets==8.1
+yapf

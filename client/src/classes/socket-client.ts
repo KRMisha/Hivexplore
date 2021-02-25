@@ -1,4 +1,4 @@
-const serverUrl = 'ws:localhost:5678'
+const serverUrl = 'ws:localhost:5678';
 
 export default class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);

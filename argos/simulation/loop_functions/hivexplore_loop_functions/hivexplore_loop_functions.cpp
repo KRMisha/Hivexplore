@@ -13,7 +13,7 @@ namespace {
 } // namespace
 
 void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
-    StartSocket();
+    Reset();
 }
 
 void CHivexploreLoopFunctions::Reset() {

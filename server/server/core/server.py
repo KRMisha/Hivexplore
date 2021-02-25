@@ -32,7 +32,7 @@ class Server:
             is_enabled = not is_enabled
 
     # TODO: Remove
-    def _mock_argos_battery_callback(self, drone_id, value):
+    def _mock_argos_battery_callback(self, drone_id, value): # pylint: disable=no-self-use
         print(f'Received battery level from drone {drone_id}: {value}')
 
     async def _start_tasks(self):

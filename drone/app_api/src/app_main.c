@@ -46,100 +46,119 @@
 #include "pm.h"
 #include "app_channel.h"
 
+#include "commander.h"
+#include "timers.h"
 #define DEBUG_MODULE "APPAPI"
 
-static bool isM1LedOn;
+static bool isM1LedOn = true;
+static setpoint_t setPoint;
+enum state {IDLE = 0 , STARTUP, TAKEOFF, FORWARD, LANDING, LANDED} typedef state;
+static state currentState = IDLE;
+
+float cruiseHeight = 1.f;
+float cruiseVelocity = 0.2f;
+
+static void setWaypoint(setpoint_t* setpoint, float vx, float vy, float z, float yawrate) {
+    setpoint->mode.z = modeAbs;
+    setpoint->position.z = z;
+
+    setpoint->mode.yaw = modeVelocity;
+    setpoint->attitudeRate.yaw = yawrate;
+
+    setpoint->mode.x = modeVelocity;
+    setpoint->mode.y = modeVelocity;
+    setpoint->velocity.x = vx;
+    setpoint->velocity.y = vy;
+
+    setpoint->velocity_body = true;
+}
+
 
 void appMain() {
+    logVarId_t idUp = logGetVarId("range", "up");
+    logVarId_t idDown = logGetVarId("range", "zrange");
+    // logVarId_t idLeft = logGetVarId("range", "left");
+    // logVarId_t idRight = logGetVarId("range", "right");
+    logVarId_t idFront = logGetVarId("range", "front");
+    // logVarId_t idBack = logGetVarId("range", "back");
+
+    // paramVarId_t idPositioningDeck = paramGetVarId("deck", "bcFlow2");
+    // paramVarId_t idMultiranger = paramGetVarId("deck", "bcMultiranger");
+
+    vTaskDelay(M2T(1000));
+    currentState = IDLE;
     while (true) {
-        ledSet(LED_GREEN_R, isM1LedOn);
+        vTaskDelay(M2T(10));
+        // uint8_t positioningInit = paramGetUint(idPositioningDeck);
+        // uint8_t multirangerInit = paramGetUint(idMultiranger);
+        uint16_t up = logGetUint(idUp);
+        // DEBUG_PRINT("Up: %i\n", up);
+        uint16_t down = logGetUint(idDown);
+        // uint16_t left = logGetUint(idLeft);
+        // uint16_t right = logGetUint(idRight);
+        uint16_t front = logGetUint(idFront);
+        // uint16_t back = logGetUint(idBack);
+
+        switch (currentState) {
+            case IDLE: {
+                    if (up < 200) {
+                        DEBUG_PRINT("Startup\n");
+                        currentState = STARTUP;
+                    }
+                    memset(&setPoint, 0, sizeof(setpoint_t));
+                    commanderSetSetpoint(&setPoint, 3);
+                }
+                break;
+            case STARTUP: {
+                    if (up > 300) {
+                        DEBUG_PRINT("Takeoff\n");
+                        currentState = TAKEOFF;
+                    }
+                }
+                break;
+            case TAKEOFF: {
+                    // TODO: Check obstacle above
+                    float vx = 0.0f;
+                    float vy = 0.0f;
+                    setWaypoint(&setPoint, vx, vy, cruiseHeight, 0);
+                    commanderSetSetpoint(&setPoint, 3);
+                    if(down >= cruiseHeight * 1000) {
+                        DEBUG_PRINT("Take off started\n");
+                        currentState = FORWARD;
+                        DEBUG_PRINT("Take off finished\n");
+                    }
+                }
+                break;
+            case FORWARD: {
+                    float vy = 0.f;
+                    setWaypoint(&setPoint, cruiseVelocity, vy, cruiseHeight, 0);
+                    commanderSetSetpoint(&setPoint, 3);
+                    if (front < 200) {
+                        DEBUG_PRINT("Wow minute madame, on se calme le ponpon\n");
+                        currentState = LANDING;
+                    }
+                }
+                break;
+            case LANDING: {
+                    float vx = 0.0f;
+                    float vy = 0.0f;
+                    float height = 0.0f;
+                    setWaypoint(&setPoint, vx, vy, height, 0);
+                    commanderSetSetpoint(&setPoint, 3);
+                    if (down < 50) {
+                        DEBUG_PRINT("Land started\n");
+                        currentState = LANDED;
+                        DEBUG_PRINT("Land finished\n");
+                    }
+                }
+                break;
+            case LANDED: {
+                    DEBUG_PRINT("4->0\n");
+                    currentState = IDLE;
+                }
+                break;
+        }
     }
-
-    /*
-    // Do not run this app
-    ASSERT_FAILED();
-
-    // LED sequencer
-    {
-        ledseqContext_t ledSeqContext;
-        ledseqRegisterSequence(&ledSeqContext);
-        ledseqRun(&ledSeqContext);
-        ledseqRunBlocking(&ledSeqContext);
-        ledseqStop(&ledSeqContext);
-        ledseqStopBlocking(&ledSeqContext);
-    }
-
-    // High level commander
-    {
-        uint8_t dummyTrajectory[10];
-        crtpCommanderHighLevelTakeoff(1.0f, 1.0f);
-        crtpCommanderHighLevelTakeoffYaw(1.0f, 1.0f, 1.0f);
-        crtpCommanderHighLevelLand(0.0f, 1.0f);
-        crtpCommanderHighLevelLandYaw(0.0f, 1.0f, 1.0f);
-        crtpCommanderHighLevelStop();
-        crtpCommanderHighLevelGoTo(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, false);
-        crtpCommanderHighLevelStartTrajectory(3, 1.0f, true, false);
-        crtpCommanderHighLevelDefineTrajectory(3, CRTP_CHL_TRAJECTORY_TYPE_POLY4D_COMPRESSED, 0, 17);
-        crtpCommanderHighLevelTrajectoryMemSize();
-        crtpCommanderHighLevelWriteTrajectory(20, 10, dummyTrajectory);
-        crtpCommanderHighLevelReadTrajectory(20, 10, dummyTrajectory);
-        crtpCommanderHighLevelIsTrajectoryFinished();
-        crtpCommanderHighLevelTakeoffWithVelocity(1.0f, 1.0f, true);
-        crtpCommanderHighLevelLandWithVelocity(1.0f, 1.0f, true);
-    }
-
-    // LPS
-    {
-        point_t position;
-        uint8_t unorderedAnchorList[5];
-
-        locoDeckGetAnchorPosition(0, &position);
-        locoDeckGetAnchorIdList(unorderedAnchorList, 5);
-        locoDeckGetActiveAnchorIdList(unorderedAnchorList, 5);
-    }
-
-    // Memory sub system
-    {
-        static const MemoryHandlerDef_t memDef = {
-            .type = MEM_TYPE_APP,
-        };
-        memoryRegisterHandler(&memDef);
-    }
-
-    // Log
-    {
-        logVarId_t id = logGetVarId("some", "log");
-        logGetFloat(id);
-        logGetInt(id);
-        logGetUint(id);
-    }
-
-    // Param
-    {
-        paramVarId_t id = paramGetVarId("some", "param");
-        paramGetFloat(id);
-        paramGetInt(id);
-        paramGetUint(id);
-        paramSetInt(id, 0);
-        paramSetFloat(id, 0.0f);
-    }
-
-    // Power management
-    {
-        pmIsBatteryLow();
-        pmIsChargerConnected();
-        pmIsCharging();
-        pmIsDischarging();
-    }
-
-    // App-channel
-    {
-        char buffer[APPCHANNEL_MTU];
-        appchannelSendPacket("hello", 5);
-        appchannelReceivePacket(buffer, APPCHANNEL_MTU, APPCHANNEL_WAIT_FOREVER);
-        appchannelHasOverflowOccured();
-    }
-    */
 }
 
 PARAM_GROUP_START(hivexplore)

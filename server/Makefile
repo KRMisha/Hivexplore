@@ -9,7 +9,7 @@ venv:
 run:
 	python3 -m server.main
 
-run-simulation:
+run-argos:
 	python3 -m server.main argos
 
 test:

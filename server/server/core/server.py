@@ -24,5 +24,5 @@ class Server:
     async def _start_tasks(self):
         await asyncio.gather(
             self._web_socket_server.serve(),
-            self._crazyflie_manager.start() if not self._is_argos.simulation else self._argos_manager.start(),
+            self._crazyflie_manager.start() if not self._is_argos_simulation else self._argos_manager.start(),
         )

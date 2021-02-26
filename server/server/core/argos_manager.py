@@ -21,6 +21,15 @@ class ArgosManager:
         # TODO: Handle ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange']
         # TODO: Handle ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z']
 
+        # self._unix_socket_client.bind('pm.batteryLevel', self._mock_argos_battery_callback) # TODO: Remove
+        # self._unix_socket_client.bind('range.front', self._mock_argos_range_front_callback) # TODO: Remove
+        # self._unix_socket_client.bind('range.left', self._mock_argos_range_left_callback)# TODO: Remove
+        # self._unix_socket_client.bind('range.back', self._mock_argos_range_back_callback)# TODO: Remove
+        # self._unix_socket_client.bind('range.right', self._mock_argos_range_right_callback)# TODO: Remove
+        # self._unix_socket_client.bind('stateEstimate.x', self._mock_argos_state_estimate_x_callback)# TODO: Remove
+        # self._unix_socket_client.bind('stateEstimate.y', self._mock_argos_state_estimate_y_callback)# TODO: Remove
+        # self._unix_socket_client.bind('stateEstimate.z', self._mock_argos_state_estimate_z_callback)# TODO: Remove
+
     def _set_led_enabled(self, is_enabled: bool):
         # TODO: Get drone IDs on connection to ARGoS and loop for all drone IDs
         drone_id = 's0'
@@ -30,3 +39,35 @@ class ArgosManager:
         print(f'Received battery level from drone {drone_id}: {value}')
         # TODO: Add drone_id
         self._web_socket_server.send('battery-level', value)
+
+    # TODO: Remove
+    def _mock_argos_battery_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received battery level from drone {drone_id}: {value}')
+
+    # TODO: Remove
+    def _mock_argos_range_front_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received range front from drone {drone_id}: {value}')
+
+    # TODO: Remove
+    def _mock_argos_range_left_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received range left from drone {drone_id}: {value}')
+
+    # TODO: Remove
+    def _mock_argos_range_back_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received range back from drone {drone_id}: {value}')
+
+    # TODO: Remove
+    def _mock_argos_range_right_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received range right from drone {drone_id}: {value}')
+
+    # TODO: Remove
+    def _mock_argos_state_estimate_x_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received state estimate x from drone {drone_id}: {value}')
+
+    # TODO: Remove
+    def _mock_argos_state_estimate_y_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received state estimate y from drone {drone_id}: {value}')
+
+    # TODO: Remove
+    def _mock_argos_state_estimate_z_callback(self, drone_id, value): # pylint: disable=no-self-use
+        print(f'Received state estimate z from drone {drone_id}: {value}')

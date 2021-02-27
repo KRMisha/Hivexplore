@@ -6,9 +6,9 @@ from server.core.server import Server
 
 def main():
     try:
-        enable_debug_driver = 'debug' in sys.argv[1:]
         is_argos_simulation = 'argos' in sys.argv[1:]
-        server = Server(enable_debug_driver, is_argos_simulation)
+        enable_debug_driver = 'debug' in sys.argv[1:]
+        server = Server(is_argos_simulation, enable_debug_driver)
         server.start()
     except KeyboardInterrupt:
         pass

@@ -1,6 +1,6 @@
 VENV := .venv
 
-.PHONY: venv run test lint typecheck format help
+.PHONY: venv run run-argos test lint typecheck format help
 
 venv:
 	python3 -m venv $(VENV)

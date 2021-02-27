@@ -27,11 +27,11 @@ image-prod:
 
 start:
 	mkdir -p $(HIVEXPLORE_SOCKET_DIR)
-	x11docker --hostdisplay -- "-v \"$$(pwd)/..\":/hivexplore -v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos:dev
+	x11docker --hostdisplay --name hivexplore -- "-v \"$$(pwd)/..\":/hivexplore -v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos:dev
 
 start-prod:
 	mkdir -p $(HIVEXPLORE_SOCKET_DIR)
-	x11docker --hostdisplay -i -- "-v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos
+	x11docker --hostdisplay --name hivexplore -i -- "-v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos
 
 # Commands for use inside the container dev environment
 cmake: $(CMAKE_BUILD_DIR)/Makefile

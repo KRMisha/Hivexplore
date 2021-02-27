@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.ERROR)
 
 
 class Server:
-    def __init__(self, is_argos_simulation, enable_debug_driver = False):
+    def __init__(self, is_argos_simulation, enable_debug_driver=False):
         self._is_argos_simulation = is_argos_simulation
         self._map_generator = MapGenerator()
         self._web_socket_server = WebSocketServer()

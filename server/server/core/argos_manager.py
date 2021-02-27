@@ -10,8 +10,6 @@ class ArgosManager:
         self._unix_socket_client = UnixSocketClient()
 
     async def start(self):
-        await self._unix_socket_client.serve()
-
         # Client bindings
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
@@ -20,6 +18,8 @@ class ArgosManager:
         # TODO: Handle ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw']
         # TODO: Handle ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange']
         # TODO: Handle ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z']
+
+        await self._unix_socket_client.serve()
 
     def _set_led_enabled(self, is_enabled: bool):
         # TODO: Get drone IDs on connection to ARGoS and loop for all drone IDs

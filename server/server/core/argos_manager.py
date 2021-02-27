@@ -22,7 +22,7 @@ class ArgosManager:
         await self._unix_socket_client.serve()
 
     def _set_led_enabled(self, is_enabled: bool):
-        # TODO: Add id
+        # TODO: Get drone IDs on connection to ARGoS and loop for all drone IDs
         drone_id = 's0'
         self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
 

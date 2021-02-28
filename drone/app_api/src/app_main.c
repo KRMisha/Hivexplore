@@ -64,18 +64,22 @@ static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
 static bool isM1LedOn = true;
 
-static void setWaypoint(setpoint_t* setPoint, float forwardVelocity, float leftVelocity, float height, float yaw) {
+static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
     setPoint->velocity_body = true;
     setPoint->mode.x = modeVelocity;
     setPoint->mode.y = modeVelocity;
-    setPoint->velocity.x = forwardVelocity;
-    setPoint->velocity.y = leftVelocity;
+    setPoint->velocity.x = targetForwardVelocity;
+    setPoint->velocity.y = targetLeftVelocity;
 
     setPoint->mode.yaw = modeVelocity;
     setPoint->attitudeRate.yaw = yaw;
 
     setPoint->mode.z = modeAbs;
-    setPoint->position.z = height;
+    setPoint->position.z = targetHeight;
+}
+
+static uint16_t calculateDistanceCorrection(const uint16_t obstacleThreshold, const uint16_t sensorReading) {
+    return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
 void appMain(void) {
@@ -93,8 +97,6 @@ void appMain(void) {
     paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
     state currentState = IDLE;
-    // Named as bool since the returned value is actually a bool placed in a uint8_t (see multiranger.c and flowdeck_v1v2.c call to
-    // PARAM_ADD())
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
     if (!isFlowDeckInitialized) {
@@ -111,28 +113,28 @@ void appMain(void) {
 
         uint16_t upSensorReading = logGetUint(upSensorId);
         uint16_t downSensorReading = logGetUint(downSensorId);
-        uint16_t leftSensorreading = logGetUint(leftSensorId);
+        uint16_t leftSensorReading = logGetUint(leftSensorId);
         uint16_t rightSensorReading = logGetUint(rightSensorId);
         uint16_t frontSensorReading = logGetUint(frontSensorId);
         uint16_t backSensorReading = logGetUint(backSensorId);
 
-        float forwardVelocity = 0;
-        float leftVelocity = 0;
-        float height = 0;
-        float yawRate = 0;
+        float targetForwardVelocity = 0;
+        float targetLeftVelocity = 0;
+        float targetHeight = 0;
+        float targetYawRate = 0;
 
         // Global obstacle avoidance
         if (currentState == LIFTOFF || currentState == EXPLORE || currentState == ROTATE || currentState == LAND) {
             // Distance correction required to stay out of range of any obstacle
-            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(leftSensorreading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(rightSensorReading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(frontSensorReading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(backSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
+            uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
+            uint16_t frontDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, frontSensorReading);
+            uint16_t backDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, backSensorReading);
 
             // Velocity required to apply distance correction
             const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;
-            leftVelocity += (rightDistanceCorrection - leftDistanceCorrection) * AVOIDANCE_SENSITIVITY;
-            forwardVelocity += (backDistanceCorrection - frontDistanceCorrection) * AVOIDANCE_SENSITIVITY;
+            targetLeftVelocity += (rightDistanceCorrection - leftDistanceCorrection) * AVOIDANCE_SENSITIVITY;
+            targetForwardVelocity += (backDistanceCorrection - frontDistanceCorrection) * AVOIDANCE_SENSITIVITY;
         }
 
         switch (currentState) {
@@ -151,8 +153,8 @@ void appMain(void) {
             }
         } break;
         case LIFTOFF: {
-            height += EXPLORATION_HEIGHT;
-            setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
+            targetHeight += EXPLORATION_HEIGHT;
+            setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
             if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                 DEBUG_PRINT("Liftoff finished\n");
                 currentState = EXPLORE;
@@ -164,9 +166,9 @@ void appMain(void) {
             }
         } break;
         case EXPLORE: {
-            height += EXPLORATION_HEIGHT;
-            forwardVelocity += CRUISE_VELOCITY;
-            setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
+            targetHeight += EXPLORATION_HEIGHT;
+            targetForwardVelocity += CRUISE_VELOCITY;
+            setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
 
             if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
                 currentState = ROTATE;
@@ -182,9 +184,9 @@ void appMain(void) {
             if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
                 currentState = EXPLORE;
             }
-            height += EXPLORATION_HEIGHT;
-            yawRate = 50;
-            setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
+            targetHeight += EXPLORATION_HEIGHT;
+            targetYawRate = 50;
+            setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
 
             // TODO: Remove in final algorithm, currently used to make drone land
             if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
@@ -192,7 +194,7 @@ void appMain(void) {
             }
         } break;
         case LAND: {
-            setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
+            setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
             static const uint16_t LANDED_HEIGHT = 50;
             if (downSensorReading < LANDED_HEIGHT) {
                 DEBUG_PRINT("Landed\n");

@@ -51,7 +51,7 @@
 #define DEBUG_MODULE "APPAPI"
 
 static bool isM1LedOn = true;
-enum state { IDLE = 0, STARTUP, TAKEOFF, HOVER, DANCE, DANCING, LANDING, LANDED } typedef state;
+enum state { IDLE = 0, STARTUP, TAKEOFF, EXPLORE, ROTATE, LAND, LANDED, OUT_OF_SERVICE } typedef state;
 
 static const uint16_t OBTACLE_DETECTED_THRESHOLD = 300;
 const float EXPLORATION_HEIGHT = 0.5f;
@@ -81,10 +81,14 @@ void appMain() {
     logVarId_t idFront = logGetVarId("range", "front");
     logVarId_t idBack = logGetVarId("range", "back");
 
-    // TODO: Check module status and switch to Out-Of-Service state if unavailale
-    // paramVarId_t idPositioningDeck = paramGetVarId("deck", "bcFlow2");
-    // paramVarId_t idMultiranger = paramGetVarId("deck", "bcMultiranger");
+    paramVarId_t idPositioningDeck = paramGetVarId("deck", "bcFlow2");
+    paramVarId_t idMultiranger = paramGetVarId("deck", "bcMultiranger");
 
+    static state currentState = IDLE;
+    while (true) {
+        vTaskDelay(M2T(10));
+        uint8_t positioningInit = paramGetUint(idPositioningDeck);
+        uint8_t multirangerInit = paramGetUint(idMultiranger);
     float forwardVelocity = 0;
     float leftVelocity = 0;
     float height = 0;
@@ -113,6 +117,10 @@ void appMain() {
             if (up > OBTACLE_DETECTED_THRESHOLD) {
                 DEBUG_PRINT("Takeoff\n");
                 currentState = TAKEOFF;
+            }
+
+            if (!positioningInit || !multirangerInit) {
+                currentState = OUT_OF_SERVICE;
             }
         } break;
         case TAKEOFF: {
@@ -186,6 +194,16 @@ void appMain() {
         case LANDED: {
             DEBUG_PRINT("4->0\n");
             currentState = IDLE;
+        } break;
+        case OUT_OF_SERVICE: {
+            if (!positioningInit) {
+                DEBUG_PRINT("FlowdeckV2 is not connected\n");
+            }
+
+            if (!multirangerInit) {
+                DEBUG_PRINT("Multiranger is not connected\n");
+            }
+            memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
         }
         const uint8_t taskPriority = 3;

@@ -100,13 +100,13 @@ void appMain() {
     state currentState = IDLE;
     // Named as bool since the returned value is actually a bool placed in a uint8_t (see multiranger.c and flowdeck_v1v2.c call to
     // PARAM_ADD())
-    const uint8_t isFlowDeckconnected = paramGetUint(flowDeckModuleId);
-    const uint8_t isMultirangerConnected = paramGetUint(multirangerModuleId);
-    if (!isFlowDeckconnected) {
+    const uint8_t isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
+    const uint8_t isMultirangerInitialized = paramGetUint(multirangerModuleId);
+    if (!isFlowDeckInitialized) {
         DEBUG_PRINT("FlowdeckV2 is not connected\n");
         currentState = OUT_OF_SERVICE;
     }
-    if (!isMultirangerConnected) {
+    if (!isMultirangerInitialized) {
         DEBUG_PRINT("Multiranger is not connected\n");
         currentState = OUT_OF_SERVICE;
     }

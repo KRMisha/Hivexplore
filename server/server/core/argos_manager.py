@@ -1,6 +1,7 @@
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
+from typing import Any
 
 
 class ArgosManager:
@@ -16,6 +17,7 @@ class ArgosManager:
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
         # Argos bindings
+        self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
         self._unix_socket_client.bind('pm.batteryLevel', self._get_battery_callback)
         # TODO: Handle ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw']
         # TODO: Handle ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange']
@@ -33,10 +35,11 @@ class ArgosManager:
 
     # ARGoS Callbacks
 
-    def _on_argos_connection(self, drone_id: str, value: Any):
+    def _get_drone_ids_callback(self, drone_id: str, value: Any):
         try:
-            self._drone_ids = value['droneIds']
-            print('Received drone ids')
+            self._drone_ids = value
+            self._web_socket_server.send('drone-ids', None, self._drone_ids)
+            print('Received drone ids: ' self._drone_ids)
         except (json.JSONDecodeError, KeyError) as exc:
             print('ArgosManager error: Invalid message received', exc)
 

@@ -6,6 +6,8 @@
 
 using namespace argos;
 
+class CCrazyflieController;
+
 class CHivexploreLoopFunctions : public CLoopFunctions {
 public:
     virtual void Init(TConfigurationNode& t_tree) override;
@@ -19,6 +21,7 @@ public:
 private:
     void StartSocket();
     void Stop();
+    std::vector<std::reference_wrapper<CCrazyflieController>> GetControllers();
 
     int m_connectionSocket = -1;
     sockaddr_un m_socketName;

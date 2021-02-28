@@ -53,16 +53,17 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
 
-static bool isM1LedOn = true;
 enum state { IDLE = 0, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } typedef state;
 
+static bool isM1LedOn = true;
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
-const float EXPLORATION_HEIGHT = 0.5f;
-const float CRUISE_VELOCITY = 0.2f;
-const uint16_t meterToMillimeterFactor = 1000;
+static const float EXPLORATION_HEIGHT = 0.5f;
+static const float CRUISE_VELOCITY = 0.2f;
+static const uint16_t meterToMillimeterFactor = 1000;
 
-const float MAXIMUM_VELOCITY = 1.0f;
+static const float MAXIMUM_VELOCITY = 1.0f;
+
 static void setWaypoint(setpoint_t* setPoint, float forwardVelocity, float leftVelocity, float height, float yaw) {
     setPoint->velocity_body = true;
     setPoint->mode.x = modeVelocity;
@@ -78,7 +79,7 @@ static void setWaypoint(setpoint_t* setPoint, float forwardVelocity, float leftV
 }
 
 void appMain() {
-    static setpoint_t setPoint;
+    setpoint_t setPoint;
     vTaskDelay(M2T(3000));
 
     logVarId_t upSensorId = logGetVarId("range", "up");
@@ -91,11 +92,22 @@ void appMain() {
     paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
-    static state currentState = IDLE;
+
+    state currentState = IDLE;
+    // Named as bool since the returned value is actually a bool placed in a uint8_t (see multiranger.c and flowdeck_v1v2.c call to PARAM_ADD())
+    const uint8_t isFlowDeckconnected = paramGetUint(flowDeckModuleId);
+    const uint8_t isMultirangerConnected = paramGetUint(multirangerModuleId);
+    if (!isFlowDeckconnected) {
+        DEBUG_PRINT("FlowdeckV2 is not connected\n");
+        currentState = OUT_OF_SERVICE;
+    }
+    if (!isMultirangerConnected) {
+        DEBUG_PRINT("Multiranger is not connected\n");
+        currentState = OUT_OF_SERVICE;
+    }
+
     while (true) {
         vTaskDelay(M2T(10));
-        uint8_t flowDeckModuleState = paramGetUint(flowDeckModuleId);
-        uint8_t multirangerModuleState = paramGetUint(multirangerModuleId);
 
         uint16_t upSensorReading = logGetUint(upSensorId);
         uint16_t downSensorReading = logGetUint(downSensorId);
@@ -110,7 +122,7 @@ void appMain() {
         float yawRate = 0;
 
         // Global obstacle avoidance
-        if (currentState != IDLE && currentState != STARTUP && currentState != OUT_OF_SERVICE) {
+        if (currentState == LIFTOFF || currentState == EXPLORE || currentState == ROTATE || currentState == LAND) {
             // Distance correction required to stay out of range of any obstacle
             uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(leftSensorreading, OBSTACLE_DETECTED_THRESHOLD);
             uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(rightSensorReading, OBSTACLE_DETECTED_THRESHOLD);
@@ -132,22 +144,23 @@ void appMain() {
             memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
         case STARTUP: {
-            // Check if any obstacle is present before taking off
+            // Check if any obstacle is in the way before taking off
             if (upSensorReading > EXPLORATION_HEIGHT * meterToMillimeterFactor) {
                 DEBUG_PRINT("Liftoff\n");
                 currentState = LIFTOFF;
-            }
-
-            if (!flowDeckModuleState || !multirangerModuleState) {
-                currentState = OUT_OF_SERVICE;
             }
         } break;
         case LIFTOFF: {
             height += EXPLORATION_HEIGHT;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
             if (downSensorReading >= EXPLORATION_HEIGHT * meterToMillimeterFactor) {
-                currentState = EXPLORE;
                 DEBUG_PRINT("Liftoff finished\n");
+                currentState = EXPLORE;
+            }
+
+            // TODO: Remove in final algorithm, currently used to make drone land
+            if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
+                currentState = LAND;
             }
         } break;
         case EXPLORE: {
@@ -159,7 +172,7 @@ void appMain() {
                 currentState = ROTATE;
             }
 
-            // Temporary code to make drone land
+            // TODO: Remove in final algorithm, currently used to make drone land
             if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
                 currentState = LAND;
             }
@@ -169,31 +182,26 @@ void appMain() {
             if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
                 currentState = EXPLORE;
             }
-
-            // Temporary code to make drone land
-            if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                currentState = LAND;
-            }
             height += EXPLORATION_HEIGHT;
             yawRate = 50;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
+
+            // TODO: Remove in final algorithm, currently used to make drone land
+            if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
+                currentState = LAND;
+            }
         } break;
         case LAND: {
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
             const uint16_t LANDED_HEIGHT = 50;
             if (downSensorReading < LANDED_HEIGHT) {
-                currentState = IDLE;
                 DEBUG_PRINT("Landed\n");
+                currentState = IDLE;
             }
         } break;
         case OUT_OF_SERVICE: {
-            if (!flowDeckModuleState) {
-                DEBUG_PRINT("FlowdeckV2 is not connected\n");
-            }
-
-            if (!multirangerModuleState) {
-                DEBUG_PRINT("Multiranger is not connected\n");
-            }
+            isM1LedOn = true;
+            ledSet(LED_RED_R, isM1LedOn);
             memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
         }

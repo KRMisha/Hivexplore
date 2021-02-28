@@ -50,8 +50,13 @@
 #include "timers.h"
 #define DEBUG_MODULE "APPAPI"
 
-#define MAX(a, b) ((a > b) ? a : b)
-#define MIN(a, b) ((a < b) ? a : b)
+uint16_t min(uint16_t a, uint16_t b) {
+    return (a < b) ? a : b;
+}
+
+uint16_t max(uint16_t a, uint16_t b) {
+    return (a > b) ? a : b;
+}
 
 enum state { IDLE = 0, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } typedef state;
 
@@ -124,10 +129,10 @@ void appMain() {
         // Global obstacle avoidance
         if (currentState == LIFTOFF || currentState == EXPLORE || currentState == ROTATE || currentState == LAND) {
             // Distance correction required to stay out of range of any obstacle
-            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(leftSensorreading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(rightSensorReading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(frontSensorReading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(backSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(leftSensorreading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(rightSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(frontSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(backSensorReading, OBSTACLE_DETECTED_THRESHOLD);
 
             // Velocity required to apply distance correction
             const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;

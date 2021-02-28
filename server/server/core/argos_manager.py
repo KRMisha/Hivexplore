@@ -26,7 +26,7 @@ class ArgosManager:
 
         await self._unix_socket_client.serve()
 
-    # Client Callbacks
+    # Client callbacks
 
     def _new_connection_callback(self):
         self._web_socket_server.send('drone-ids', None, self._drone_ids)
@@ -35,15 +35,15 @@ class ArgosManager:
         if drone_id in self._drone_ids:
             self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
         else:
-            print('ArgosManager error: Invalid drone id received:', drone_id)
+            print('ArgosManager error: Unknown drone ID received:', drone_id)
 
-    # ARGoS Callbacks
+    # ARGoS callbacks
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], value: Any):
         try:
             self._drone_ids = value
             self._web_socket_server.send('drone-ids', None, self._drone_ids)
-            print('Received drone ids: ', self._drone_ids)
+            print('Received drone IDs: ', self._drone_ids)
         except (json.JSONDecodeError, KeyError) as exc:
             print('ArgosManager error: Invalid message received', exc)
 

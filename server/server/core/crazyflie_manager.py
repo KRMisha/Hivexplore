@@ -55,6 +55,7 @@ class CrazyflieManager:
     def _setup_log(self, crazyflie: Crazyflie):
         # Log config setup with the logged variables and success/error logging callbacks
         POLLING_PERIOD_MS = 1000
+        # TODO: Add log config for velocity (from state estimate group)
         log_configs = [
             {
                 'log_config': LogConfig(name='BatteryLevel', period_in_ms=POLLING_PERIOD_MS),
@@ -63,21 +64,21 @@ class CrazyflieManager:
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Stabilizer', period_in_ms=POLLING_PERIOD_MS),
-                'variables': ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw'],
+                'log_config': LogConfig(name='Orientation', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['stateEstimate.roll', 'stateEstimate.pitch', 'stateEstimate.yaw'],
                 'data_callback': self._log_stabilizer_callback,
-                'error_callback': self._log_error_callback,
-            },
-            {
-                'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS),
-                'variables': ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange'],
-                'data_callback': self._log_range_callback,
                 'error_callback': self._log_error_callback,
             },
             {
                 'log_config': LogConfig(name='Position', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
                 'data_callback': self._log_position_callback,
+                'error_callback': self._log_error_callback,
+            },
+            {
+                'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['range.front', 'range.left', 'range.back', 'range.right', 'range.up', 'range.zrange'],
+                'data_callback': self._log_range_callback,
                 'error_callback': self._log_error_callback,
             },
         ]

@@ -163,10 +163,10 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
         std::size_t index = std::distance(distanceReadings.begin(), it);
         rangeLog.emplace(rangeLogNames[index], static_cast<float>((it->second == -2)? 0 : (it->second)* 10));
     }
-    // TODO: Find sensor to get range.zrange value
-    rangeLog.emplace("range.zrange", static_cast<float>(position.GetZ() * 1000));
     // TODO: Find sensor to get range.up value
     rangeLog.emplace("range.up", static_cast<float>(0));
+    // TODO: Find sensor to get range.zrange value
+    rangeLog.emplace("range.zrange", static_cast<float>(position.GetZ() * 1000));
     logDataMap.emplace("Range", rangeLog);
 
     return logDataMap;

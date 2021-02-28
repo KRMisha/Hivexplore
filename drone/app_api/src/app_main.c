@@ -54,7 +54,7 @@
 #define MIN(a, b) ((a < b) ? a : b)
 
 static bool isM1LedOn = true;
-enum state { IDLE = 0, STARTUP, TAKEOFF, EXPLORE, ROTATE, LAND, LANDED, OUT_OF_SERVICE } typedef state;
+enum state { IDLE = 0, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } typedef state;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -81,82 +81,73 @@ void appMain() {
     static setpoint_t setPoint;
     vTaskDelay(M2T(3000));
 
-    logVarId_t idUp = logGetVarId("range", "up");
-    logVarId_t idDown = logGetVarId("range", "zrange");
-    logVarId_t idLeft = logGetVarId("range", "left");
-    logVarId_t idRight = logGetVarId("range", "right");
-    logVarId_t idFront = logGetVarId("range", "front");
-    logVarId_t idBack = logGetVarId("range", "back");
+    logVarId_t upSensorId = logGetVarId("range", "up");
+    logVarId_t downSensorId = logGetVarId("range", "zrange");
+    logVarId_t leftSensorId = logGetVarId("range", "left");
+    logVarId_t rightSensorId = logGetVarId("range", "right");
+    logVarId_t frontSensorId = logGetVarId("range", "front");
+    logVarId_t backSensorId = logGetVarId("range", "back");
 
-    paramVarId_t idPositioningDeck = paramGetVarId("deck", "bcFlow2");
-    paramVarId_t idMultiranger = paramGetVarId("deck", "bcMultiranger");
+    paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
+    paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
     static state currentState = IDLE;
     while (true) {
         vTaskDelay(M2T(10));
-        uint8_t positioningInit = paramGetUint(idPositioningDeck);
-        uint8_t multirangerInit = paramGetUint(idMultiranger);
-        uint16_t upSensor = logGetUint(idUp);
-        uint16_t downSensor = logGetUint(idDown);
-        uint16_t leftSensor = logGetUint(idLeft);
-        uint16_t rightSensor = logGetUint(idRight);
-        uint16_t frontSensor = logGetUint(idFront);
-        uint16_t backSensor = logGetUint(idBack);
+        uint8_t flowDeckModuleState = paramGetUint(flowDeckModuleId);
+        uint8_t multirangerModuleState = paramGetUint(multirangerModuleId);
+
+        uint16_t upSensorReading = logGetUint(upSensorId);
+        uint16_t downSensorReading = logGetUint(downSensorId);
+        uint16_t leftSensorreading = logGetUint(leftSensorId);
+        uint16_t rightSensorReading = logGetUint(rightSensorId);
+        uint16_t frontSensorReading = logGetUint(frontSensorId);
+        uint16_t backSensorReading = logGetUint(backSensorId);
 
         float forwardVelocity = 0;
         float leftVelocity = 0;
         float height = 0;
         float yawRate = 0;
 
-        // Obstacle avoidance
-        if (currentState != IDLE && currentState != STARTUP
-            && currentState != OUT_OF_SERVICE) {
-
+        // Global obstacle avoidance
+        if (currentState != IDLE && currentState != STARTUP && currentState != OUT_OF_SERVICE) {
             // Distance correction required to stay out of range of any obstacle
-            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(leftSensor, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(rightSensor, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(frontSensor, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(backSensor, OBSTACLE_DETECTED_THRESHOLD);
-
-            // float leftVelocityCompensation = -1 * leftDistanceCorrection * AVOIDANCE_SENSITIVITY;
-            // float rightVelocityCompensation = rightDistanceCorrection * AVOIDANCE_SENSITIVITY;
-            // float frontVelocityCompensation = -1 * frontDistanceCorrection * AVOIDANCE_SENSITIVITY;
-            // float backVelocityCompensation = backDistanceCorrection * AVOIDANCE_SENSITIVITY;
+            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(leftSensorreading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(rightSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(frontSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(backSensorReading, OBSTACLE_DETECTED_THRESHOLD);
 
             // Velocity required to apply distance correction
             const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;
             leftVelocity += (rightDistanceCorrection - leftDistanceCorrection) * AVOIDANCE_SENSITIVITY;
             forwardVelocity += (backDistanceCorrection - frontDistanceCorrection) * AVOIDANCE_SENSITIVITY;
-
-            // leftVelocity += rightVelocityCompensation + leftVelocityCompensation;
-            // forwardVelocity += frontVelocityCompensation + belowVelocityCompensation;
         }
 
         switch (currentState) {
         case IDLE: {
-            if (upSensor < OBSTACLE_DETECTED_THRESHOLD) {
+            if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
                 DEBUG_PRINT("Startup\n");
                 currentState = STARTUP;
             }
             memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
         case STARTUP: {
-            // Check if any obstacle if present before taking off
-            if (upSensor > EXPLORATION_HEIGHT * meterToMillimeterFactor) {
-                DEBUG_PRINT("Takeoff\n");
-                currentState = TAKEOFF;
+            // Check if any obstacle is present before taking off
+            if (upSensorReading > EXPLORATION_HEIGHT * meterToMillimeterFactor) {
+                DEBUG_PRINT("Liftoff\n");
+                currentState = LIFTOFF;
             }
 
-            if (!positioningInit || !multirangerInit) {
+            if (!flowDeckModuleState || !multirangerModuleState) {
                 currentState = OUT_OF_SERVICE;
             }
         } break;
-        case TAKEOFF: {
+        case LIFTOFF: {
             height += EXPLORATION_HEIGHT;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
-            if (downSensor >= EXPLORATION_HEIGHT * meterToMillimeterFactor) {
+            if (downSensorReading >= EXPLORATION_HEIGHT * meterToMillimeterFactor) {
                 currentState = EXPLORE;
-                DEBUG_PRINT("Take off finished\n");
+                DEBUG_PRINT("Liftoff finished\n");
             }
         } break;
         case EXPLORE: {
@@ -164,20 +155,25 @@ void appMain() {
             forwardVelocity += CRUISE_VELOCITY;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
 
-            if (frontSensor < EDGE_DETECTED_THRESHOLD) {
+            if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
                 currentState = ROTATE;
             }
 
-            if (upSensor < OBSTACLE_DETECTED_THRESHOLD) {
+            // Temporary code to make drone land
+            if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
                 currentState = LAND;
             }
         } break;
         case ROTATE: {
             const uint16_t OPEN_SPACE_THRESHOLD = 300;
-            if (frontSensor > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
+            if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
                 currentState = EXPLORE;
             }
 
+            // Temporary code to make drone land
+            if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
+                currentState = LAND;
+            }
             height += EXPLORATION_HEIGHT;
             yawRate = 50;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
@@ -185,22 +181,17 @@ void appMain() {
         case LAND: {
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
             const uint16_t LANDED_HEIGHT = 50;
-            if (downSensor < LANDED_HEIGHT) {
-                DEBUG_PRINT("Land started\n");
-                currentState = LANDED;
-                DEBUG_PRINT("Land finished\n");
+            if (downSensorReading < LANDED_HEIGHT) {
+                currentState = IDLE;
+                DEBUG_PRINT("Landed\n");
             }
         } break;
-        case LANDED: {
-            DEBUG_PRINT("4->0\n");
-            currentState = IDLE;
-        } break;
         case OUT_OF_SERVICE: {
-            if (!positioningInit) {
+            if (!flowDeckModuleState) {
                 DEBUG_PRINT("FlowdeckV2 is not connected\n");
             }
 
-            if (!multirangerInit) {
+            if (!multirangerModuleState) {
                 DEBUG_PRINT("Multiranger is not connected\n");
             }
             memset(&setPoint, 0, sizeof(setpoint_t));

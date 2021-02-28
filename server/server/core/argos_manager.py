@@ -14,12 +14,12 @@ class ArgosManager:
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
         # Argos bindings
-        self._unix_socket_client.bind('pm.batteryLevel', self._get_battery_callback)
+        # self._unix_socket_client.bind('pm.batteryLevel', self._get_battery_callback)
         # TODO: Handle ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw']
         # TODO: Handle ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange']
         # TODO: Handle ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z']
 
-        # self._unix_socket_client.bind('pm.batteryLevel', self._mock_argos_battery_callback) # TODO: Remove
+        # self._unix_socket_client.bind('BatteryLevel', self._mock_argos_battery_callback) # TODO: Remove
         # self._unix_socket_client.bind('range.front', self._mock_argos_range_front_callback) # TODO: Remove
         # self._unix_socket_client.bind('range.left', self._mock_argos_range_left_callback)# TODO: Remove
         # self._unix_socket_client.bind('range.back', self._mock_argos_range_back_callback)# TODO: Remove

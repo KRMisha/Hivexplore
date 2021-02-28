@@ -97,9 +97,9 @@ void appMain() {
     paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
-
     state currentState = IDLE;
-    // Named as bool since the returned value is actually a bool placed in a uint8_t (see multiranger.c and flowdeck_v1v2.c call to PARAM_ADD())
+    // Named as bool since the returned value is actually a bool placed in a uint8_t (see multiranger.c and flowdeck_v1v2.c call to
+    // PARAM_ADD())
     const uint8_t isFlowDeckconnected = paramGetUint(flowDeckModuleId);
     const uint8_t isMultirangerConnected = paramGetUint(multirangerModuleId);
     if (!isFlowDeckconnected) {

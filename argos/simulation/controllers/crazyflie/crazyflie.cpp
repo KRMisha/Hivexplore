@@ -125,8 +125,9 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     const {
     // TODO: Double check with real stateEstimate values (drone side)
     // TODO: Check order in crazyflie manager and add missing groups in crazyflie manager
-    // TODO: Handle if returns -2 (check crazyflie)
+    // TODO: Handle if returns -1 (check crazyflie)
     // TODO: Find measures (crazyflie + argos) and transform to make them the same
+    // TODO: Add more log data to the map (match the names for keys from cflib) with code from LogData
 
     // Fill map progressively
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, float>>> logDataMap;
@@ -160,9 +161,10 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     decltype(logDataMap)::mapped_type rangeLog;
     for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
         std::size_t index = std::distance(distanceReadings.begin(), it);
-        rangeLog.emplace(rangeLogNames[index], static_cast<float>(it->second));
+        rangeLog.emplace(rangeLogNames[index], static_cast<float>((it->second == -2)? 0 : (it->second)* 10));
     }
-    rangeLog.emplace("range.zrange", static_cast<float>(position.GetZ()));
+    // TODO: Find sensor to get range.zrange value
+    rangeLog.emplace("range.zrange", static_cast<float>(position.GetZ() * 1000));
     // TODO: Find sensor to get range.up value
     rangeLog.emplace("range.up", static_cast<float>(0));
     logDataMap.emplace("Range", rangeLog);

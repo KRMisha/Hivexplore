@@ -2,8 +2,7 @@
 	"workspaceFolder": "/hivexplore",
 	"extensions": [
 		"EditorConfig.EditorConfig",
-		"ms-vscode.cpptools",
-		"xaver.clang-format"
+		"ms-vscode.cpptools"
 	],
 	"postAttachCommand": "cd /hivexplore/argos && make clean cmake"
 }

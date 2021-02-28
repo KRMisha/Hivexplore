@@ -1,7 +1,7 @@
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
-from typing import Any
+from typing import Any, Optional
 
 
 class ArgosManager:
@@ -27,7 +27,7 @@ class ArgosManager:
 
     # Client Callbacks
 
-    def _set_led_enabled(self, drone_id: str, is_enabled: bool):
+    def _set_led_enabled(self, drone_id: Optional[str], is_enabled: bool):
         if drone_id in self._drone_ids:
             self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
         else:
@@ -35,14 +35,14 @@ class ArgosManager:
 
     # ARGoS Callbacks
 
-    def _get_drone_ids_callback(self, drone_id: str, value: Any):
+    def _get_drone_ids_callback(self, drone_id: Optional[str], value: Any):
         try:
             self._drone_ids = value
             self._web_socket_server.send('drone-ids', None, self._drone_ids)
-            print('Received drone ids: ' self._drone_ids)
+            print('Received drone ids: ', self._drone_ids)
         except (json.JSONDecodeError, KeyError) as exc:
             print('ArgosManager error: Invalid message received', exc)
 
-    def _get_battery_callback(self, drone_id: str, value: Any):
-        print(f'Received battery level from drone {drone_id}: {value}')
+    def _get_battery_callback(self, drone_id: Optional[str], value: Any):
         self._web_socket_server.send('battery-level', drone_id, value)
+        print(f'Received battery level from drone {drone_id}: {value}')

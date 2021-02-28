@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 import json
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 import websockets
 
 IP_ADDRESS = 'localhost'
@@ -21,7 +21,7 @@ class WebSocketServer:
         print('WebSocketServer started')
         await server.wait_closed()
 
-    def send(self, event: str, drone_id: str, data: Any):
+    def send(self, event: str, drone_id: Optional[str], data: Any):
         self._message_queue.put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
 
     def bind(self, event: str, callback: Callable[[Any], None]):

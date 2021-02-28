@@ -1,7 +1,7 @@
 import asyncio
 import json
 import socket
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 from server import config
 
 
@@ -50,7 +50,7 @@ class UnixSocketClient:
         finally:
             self._socket.close()
 
-    def send(self, param_name: str, drone_id: str, value: Any):
+    def send(self, param_name: str, drone_id: Optional[str], value: Any):
         self._message_queue.put_nowait({
             'paramName': param_name,
             'droneId': drone_id,

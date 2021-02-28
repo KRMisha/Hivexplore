@@ -43,7 +43,7 @@ class WebSocketServer:
             try:
                 message = json.loads(message_str)
                 for callback in self._callbacks.get(message['event'], []):
-                    callback(message['data'])
+                    callback(message['droneId'], message['data'])
             except (json.JSONDecodeError, KeyError) as exc:
                 print('WebSocketServer error: Invalid message received:', exc)
 

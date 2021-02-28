@@ -35,7 +35,7 @@ export default defineComponent({
         const isLedOn = ref(false);
 
         function changeLedStatus() {
-            socket!.send('set-led', isLedOn.value);
+            socket!.send('set-led', props.droneId, isLedOn.value);
         }
 
         return {

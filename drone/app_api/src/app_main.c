@@ -45,29 +45,24 @@
 #include "param.h"
 #include "pm.h"
 #include "app_channel.h"
-
 #include "commander.h"
-#include "timers.h"
+
 #define DEBUG_MODULE "APPAPI"
 
-uint16_t min(uint16_t a, uint16_t b) {
-    return (a < b) ? a : b;
-}
+#define MAX(a, b) ((a > b) ? a : b)
+#define MIN(a, b) ((a < b) ? a : b)
 
-uint16_t max(uint16_t a, uint16_t b) {
-    return (a > b) ? a : b;
-}
 
-enum state { IDLE = 0, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } typedef state;
+typedef enum { IDLE, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } state;
 
-static bool isM1LedOn = true;
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
 static const float EXPLORATION_HEIGHT = 0.5f;
 static const float CRUISE_VELOCITY = 0.2f;
-static const uint16_t meterToMillimeterFactor = 1000;
-
 static const float MAXIMUM_VELOCITY = 1.0f;
+static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
+
+static bool isM1LedOn = true;
 
 static void setWaypoint(setpoint_t* setPoint, float forwardVelocity, float leftVelocity, float height, float yaw) {
     setPoint->velocity_body = true;
@@ -83,7 +78,7 @@ static void setWaypoint(setpoint_t* setPoint, float forwardVelocity, float leftV
     setPoint->position.z = height;
 }
 
-void appMain() {
+void appMain(void) {
     setpoint_t setPoint;
     vTaskDelay(M2T(3000));
 
@@ -100,10 +95,10 @@ void appMain() {
     state currentState = IDLE;
     // Named as bool since the returned value is actually a bool placed in a uint8_t (see multiranger.c and flowdeck_v1v2.c call to
     // PARAM_ADD())
-    const uint8_t isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
-    const uint8_t isMultirangerInitialized = paramGetUint(multirangerModuleId);
+    const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
+    const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
     if (!isFlowDeckInitialized) {
-        DEBUG_PRINT("FlowdeckV2 is not connected\n");
+        DEBUG_PRINT("FlowDeckV2 is not connected\n");
         currentState = OUT_OF_SERVICE;
     }
     if (!isMultirangerInitialized) {
@@ -129,10 +124,10 @@ void appMain() {
         // Global obstacle avoidance
         if (currentState == LIFTOFF || currentState == EXPLORE || currentState == ROTATE || currentState == LAND) {
             // Distance correction required to stay out of range of any obstacle
-            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(leftSensorreading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(rightSensorReading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(frontSensorReading, OBSTACLE_DETECTED_THRESHOLD);
-            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - min(backSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(leftSensorreading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(rightSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(frontSensorReading, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(backSensorReading, OBSTACLE_DETECTED_THRESHOLD);
 
             // Velocity required to apply distance correction
             const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;
@@ -150,7 +145,7 @@ void appMain() {
         } break;
         case STARTUP: {
             // Check if any obstacle is in the way before taking off
-            if (upSensorReading > EXPLORATION_HEIGHT * meterToMillimeterFactor) {
+            if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                 DEBUG_PRINT("Liftoff\n");
                 currentState = LIFTOFF;
             }
@@ -158,7 +153,7 @@ void appMain() {
         case LIFTOFF: {
             height += EXPLORATION_HEIGHT;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
-            if (downSensorReading >= EXPLORATION_HEIGHT * meterToMillimeterFactor) {
+            if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                 DEBUG_PRINT("Liftoff finished\n");
                 currentState = EXPLORE;
             }
@@ -183,7 +178,7 @@ void appMain() {
             }
         } break;
         case ROTATE: {
-            const uint16_t OPEN_SPACE_THRESHOLD = 300;
+            static const uint16_t OPEN_SPACE_THRESHOLD = 300;
             if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
                 currentState = EXPLORE;
             }
@@ -198,7 +193,7 @@ void appMain() {
         } break;
         case LAND: {
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
-            const uint16_t LANDED_HEIGHT = 50;
+            static const uint16_t LANDED_HEIGHT = 50;
             if (downSensorReading < LANDED_HEIGHT) {
                 DEBUG_PRINT("Landed\n");
                 currentState = IDLE;
@@ -210,8 +205,9 @@ void appMain() {
             memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
         }
-        const uint8_t taskPriority = 3;
-        commanderSetSetpoint(&setPoint, taskPriority);
+
+        static const uint8_t TASK_PRIORITY = 3;
+        commanderSetSetpoint(&setPoint, TASK_PRIORITY);
     }
 }
 

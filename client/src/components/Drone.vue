@@ -1,8 +1,6 @@
 <template>
     <Card class="drone-card">
-        <template #title>
-            Drone
-        </template>
+        <template #title> Drone {{ droneId }} </template>
         <template #content>
             <div class="p-text-center">Drone Battery:</div>
             <Knob v-model="batteryLevel" readonly :size="64" />
@@ -27,7 +25,6 @@ export default defineComponent({
         const socket: SocketClient | undefined = inject('socket');
 
         const batteryLevel = ref(0);
-        console.log(props.droneId);
         socket!.bind('battery-level', props.droneId, (updatedBatteryLevel: number) => {
             batteryLevel.value = updatedBatteryLevel;
         });

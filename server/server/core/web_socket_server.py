@@ -6,6 +6,7 @@ import websockets
 
 IP_ADDRESS = 'localhost'
 PORT = 5678
+EVENT_DENYLIST = {'connect'}
 
 
 class WebSocketServer:
@@ -28,6 +29,9 @@ class WebSocketServer:
         self._callbacks.setdefault(event, []).append(callback)
 
     async def _socket_handler(self, websocket, path):
+        for callback in self._callbacks.get('connect', []):
+            callback()
+
         print('New client connected:', websocket.origin)
         receive_task = asyncio.create_task(self._receive_handler(websocket, path))
         send_task = asyncio.create_task(self._send_handler(websocket, path))
@@ -42,6 +46,9 @@ class WebSocketServer:
         async for message_str in websocket:
             try:
                 message = json.loads(message_str)
+                if message['event'] in EVENT_DENYLIST:
+                    print('WebSocketServer warning: Invalid event received:', message['event'])
+                    continue
                 for callback in self._callbacks.get(message['event'], []):
                     callback(message['droneId'], message['data'])
             except (json.JSONDecodeError, KeyError) as exc:

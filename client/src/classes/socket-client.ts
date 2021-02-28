@@ -4,22 +4,29 @@ export default class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    private callbacks: Map<string, Array<(data: any) => void>> = new Map();
+    private callbacks: Map<string, Map<string | undefined, Array<(data: any) => void>>> = new Map();
 
     constructor() {
         this.socket.onmessage = (event: MessageEvent) => {
-            const jsonContent = JSON.parse(event.data);
+            const jsonMessage = JSON.parse(event.data);
 
-            const droneId = jsonContent.droneId ?? undefined;
-            const callbacks = this.callbacks.get(JSON.stringify([jsonContent.event, droneId]));
+            const eventCallbacks = this.callbacks.get(jsonMessage.event);
 
-            if (callbacks === undefined) {
-                console.warn(`Unknown socket event received: ${jsonContent.event}`);
+            if (eventCallbacks === undefined) {
+                console.warn(`Unknow socket event received: ${jsonMessage.event}`);
                 return;
             }
 
-            for (const callback of callbacks) {
-                callback(jsonContent.data);
+            const droneId = jsonMessage.droneId ?? undefined;
+            const droneCallbacks = eventCallbacks.get(droneId);
+
+            if (droneCallbacks === undefined) {
+                console.warn(`Unregistered drone id ${droneId} for socket event ${jsonMessage.event}`);
+                return;
+            }
+
+            for (const callback of droneCallbacks) {
+                callback(jsonMessage.data);
             }
         };
 
@@ -34,10 +41,18 @@ export default class SocketClient {
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     bind(eventName: string, droneId: string | undefined, callback: (data: any) => void) {
-        if (!this.callbacks.has(JSON.stringify([eventName, droneId]))) {
-            this.callbacks.set(JSON.stringify([eventName, droneId]), []);
+        if (!this.callbacks.has(eventName)) {
+            this.callbacks.set(eventName, new Map());
         }
-        this.callbacks.get(JSON.stringify([eventName, droneId]))!.push(callback);
+
+        if (!this.callbacks.get(eventName)!.has(droneId)) {
+            this.callbacks.get(eventName)!.set(droneId, []);
+        }
+
+        this.callbacks
+            .get(eventName)!
+            .get(droneId)!
+            .push(callback);
     }
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any

@@ -1,7 +1,8 @@
+from typing import Any, Optional
+import json
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
-from typing import Any, Optional
 
 
 class ArgosManager:
@@ -9,11 +10,11 @@ class ArgosManager:
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
         self._unix_socket_client = UnixSocketClient()
-
         self._drone_ids = []
 
     async def start(self):
         # Client bindings
+        self._web_socket_server.bind('connect', self._new_connection_callback)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
         # Argos bindings
@@ -27,6 +28,9 @@ class ArgosManager:
 
     # Client Callbacks
 
+    def _new_connection_callback(self):
+        self._web_socket_server.send('drone-ids', None, self._drone_ids)
+
     def _set_led_enabled(self, drone_id: Optional[str], is_enabled: bool):
         if drone_id in self._drone_ids:
             self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
@@ -35,7 +39,7 @@ class ArgosManager:
 
     # ARGoS Callbacks
 
-    def _get_drone_ids_callback(self, drone_id: Optional[str], value: Any):
+    def _get_drone_ids_callback(self, _drone_id: Optional[str], value: Any):
         try:
             self._drone_ids = value
             self._web_socket_server.send('drone-ids', None, self._drone_ids)

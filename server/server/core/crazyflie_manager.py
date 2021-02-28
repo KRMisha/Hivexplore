@@ -126,12 +126,11 @@ class CrazyflieManager:
 
     # Log callbacks
 
-    def _log_battery_callback(self, _timestamp, data, _logconf):
+    def _log_battery_callback(self, _timestamp, data, logconf):
         battery_level = data['pm.batteryLevel']
         print(f'Battery level: {battery_level}')
 
         self._web_socket_server.send('battery-level', logconf.cf._link_uri, battery_level)
-
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
         measurements = {

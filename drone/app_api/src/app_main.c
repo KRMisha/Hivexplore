@@ -50,13 +50,19 @@
 #include "timers.h"
 #define DEBUG_MODULE "APPAPI"
 
+#define MAX(a, b) ((a > b) ? a : b)
+#define MIN(a, b) ((a < b) ? a : b)
+
 static bool isM1LedOn = true;
 enum state { IDLE = 0, STARTUP, TAKEOFF, EXPLORE, ROTATE, LAND, LANDED, OUT_OF_SERVICE } typedef state;
 
-static const uint16_t OBTACLE_DETECTED_THRESHOLD = 300;
+static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
+static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
 const float EXPLORATION_HEIGHT = 0.5f;
 const float CRUISE_VELOCITY = 0.2f;
+const uint16_t meterToMillimeterFactor = 1000;
 
+const float MAXIMUM_VELOCITY = 1.0f;
 static void setWaypoint(setpoint_t* setPoint, float forwardVelocity, float leftVelocity, float height, float yaw) {
     setPoint->velocity_body = true;
     setPoint->mode.x = modeVelocity;
@@ -66,6 +72,7 @@ static void setWaypoint(setpoint_t* setPoint, float forwardVelocity, float leftV
 
     setPoint->mode.yaw = modeVelocity;
     setPoint->attitudeRate.yaw = yaw;
+
     setPoint->mode.z = modeAbs;
     setPoint->position.z = height;
 }
@@ -89,32 +96,53 @@ void appMain() {
         vTaskDelay(M2T(10));
         uint8_t positioningInit = paramGetUint(idPositioningDeck);
         uint8_t multirangerInit = paramGetUint(idMultiranger);
-    float forwardVelocity = 0;
-    float leftVelocity = 0;
-    float height = 0;
-    float yawRate = 0;
-    static state currentState = IDLE;
-    while (true) {
-        vTaskDelay(M2T(10));
-        // uint8_t positioningInit = paramGetUint(idPositioningDeck);
-        // uint8_t multirangerInit = paramGetUint(idMultiranger);
-        uint16_t up = logGetUint(idUp);
-        uint16_t down = logGetUint(idDown);
-        uint16_t left = logGetUint(idLeft);
-        uint16_t right = logGetUint(idRight);
-        uint16_t front = logGetUint(idFront);
-        uint16_t back = logGetUint(idBack);
+        uint16_t upSensor = logGetUint(idUp);
+        uint16_t downSensor = logGetUint(idDown);
+        uint16_t leftSensor = logGetUint(idLeft);
+        uint16_t rightSensor = logGetUint(idRight);
+        uint16_t frontSensor = logGetUint(idFront);
+        uint16_t backSensor = logGetUint(idBack);
+
+        float forwardVelocity = 0;
+        float leftVelocity = 0;
+        float height = 0;
+        float yawRate = 0;
+
+        // Obstacle avoidance
+        if (currentState != IDLE && currentState != STARTUP
+            && currentState != OUT_OF_SERVICE) {
+
+            // Distance correction required to stay out of range of any obstacle
+            uint16_t leftDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(leftSensor, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t rightDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(rightSensor, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t frontDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(frontSensor, OBSTACLE_DETECTED_THRESHOLD);
+            uint16_t backDistanceCorrection = OBSTACLE_DETECTED_THRESHOLD - MIN(backSensor, OBSTACLE_DETECTED_THRESHOLD);
+
+            // float leftVelocityCompensation = -1 * leftDistanceCorrection * AVOIDANCE_SENSITIVITY;
+            // float rightVelocityCompensation = rightDistanceCorrection * AVOIDANCE_SENSITIVITY;
+            // float frontVelocityCompensation = -1 * frontDistanceCorrection * AVOIDANCE_SENSITIVITY;
+            // float backVelocityCompensation = backDistanceCorrection * AVOIDANCE_SENSITIVITY;
+
+            // Velocity required to apply distance correction
+            const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;
+            leftVelocity += (rightDistanceCorrection - leftDistanceCorrection) * AVOIDANCE_SENSITIVITY;
+            forwardVelocity += (backDistanceCorrection - frontDistanceCorrection) * AVOIDANCE_SENSITIVITY;
+
+            // leftVelocity += rightVelocityCompensation + leftVelocityCompensation;
+            // forwardVelocity += frontVelocityCompensation + belowVelocityCompensation;
+        }
 
         switch (currentState) {
         case IDLE: {
-            if (up < OBTACLE_DETECTED_THRESHOLD) {
+            if (upSensor < OBSTACLE_DETECTED_THRESHOLD) {
                 DEBUG_PRINT("Startup\n");
                 currentState = STARTUP;
             }
             memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
         case STARTUP: {
-            if (up > OBTACLE_DETECTED_THRESHOLD) {
+            // Check if any obstacle if present before taking off
+            if (upSensor > EXPLORATION_HEIGHT * meterToMillimeterFactor) {
                 DEBUG_PRINT("Takeoff\n");
                 currentState = TAKEOFF;
             }
@@ -124,68 +152,40 @@ void appMain() {
             }
         } break;
         case TAKEOFF: {
-            // TODO: Check obstacle above
-            forwardVelocity = 0;
-            leftVelocity = 0;
-            height = EXPLORATION_HEIGHT;
-            yawRate = 0;
+            height += EXPLORATION_HEIGHT;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
-            const uint16_t millimeterToMeterFactor = 1000;
-            if (down >= EXPLORATION_HEIGHT * millimeterToMeterFactor) {
-                DEBUG_PRINT("Take off started\n");
-                currentState = HOVER;
+            if (downSensor >= EXPLORATION_HEIGHT * meterToMillimeterFactor) {
+                currentState = EXPLORE;
                 DEBUG_PRINT("Take off finished\n");
             }
         } break;
-        case HOVER: {
-            forwardVelocity = 0;
-            leftVelocity = 0;
-            height = EXPLORATION_HEIGHT;
-            yawRate = 0;
+        case EXPLORE: {
+            height += EXPLORATION_HEIGHT;
+            forwardVelocity += CRUISE_VELOCITY;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
 
-            if (up < OBTACLE_DETECTED_THRESHOLD) {
-                DEBUG_PRINT("Obstacle above detected\n");
-                currentState = LANDING;
+            if (frontSensor < EDGE_DETECTED_THRESHOLD) {
+                currentState = ROTATE;
             }
-            if (left < OBTACLE_DETECTED_THRESHOLD) {
-                DEBUG_PRINT("Obstacle on the left detected\n");
-            }
-            if (right < OBTACLE_DETECTED_THRESHOLD) {
-                DEBUG_PRINT("Obstacle on the right detected\n");
-            }
-            if (front < OBTACLE_DETECTED_THRESHOLD) {
-                DEBUG_PRINT("Obstacle in front detected\n");
-            }
-            if (back < OBTACLE_DETECTED_THRESHOLD) {
-                DEBUG_PRINT("EVERYBODY DANCE NOW!\n");
-                currentState = DANCE;
+
+            if (upSensor < OBSTACLE_DETECTED_THRESHOLD) {
+                currentState = LAND;
             }
         } break;
-        case DANCE: {
-            if (back > OBTACLE_DETECTED_THRESHOLD) {
-                currentState = DANCING;
+        case ROTATE: {
+            const uint16_t OPEN_SPACE_THRESHOLD = 300;
+            if (frontSensor > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
+                currentState = EXPLORE;
             }
-        } break;
-        case DANCING: {
-            if (front < OBTACLE_DETECTED_THRESHOLD) {
-                DEBUG_PRINT("BOOOOOOOOOOO!\n");
-                currentState = HOVER;
-            }
-            forwardVelocity = 0;
-            leftVelocity = 0;
-            height = EXPLORATION_HEIGHT;
-            yawRate = 20;
+
+            height += EXPLORATION_HEIGHT;
+            yawRate = 50;
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
         } break;
-        case LANDING: {
-            forwardVelocity = 0;
-            leftVelocity = 0;
-            height = 0;
-            yawRate = 0;
+        case LAND: {
             setWaypoint(&setPoint, forwardVelocity, leftVelocity, height, yawRate);
             const uint16_t LANDED_HEIGHT = 50;
-            if (down < LANDED_HEIGHT) {
+            if (downSensor < LANDED_HEIGHT) {
                 DEBUG_PRINT("Land started\n");
                 currentState = LANDED;
                 DEBUG_PRINT("Land finished\n");

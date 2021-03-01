@@ -50,7 +50,7 @@ class CrazyflieManager:
                 await asyncio.sleep(timeout_s)
                 timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
 
-    def _send_drone_ids(self, client_id):
+    def _send_drone_ids(self, client_id=None):
         if client_id is None:
             self._web_socket_server.send_message('drone-ids', self._crazyflies.keys())
         else:

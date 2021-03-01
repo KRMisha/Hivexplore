@@ -48,7 +48,7 @@ class ArgosManager:
     def _log_battery_callback(self, drone_id, data):
         battery_level = data['pm.batteryLevel']
         print(f'BatteryLevel from drone {drone_id}: {battery_level}')
-        self._web_socket_server.send_drone_message('battery-level', drone_id, data)
+        self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data):
         measurements = {

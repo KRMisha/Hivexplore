@@ -43,7 +43,7 @@ class ArgosManager:
         self._drone_ids = value
         self._web_socket_server.send_message('drone-ids', self._drone_ids)
 
-        print('Received drone IDs: ', self._drone_ids)
+        print('Received drone IDs:', self._drone_ids)
 
     def _get_battery_callback(self, drone_id: str, value: Any):
         self._web_socket_server.send_drone_message('battery-level', drone_id, value)

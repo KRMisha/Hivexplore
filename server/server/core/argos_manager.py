@@ -28,7 +28,7 @@ class ArgosManager:
 
     def _log_battery_callback(self, drone_id, data):
         battery_level = data['pm.batteryLevel']
-        print(f'Battery level from drone {drone_id}: {battery_level}')
+        print(f'BatteryLevel from drone {drone_id}: {battery_level}')
         # TODO: Add drone_id
         # self._web_socket_server.send('battery-level', battery_level)
 

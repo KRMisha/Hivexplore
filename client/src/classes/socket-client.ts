@@ -51,7 +51,7 @@ export default class SocketClient {
     }
 
     send_message(event: string, data: any) {
-        // undefined represents a global broadcast
+        // undefined represents an event not related to a specific drone
         this.send(event, undefined, data);
     }
 

@@ -137,7 +137,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     CRadians angleRadians;
     CVector3 vector;
     m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
-    float angleDegrees = static_cast<float>(ToDegrees(angleRadians.SignedNormalize()).GetValue());
+    Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
     decltype(logDataMap)::mapped_type orientationLog;
     orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));

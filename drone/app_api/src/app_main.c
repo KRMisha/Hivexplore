@@ -78,7 +78,7 @@ static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float
     setPoint->position.z = targetHeight;
 }
 
-static uint16_t calculateDistanceCorrection(const uint16_t obstacleThreshold, const uint16_t sensorReading) {
+static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
@@ -86,12 +86,12 @@ void appMain(void) {
     setpoint_t setPoint;
     vTaskDelay(M2T(3000));
 
-    logVarId_t upSensorId = logGetVarId("range", "up");
-    logVarId_t downSensorId = logGetVarId("range", "zrange");
-    logVarId_t leftSensorId = logGetVarId("range", "left");
-    logVarId_t rightSensorId = logGetVarId("range", "right");
-    logVarId_t frontSensorId = logGetVarId("range", "front");
-    logVarId_t backSensorId = logGetVarId("range", "back");
+    const logVarId_t upSensorId = logGetVarId("range", "up");
+    const logVarId_t downSensorId = logGetVarId("range", "zrange");
+    const logVarId_t leftSensorId = logGetVarId("range", "left");
+    const logVarId_t rightSensorId = logGetVarId("range", "right");
+    const logVarId_t frontSensorId = logGetVarId("range", "front");
+    const logVarId_t backSensorId = logGetVarId("range", "back");
 
     paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");

@@ -18,7 +18,7 @@ class ArgosManager:
 
         # ARGoS bindings
         self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
-        self._unix_socket_client.bind('pm.batteryLevel', self._get_battery_callback)
+        self._unix_socket_client.bind('pm.batteryLevel', self._log_battery_callback)
         # TODO: Handle ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw']
         # TODO: Handle ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange']
         # TODO: Handle ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z']
@@ -45,6 +45,6 @@ class ArgosManager:
 
         print('Received drone IDs:', self._drone_ids)
 
-    def _get_battery_callback(self, drone_id: str, value: Any):
+    def _log_battery_callback(self, drone_id: str, value: Any):
         self._web_socket_server.send_drone_message('battery-level', drone_id, value)
         print(f'Received battery level from drone {drone_id}: {value}')

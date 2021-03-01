@@ -28,7 +28,7 @@ class ArgosManager:
     # Client callbacks
 
     def _new_connection_callback(self, client_id):
-        self._web_socket_server.send_message_to_client(client_id, 'drone-ids', self._drone_ids)
+        self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._drone_ids))
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if drone_id in self._drone_ids:
@@ -41,7 +41,7 @@ class ArgosManager:
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], value: Any):
         self._drone_ids = value
-        self._web_socket_server.send_message('drone-ids', self._drone_ids)
+        self._web_socket_server.send_message('drone-ids', list(self._drone_ids))
 
         print('Received drone IDs:', self._drone_ids)
 

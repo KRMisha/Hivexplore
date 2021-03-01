@@ -20,6 +20,7 @@ public:
 private:
     void StartSocket();
     void Stop();
+    void SendDroneIdsToServer();
     std::vector<std::reference_wrapper<CCrazyflieController>> GetControllers();
 
     int m_connectionSocket = -1;

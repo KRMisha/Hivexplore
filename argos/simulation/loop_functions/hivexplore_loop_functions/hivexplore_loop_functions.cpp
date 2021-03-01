@@ -18,28 +18,7 @@ void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
 void CHivexploreLoopFunctions::Reset() {
     m_isExperimentFinished = false;
     StartSocket();
-
-    // Send drone IDs to server
-
-    std::vector<std::reference_wrapper<CCrazyflieController>> controllers = GetControllers();
-    std::vector<std::string> droneIds;
-
-    std::transform(controllers.begin(), controllers.end(), std::back_inserter(droneIds), [](const auto& controller) {
-        return controller.get().GetId();
-    });
-
-    json packet = {
-        {"logName", "drone-ids"},
-        {"droneId", nullptr},
-        {"value", droneIds},
-    };
-    std::string serializedPacket = packet.dump();
-
-    ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
-    if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-        std::perror("Unix socket send");
-        Stop();
-    }
+    SendDroneIdsToServer();
 }
 
 void CHivexploreLoopFunctions::Destroy() {
@@ -147,17 +126,6 @@ void CHivexploreLoopFunctions::PostExperiment() {
     }
 }
 
-std::vector<std::reference_wrapper<CCrazyflieController>> CHivexploreLoopFunctions::GetControllers() {
-    CSpace::TMapPerType& entities = GetSpace().GetEntitiesByType("crazyflie");
-    std::vector<std::reference_wrapper<CCrazyflieController>> controllers;
-    std::transform(entities.begin(), entities.end(), std::back_inserter(controllers), [](const auto& pair) {
-        CCrazyflieEntity& crazyflie = *any_cast<CCrazyflieEntity*>(pair.second);
-        CCrazyflieController& controller = dynamic_cast<CCrazyflieController&>(crazyflie.GetControllableEntity().GetController());
-        return std::ref(controller);
-    });
-    return controllers;
-}
-
 void CHivexploreLoopFunctions::StartSocket() {
     // Remove socket if it already exists
     if (unlink(socketPath) == -1 && errno != ENOENT) {
@@ -208,6 +176,39 @@ void CHivexploreLoopFunctions::Stop() {
            "2. Restart the server\n"
            "3. Press the play button on the ARGoS client\n";
     m_isExperimentFinished = true;
+}
+
+void CHivexploreLoopFunctions::SendDroneIdsToServer() {
+    std::vector<std::reference_wrapper<CCrazyflieController>> controllers = GetControllers();
+    std::vector<std::string> droneIds;
+
+    std::transform(controllers.begin(), controllers.end(), std::back_inserter(droneIds), [](const auto& controller) {
+        return controller.get().GetId();
+    });
+
+    json packet = {
+        {"logName", "drone-ids"},
+        {"droneId", nullptr},
+        {"value", droneIds},
+    };
+    std::string serializedPacket = packet.dump();
+
+    ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
+    if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+        std::perror("Unix socket send");
+        Stop();
+    }
+}
+
+std::vector<std::reference_wrapper<CCrazyflieController>> CHivexploreLoopFunctions::GetControllers() {
+    CSpace::TMapPerType& entities = GetSpace().GetEntitiesByType("crazyflie");
+    std::vector<std::reference_wrapper<CCrazyflieController>> controllers;
+    std::transform(entities.begin(), entities.end(), std::back_inserter(controllers), [](const auto& pair) {
+        CCrazyflieEntity& crazyflie = *any_cast<CCrazyflieEntity*>(pair.second);
+        CCrazyflieController& controller = dynamic_cast<CCrazyflieController&>(crazyflie.GetControllableEntity().GetController());
+        return std::ref(controller);
+    });
+    return controllers;
 }
 
 REGISTER_LOOP_FUNCTIONS(CHivexploreLoopFunctions, "hivexplore_loop_functions")

@@ -132,21 +132,24 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     // Fill map progressively
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, float>>> logDataMap;
 
+    // TODO: Check if uint8_t
     // BatteryLevel group
     decltype(logDataMap)::mapped_type batteryLevelLog;
     batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
     logDataMap.emplace("BatteryLevel", batteryLevelLog);
 
     // Orientation group
-    CRadians angle;
+    CRadians angleRadians;
     CVector3 vector;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
+    float angleDegrees = static_cast<float>(ToDegrees(angleRadians.SignedNormalize()).GetValue());
     decltype(logDataMap)::mapped_type orientationLog;
-    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angle.GetValue() * vector.GetX()));
-    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angle.GetValue() * vector.GetY()));
-    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angle.GetValue() * vector.GetZ()));
+    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
+    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
     logDataMap.emplace("Orientation", orientationLog);
 
+    // TODO: Check type (float)
     // Position group
     CVector3 position = m_pcPos->GetReading().Position;
     decltype(logDataMap)::mapped_type positionLog;
@@ -155,6 +158,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
     logDataMap.emplace("Position", positionLog);
 
+    // TODO: Check type (float)
     // Range group
     CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
     static const std::array<std::string, 4> rangeLogNames = {"range.front", "range.left", "range.back", "range.right"};

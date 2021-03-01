@@ -156,15 +156,21 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
     static const std::array<std::string, 4> rangeLogNames = {"range.front", "range.left", "range.back", "range.right"};
     decltype(logDataMap)::mapped_type rangeLog;
-    static constexpr int sensorSaturated = -1;
-    static constexpr int sensorEmpty = -2;
-    static constexpr int obstacleTooClose = 0;
-    static constexpr int obstacleTooFar = 4000;
+    static constexpr std::int8_t sensorSaturated = -1;
+    static constexpr std::int8_t sensorEmpty = -2;
+    static constexpr std::uint8_t obstacleTooClose = 0;
+    static constexpr std::uint16_t obstacleTooFar = 4000;
 
     for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
         std::size_t index = std::distance(distanceReadings.begin(), it);
-        Real rangeData =
-            (it->second == sensorSaturated) ? obstacleTooClose : ((it->second == sensorEmpty) ? obstacleTooFar : it->second * 10);
+        Real rangeData = it->second;
+        if (rangeData == sensorSaturated) {
+            rangeData = obstacleTooClose;
+        } else if (rangeData == sensorEmpty) {
+            rangeData = obstacleTooFar;
+        } else {
+            rangeData *= 10;
+        }
         rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));
     }
     // TODO: Find sensor to get range.up value

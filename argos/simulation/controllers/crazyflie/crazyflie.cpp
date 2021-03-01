@@ -121,8 +121,8 @@ void CCrazyflieController::Reset() {
 void CCrazyflieController::Destroy() {
 }
 
-std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::GetLogData()
-    const {
+std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::
+    GetLogData() const {
     // TODO: Add more log data to the map and crazyflie manager (match the names for keys from cflib) (velocity)
 
     // Fill map progressively
@@ -158,7 +158,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     decltype(logDataMap)::mapped_type rangeLog;
     for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
         std::size_t index = std::distance(distanceReadings.begin(), it);
-        Real rangeData = (it->second == -1)? 0 : ((it->second == -2)? 4000 : it->second * 10);
+        Real rangeData = (it->second == -1) ? 0 : ((it->second == -2) ? 4000 : it->second * 10);
         rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));
     }
     // TODO: Find sensor to get range.up value

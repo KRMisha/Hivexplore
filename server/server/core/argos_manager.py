@@ -14,10 +14,10 @@ class ArgosManager:
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
         # Argos bindings
-        self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback) # TODO: Remove
-        self._unix_socket_client.bind('Orientation', self._log_orientation_callback)# TODO: Remove
-        self._unix_socket_client.bind('Position', self._log_position_callback)# TODO: Remove
-        self._unix_socket_client.bind('Range', self._log_range_callback) # TODO: Remove
+        self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback)
+        self._unix_socket_client.bind('Orientation', self._log_orientation_callback)
+        self._unix_socket_client.bind('Position', self._log_position_callback)
+        self._unix_socket_client.bind('Range', self._log_range_callback)
 
         await self._unix_socket_client.serve()
 

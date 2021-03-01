@@ -3,7 +3,7 @@ const serverUrl = 'ws:localhost:5678';
 export default class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private callbacks: Map<string, Map<string | undefined, Array<(data: any) => void>>> = new Map();
 
     constructor() {
@@ -39,18 +39,18 @@ export default class SocketClient {
         };
     }
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bind_message(event: string, callback: (data: any) => void) {
         // undefined represents a global broadcast
         this.bind(event, undefined, callback);
     }
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bind_drone_message(event: string, droneId: string, callback: (data: any) => void) {
         this.bind(event, droneId, callback);
     }
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private bind(event: string, droneId: string | undefined, callback: (data: any) => void) {
         if (!this.callbacks.has(event)) {
             this.callbacks.set(event, new Map());
@@ -75,7 +75,7 @@ export default class SocketClient {
         this.send(event, droneId, data);
     }
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private send(event: string, droneId: string | undefined, data: any) {
         // Convert date to local timezone by stripping the timezone offset
         const timestampUtc = new Date();

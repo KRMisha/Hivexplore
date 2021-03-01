@@ -14,10 +14,10 @@ class ArgosManager:
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
         # Argos bindings
-        self._unix_socket_client.bind('BatteryLevel', self._mock_argos_battery_callback) # TODO: Remove
-        self._unix_socket_client.bind('Orientation', self._mock_argos_orientation_callback)# TODO: Remove
-        self._unix_socket_client.bind('Position', self._mock_argos_position_callback)# TODO: Remove
-        self._unix_socket_client.bind('Range', self._mock_argos_range_callback) # TODO: Remove
+        self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback) # TODO: Remove
+        self._unix_socket_client.bind('Orientation', self._log_orientation_callback)# TODO: Remove
+        self._unix_socket_client.bind('Position', self._log_position_callback)# TODO: Remove
+        self._unix_socket_client.bind('Range', self._log_range_callback) # TODO: Remove
 
         await self._unix_socket_client.serve()
 
@@ -26,23 +26,43 @@ class ArgosManager:
         drone_id = 's0'
         self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
 
-    def _get_battery_callback(self, drone_id, value):
-        print(f'Received battery level from drone {drone_id}: {value}')
+    def _log_battery_callback(self, drone_id, data):
+        battery_level = data['pm.batteryLevel']
+        print(f'Battery level from drone {drone_id}: {battery_level}')
         # TODO: Add drone_id
-        self._web_socket_server.send('battery-level', value)
+        # self._web_socket_server.send('battery-level', battery_level)
 
-    # TODO: Remove
-    def _mock_argos_battery_callback(self, drone_id, value): # pylint: disable=no-self-use
-        print(f'Received battery level log from drone {drone_id}: {value}')
+    def _log_orientation_callback(self, drone_id, data):
+        measurements = {
+            'roll': data['stateEstimate.roll'],
+            'pitch': data['stateEstimate.pitch'],
+            'yaw': data['stateEstimate.yaw'],
+        }
+        print(f'Orientation from drone {drone_id}: ')
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.2f}')
 
-    # TODO: Remove
-    def _mock_argos_orientation_callback(self, drone_id, value): # pylint: disable=no-self-use
-        print(f'Received orientation log from drone {drone_id}: {value}')
+    def _log_position_callback(self, drone_id, data):
+        measurements = {
+            'x': data['stateEstimate.x'],
+            'y': data['stateEstimate.y'],
+            'z': data['stateEstimate.z'],
+        }
+        # self._map_generator.add_position(measurements)
+        print(f'Position from drone {drone_id}: ')
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.6f}')
 
-    # TODO: Remove
-    def _mock_argos_position_callback(self, drone_id, value): # pylint: disable=no-self-use
-        print(f'Received position log from drone {drone_id}: {value}')
-
-    # TODO: Remove
-    def _mock_argos_range_callback(self, drone_id, value): # pylint: disable=no-self-use
-        print(f'Received range log from drone {drone_id}: {value}')
+    def _log_range_callback(self, drone_id, data):
+        measurements = {
+            'front': data['range.front'],
+            'back': data['range.back'],
+            'up': data['range.up'],
+            'left': data['range.left'],
+            'right': data['range.right'],
+            'zrange': data['range.zrange'],
+        }
+        # self._map_generator.add_points(measurements)
+        print(f'Range from drone {drone_id}: ')
+        for key, value in measurements.items():
+            print(f'- {key}: {value}')

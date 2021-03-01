@@ -53,7 +53,7 @@
 #define MIN(a, b) ((a < b) ? a : b)
 
 
-typedef enum { IDLE, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } state;
+typedef enum { IDLE, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } drone_state_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -96,7 +96,7 @@ void appMain(void) {
     paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
-    state currentState = IDLE;
+    drone_state_t currentState = IDLE;
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
     if (!isFlowDeckInitialized) {

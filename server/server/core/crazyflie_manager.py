@@ -134,9 +134,9 @@ class CrazyflieManager:
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
         measurements = {
-            'roll': data["stabilize.roll"],
-            'pitch': data["stabilize.pitch"],
-            'yaw': data["stabilize.yaw"],
+            'roll': data['stabilizer.roll'],
+            'pitch': data['stabilizer.pitch'],
+            'yaw': data['stabilizer.yaw'],
         }
 
         print(logconf.name)

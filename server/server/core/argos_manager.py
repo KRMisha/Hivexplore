@@ -48,7 +48,7 @@ class ArgosManager:
             'y': data['stateEstimate.y'],
             'z': data['stateEstimate.z'],
         }
-        # self._map_generator.add_position(measurements)
+        self._map_generator.add_position(measurements)
         print(f'Position from drone {drone_id}: ')
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
@@ -62,7 +62,7 @@ class ArgosManager:
             'right': data['range.right'],
             'zrange': data['range.zrange'],
         }
-        # self._map_generator.add_points(measurements)
+        self._map_generator.add_points(measurements)
         print(f'Range from drone {drone_id}: ')
         for key, value in measurements.items():
             print(f'- {key}: {value}')

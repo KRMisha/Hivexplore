@@ -1,8 +1,10 @@
 <template>
-    <li v-for="droneId in droneIds" :key="droneId">
-        <Drone :droneId="droneId" />
-    </li>
-    <div v-if="droneIds.length === 0">
+    <ul v-if="droneIds.length > 0">
+        <li v-for="droneId in droneIds" :key="droneId">
+            <Drone :droneId="droneId" />
+        </li>
+    </ul>
+    <div v-else>
         ✂✂ No drones connected ✂✂
     </div>
 </template>

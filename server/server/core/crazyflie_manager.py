@@ -55,6 +55,8 @@ class CrazyflieManager:
     def _setup_log(self, crazyflie: Crazyflie):
         # Log config setup with the logged variables and success/error logging callbacks
         POLLING_PERIOD_MS = 1000
+
+        # TODO: Add log config for velocity (from state estimate group)
         log_configs = [
             {
                 'log_config': LogConfig(name='BatteryLevel', period_in_ms=POLLING_PERIOD_MS),
@@ -63,21 +65,21 @@ class CrazyflieManager:
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Stabilizer', period_in_ms=POLLING_PERIOD_MS),
-                'variables': ['stabilizer.roll', 'stabilizer.pitch', 'stabilizer.yaw'],
-                'data_callback': self._log_stabilizer_callback,
-                'error_callback': self._log_error_callback,
-            },
-            {
-                'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS),
-                'variables': ['range.front', 'range.back', 'range.up', 'range.left', 'range.right', 'range.zrange'],
-                'data_callback': self._log_range_callback,
+                'log_config': LogConfig(name='Orientation', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['stateEstimate.roll', 'stateEstimate.pitch', 'stateEstimate.yaw'],
+                'data_callback': self._log_orientation_callback,
                 'error_callback': self._log_error_callback,
             },
             {
                 'log_config': LogConfig(name='Position', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
                 'data_callback': self._log_position_callback,
+                'error_callback': self._log_error_callback,
+            },
+            {
+                'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['range.front', 'range.left', 'range.back', 'range.right', 'range.up', 'range.zrange'],
+                'data_callback': self._log_range_callback,
                 'error_callback': self._log_error_callback,
             },
         ]
@@ -121,27 +123,17 @@ class CrazyflieManager:
 
     # Log callbacks
 
-    def _log_battery_callback(self, _timestamp, data, _logconf):
+    def _log_battery_callback(self, _timestamp, data, logconf):
         battery_level = data['pm.batteryLevel']
-        print(f'Battery level: {battery_level}')
+        print(f'{logconf.name}: {battery_level}')
         self._web_socket_server.send('battery-level', battery_level)
 
-    def _log_stabilizer_callback(self, _timestamp, data, logconf):
-        print(logconf.name)
-        print(f'- Roll: {data["stabilizer.roll"]:.2f}')
-        print(f'- Pitch: {data["stabilizer.pitch"]:.2f}')
-        print(f'- Yaw: {data["stabilizer.yaw"]:.2f}')
-
-    def _log_range_callback(self, _timestamp, data, logconf):
+    def _log_orientation_callback(self, _timestamp, data, logconf):
         measurements = {
-            'front': data['range.front'],
-            'back': data['range.back'],
-            'up': data['range.up'],
-            'left': data['range.left'],
-            'right': data['range.right'],
-            'zrange': data['range.zrange'],
+            'roll': data['stateEstimate.roll'],
+            'pitch': data['stateEstimate.pitch'],
+            'yaw': data['stateEstimate.yaw'],
         }
-        self._map_generator.add_points(measurements)
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
@@ -156,6 +148,20 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
+
+    def _log_range_callback(self, _timestamp, data, logconf):
+        measurements = {
+            'front': data['range.front'],
+            'left': data['range.left'],
+            'back': data['range.back'],
+            'right': data['range.right'],
+            'up': data['range.up'],
+            'zrange': data['range.zrange'],
+        }
+        self._map_generator.add_points(measurements)
+        print(logconf.name)
+        for key, value in measurements.items():
+            print(f'- {key}: {value}')
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

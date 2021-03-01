@@ -130,7 +130,7 @@ class CrazyflieManager:
         battery_level = data['pm.batteryLevel']
         print(f'Battery level: {battery_level}')
 
-        self._web_socket_server.send('battery-level', logconf.cf._link_uri, battery_level)
+        self._web_socket_server.send('battery-level', logconf.cf.link_uri, battery_level)
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -143,7 +143,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
-        self._web_socket_server.send('stabilizer-data', logconf.cf._link_uri, measurements)
+        self._web_socket_server.send('stabilizer-data', logconf.cf.link_uri, measurements)
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -159,7 +159,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
-        self._web_socket_server.send('range-data', logconf.cf._link_uri, measurements)
+        self._web_socket_server.send('range-data', logconf.cf.link_uri, measurements)
 
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -172,7 +172,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
 
-        self._web_socket_server.send('position-data', logconf.cf._link_uri, measurements)
+        self._web_socket_server.send('position-data', logconf.cf.link_uri, measurements)
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

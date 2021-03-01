@@ -32,9 +32,7 @@ export default defineComponent({
         const isLedOn = ref(false);
         socket!.bind_drone_message('set-led', props.droneId!, (updatedIsLedOn: boolean) => {
             isLedOn.value = updatedIsLedOn;
-            console.log('a');
         });
-
 
         function changeLedStatus() {
             socket!.send_drone_message('set-led', props.droneId!, isLedOn.value);

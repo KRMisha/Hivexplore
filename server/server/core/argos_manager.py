@@ -56,10 +56,10 @@ class ArgosManager:
     def _log_range_callback(self, drone_id, data):
         measurements = {
             'front': data['range.front'],
-            'back': data['range.back'],
-            'up': data['range.up'],
             'left': data['range.left'],
+            'back': data['range.back'],
             'right': data['range.right'],
+            'up': data['range.up'],
             'zrange': data['range.zrange'],
         }
         self._map_generator.add_points(measurements)

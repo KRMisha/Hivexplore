@@ -46,10 +46,10 @@ class WebSocketServer:
         self._message_queues[client_id].put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
 
     async def _socket_handler(self, websocket, path):
-        print('New client connected:', websocket.origin)
-
         # Generate a unique ID for each client
         client_id = uuid.uuid4().hex
+
+        print('New client connected:', client_id)
 
         self._message_queues.setdefault(client_id, asyncio.Queue())
 
@@ -63,7 +63,7 @@ class WebSocketServer:
         for task in pending:
             task.cancel()
 
-        print('Client disconnected:', websocket.origin)
+        print('Client disconnected:', client_id)
 
         del self._message_queues[client_id]
 

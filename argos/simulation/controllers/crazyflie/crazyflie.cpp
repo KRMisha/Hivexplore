@@ -121,8 +121,8 @@ void CCrazyflieController::Reset() {
 void CCrazyflieController::Destroy() {
 }
 
-// Returns an unordered_map. The key is the log config name and the value is an unordered_map that contains the log variables' names and
-// their values
+// Returns an unordered_map. The key is the log config name and the value is
+// an unordered_map that contains the log variables' names and their values
 std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::
     GetLogData() const {
     // Fill map progressively

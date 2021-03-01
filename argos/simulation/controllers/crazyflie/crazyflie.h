@@ -35,7 +35,6 @@ public:
     virtual void Reset() override;
     virtual void Destroy() override;
 
-    // TODO: Add more types to the std::variant (check which types are used in the Crazyflie firmware for each log/param)
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> GetLogData() const;
     void SetParamData(const std::string& param, std::variant<bool> value);
 

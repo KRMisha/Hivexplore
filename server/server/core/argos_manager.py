@@ -9,7 +9,7 @@ class ArgosManager:
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
         self._unix_socket_client = UnixSocketClient()
-        self._drone_ids = []
+        self._drone_ids = set()
 
     async def start(self):
         # Client bindings

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Set
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
@@ -9,7 +9,7 @@ class ArgosManager:
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
         self._unix_socket_client = UnixSocketClient()
-        self._drone_ids = set()
+        self._drone_ids: Set[str] = set()
 
     async def start(self):
         # Client bindings

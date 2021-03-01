@@ -75,7 +75,10 @@ class WebSocketServer:
                     print('WebSocketServer warning: Invalid event received:', message['event'])
                     continue
                 for callback in self._callbacks.get(message['event'], []):
-                    callback(message['droneId'], message['data'])
+                    if message['droneId'] is None:
+                        callback(message['data'])
+                    else:
+                        callback(message['droneId'], message['data'])
             except (json.JSONDecodeError, KeyError) as exc:
                 print('WebSocketServer error: Invalid message received:', exc)
 

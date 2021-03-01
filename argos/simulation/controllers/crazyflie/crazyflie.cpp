@@ -123,8 +123,6 @@ void CCrazyflieController::Destroy() {
 
 std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::
     GetLogData() const {
-    // TODO: Add more log data to the map and crazyflie manager (match the names for keys from cflib) (velocity)
-
     // Fill map progressively
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> logDataMap;
 
@@ -151,6 +149,8 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
     logDataMap.emplace("Position", positionLog);
+
+    // TODO: Add velocity
 
     // Range group
     CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();

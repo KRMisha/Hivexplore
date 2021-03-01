@@ -23,7 +23,7 @@ class WebSocketServer:
         self._callbacks.setdefault(event, []).append(callback)
 
     def send_message(self, event: str, data: Any):
-        # None represents a global broadcast
+        # None represents an event not related to a specific drone
         self._send(event, None, data)
 
     def send_drone_message(self, event: str, drone_id: str, data: Any):

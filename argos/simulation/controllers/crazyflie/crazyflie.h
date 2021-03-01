@@ -40,8 +40,6 @@ public:
     void SetParamData(const std::string& param, std::variant<bool> value);
 
 private:
-    void LogData(); // TODO: Remove
-
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;

@@ -121,18 +121,13 @@ void CCrazyflieController::Reset() {
 void CCrazyflieController::Destroy() {
 }
 
-std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, float>>> CCrazyflieController::GetLogData()
+std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::GetLogData()
     const {
-    // TODO: Double check with real stateEstimate values (drone side)
-    // TODO: Check order in crazyflie manager and add missing groups in crazyflie manager
-    // TODO: Handle if returns -1 (check crazyflie)
-    // TODO: Find measures (crazyflie + argos) and transform to make them the same
-    // TODO: Add more log data to the map (match the names for keys from cflib) with code from LogData
+    // TODO: Add more log data to the map and crazyflie manager (match the names for keys from cflib) (velocity)
 
     // Fill map progressively
-    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, float>>> logDataMap;
+    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> logDataMap;
 
-    // TODO: Check if uint8_t
     // BatteryLevel group
     decltype(logDataMap)::mapped_type batteryLevelLog;
     batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
@@ -149,7 +144,6 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
     logDataMap.emplace("Orientation", orientationLog);
 
-    // TODO: Check type (float)
     // Position group
     CVector3 position = m_pcPos->GetReading().Position;
     decltype(logDataMap)::mapped_type positionLog;
@@ -158,19 +152,19 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
     logDataMap.emplace("Position", positionLog);
 
-    // TODO: Check type (float)
     // Range group
     CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
     static const std::array<std::string, 4> rangeLogNames = {"range.front", "range.left", "range.back", "range.right"};
     decltype(logDataMap)::mapped_type rangeLog;
     for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
         std::size_t index = std::distance(distanceReadings.begin(), it);
-        rangeLog.emplace(rangeLogNames[index], static_cast<float>((it->second == -2)? 0 : (it->second)* 10));
+        Real rangeData = (it->second == -1)? 0 : ((it->second == -2)? 4000 : it->second * 10);
+        rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));
     }
     // TODO: Find sensor to get range.up value
-    rangeLog.emplace("range.up", static_cast<float>(0));
+    rangeLog.emplace("range.up", static_cast<std::uint16_t>(0));
     // TODO: Find sensor to get range.zrange value
-    rangeLog.emplace("range.zrange", static_cast<float>(position.GetZ() * 1000));
+    rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
     logDataMap.emplace("Range", rangeLog);
 
     return logDataMap;

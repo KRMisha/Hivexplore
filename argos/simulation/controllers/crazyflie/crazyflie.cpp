@@ -172,7 +172,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
 
 void CCrazyflieController::SetParamData(const std::string& param, std::variant<bool> value) {
     if (param == "hivexplore.isM1LedOn") {
-        // TODO: Toggle LED (see CCI_LEDsActuator in footbot_foraging)
+        // Print LED state since simulated Crazyflie doesn't have LEDs
         RLOG << "LED changed: " << std::get<bool>(value) << '\n';
     }
 }

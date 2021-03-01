@@ -36,8 +36,6 @@ public:
     virtual void Destroy() override;
 
     // TODO: Add more types to the std::variant (check which types are used in the Crazyflie firmware for each log/param)
-    // Returns an unordered_map. The key is the log config name and the value is an unordered_map that contains the log variables' names and
-    // their values
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> GetLogData() const;
     void SetParamData(const std::string& param, std::variant<bool> value);
 

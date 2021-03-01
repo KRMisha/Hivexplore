@@ -19,7 +19,6 @@ class CrazyflieManager:
 
     async def start(self):
         await self._find_crazyflies()
-        self._send_drone_ids()
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     async def _find_crazyflies(self):
@@ -51,8 +50,11 @@ class CrazyflieManager:
                 await asyncio.sleep(timeout_s)
                 timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
 
-    def _send_drone_ids(self):
-        self._web_socket_server.send_message('drone-ids', self._crazyflies.keys())
+    def _send_drone_ids(self, client_id):
+        if client_id is None:
+            self._web_socket_server.send_message('drone-ids', self._crazyflies.keys())
+        else:
+            self._web_socket_server.send_message_to_client(client_id, 'drone-ids', self._crazyflies.keys())
 
     # Setup
 
@@ -182,7 +184,10 @@ class CrazyflieManager:
     def _param_update_callback(self, name, value):
         print(f'Readback: {name}={value}')
 
-    # Param assigning methods
+    # Client callbacks
+
+    def _new_connection_callback(self, client_id):
+        self._send_drone_ids(client_id)
 
     def _set_led_enabled(self, drone_id, is_enabled: bool):
         try:

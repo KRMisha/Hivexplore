@@ -7,26 +7,26 @@ export default class SocketClient {
     private callbacks: Map<string, Map<string | undefined, Array<(data: any) => void>>> = new Map();
 
     constructor() {
-        this.socket.onmessage = (event: MessageEvent) => {
-            const jsonMessage = JSON.parse(event.data);
+        this.socket.onmessage = (messageString: MessageEvent) => {
+            const message = JSON.parse(messageString.data);
 
-            const eventCallbacks = this.callbacks.get(jsonMessage.event);
+            const eventCallbacks = this.callbacks.get(message.event);
 
             if (eventCallbacks === undefined) {
-                console.warn(`Unknow socket event received: ${jsonMessage.event}`);
+                console.warn(`Unknown socket event received: ${message.event}`);
                 return;
             }
 
-            const droneId = jsonMessage.droneId ?? undefined;
+            const droneId = message.droneId ?? undefined;
             const droneCallbacks = eventCallbacks.get(droneId);
 
             if (droneCallbacks === undefined) {
-                console.warn(`Unregistered drone id ${droneId} for socket event ${jsonMessage.event}`);
+                console.warn(`Unregistered drone ID ${droneId} for socket event ${message.event}`);
                 return;
             }
 
             for (const callback of droneCallbacks) {
-                callback(jsonMessage.data);
+                callback(message.data);
             }
         };
 
@@ -40,29 +40,29 @@ export default class SocketClient {
     }
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    bind(eventName: string, droneId: string | undefined, callback: (data: any) => void) {
-        if (!this.callbacks.has(eventName)) {
-            this.callbacks.set(eventName, new Map());
+    bind(event: string, droneId: string | undefined, callback: (data: any) => void) {
+        if (!this.callbacks.has(event)) {
+            this.callbacks.set(event, new Map());
         }
 
-        if (!this.callbacks.get(eventName)!.has(droneId)) {
-            this.callbacks.get(eventName)!.set(droneId, []);
+        if (!this.callbacks.get(event)!.has(droneId)) {
+            this.callbacks.get(event)!.set(droneId, []);
         }
 
         this.callbacks
-            .get(eventName)!
+            .get(event)!
             .get(droneId)!
             .push(callback);
     }
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    send(eventName: string, droneId: string | undefined, data: any) {
+    send(event: string, droneId: string | undefined, data: any) {
         // Convert date to local timezone by stripping the timezone offset
         const timestampUtc = new Date();
         const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
 
         const payload = JSON.stringify({
-            event: eventName,
+            event: event,
             droneId: droneId ?? null,
             data: data,
             timestamp: timestamp.toJSON().replace('Z', ''), // Remove the trailing Z since the timestamp is not in UTC

@@ -50,6 +50,19 @@ export default class SocketClient {
         this.bind(event, droneId, callback);
     }
 
+    send_message(event: string, data: any) {
+        // undefined represents a global broadcast
+        this.send(event, undefined, data);
+    }
+
+    send_drone_message(event: string, droneId: string, data: any) {
+        this.send(event, droneId, data);
+    }
+
+    close() {
+        this.socket.close();
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private bind(event: string, droneId: string | undefined, callback: (data: any) => void) {
         if (!this.callbacks.has(event)) {
@@ -66,15 +79,6 @@ export default class SocketClient {
             .push(callback);
     }
 
-    send_message(event: string, data: any) {
-        // undefined represents a global broadcast
-        this.send(event, undefined, data);
-    }
-
-    send_drone_message(event: string, droneId: string, data: any) {
-        this.send(event, droneId, data);
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private send(event: string, droneId: string | undefined, data: any) {
         // Convert date to local timezone by stripping the timezone offset
@@ -89,9 +93,5 @@ export default class SocketClient {
         });
 
         this.socket.send(payload);
-    }
-
-    close() {
-        this.socket.close();
     }
 }

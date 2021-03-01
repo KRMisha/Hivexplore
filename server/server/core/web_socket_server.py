@@ -48,7 +48,7 @@ class WebSocketServer:
     async def _socket_handler(self, websocket, path):
         print('New client connected:', websocket.origin)
 
-        # Generate unique id for each client
+        # Generate a unique ID for each client
         client_id = uuid.uuid4().hex
 
         self._message_queues.setdefault(client_id, asyncio.Queue())

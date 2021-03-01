@@ -41,7 +41,7 @@ export default class SocketClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bind_message(event: string, callback: (data: any) => void) {
-        // undefined represents a global broadcast
+        // undefined represents an event not related to a specific drone
         this.bind(event, undefined, callback);
     }
 

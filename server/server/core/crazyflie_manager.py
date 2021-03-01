@@ -52,7 +52,7 @@ class CrazyflieManager:
                 timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
 
     def _send_drone_ids(self):
-        self._web_socket_server.send('drone-ids', None, (self._crazyflies.keys()))
+        self._web_socket_server.send_message('drone-ids', self._crazyflies.keys())
 
     # Setup
 
@@ -130,7 +130,7 @@ class CrazyflieManager:
         battery_level = data['pm.batteryLevel']
         print(f'Battery level: {battery_level}')
 
-        self._web_socket_server.send('battery-level', logconf.cf.link_uri, battery_level)
+        self._web_socket_server.send_drone_message('battery-level', logconf.cf.link_uri, battery_level)
 
     def _log_stabilizer_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -143,7 +143,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
-        self._web_socket_server.send('stabilizer-data', logconf.cf.link_uri, measurements)
+        self._web_socket_server.send_drone_message('stabilizer-data', logconf.cf.link_uri, measurements)
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -159,7 +159,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
-        self._web_socket_server.send('range-data', logconf.cf.link_uri, measurements)
+        self._web_socket_server.send_drone_message('range-data', logconf.cf.link_uri, measurements)
 
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -172,7 +172,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
 
-        self._web_socket_server.send('position-data', logconf.cf.link_uri, measurements)
+        self._web_socket_server.send_drone_message('position-data', logconf.cf.link_uri, measurements)
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')
@@ -184,6 +184,8 @@ class CrazyflieManager:
 
     # Param assigning methods
 
-    def _set_led_enabled(self, is_enabled: bool):
-        for crazyflie in self._crazyflies.values():
-            crazyflie.param.set_value('hivexplore.isM1LedOn', is_enabled)
+    def _set_led_enabled(self, drone_id, is_enabled: bool):
+        try:
+            self._crazyflies[drone_id].param.set_value('hivexplore.isM1LedOn', is_enabled)
+        except KeyError:
+            print('CrazyflieManager error: Unknown drone ID received:', drone_id)

@@ -25,14 +25,19 @@ export default defineComponent({
         const socket: SocketClient | undefined = inject('socket');
 
         const batteryLevel = ref(0);
-        socket!.bind('battery-level', props.droneId, (updatedBatteryLevel: number) => {
+        socket!.bind_drone_message('battery-level', props.droneId!, (updatedBatteryLevel: number) => {
             batteryLevel.value = updatedBatteryLevel;
         });
 
         const isLedOn = ref(false);
+        socket!.bind_drone_message('set-led', props.droneId!, (updatedIsLedOn: boolean) => {
+            isLedOn.value = updatedIsLedOn;
+            console.log('a');
+        });
+
 
         function changeLedStatus() {
-            socket!.send('set-led', props.droneId, isLedOn.value);
+            socket!.send_drone_message('set-led', props.droneId!, isLedOn.value);
         }
 
         return {

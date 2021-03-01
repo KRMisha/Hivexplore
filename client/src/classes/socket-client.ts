@@ -40,7 +40,18 @@ export default class SocketClient {
     }
 
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    bind(event: string, droneId: string | undefined, callback: (data: any) => void) {
+    bind_message(event: string, callback: (data: any) => void) {
+        // undefined represents a global broadcast
+        this.bind(event, undefined, callback);
+    }
+
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    bind_drone_message(event: string, droneId: string, callback: (data: any) => void) {
+        this.bind(event, droneId, callback);
+    }
+
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    private bind(event: string, droneId: string | undefined, callback: (data: any) => void) {
         if (!this.callbacks.has(event)) {
             this.callbacks.set(event, new Map());
         }
@@ -55,8 +66,17 @@ export default class SocketClient {
             .push(callback);
     }
 
+    send_message(event: string, data: any) {
+        // undefined represents a global broadcast
+        this.send(event, undefined, data);
+    }
+
+    send_drone_message(event: string, droneId: string, data: any) {
+        this.send(event, droneId, data);
+    }
+
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    send(event: string, droneId: string | undefined, data: any) {
+    private send(event: string, droneId: string | undefined, data: any) {
         // Convert date to local timezone by stripping the timezone offset
         const timestampUtc = new Date();
         const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);

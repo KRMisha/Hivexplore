@@ -22,7 +22,7 @@ export default defineComponent({
         const socket = new SocketClient();
         const droneIds = ref<Array<string>>([]);
 
-        socket.bind('drone-ids', undefined, (newDroneIds: Array<string>) => {
+        socket.bind_message('drone-ids', (newDroneIds: Array<string>) => {
             droneIds.value = newDroneIds;
         });
 

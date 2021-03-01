@@ -3,10 +3,9 @@
 
 #include <sys/un.h>
 #include <argos3/core/simulator/loop_functions.h>
+#include "controllers/crazyflie/crazyflie.h"
 
 using namespace argos;
-
-class CCrazyflieController;
 
 class CHivexploreLoopFunctions : public CLoopFunctions {
 public:

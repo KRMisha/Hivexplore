@@ -89,7 +89,14 @@ class WebSocketServer:
                 if message['event'] in EVENT_DENYLIST:
                     print('WebSocketServer error: Invalid event received:', message['event'])
                     continue
-                for callback in self._callbacks.get(message['event'], []):
+
+                try:
+                    callbacks = self._callbacks[message['event']]
+                except KeyError:
+                    print('WebSocketServer warning: No callbacks bound for event:', message['event'])
+                    continue
+
+                for callback in callbacks:
                     if message['droneId'] is None:
                         callback(message['data'])
                     else:

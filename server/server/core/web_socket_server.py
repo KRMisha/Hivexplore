@@ -9,6 +9,7 @@ IP_ADDRESS = 'localhost'
 PORT = 5678
 EVENT_DENYLIST = {'connect'}
 
+
 class WebSocketServer:
     def __init__(self):
         self._callbacks: Dict[str, List[Callable]] = {}
@@ -43,7 +44,12 @@ class WebSocketServer:
         if client_id not in self._message_queues:
             print('WebSocketServer error: Unknown client ID:', client_id)
             return
-        self._message_queues[client_id].put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
+        self._message_queues[client_id].put_nowait({
+            'event': event,
+            'droneId': drone_id,
+            'data': data,
+            'timestamp': datetime.now().isoformat()
+        })
 
     async def _socket_handler(self, websocket, path):
         # Generate a unique ID for each client
@@ -82,7 +88,12 @@ class WebSocketServer:
             except (json.JSONDecodeError, KeyError) as exc:
                 print('WebSocketServer error: Invalid message received:', exc)
 
-    async def _send_handler(self, websocket, _path, message_queue,):
+    async def _send_handler(
+        self,
+        websocket,
+        _path,
+        message_queue,
+    ):
         while True:
             message = await message_queue.get()
             message_str = json.dumps(message)

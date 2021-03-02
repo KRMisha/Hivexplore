@@ -73,7 +73,14 @@ class UnixSocketClient:
 
             try:
                 message = json.loads(message_bytes.decode('utf-8'))
-                for callback in self._callbacks.get(message['logName'], []):
+
+                try:
+                    callbacks = self._callbacks[message['logName']]
+                except KeyError:
+                    print('UnixSocketClient warning: No callbacks bound for log name:', message['logName'])
+                    continue
+
+                for callback in callbacks:
                     callback(message['droneId'], message['variables'])
             except (json.JSONDecodeError, KeyError) as exc:
                 print('UnixSocketClient error: Invalid message received:', exc)

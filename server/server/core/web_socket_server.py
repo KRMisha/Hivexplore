@@ -72,7 +72,7 @@ class WebSocketServer:
             try:
                 message = json.loads(message_str)
                 if message['event'] in EVENT_DENYLIST:
-                    print('WebSocketServer warning: Invalid event received:', message['event'])
+                    print('WebSocketServer error: Invalid event received:', message['event'])
                     continue
                 for callback in self._callbacks.get(message['event'], []):
                     if message['droneId'] is None:

@@ -12,10 +12,6 @@ class ArgosManager:
         self._drone_ids: Set[str] = set()
 
     async def start(self):
-        # Client bindings
-        self._web_socket_server.bind('connect', self._new_connection_callback)
-        self._web_socket_server.bind('set-led', self._set_led_enabled)
-
         # ARGoS bindings
         self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
         self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback)
@@ -23,20 +19,11 @@ class ArgosManager:
         self._unix_socket_client.bind('Position', self._log_position_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
 
+        # Client bindings
+        self._web_socket_server.bind('connect', self._new_connection_callback)
+        self._web_socket_server.bind('set-led', self._set_led_enabled)
+
         await self._unix_socket_client.serve()
-
-    # Client callbacks
-
-    def _new_connection_callback(self, client_id):
-        self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._drone_ids))
-
-    def _set_led_enabled(self, drone_id: str, is_enabled: bool):
-        if drone_id in self._drone_ids:
-            print(f'Set LED state for drone {drone_id}: {is_enabled}')
-            self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
-            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
-        else:
-            print('ArgosManager error: Unknown drone ID received:', drone_id)
 
     # ARGoS callbacks
 
@@ -85,3 +72,16 @@ class ArgosManager:
         print(f'Range from drone {drone_id}:')
         for key, value in measurements.items():
             print(f'- {key}: {value}')
+
+    # Client callbacks
+
+    def _new_connection_callback(self, client_id):
+        self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._drone_ids))
+
+    def _set_led_enabled(self, drone_id: str, is_enabled: bool):
+        if drone_id in self._drone_ids:
+            print(f'Set LED state for drone {drone_id}: {is_enabled}')
+            self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
+            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
+        else:
+            print('ArgosManager error: Unknown drone ID received:', drone_id)

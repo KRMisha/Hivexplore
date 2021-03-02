@@ -51,7 +51,7 @@ class WebSocketServer:
 
         print('New client connected:', client_id)
 
-        self._message_queues.setdefault(client_id, asyncio.Queue())
+        self._message_queues[client_id] = asyncio.Queue()
 
         for callback in self._callbacks.get('connect', []):
             callback(client_id)

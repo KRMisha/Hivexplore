@@ -2,180 +2,136 @@
 
 Source code for the firmware used in the Crazyflie range of platforms, including the Crazyflie 2.X and the Roadrunner.
 
+The Hivexplore drone logic is contained the `app_api` directory.
+
 ## Prerequisites
 
-You'll need to use either the [Crazyflie VM](https://wiki.bitcraze.io/projects:virtualmachine:index),
-[the toolbelt](https://wiki.bitcraze.io/projects:dockerbuilderimage:index) or
-install some ARM toolchain.
+- ARM embedded toolchain:
+    - Ubuntu 20.04+
 
-### Install a toolchain
+        ```
+        sudo apt-get install make gcc-arm-none-eabi
+        ```
 
-#### OS X
+    - Ubuntu 16.04 & 18.04:
 
-```bash
-brew tap PX4/homebrew-px4
-brew install gcc-arm-none-eabi
+        ```
+        sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
+        sudo apt-get update
+        sudo apt install gcc-arm-embedded
+        ```
+
+    - Arch Linux
+
+        ```
+        sudo pacman -S community/arm-none-eabi-gcc community/arm-none-eabi-gdb community/arm-none-eabi-newlib
+        ```
+
+- Make sure all the [submodules have been cloned](../README.md#setup)
+- [Python >= 3.8](https://www.python.org/downloads/)
+- Make
+
+## Setup
+
+Install the required packages to flash the drone with a virtual environment located at the project root:
+```
+make venv
 ```
 
-#### Debian/Ubuntu
-
-Tested on Ubuntu 16.04 64b/18.04 64b/20.04 64b/20.10 64b:
-
-For Ubuntu 16.04 and 18.04:
-
-```bash
-sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
-sudo apt-get update
-sudo apt install gcc-arm-embedded
+The virtual environment must be activated once per shell session before running `make cload`:
+```
+source ../.venv/bin/activate
 ```
 
-For Ubuntu 20.04 and 20.10:
-
-```bash
-sudo apt-get install make gcc-arm-none-eabi
+To install new packages needed for the drone build process, add them to `requirements.txt` and run the following command (with the venv activated):
+```
+pip install -r requirements.txt
 ```
 
-#### Arch Linux
+## Usage
 
-```bash
-sudo pacman -S community/arm-none-eabi-gcc community/arm-none-eabi-gdb community/arm-none-eabi-newlib
+### Build the Hivexplore firmware
+
+Build the firmware with the logic defined in the `app_api` directory:
+```sh
+cd app_api
+make
 ```
 
-#### Windows
+### Build the default (logic-less) firmware
 
-The GCC ARM Embedded toolchain for Windows is available at [launchpad.net](https://launchpad.net/gcc-arm-embedded/+download). Download the zip archive rather than the executable installer. There are a few different systems for running UNIX-style shells and build systems on Windows; the instructions below are for [Cygwin](https://www.cygwin.com/).
-
-Install Cygwin with [setup-x86_64.exe](https://www.cygwin.com/setup-x86_64.exe). Use the standard `C:\cygwin64` installation directory and install at least the `make` and `git` packages.
-
-Download the latest `gcc-arm-none-eabi-*-win32.zip` archive from [launchpad.net](https://launchpad.net/gcc-arm-embedded/+download). Create the directory `C:\cygwin64\opt\gcc-arm-none-eabi` and extract the contents of the zip file to it.
-
-Launch a Cygwin terminal and run the following to append to your `~/.bashrc` file:
-```bash
-echo '[[ $PATH == */opt/gcc-arm-none-eabi/bin* ]] || export PATH=/opt/gcc-arm-none-eabi/bin:$PATH' >>~/.bashrc
-source ~/.bashrc
+Build the default firmware from the root of the `drone` subproject:
+```sh
+make
 ```
 
-Verify the toolchain installation with `arm-none-eabi-gcc --version`
+### Flashing
 
-## Compiling
-
-**Note**: The following steps should be done in the app_api directory to flash the drone with the app_main or in any of the examples' directories. They can also be done in the firmware's main folder to flash the Crazyflie with the default firmware.
-
-### Crazyflie 2.X
-
-This is the default build so just running ```make``` is enough or:
-```bash
-make PLATFORM=cf2
-```
-
-or with the toolbelt
-
-```bash
-tb make PLATFORM=cf2
-```
-
-### Roadrunner
-
-Use the ```tag``` platform
-
-```bash
-make PLATFORM=tag
-```
-
-or with the toolbelt
-
-```bash
-tb make PLATFORM=tag
-```
-
-### config.mk
-
-To create custom build options create a file called `config.mk` in the `tools/make/`
-folder and fill it with options. E.g.
-```
-PLATFORM=CF2
-DEBUG=1
-```
-More information can be found on the
-[Bitcraze documentation](https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/)
-
-## Flashing
-
-1. Plug in the Crazyradio PA USB dongle
-2. Put the drone in bootloader mode:
+1. `cd` into the directory with the firmware you wish to flash. Most often, this will be the `app_api` directory.
+2. Plug in the Crazyradio PA USB dongle
+3. Put the Crazyflie in bootloader mode:
     1. Press and hold the power button
     2. When the blue LED M2 starts blinking, release the power button
     3. The blue LED M3 should now start blinking as well
-3. Flash the drone using the wireless bootloader
+4. Flash the drone using the wireless bootloader
 
     ```
     make cload
     ```
 
-## Make targets:
+> You can also flash any one of the pre-made examples contained from one of the projects in the `examples` directory.
+
+### Make targets
 
 ```
-all        : Shortcut for build
-compile    : Compile cflie.hex. WARNING: Do NOT update version.c
-build      : Update version.c and compile cflie.elf/hex
-clean_o    : Clean only the Objects files, keep the executables (ie .elf, .hex)
-clean      : Clean every compiled files
-mrproper   : Clean every compiled files and the classical editors backup files
+all          Shortcut for build
+compile      Compile cflie.hex. WARNING: do NOT update version.c
+build        Update version.c and compile cflie.elf/hex
+clean_o      Clean only the object files, keep the executables (ie .elf, .hex)
+clean        Clean every compiled files
+mrproper     Clean every compiled files and the classical editors backup files
 
-cload      : If the crazyflie-clients-python is placed on the same directory level and
-             the Crazyradio/Crazyradio PA is inserted it will try to flash the firmware
-             using the wireless bootloader.
-flash      : Flash .elf using OpenOCD
-halt       : Halt the target using OpenOCD
-reset      : Reset the target using OpenOCD
-openocd    : Launch OpenOCD
+cload        Flash the firmware using the wireless bootloader
+flash        Flash .elf using OpenOCD
+halt         Halt the target using OpenOCD
+reset        Reset the target using OpenOCD
+openocd      Launch OpenOCD
 
-format     : Format source files
+format       Format source files
 ```
+
+### Preset build options
+
+To create custom build options, create a file named `config.mk` in the `tools/make/`
+directory and fill it with options. For example:
+```
+PLATFORM=CF2
+DEBUG=1
+```
+
+More information can be found on the
+[Bitcraze documentation](https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/).
 
 ## Unit testing
 
 ### Running all unit tests
 
-With the environment set up locally
 ```
 make unit
 ```
 
-with the docker builder image and the toolbelt
-```
-tb make unit
-```
-
 ### Running one unit test
 
-When working with one specific file it is often convenient to run only one unit test
+When working with one specific file, it is often convenient to run only one unit test. For example:
 ```
 make unit FILES=test/utils/src/test_num.c
 ```
 
-or with the toolbelt
-```
-tb make unit FILES=test/utils/src/test_num.c
-```
-
 ### Running unit tests with specific build settings
 
-Defines are managed by make and are passed on to the unit test code. Use the
-normal ways of configuring make when running tests. For instance to run test
-for Crazyflie 1
+Defines are managed by Make and are passed on to the unit test code. Use the
+usual way of passing arguments to Make when running tests. For instance, to run tests
+for the Crazyflie 1:
 ```
 make unit LPS_TDOA_ENABLE=1
 ```
-
-### Dependencies
-
-Frameworks for unit testing and mocking are pulled in as git submodules.
-
-The testing framework uses ruby and rake to generate and run code.
-
-To minimize the need for installations and configuration, use the docker builder
-image (bitcraze/builder) that contains all tools needed. All scripts in the
-tools/build directory are intended to be run in the image. The
-[toolbelt](https://wiki.bitcraze.io/projects:dockerbuilderimage:index) makes it
-easy to run the tool scripts.

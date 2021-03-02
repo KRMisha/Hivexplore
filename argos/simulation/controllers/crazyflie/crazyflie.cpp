@@ -1,4 +1,5 @@
 #include "crazyflie.h"
+#include <array>
 #include <type_traits>
 #include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
@@ -49,13 +50,13 @@ void CCrazyflieController::ControlStep() {
         }
         break;
     case DroneState::ForwardMovement:
-        m_pcPropellers->SetRelativePosition(CVector3(distanceToTravel, 0.0, 0.0));
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
         m_lastReferencePosition = m_pcPos->GetReading().Position;
         m_currentState = DroneState::WaitForwardMovement;
         break;
     case DroneState::WaitForwardMovement:
         // If we detect a wall in front of us
-        if ((++m_pcDistance->GetReadingsMap().begin())->second >= 0) {
+        if (m_pcDistance->GetReadingsMap().begin()->second >= 0) {
             m_currentState = DroneState::BrakeMovement;
         }
         // If we finished traveling
@@ -76,7 +77,7 @@ void CCrazyflieController::ControlStep() {
         m_lastReferencePosition = m_pcPos->GetReading().Position;
         break;
     case DroneState::Rotate:
-        if ((++m_pcDistance->GetReadingsMap().begin())->second < 0) {
+        if (m_pcDistance->GetReadingsMap().begin()->second < 0) {
             m_currentState = DroneState::ForwardMovement;
         } else {
             CRadians angle;
@@ -120,44 +121,74 @@ void CCrazyflieController::Reset() {
 void CCrazyflieController::Destroy() {
 }
 
-std::unordered_map<std::string, std::variant<std::uint8_t>> CCrazyflieController::GetLogData() const {
-    // TODO: Add more log data to the map (match the names for keys from cflib) with code from LogData
-    return {{"pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100)}};
+// Returns an unordered_map. The key is the log config name and the value is
+// an unordered_map that contains the log variables' names and their values
+std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::
+    GetLogData() const {
+    // Fill map progressively
+    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> logDataMap;
+
+    // BatteryLevel group
+    decltype(logDataMap)::mapped_type batteryLevelLog;
+    batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
+    logDataMap.emplace("BatteryLevel", batteryLevelLog);
+
+    // Orientation group
+    CRadians angleRadians;
+    CVector3 vector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
+    Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
+    decltype(logDataMap)::mapped_type orientationLog;
+    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
+    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
+    logDataMap.emplace("Orientation", orientationLog);
+
+    // Position group
+    CVector3 position = m_pcPos->GetReading().Position;
+    decltype(logDataMap)::mapped_type positionLog;
+    positionLog.emplace("stateEstimate.x", static_cast<float>(position.GetX()));
+    positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
+    positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
+    logDataMap.emplace("Position", positionLog);
+
+    // TODO: Add velocity
+
+    // Range group
+    CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
+    static const std::array<std::string, 4> rangeLogNames = {"range.front", "range.left", "range.back", "range.right"};
+    decltype(logDataMap)::mapped_type rangeLog;
+    static constexpr std::int8_t sensorSaturated = -1;
+    static constexpr std::int8_t sensorEmpty = -2;
+    static constexpr std::uint8_t obstacleTooClose = 0;
+    static constexpr std::uint16_t obstacleTooFar = 4000;
+
+    for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
+        std::size_t index = std::distance(distanceReadings.begin(), it);
+        Real rangeData = it->second;
+        if (rangeData == sensorSaturated) {
+            rangeData = obstacleTooClose;
+        } else if (rangeData == sensorEmpty) {
+            rangeData = obstacleTooFar;
+        } else {
+            rangeData *= 10;
+        }
+        rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));
+    }
+    // TODO: Find sensor to get range.up value
+    rangeLog.emplace("range.up", static_cast<std::uint16_t>(0));
+    // TODO: Find sensor to get range.zrange value
+    rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
+    logDataMap.emplace("Range", rangeLog);
+
+    return logDataMap;
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, std::variant<bool> value) {
     if (param == "hivexplore.isM1LedOn") {
-        // TODO: Toggle LED (see CCI_LEDsActuator in footbot_foraging)
+        // Print LED state since simulated Crazyflie doesn't have LEDs
         RLOG << "LED changed: " << std::get<bool>(value) << '\n';
     }
-}
-
-// TODO: Remove to integrate in GetLogData
-void CCrazyflieController::LogData() {
-    // Battery sensor
-    RLOG << "Battery level: " << m_pcBattery->GetReading().AvailableCharge << std::endl;
-
-    // Distance sensors
-    auto iterDistRead = m_pcDistance->GetReadingsMap().begin();
-    if (m_pcDistance->GetReadingsMap().size() == 4) {
-        RLOG << "Front dist: " << (iterDistRead++)->second << std::endl;
-        RLOG << "Left dist: " << (iterDistRead++)->second << std::endl;
-        RLOG << "Back dist: " << (iterDistRead++)->second << std::endl;
-        RLOG << "Right dist: " << (iterDistRead)->second << std::endl;
-    }
-
-    // Position sensor
-    RLOG << "PosSens Pos X: " << m_pcPos->GetReading().Position.GetX() << std::endl;
-    RLOG << "PosSens Pos Y: " << m_pcPos->GetReading().Position.GetY() << std::endl;
-    RLOG << "PosSens Pos Z: " << m_pcPos->GetReading().Position.GetZ() << std::endl;
-
-    CRadians angle;
-    CVector3 vector;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
-    RLOG << "PosSens Angle X: " << vector.GetX() << std::endl;
-    RLOG << "PosSens Angle Y: " << vector.GetY() << std::endl;
-    RLOG << "PosSens Angle Z: " << vector.GetZ() << std::endl;
-    RLOG << "PosSens Angle Angle: " << angle << std::endl;
 }
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

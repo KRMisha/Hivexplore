@@ -83,24 +83,27 @@ void CHivexploreLoopFunctions::PreStep() {
     if (GetSpace().GetSimulationClock() % ticksPerSecond == 0) {
         for (const auto& controller : controllers) {
             auto logData = controller.get().GetLogData();
-            for (const auto& [key, value] : logData) {
-                std::visit(
-                    [&key = std::as_const(key), &controller, this](const auto& value) {
-                        json packet = {
-                            {"logName", key},
-                            {"droneId", controller.get().GetId()},
-                            {"value", value},
-                        };
-                        std::string serializedPacket = packet.dump();
+            for (const auto& [logName, variables] : logData) {
+                json variablesJson;
+                for (const auto& [key, variant] : variables) {
+                    std::visit([&key = std::as_const(key), &variablesJson](const auto& value) { variablesJson.emplace(key, value); },
+                               variant);
+                }
 
-                        ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
-                        if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-                            // Restart simulation in case of socket error
-                            std::perror("Unix socket send");
-                            Stop();
-                        }
-                    },
-                    value);
+                json packet = {
+                    {"logName", logName},
+                    {"droneId", controller.get().GetId()},
+                    {"variables", variablesJson},
+                };
+
+                std::string serializedPacket = packet.dump();
+
+                ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
+                if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+                    // Restart simulation in case of socket error
+                    std::perror("Unix socket send");
+                    Stop();
+                }
             }
         }
     }
@@ -189,7 +192,7 @@ void CHivexploreLoopFunctions::SendDroneIdsToServer() {
     json packet = {
         {"logName", "drone-ids"},
         {"droneId", nullptr},
-        {"value", droneIds},
+        {"variables", droneIds},
     };
     std::string serializedPacket = packet.dump();
 

@@ -5,11 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python",
+            "name": "Python - Crazyflie",
             "type": "python",
             "request": "launch",
             "module": "server.main",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python - ARGoS",
+            "type": "python",
+            "request": "launch",
+            "module": "server.main",
+            "console": "integratedTerminal",
+            "args": ["argos"]
         }
     ]
 }

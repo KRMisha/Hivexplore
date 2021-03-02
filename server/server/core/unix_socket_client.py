@@ -1,7 +1,7 @@
 import asyncio
 import json
 import socket
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 from server import config
 
 
@@ -50,15 +50,15 @@ class UnixSocketClient:
         finally:
             self._socket.close()
 
+    def bind(self, log_name: str, callback: Callable[[Optional[str], Any], None]):
+        self._callbacks.setdefault(log_name, []).append(callback)
+
     def send(self, param_name: str, drone_id: str, value: Any):
         self._message_queue.put_nowait({
             'paramName': param_name,
             'droneId': drone_id,
             'value': value,
         })
-
-    def bind(self, log_name: str, callback: Callable[[str, Any], None]):
-        self._callbacks.setdefault(log_name, []).append(callback)
 
     def _create_socket(self):
         self._socket = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
@@ -73,7 +73,14 @@ class UnixSocketClient:
 
             try:
                 message = json.loads(message_bytes.decode('utf-8'))
-                for callback in self._callbacks.get(message['logName'], []):
+
+                try:
+                    callbacks = self._callbacks[message['logName']]
+                except KeyError:
+                    print('UnixSocketClient warning: No callbacks bound for log name:', message['logName'])
+                    continue
+
+                for callback in callbacks:
                     callback(message['droneId'], message['variables'])
             except (json.JSONDecodeError, KeyError) as exc:
                 print('UnixSocketClient error: Invalid message received:', exc)

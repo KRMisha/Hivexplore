@@ -3,7 +3,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <argos3/plugins/robots/crazyflie/simulator/crazyflie_entity.h>
-#include "controllers/crazyflie/crazyflie.h"
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -19,6 +18,7 @@ void CHivexploreLoopFunctions::Init(TConfigurationNode& t_tree) {
 void CHivexploreLoopFunctions::Reset() {
     m_isExperimentFinished = false;
     StartSocket();
+    SendDroneIdsToServer();
 }
 
 void CHivexploreLoopFunctions::Destroy() {
@@ -36,13 +36,7 @@ void CHivexploreLoopFunctions::Destroy() {
 
 void CHivexploreLoopFunctions::PreStep() {
     // Get list of Crazyflie controllers
-    CSpace::TMapPerType& entities = GetSpace().GetEntitiesByType("crazyflie");
-    std::vector<std::reference_wrapper<CCrazyflieController>> controllers;
-    std::transform(entities.begin(), entities.end(), std::back_inserter(controllers), [](const auto& pair) {
-        CCrazyflieEntity& crazyflie = *any_cast<CCrazyflieEntity*>(pair.second);
-        CCrazyflieController& controller = dynamic_cast<CCrazyflieController&>(crazyflie.GetControllableEntity().GetController());
-        return std::ref(controller);
-    });
+    std::vector<std::reference_wrapper<CCrazyflieController>> controllers = GetControllers();
 
     // Receive param data from server
     while (true) {
@@ -185,6 +179,39 @@ void CHivexploreLoopFunctions::Stop() {
            "2. Restart the server\n"
            "3. Press the play button on the ARGoS client\n";
     m_isExperimentFinished = true;
+}
+
+void CHivexploreLoopFunctions::SendDroneIdsToServer() {
+    std::vector<std::reference_wrapper<CCrazyflieController>> controllers = GetControllers();
+    std::vector<std::string> droneIds;
+
+    std::transform(controllers.begin(), controllers.end(), std::back_inserter(droneIds), [](const auto& controller) {
+        return controller.get().GetId();
+    });
+
+    json packet = {
+        {"logName", "drone-ids"},
+        {"droneId", nullptr},
+        {"variables", droneIds},
+    };
+    std::string serializedPacket = packet.dump();
+
+    ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
+    if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+        std::perror("Unix socket send");
+        Stop();
+    }
+}
+
+std::vector<std::reference_wrapper<CCrazyflieController>> CHivexploreLoopFunctions::GetControllers() {
+    CSpace::TMapPerType& entities = GetSpace().GetEntitiesByType("crazyflie");
+    std::vector<std::reference_wrapper<CCrazyflieController>> controllers;
+    std::transform(entities.begin(), entities.end(), std::back_inserter(controllers), [](const auto& pair) {
+        CCrazyflieEntity& crazyflie = *any_cast<CCrazyflieEntity*>(pair.second);
+        CCrazyflieController& controller = dynamic_cast<CCrazyflieController&>(crazyflie.GetControllableEntity().GetController());
+        return std::ref(controller);
+    });
+    return controllers;
 }
 
 REGISTER_LOOP_FUNCTIONS(CHivexploreLoopFunctions, "hivexplore_loop_functions")

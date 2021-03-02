@@ -3,6 +3,7 @@
 
 #include <sys/un.h>
 #include <argos3/core/simulator/loop_functions.h>
+#include "controllers/crazyflie/crazyflie.h"
 
 using namespace argos;
 
@@ -19,6 +20,8 @@ public:
 private:
     void StartSocket();
     void Stop();
+    void SendDroneIdsToServer();
+    std::vector<std::reference_wrapper<CCrazyflieController>> GetControllers();
 
     int m_connectionSocket = -1;
     sockaddr_un m_socketName;

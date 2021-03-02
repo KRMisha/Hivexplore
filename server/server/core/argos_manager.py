@@ -1,6 +1,11 @@
+from typing import Any, Optional, Set
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
+
+# pylint: disable=no-self-use
+
+# TODO: Refactor common code between CrazyflieManager and ArgosManager
 
 
 class ArgosManager:
@@ -8,29 +13,34 @@ class ArgosManager:
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
         self._unix_socket_client = UnixSocketClient()
+        self._drone_ids: Set[str] = set()
 
     async def start(self):
-        # Client bindings
-        self._web_socket_server.bind('set-led', self._set_led_enabled)
-
-        # Argos bindings
+        # ARGoS bindings
+        self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
         self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback)
         self._unix_socket_client.bind('Orientation', self._log_orientation_callback)
         self._unix_socket_client.bind('Position', self._log_position_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
 
+        # Client bindings
+        self._web_socket_server.bind('connect', self._new_connection_callback)
+        self._web_socket_server.bind('set-led', self._set_led_enabled)
+
         await self._unix_socket_client.serve()
 
-    def _set_led_enabled(self, is_enabled: bool):
-        # TODO: Get drone IDs on connection to ARGoS and loop for all drone IDs
-        drone_id = 's0'
-        self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
+    # ARGoS callbacks
+
+    def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
+        self._drone_ids = data
+        self._web_socket_server.send_message('drone-ids', list(self._drone_ids))
+
+        print('Received drone IDs:', self._drone_ids)
 
     def _log_battery_callback(self, drone_id, data):
         battery_level = data['pm.batteryLevel']
         print(f'BatteryLevel from drone {drone_id}: {battery_level}')
-        # TODO: Add drone_id
-        # self._web_socket_server.send('battery-level', battery_level)
+        self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data):
         measurements = {
@@ -66,3 +76,16 @@ class ArgosManager:
         print(f'Range from drone {drone_id}:')
         for key, value in measurements.items():
             print(f'- {key}: {value}')
+
+    # Client callbacks
+
+    def _new_connection_callback(self, client_id):
+        self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._drone_ids))
+
+    def _set_led_enabled(self, drone_id: str, is_enabled: bool):
+        if drone_id in self._drone_ids:
+            print(f'Set LED state for drone {drone_id}: {is_enabled}')
+            self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
+            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
+        else:
+            print('ArgosManager error: Unknown drone ID received:', drone_id)

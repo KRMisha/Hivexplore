@@ -6,9 +6,9 @@
 - [x11docker](https://github.com/mviereck/x11docker)
 - Make
 
-## Setup
+## Development
 
-### Development
+### Setup
 
 1. Copy the VS Code attached container configuration reference into your local VS Code configuration:
 
@@ -24,17 +24,9 @@
     make image
     ```
 
-### Production
+### Usage
 
-1. Build the Docker image for production:
-
-    ```
-    make image-prod
-    ```
-
-## Usage - Development
-
-### Open the container using the VS Code Remote-Containers extension
+#### Open the container using the VS Code Remote-Containers extension
 
 1. Start the container non-interactively with x11docker:
 
@@ -52,31 +44,31 @@
 
     The simulation will start. ARGoS will not show a window until the server is running and has connected to it. Once it does, the simulator window will appear.
 
-3. When done making changes, simply close the VS Code window with the container and stop x11docker with `Ctrl+C`.
+4. When done making changes, simply close the VS Code window with the container and stop x11docker with `Ctrl+C`.
 
-### Build simulation
+#### Build simulation
 ```
 make build
 ```
 
-### Build and run simulation
+#### Build and run simulation
 ```
 make run
 ```
 
 > This will automatically run CMake if no Makefile exists and rebuild the program if the source files have changed.
 
-### Format code
+#### Format code
 ```
 make format
 ```
 
-### Clean simulation build directory
+#### Clean simulation build directory
 ```
 make clean
 ```
 
-### See list of available commands
+#### See list of available commands
 
 ```
 make help
@@ -84,7 +76,17 @@ make help
 
 > Note that some commands are meant to be ran outside a container, and some once inside the development container. See the output of `make help` for more information.
 
-## Usage - Production
+## Production
+
+### Setup
+
+Build the Docker image for production:
+
+```
+make image-prod
+```
+
+### Usage
 
 ```
 make start-prod

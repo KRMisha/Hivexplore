@@ -64,7 +64,7 @@
         <distribute>
             <position method="uniform" min="-1,-1,0" max="1,1,0" />
             <orientation method="uniform" min="0,0,0" max="180,0,0" />
-            <entity quantity="2" max_trials="100">
+            <entity quantity="4" max_trials="100">
                 <crazyflie id="s">
                     <controller config="cfc" />
                     <battery model="time_motion" delta="1e-3" pos_delta="1e-3" orient_delta="1e-3"/>

@@ -9,6 +9,8 @@ from server import config
 
 # pylint: disable=no-self-use
 
+# TODO: Refactor common code between CrazyflieManager and ArgosManager
+
 
 class CrazyflieManager:
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
@@ -19,6 +21,7 @@ class CrazyflieManager:
 
     async def start(self):
         await self._find_crazyflies()
+        self._web_socket_server.bind('connect', self._new_connection_callback)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     async def _find_crazyflies(self):
@@ -49,6 +52,12 @@ class CrazyflieManager:
                 print(f'No Crazyflies found, retrying after {timeout_s} seconds')
                 await asyncio.sleep(timeout_s)
                 timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
+
+    def _send_drone_ids(self, client_id=None):
+        if client_id is None:
+            self._web_socket_server.send_message('drone-ids', list(self._crazyflies.keys()))
+        else:
+            self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._crazyflies.keys()))
 
     # Setup
 
@@ -105,13 +114,14 @@ class CrazyflieManager:
 
     def _connected(self, link_uri):
         print(f'Connected to {link_uri}')
-
         self._setup_log(self._crazyflies[link_uri])
         self._setup_param(self._crazyflies[link_uri])
+        self._send_drone_ids()
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')
         del self._crazyflies[link_uri]
+        self._send_drone_ids()
 
     def _connection_failed(self, link_uri, msg):
         print(f'Connection to {link_uri} failed: {msg}')
@@ -126,7 +136,7 @@ class CrazyflieManager:
     def _log_battery_callback(self, _timestamp, data, logconf):
         battery_level = data['pm.batteryLevel']
         print(f'{logconf.name}: {battery_level}')
-        self._web_socket_server.send('battery-level', battery_level)
+        self._web_socket_server.send_drone_message('battery-level', logconf.cf.link_uri, battery_level)
 
     def _log_orientation_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -138,6 +148,8 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
+        self._web_socket_server.send_drone_message('orientation-data', logconf.cf.link_uri, measurements)
+
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
             'x': data['stateEstimate.x'],
@@ -148,6 +160,8 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
+
+        self._web_socket_server.send_drone_message('position-data', logconf.cf.link_uri, measurements)
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -163,6 +177,8 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value}')
 
+        self._web_socket_server.send_drone_message('range-data', logconf.cf.link_uri, measurements)
+
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')
 
@@ -171,8 +187,15 @@ class CrazyflieManager:
     def _param_update_callback(self, name, value):
         print(f'Readback: {name}={value}')
 
-    # Param assigning methods
+    # Client callbacks
 
-    def _set_led_enabled(self, is_enabled: bool):
-        for crazyflie in self._crazyflies.values():
-            crazyflie.param.set_value('hivexplore.isM1LedOn', is_enabled)
+    def _new_connection_callback(self, client_id):
+        self._send_drone_ids(client_id)
+
+    def _set_led_enabled(self, drone_id, is_enabled: bool):
+        if drone_id in self._crazyflies:
+            print(f'Set LED state for drone {drone_id}: {is_enabled}')
+            self._crazyflies[drone_id].param.set_value('hivexplore.isM1LedOn', is_enabled)
+            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
+        else:
+            print('CrazyflieManager error: Unknown drone ID received:', drone_id)

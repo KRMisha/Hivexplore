@@ -1,8 +1,6 @@
 <template>
     <Card class="drone-card">
-        <template #title>
-            Drone
-        </template>
+        <template #title> Drone {{ droneId }} </template>
         <template #content>
             <div class="p-text-center">Drone Battery:</div>
             <Knob v-model="batteryLevel" readonly :size="64" />
@@ -20,18 +18,24 @@ import SocketClient from './../classes/socket-client';
 
 export default defineComponent({
     name: 'Drone',
-    setup() {
+    props: {
+        droneId: String,
+    },
+    setup(props) {
         const socket: SocketClient | undefined = inject('socket');
 
         const batteryLevel = ref(0);
-        socket!.bind('battery-level', (updatedBatteryLevel: number) => {
-            batteryLevel.value = updatedBatteryLevel;
+        socket!.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
+            batteryLevel.value = newBatteryLevel;
         });
 
         const isLedOn = ref(false);
+        socket!.bindDroneMessage('set-led', props.droneId!, (newIsLedOn: boolean) => {
+            isLedOn.value = newIsLedOn;
+        });
 
         function changeLedStatus() {
-            socket!.send('set-led', isLedOn.value);
+            socket!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
         }
 
         return {

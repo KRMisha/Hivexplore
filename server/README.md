@@ -38,23 +38,17 @@ sudo udevadm trigger
 
 ### Virtual environment
 
-Install the required packages with a virtual environment:
-
+Install the required packages with a virtual environment located at the project root:
 ```
 make venv
 ```
 
 The virtual environment must be activated once per shell session before running any command:
 ```
-# Unix:
-source .venv/bin/activate
-
-# Windows:
-.venv\Scripts\activate.bat on Windows
+source ../.venv/bin/activate
 ```
 
-To install new packages, add them to `requirements.txt` and run the following command (with the venv activated):
-
+To install new packages for the server, add them to `requirements.txt` and run the following command (with the venv activated):
 ```
 pip install -r requirements.txt
 ```

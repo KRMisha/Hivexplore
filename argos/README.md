@@ -81,13 +81,11 @@ make help
 ### Setup
 
 Build the Docker image for production:
-
 ```
 make image-prod
 ```
 
 ### Usage
-
 ```
 make start-prod
 ```

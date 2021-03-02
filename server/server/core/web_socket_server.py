@@ -14,8 +14,10 @@ class WebSocketServer:
     def __init__(self):
         self._callbacks: Dict[str, List[Callable]] = {}
         self._message_queues = {}
+        self._loop = None
 
     async def serve(self):
+        self._loop = asyncio.get_running_loop()
         server = await websockets.serve(self._socket_handler, IP_ADDRESS, PORT)
         print('WebSocketServer started')
         await server.wait_closed()
@@ -38,18 +40,25 @@ class WebSocketServer:
 
     def _send(self, event: str, drone_id: Optional[str], data: Any):
         for message_queue in self._message_queues.values():
-            message_queue.put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
+            asyncio.run_coroutine_threadsafe(
+                message_queue.put({
+                    'event': event,
+                    'droneId': drone_id,
+                    'data': data,
+                    'timestamp': datetime.now().isoformat(),
+                }), self._loop)
 
     def _send_to_client(self, client_id: str, event: str, drone_id: Optional[str], data: Any):
         if client_id not in self._message_queues:
             print('WebSocketServer error: Unknown client ID:', client_id)
             return
-        self._message_queues[client_id].put_nowait({
-            'event': event,
-            'droneId': drone_id,
-            'data': data,
-            'timestamp': datetime.now().isoformat()
-        })
+        asyncio.run_coroutine_threadsafe(
+            self._message_queues[client_id].put({
+                'event': event,
+                'droneId': drone_id,
+                'data': data,
+                'timestamp': datetime.now().isoformat(),
+            }), self._loop)
 
     async def _socket_handler(self, websocket, path):
         # Generate a unique ID for each client
@@ -88,12 +97,7 @@ class WebSocketServer:
             except (json.JSONDecodeError, KeyError) as exc:
                 print('WebSocketServer error: Invalid message received:', exc)
 
-    async def _send_handler(
-        self,
-        websocket,
-        _path,
-        message_queue,
-    ):
+    async def _send_handler(self, websocket, _path, message_queue):
         while True:
             message = await message_queue.get()
             message_str = json.dumps(message)

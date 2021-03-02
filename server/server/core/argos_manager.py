@@ -3,6 +3,10 @@ from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
 
+# pylint: disable=no-self-use
+
+# TODO: Refactor common code between CrazyflieManager and ArgosManager
+
 
 class ArgosManager:
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):

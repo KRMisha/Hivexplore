@@ -52,7 +52,6 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
 
-
 typedef enum { IDLE, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } drone_state_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;

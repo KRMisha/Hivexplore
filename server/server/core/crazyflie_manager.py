@@ -9,6 +9,8 @@ from server import config
 
 # pylint: disable=no-self-use
 
+# TODO: Refactor common code between CrazyflieManager and ArgosManager
+
 
 class CrazyflieManager:
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):

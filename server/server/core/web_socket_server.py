@@ -57,7 +57,7 @@ class WebSocketServer:
             callback(client_id)
 
         receive_task = asyncio.create_task(self._receive_handler(websocket, path))
-        send_task = asyncio.create_task(self._send_handler(websocket, self._message_queues[client_id], path))
+        send_task = asyncio.create_task(self._send_handler(websocket, path, self._message_queues[client_id]))
 
         _done, pending = await asyncio.wait([receive_task, send_task], return_when=asyncio.FIRST_COMPLETED)
         for task in pending:
@@ -82,7 +82,7 @@ class WebSocketServer:
             except (json.JSONDecodeError, KeyError) as exc:
                 print('WebSocketServer error: Invalid message received:', exc)
 
-    async def _send_handler(self, websocket, message_queue, _path):
+    async def _send_handler(self, websocket, _path, message_queue,):
         while True:
             message = await message_queue.get()
             message_str = json.dumps(message)

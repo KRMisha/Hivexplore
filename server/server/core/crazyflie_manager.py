@@ -53,9 +53,9 @@ class CrazyflieManager:
 
     def _send_drone_ids(self, client_id=None):
         if client_id is None:
-            self._web_socket_server.send_message('drone-ids', self._crazyflies.keys())
+            self._web_socket_server.send_message('drone-ids', list(self._crazyflies.keys()))
         else:
-            self._web_socket_server.send_message_to_client(client_id, 'drone-ids', self._crazyflies.keys())
+            self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._crazyflies.keys()))
 
     # Setup
 

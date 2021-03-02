@@ -7,7 +7,38 @@
 
 ## Setup
 
-Install the required packages with a venv:
+### USB radio
+
+In order to use the USB radio without being root, first run the following commands:
+```
+sudo groupadd plugdev
+sudo usermod -a -G plugdev $USER
+```
+
+Log out and log back in to be a member of the `plugdev` group.
+
+Create a file named `/etc/udev/rules.d/99-crazyradio.rules` and add the following:
+```
+# Crazyradio (normal operation)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="7777", MODE="0664", GROUP="plugdev"
+# Bootloader
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="0101", MODE="0664", GROUP="plugdev"
+```
+
+To connect to the Crazyflie via USB, create another file named `/etc/udev/rules.d/99-crazyflie.rules` and add the following:
+```
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0664", GROUP="plugdev"
+```
+
+Reload the udev-rules using the following commands:
+```
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+### Virtual environment
+
+Install the required packages with a virtual environment:
 
 ```
 make venv
@@ -22,37 +53,22 @@ source .venv/bin/activate
 .venv\Scripts\activate.bat on Windows
 ```
 
-### Linux
+To install new packages, add them to `requirements.txt` and run the following command (with the venv activated):
 
-The following steps make it possible to use the USB Radio without being root.
 ```
-sudo groupadd plugdev
-sudo usermod -a -G plugdev $USER
-```
-You will need to log out and log in again in order to be a member of the plugdev group.
-
-Create a file named /etc/udev/rules.d/99-crazyradio.rules and add the following:
-```
-# Crazyradio (normal operation)
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="7777", MODE="0664", GROUP="plugdev"
-# Bootloader
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="0101", MODE="0664", GROUP="plugdev"
-```
-To connect Crazyflie 2.0 via usb, create a file named /etc/udev/rules.d/99-crazyflie.rules and add the following:
-```
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0664", GROUP="plugdev"
-```
-You can reload the udev-rules using the following:
-```
-sudo udevadm control --reload-rules
-sudo udevadm trigger
+pip install -r requirements.txt
 ```
 
 ## Usage
 
-### Run program
+### Run program to connect with Crazyflies
 ```
 make run
+```
+
+### Run program to connect with the ARGoS simulation
+```
+make run-argos
 ```
 
 ### Run tests

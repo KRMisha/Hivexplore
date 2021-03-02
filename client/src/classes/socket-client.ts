@@ -7,8 +7,8 @@ export default class SocketClient {
     private callbacks: Map<string, Map<string | undefined, Array<(data: any) => void>>> = new Map();
 
     constructor() {
-        this.socket.onmessage = (messageString: MessageEvent) => {
-            const message = JSON.parse(messageString.data);
+        this.socket.onmessage = (messageEvent: MessageEvent) => {
+            const message = JSON.parse(messageEvent.data);
 
             const eventCallbacks = this.callbacks.get(message.event);
 

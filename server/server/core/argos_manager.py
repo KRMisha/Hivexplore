@@ -32,6 +32,7 @@ class ArgosManager:
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if drone_id in self._drone_ids:
+            print(f'Set LED state for drone {drone_id}: {is_enabled}')
             self._unix_socket_client.send('hivexplore.isM1LedOn', drone_id, is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
         else:

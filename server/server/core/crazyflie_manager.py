@@ -192,6 +192,7 @@ class CrazyflieManager:
 
     def _set_led_enabled(self, drone_id, is_enabled: bool):
         if drone_id in self._crazyflies:
+            print(f'Set LED state for drone {drone_id}: {is_enabled}')
             self._crazyflies[drone_id].param.set_value('hivexplore.isM1LedOn', is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
         else:

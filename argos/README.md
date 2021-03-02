@@ -32,9 +32,9 @@
     make image-prod
     ```
 
-## Usage
+## Usage - Development
 
-### Development - Using the VS Code Remote-Containers extension
+### Open the container using the VS Code Remote-Containers extension
 
 1. Start the container non-interactively with x11docker:
 
@@ -53,11 +53,6 @@
     The simulation will start. ARGoS will not show a window until the server is running and has connected to it. Once it does, the simulator window will appear.
 
 3. When done making changes, simply close the VS Code window with the container and stop x11docker with `Ctrl+C`.
-
-### Production - Starting the container interactively with x11docker
-```
-make start-prod
-```
 
 ### Build simulation
 ```
@@ -88,3 +83,9 @@ make help
 ```
 
 > Note that some commands are meant to be ran outside a container, and some once inside the development container. See the output of `make help` for more information.
+
+## Usage - Production
+
+```
+make start-prod
+```

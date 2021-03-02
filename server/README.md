@@ -66,6 +66,8 @@ pip install -r requirements.txt
 make run
 ```
 
+> Note: the Crazyradio PA must be connected to the computer.
+
 ### Run program to connect with the ARGoS simulation
 ```
 make run-argos

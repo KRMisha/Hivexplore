@@ -19,6 +19,7 @@ class CrazyflieManager:
 
     async def start(self):
         await self._find_crazyflies()
+        self._web_socket_server.bind('connect', self._new_connection_callback)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     async def _find_crazyflies(self):
@@ -190,7 +191,8 @@ class CrazyflieManager:
         self._send_drone_ids(client_id)
 
     def _set_led_enabled(self, drone_id, is_enabled: bool):
-        try:
+        if drone_id in self._crazyflies:
             self._crazyflies[drone_id].param.set_value('hivexplore.isM1LedOn', is_enabled)
-        except KeyError:
+            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
+        else:
             print('CrazyflieManager error: Unknown drone ID received:', drone_id)

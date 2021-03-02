@@ -39,7 +39,7 @@ class WebSocketServer:
         for message_queue in self._message_queues.values():
             message_queue.put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
 
-    def _send_to_client(self, client_id, event: str, drone_id: Optional[str], data: Any):
+    def _send_to_client(self, client_id: str, event: str, drone_id: Optional[str], data: Any):
         if client_id not in self._message_queues:
             print('WebSocketServer error: Unknown client ID:', client_id)
             return

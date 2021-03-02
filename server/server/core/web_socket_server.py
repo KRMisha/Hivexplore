@@ -36,7 +36,7 @@ class WebSocketServer:
         self._send_to_client(client_id, event, drone_id, data)
 
     def _send(self, event: str, drone_id: Optional[str], data: Any):
-        for _, message_queue in self._message_queues.items():
+        for message_queue in self._message_queues.values():
             message_queue.put_nowait({'event': event, 'droneId': drone_id, 'data': data, 'timestamp': datetime.now().isoformat()})
 
     def _send_to_client(self, client_id, event: str, drone_id: Optional[str], data: Any):

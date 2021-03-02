@@ -40,22 +40,24 @@ export default class SocketClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bind_message(event: string, callback: (data: any) => void) {
+    bindMessage(event: string, callback: (data: any) => void) {
         // undefined represents an event not related to a specific drone
         this.bind(event, undefined, callback);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bind_drone_message(event: string, droneId: string, callback: (data: any) => void) {
+    bindDroneMessage(event: string, droneId: string, callback: (data: any) => void) {
         this.bind(event, droneId, callback);
     }
 
-    send_message(event: string, data: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sendMessage(event: string, data: any) {
         // undefined represents an event not related to a specific drone
         this.send(event, undefined, data);
     }
 
-    send_drone_message(event: string, droneId: string, data: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sendDroneMessage(event: string, droneId: string, data: any) {
         this.send(event, droneId, data);
     }
 

@@ -50,7 +50,7 @@ class UnixSocketClient:
         finally:
             self._socket.close()
 
-    def bind(self, log_name: str, callback: Callable[[str, Any], None]):
+    def bind(self, log_name: str, callback: Callable[[Optional[str], Any], None]):
         self._callbacks.setdefault(log_name, []).append(callback)
 
     def send_message(self, param_name: str, value: Any):

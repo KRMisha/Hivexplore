@@ -53,14 +53,7 @@ class UnixSocketClient:
     def bind(self, log_name: str, callback: Callable[[Optional[str], Any], None]):
         self._callbacks.setdefault(log_name, []).append(callback)
 
-    def send_message(self, param_name: str, value: Any):
-        # None represents a global broadcast
-        self._send(param_name, None, value)
-
-    def send_drone_message(self, param_name: str, drone_id: str, value: Any):
-        self._send(param_name, drone_id, value)
-
-    def _send(self, param_name: str, drone_id: Optional[str], value: Any):
+    def send(self, param_name: str, drone_id: str, value: Any):
         self._message_queue.put_nowait({
             'paramName': param_name,
             'droneId': drone_id,

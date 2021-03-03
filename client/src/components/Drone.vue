@@ -106,9 +106,6 @@ export default defineComponent({
 .center-container {
     display: flex;
     flex-direction: column;
-}
-
-.center-container {
     align-items: center;
 }
 </style>

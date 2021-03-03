@@ -68,7 +68,7 @@ export default defineComponent({
         const droneStateColor = computed(() => {
             switch (currentDroneState.value) {
                 case 'Standby':
-                    return 'var(gray)';  // TODO: use var(--color) colors
+                    return 'light-gray';  // TODO: use var(--color) colors
                 case 'Flying':
                     return 'var(--primary-color)';
                 case 'Crashed':

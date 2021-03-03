@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
-#include "../experiments/constants.h"
+#include "experiments/constants.h"
 
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
     try {
@@ -19,15 +19,6 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
     }
 
     Reset();
-}
-
-void CCrazyflieController::UpdateCurrentVelocity() {
-    static constexpr double secondsPerTicks = 1.0 / Constants::ticksPerSeconds;
-    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTicks;
-}
-
-CVector3 CCrazyflieController::GetVelocity() const {
-    return m_currentVelocity;
 }
 
 void CCrazyflieController::ControlStep() {
@@ -202,6 +193,15 @@ void CCrazyflieController::SetParamData(const std::string& param, std::variant<b
         // Print LED state since simulated Crazyflie doesn't have LEDs
         RLOG << "LED changed: " << std::get<bool>(value) << '\n';
     }
+}
+
+void CCrazyflieController::UpdateCurrentVelocity() {
+    static constexpr double secondsPerTicks = 1.0 / Constants::ticksPerSeconds;
+    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTicks;
+}
+
+CVector3 CCrazyflieController::GetVelocity() const {
+    return m_currentVelocity;
 }
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <argos3/plugins/robots/crazyflie/simulator/crazyflie_entity.h>
-#include "../../experiments/constants.h"
+#include "experiments/constants.h"
 #include "json.hpp"
 
 using json = nlohmann::json;

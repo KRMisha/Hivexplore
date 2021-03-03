@@ -68,11 +68,11 @@ export default defineComponent({
         const droneStateColor = computed(() => {
             switch (droneState.value) {
                 case 'Standby':
-                    return 'light-gray';  // TODO: use var(--color) colors
+                    return undefined;  // Default background color
                 case 'Flying':
                     return 'var(--primary-color)';
                 case 'Crashed':
-                    return 'red'; // TODO: use var(--color) colors
+                    return 'var(--orange-400)';
             }
         });
 

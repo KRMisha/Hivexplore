@@ -12,7 +12,7 @@
                 <div class="item-container middle-container">
                     <div class="item-container">
                         <h4>Status 🍯</h4>
-                        <Chip :label="droneState" :style="{'background-color': droneStateColor}" />
+                        <Chip :label="droneState" :style="{ 'background-color': droneStateColor }" />
                     </div>
                     <div class="item-container">
                         <h4>LED 💡</h4>
@@ -65,14 +65,16 @@ export default defineComponent({
             socket!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
         }
 
-        const droneStateColor = computed(() => {
+        const droneStateColor = computed((): string | undefined => {
             switch (droneState.value) {
                 case 'Standby':
-                    return undefined;  // Default background color
+                    return undefined; // Default background color
                 case 'Flying':
                     return 'var(--primary-color)';
                 case 'Crashed':
                     return 'var(--orange-400)';
+                default:
+                    return undefined;
             }
         });
 

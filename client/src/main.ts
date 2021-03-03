@@ -6,6 +6,7 @@ import Card from 'primevue/card';
 import Divider from 'primevue/divider';
 import Knob from 'primevue/knob';
 import Timeline from 'primevue/timeline';
+import Chip from 'primevue/chip';
 import InputSwitch from 'primevue/inputswitch';
 
 import 'primevue/resources/themes/md-light-indigo/theme.css';
@@ -21,5 +22,6 @@ app.component('Divider', Divider);
 app.component('InputSwitch', InputSwitch);
 app.component('Knob', Knob);
 app.component('Timeline', Timeline);
+app.component('Chip', Chip);
 
 app.mount('#app');

@@ -1,33 +1,27 @@
 <template>
-    <Card class="drone-card">
+    <Card class="card">
         <template #title>
-            <div style="text-align:center"> Drone {{ droneId }} </div>
+            <div class="center-title">Drone {{ droneId }}</div>
         </template>
         <template #content>
-            <div class="flexbox1">
-                <div>
-                    <div class="p-text-center">Battery</div>
-                    <Knob v-model="batteryLevel" readonly :size="64" />
-                    <div class="p-text-center">Velocity</div>
-                    <Knob v-model="velocity" readonly :size="64" />
-                    <Divider />
-                    <div class="p-text-center">LED</div>
-                    <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
-                    <Divider />
+            <div class="card-container">
+                <div class="item-container">
+                    <h4 class="center-title">Velocity 🐝</h4>
+                    <Knob v-model="velocity" readonly :size="128" />
                 </div>
-                <div class="flexbox2">
-                    <Timeline :value="states">
-                        <template #marker="stateProps">
-                            <span>
-                                <i class="dot" v-if="stateProps.item.name === currentState" style="background-color:blue"></i>
-                                <i class="dot" v-else></i>
-                            </span>
-                        </template>
-                        <template #content="stateProps">
-                            <div v-if="stateProps.item.name === currentState" style="font-weight:bold">{{stateProps.item.name}}</div>
-                            <div v-else>{{stateProps.item.name}}</div>
-                        </template>
-                    </Timeline>
+                <div class="center-container">
+                    <div class="item-container">
+                        <h4 class="center-title">Status 🍯</h4>
+                        <Chip :label="currentDroneState" :color="droneStateColor" />
+                    </div>
+                    <div class="item-container">
+                        <h4 class="center-title">LED 💡</h4>
+                        <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
+                    </div>
+                </div>
+                <div class="item-container">
+                    <h4 class="center-title">Battery 🔋</h4>
+                    <Knob v-model="batteryLevel" readonly :size="128" />
                 </div>
             </div>
         </template>
@@ -44,7 +38,7 @@ export default defineComponent({
     props: {
         droneId: String,
         velocity: String,
-        state: String,
+        droneState: String,
     },
     setup(props) {
         const socket: SocketClient | undefined = inject('socket');
@@ -59,12 +53,11 @@ export default defineComponent({
             velocity.value = newVelocity;
         });
 
-        const currentState = ref('');
-        socket!.bindDroneMessage('state', props.state!, (newState: string) => {
-            currentState.value = newState;
+        const currentDroneState = ref('');
+        socket!.bindDroneMessage('drone-state', props.droneState!, (newCurrentMissionState: string) => {
+            currentDroneState.value = newCurrentMissionState;
         });
-        // TODO: Set state dynamically
-        currentState.value = 'Standby'
+        currentDroneState.value = 'Flying'; // TODO: Set state dynamically
 
         const isLedOn = ref(false);
         socket!.bindDroneMessage('set-led', props.droneId!, (newIsLedOn: boolean) => {
@@ -78,38 +71,53 @@ export default defineComponent({
         return {
             batteryLevel,
             velocity,
-            currentState,
-            states: [
-                {name: 'Standby'},
-                {name: 'In-mission'},
-                {name: 'Crashed'},
-                {name: 'Returned'}
-            ],
             isLedOn,
             changeLedStatus,
+            currentDroneState,
         };
+    },
+    computed: {
+        droneStateColor() {
+            if (this.currentDroneState === 'Flying') {
+                return 'blue';
+            } else if (this.currentDroneState === 'Crashed') {
+                return 'red';
+            }
+            return 'gray';
+        }
     },
 });
 </script>
 
 <style scoped lang="scss">
-.drone-card {
-    width: 25rem;
-    margin: auto;
-    margin-bottom: 2em;
+.card {
+    margin-bottom: 16px;
 }
-.dot {
-    height: 10px;
-    width: 10px;
-    background-color: #bbb;
-    border-radius: 50%;
-    display: inline-block;
+
+.center-title {
+    text-align: center;
 }
-.flexbox1 {
+
+.card-container {
     display: flex;
     justify-content: space-evenly;
 }
-.flexbox2 {
+
+.item-container,
+.center-container {
     display: flex;
+    flex-direction: column;
+}
+
+.center-container {
+    align-items: center;
+}
+
+.blue-chip {
+    color: blue;
+}
+
+.red-chip {
+    color: red;
 }
 </style>

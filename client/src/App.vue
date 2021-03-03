@@ -67,11 +67,6 @@ export default defineComponent({
     padding-right: 32px;
 }
 
-ul {
-    width: 100%;
-    list-style-type: none;
-}
-
 .timeline {
     width: 50%;
     margin-left: 80px;
@@ -83,5 +78,10 @@ ul {
 
 .selected-content {
     font-weight: bold;
+}
+
+ul {
+    width: 100%;
+    list-style-type: none;
 }
 </style>

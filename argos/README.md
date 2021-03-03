@@ -42,7 +42,7 @@
     make run
     ```
 
-    The simulation will start. ARGoS will not show a window until the server is running and has connected to it. Once it does, the simulator window will appear.
+    The simulation will start. ARGoS will not show a window until the server is running and has connected to it. Once it has, the simulator window will appear.
 
 4. When done making changes, simply close the VS Code window with the container and stop x11docker with `Ctrl+C`.
 

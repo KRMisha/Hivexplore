@@ -6,21 +6,21 @@
         <template #content>
             <div class="card-container">
                 <div class="item-container">
-                    <h4 class="center-title">Velocity 🐝</h4>
+                    <h4>Velocity 🐝</h4>
                     <Knob v-model="velocity" readonly :size="128" />
                 </div>
-                <div class="center-container">
+                <div class="item-container middle-container">
                     <div class="item-container">
-                        <h4 class="center-title">Status 🍯</h4>
+                        <h4>Status 🍯</h4>
                         <Chip :label="droneState" :style="{'background-color': droneStateColor}" />
                     </div>
                     <div class="item-container">
-                        <h4 class="center-title">LED 💡</h4>
+                        <h4>LED 💡</h4>
                         <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
                     </div>
                 </div>
                 <div class="item-container">
-                    <h4 class="center-title">Battery 🔋</h4>
+                    <h4>Battery 🔋</h4>
                     <Knob v-model="batteryLevel" readonly :size="128" />
                 </div>
             </div>
@@ -102,10 +102,13 @@ export default defineComponent({
     justify-content: space-evenly;
 }
 
-.item-container,
-.center-container {
+.item-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.middle-container {
+    min-width: 100px;
 }
 </style>

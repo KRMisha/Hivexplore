@@ -2,10 +2,10 @@
     <div class="container">
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
             <template #marker="stateProps">
-                <div class="p-timeline-event-marker" :class="{ 'selected-marker': stateProps.item.name === currentMissionState }"></div>
+                <div class="p-timeline-event-marker" :class="{ 'selected-marker': stateProps.item.name === missionState }"></div>
             </template>
             <template #content="stateProps">
-                <div :class="{ 'selected-content': stateProps.item.name === currentMissionState }">{{ stateProps.item.name }}</div>
+                <div :class="{ 'selected-content': stateProps.item.name === missionState }">{{ stateProps.item.name }}</div>
             </template>
         </Timeline>
         <ul v-if="droneIds.length > 0">
@@ -30,10 +30,7 @@ export default defineComponent({
     components: {
         Drone,
     },
-    props: {
-        missionState: String,
-    },
-    setup(props) {
+    setup() {
         const socket = new SocketClient();
         const droneIds = ref<Array<string>>([]);
 
@@ -41,9 +38,9 @@ export default defineComponent({
             droneIds.value = newDroneIds;
         });
 
-        const currentMissionState = ref('Standby'); // TODO: Send message on server
-        socket!.bindDroneMessage('state', props.missionState!, (newCurrentMissionState: string) => {
-            currentMissionState.value = newCurrentMissionState;
+        const missionState = ref('Standby'); // TODO: Send message on server
+        socket!.bindMessage('state', (newCurrentMissionState: string) => {
+            missionState.value = newCurrentMissionState;
         });
 
         provide('socket', socket);
@@ -54,7 +51,7 @@ export default defineComponent({
 
         return {
             droneIds,
-            currentMissionState,
+            missionState,
             missionStates: [{ name: 'Standby' }, { name: 'Mission' }, { name: 'Returned' }],
         };
     },

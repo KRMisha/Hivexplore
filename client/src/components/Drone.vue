@@ -4,26 +4,32 @@
             <div style="text-align:center"> Drone {{ droneId }} </div>
         </template>
         <template #content>
-            <div class="p-text-center">Battery</div>
-            <Knob v-model="batteryLevel" readonly :size="64" />
-            <div class="p-text-center">Velocity</div>
-            <Knob v-model="velocity" readonly :size="64" />
-            <Divider />
-            <div class="p-text-center">LED</div>
-            <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
-            <Divider />
-            <Timeline :value="states">
-                <template #marker="stateProps">
-                    <span>
-                        <i class="dot" v-if="stateProps.item.name === currentState" style="background-color:blue"></i>
-                        <i class="dot" v-else></i>
-                    </span>
-                </template>
-                <template #content="stateProps">
-                    <div v-if="stateProps.item.name === currentState" style="font-weight:bold">{{stateProps.item.name}}</div>
-                    <div v-else>{{stateProps.item.name}}</div>
-                </template>
-            </Timeline>
+            <div class="flexbox1">
+                <div>
+                    <div class="p-text-center">Battery</div>
+                    <Knob v-model="batteryLevel" readonly :size="64" />
+                    <div class="p-text-center">Velocity</div>
+                    <Knob v-model="velocity" readonly :size="64" />
+                    <Divider />
+                    <div class="p-text-center">LED</div>
+                    <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
+                    <Divider />
+                </div>
+                <div class="flexbox2">
+                    <Timeline :value="states">
+                        <template #marker="stateProps">
+                            <span>
+                                <i class="dot" v-if="stateProps.item.name === currentState" style="background-color:blue"></i>
+                                <i class="dot" v-else></i>
+                            </span>
+                        </template>
+                        <template #content="stateProps">
+                            <div v-if="stateProps.item.name === currentState" style="font-weight:bold">{{stateProps.item.name}}</div>
+                            <div v-else>{{stateProps.item.name}}</div>
+                        </template>
+                    </Timeline>
+                </div>
+            </div>
         </template>
     </Card>
 </template>
@@ -93,10 +99,17 @@ export default defineComponent({
     margin-bottom: 2em;
 }
 .dot {
-  height: 10px;
-  width: 10px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
+    height: 10px;
+    width: 10px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+}
+.flexbox1 {
+    display: flex;
+    justify-content: space-evenly;
+}
+.flexbox2 {
+    display: flex;
 }
 </style>

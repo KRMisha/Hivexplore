@@ -1,10 +1,10 @@
-VENV := .venv
+VENV := ../.venv
 
 .PHONY: venv run run-argos test lint typecheck format help
 
 venv:
 	python3 -m venv $(VENV)
-	./$(VENV)/bin/pip install -r requirements.txt
+	$(VENV)/bin/pip install -r requirements.txt
 
 run:
 	python3 -m server.main

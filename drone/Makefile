@@ -470,8 +470,15 @@ unit:
 
 # Custom commands
 
+.PHONY: venv format
+
+VENV := ../.venv
+
 FORMATTED_DIRS := app_api examples src/config src/deck src/drivers src/hal src/init src/modules src/platform src/utils test
 
-.PHONY: format
+venv:
+	python3 -m venv $(VENV)
+	$(VENV)/bin/pip install -r requirements.txt
+
 format:
 	@clang-format -i $$(find $(FORMATTED_DIRS) -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')

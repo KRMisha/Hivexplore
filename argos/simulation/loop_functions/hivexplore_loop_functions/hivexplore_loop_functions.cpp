@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <argos3/plugins/robots/crazyflie/simulator/crazyflie_entity.h>
+#include ""../../experiments/hivexplore_constants.h>
 #include "json.hpp"
 
 using json = nlohmann::json;
@@ -79,8 +80,7 @@ void CHivexploreLoopFunctions::PreStep() {
     }
 
     // Send log data to server from each Crazyflie every second
-    static constexpr std::uint8_t ticksPerSecond = 10;
-    if (GetSpace().GetSimulationClock() % ticksPerSecond == 0) {
+    if (GetSpace().GetSimulationClock() % Hivexplore::TICKS_PER_SECOND == 0) {
         for (const auto& controller : controllers) {
             auto logData = controller.get().GetLogData();
             for (const auto& [logName, variables] : logData) {

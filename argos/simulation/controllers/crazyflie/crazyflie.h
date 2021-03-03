@@ -37,8 +37,10 @@ public:
 
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> GetLogData() const;
     void SetParamData(const std::string& param, std::variant<bool> value);
-
+    CVector3 GetVelocity() const;
 private:
+    void UpdateCurrentVelocity();
+
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;
@@ -46,6 +48,8 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
+    CVector3 m_currentVelocity;
+    CVector3 m_lastDronePosition;
     CVector3 m_initialPosition;
     CVector3 m_lastReferencePosition;
     CRadians m_lastReferenceYaw;

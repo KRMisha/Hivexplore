@@ -2,11 +2,26 @@
     <Card class="drone-card">
         <template #title> Drone {{ droneId }} </template>
         <template #content>
-            <div class="p-text-center">Drone Battery:</div>
+            <div class="p-text-center">Battery</div>
             <Knob v-model="batteryLevel" readonly :size="64" />
+            <div class="p-text-center">Velocity</div>
+            <Knob v-model="velocity" readonly :size="64" />
             <Divider />
-            <div class="p-text-center">Drone Led:</div>
+            <div class="p-text-center">LED</div>
             <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
+            <Divider />
+            <Timeline :value="states">
+                <template #marker="slotProps">
+                    <span>
+                        <i v-if="slotProps.item.name === 'Standby'" class="current-dot"></i>
+                        <i v-else class="dot"></i>
+                    </span>
+                </template>
+                <template #content="slotProps">
+                    <div v-if="slotProps.item.name === 'Standby'" class="bold">{{slotProps.item.name}}</div>
+                    <div v-else>{{slotProps.item.name}}</div>
+                </template>
+            </Timeline>
         </template>
     </Card>
 </template>
@@ -20,6 +35,8 @@ export default defineComponent({
     name: 'Drone',
     props: {
         droneId: String,
+        velocity: String,
+        state: String,
     },
     setup(props) {
         const socket: SocketClient | undefined = inject('socket');
@@ -28,6 +45,18 @@ export default defineComponent({
         socket!.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
             batteryLevel.value = newBatteryLevel;
         });
+
+        const velocity = ref(0);
+        socket!.bindDroneMessage('velocity', props.velocity!, (newVelocity: number) => {
+            velocity.value = newVelocity;
+        });
+
+        const currentState = ref('');
+        socket!.bindDroneMessage('state', props.state!, (newState: string) => {
+            currentState.value = newState;
+        });
+        // TODO: Set state dynamically
+        currentState.value = 'Standby'
 
         const isLedOn = ref(false);
         socket!.bindDroneMessage('set-led', props.droneId!, (newIsLedOn: boolean) => {
@@ -40,6 +69,14 @@ export default defineComponent({
 
         return {
             batteryLevel,
+            velocity,
+            currentState,
+            states: [
+                {name: 'Standby'},
+                {name: 'In-mission'},
+                {name: 'Crashed'},
+                {name: 'Returned'}
+            ],
             isLedOn,
             changeLedStatus,
         };
@@ -52,5 +89,22 @@ export default defineComponent({
     width: 25rem;
     margin: auto;
     margin-bottom: 2em;
+}
+.dot {
+  height: 10px;
+  width: 10px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+.current-dot {
+  height: 10px;
+  width: 10px;
+  background-color: blue;
+  border-radius: 50%;
+  display: inline-block;
+}
+.bold {
+    font-weight: bold;
 }
 </style>

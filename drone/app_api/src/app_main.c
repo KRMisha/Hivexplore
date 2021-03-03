@@ -61,7 +61,7 @@ static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 1.0f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
-static bool isM1LedOn = true;
+static bool isM1LedOn = false;
 
 static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
     setPoint->velocity_body = true;
@@ -109,6 +109,8 @@ void appMain(void) {
 
     while (true) {
         vTaskDelay(M2T(10));
+
+        ledSet(LED_GREEN_R, isM1LedOn);
 
         uint16_t upSensorReading = logGetUint(upSensorId);
         uint16_t downSensorReading = logGetUint(downSensorId);
@@ -201,8 +203,7 @@ void appMain(void) {
             }
         } break;
         case OUT_OF_SERVICE: {
-            isM1LedOn = true;
-            ledSet(LED_RED_R, isM1LedOn);
+            ledSet(LED_RED_R, true);
             memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
         }

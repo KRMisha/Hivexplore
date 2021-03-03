@@ -39,8 +39,8 @@ export default defineComponent({
         });
 
         const missionState = ref('Standby'); // TODO: Send message on server
-        socket!.bindMessage('state', (newCurrentMissionState: string) => {
-            missionState.value = newCurrentMissionState;
+        socket!.bindMessage('state', (newMissionState: string) => {
+            missionState.value = newMissionState;
         });
 
         provide('socket', socket);

@@ -36,7 +36,6 @@ void CCrazyflieController::ControlStep() {
     static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
 
     UpdateCurrentVelocity();
-    m_previousDronePosition = m_pcPos->GetReading().Position;
 
     switch (m_currentState) {
     case DroneState::OnGround:
@@ -117,6 +116,7 @@ void CCrazyflieController::ControlStep() {
         break;
     }
     }
+    m_previousDronePosition = m_pcPos->GetReading().Position;
 }
 
 void CCrazyflieController::Reset() {
@@ -195,13 +195,13 @@ void CCrazyflieController::SetParamData(const std::string& param, std::variant<b
     }
 }
 
-void CCrazyflieController::UpdateCurrentVelocity() {
-    static constexpr double secondsPerTicks = 1.0 / Constants::ticksPerSeconds;
-    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTicks;
-}
-
 CVector3 CCrazyflieController::GetVelocity() const {
     return m_currentVelocity;
+}
+
+void CCrazyflieController::UpdateCurrentVelocity() {
+    static constexpr double secondsPerTick = 1.0 / Constants::ticksPerSecond;
+    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTick;
 }
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

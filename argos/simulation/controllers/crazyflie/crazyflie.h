@@ -39,6 +39,7 @@ public:
     void SetParamData(const std::string& param, std::variant<bool> value);
 
     CVector3 GetVelocity() const;
+
 private:
     void UpdateCurrentVelocity();
 

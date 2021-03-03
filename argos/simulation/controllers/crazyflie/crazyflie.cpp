@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
-#include "../experiments/hivexplore_constants.h"
+#include "../experiments/constants.h"
 
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
     try {
@@ -22,8 +22,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::UpdateCurrentVelocity() {
-    static constexpr double SECONDS_PER_TICKS = 1.0 / Hivexplore::TICKS_PER_SECOND;
-    m_currentVelocity = (m_pcPos->GetReading().Position - m_lastDronePosition) / SECONDS_PER_TICKS;
+    static constexpr double secondsPerTicks = 1.0 / Constants::ticksPerSeconds;
+    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTicks;
 }
 
 CVector3 CCrazyflieController::GetVelocity() const {
@@ -45,7 +45,7 @@ void CCrazyflieController::ControlStep() {
     static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
 
     UpdateCurrentVelocity();
-    m_lastDronePosition = m_pcPos->GetReading().Position;
+    m_previousDronePosition = m_pcPos->GetReading().Position;
 
     switch (m_currentState) {
     case DroneState::OnGround:

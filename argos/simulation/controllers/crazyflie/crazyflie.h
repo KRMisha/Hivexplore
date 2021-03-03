@@ -49,7 +49,7 @@ private:
     CCI_BatterySensor* m_pcBattery = nullptr;
 
     CVector3 m_currentVelocity;
-    CVector3 m_lastDronePosition;
+    CVector3 m_previousDronePosition;
     CVector3 m_initialPosition;
     CVector3 m_lastReferencePosition;
     CRadians m_lastReferenceYaw;

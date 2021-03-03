@@ -80,7 +80,7 @@ void CHivexploreLoopFunctions::PreStep() {
     }
 
     // Send log data to server from each Crazyflie every second
-    if (GetSpace().GetSimulationClock() % Constants::ticksPerSeconds == 0) {
+    if (GetSpace().GetSimulationClock() % Constants::ticksPerSecond == 0) {
         for (const auto& controller : controllers) {
             auto logData = controller.get().GetLogData();
             for (const auto& [logName, variables] : logData) {

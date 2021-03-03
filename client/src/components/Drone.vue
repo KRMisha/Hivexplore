@@ -1,6 +1,8 @@
 <template>
     <Card class="drone-card">
-        <template #title> Drone {{ droneId }} </template>
+        <template #title>
+            <div style="text-align:center"> Drone {{ droneId }} </div>
+        </template>
         <template #content>
             <div class="p-text-center">Battery</div>
             <Knob v-model="batteryLevel" readonly :size="64" />
@@ -13,12 +15,12 @@
             <Timeline :value="states">
                 <template #marker="stateProps">
                     <span>
-                        <i v-if="stateProps.item.name === currentState" class="current-dot"></i>
-                        <i v-else class="dot"></i>
+                        <i class="dot" v-if="stateProps.item.name === currentState" style="background-color:blue"></i>
+                        <i class="dot" v-else></i>
                     </span>
                 </template>
                 <template #content="stateProps">
-                    <div v-if="stateProps.item.name === currentState" class="bold">{{stateProps.item.name}}</div>
+                    <div v-if="stateProps.item.name === currentState" style="font-weight:bold">{{stateProps.item.name}}</div>
                     <div v-else>{{stateProps.item.name}}</div>
                 </template>
             </Timeline>
@@ -96,15 +98,5 @@ export default defineComponent({
   background-color: #bbb;
   border-radius: 50%;
   display: inline-block;
-}
-.current-dot {
-  height: 10px;
-  width: 10px;
-  background-color: blue;
-  border-radius: 50%;
-  display: inline-block;
-}
-.bold {
-    font-weight: bold;
 }
 </style>

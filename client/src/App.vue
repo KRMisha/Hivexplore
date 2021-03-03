@@ -41,11 +41,10 @@ export default defineComponent({
             droneIds.value = newDroneIds;
         });
 
-        const currentMissionState = ref('');
+        const currentMissionState = ref('Standby'); // TODO: Send message on server
         socket!.bindDroneMessage('state', props.missionState!, (newCurrentMissionState: string) => {
             currentMissionState.value = newCurrentMissionState;
         });
-        currentMissionState.value = 'Standby'; // TODO: Set state dynamically
 
         provide('socket', socket);
 

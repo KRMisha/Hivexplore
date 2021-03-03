@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { inject } from 'vue';
+import { inject, computed } from 'vue';
 import SocketClient from './../classes/socket-client';
 
 export default defineComponent({
@@ -46,16 +46,15 @@ export default defineComponent({
             batteryLevel.value = newBatteryLevel;
         });
 
-        const velocity = ref(0);
+        const velocity = ref(0); // TODO: Send message on server
         socket!.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
         });
 
-        const currentDroneState = ref('');
+        const currentDroneState = ref('Flying'); // TODO: Send message on server
         socket!.bindDroneMessage('drone-state', props.droneId!, (newCurrentMissionState: string) => {
             currentDroneState.value = newCurrentMissionState;
         });
-        currentDroneState.value = 'Flying'; // TODO: Set state dynamically
 
         const isLedOn = ref(false);
         socket!.bindDroneMessage('set-led', props.droneId!, (newIsLedOn: boolean) => {
@@ -66,7 +65,7 @@ export default defineComponent({
             socket!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
         }
 
-        function droneStateColor() {
+        const droneStateColor = computed(() => {
             if (currentDroneState.value === 'Flying') {
                 return 'blue';
             }
@@ -74,7 +73,7 @@ export default defineComponent({
                 return 'red';
             }
             return 'gray';
-        }
+        });
 
         return {
             batteryLevel,
@@ -110,13 +109,5 @@ export default defineComponent({
 
 .center-container {
     align-items: center;
-}
-
-.blue-chip {
-    color: blue;
-}
-
-.red-chip {
-    color: red;
 }
 </style>

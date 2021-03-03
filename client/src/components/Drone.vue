@@ -11,15 +11,15 @@
             <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
             <Divider />
             <Timeline :value="states">
-                <template #marker="slotProps">
+                <template #marker="stateProps">
                     <span>
-                        <i v-if="slotProps.item.name === 'Standby'" class="current-dot"></i>
+                        <i v-if="stateProps.item.name === currentState" class="current-dot"></i>
                         <i v-else class="dot"></i>
                     </span>
                 </template>
-                <template #content="slotProps">
-                    <div v-if="slotProps.item.name === 'Standby'" class="bold">{{slotProps.item.name}}</div>
-                    <div v-else>{{slotProps.item.name}}</div>
+                <template #content="stateProps">
+                    <div v-if="stateProps.item.name === currentState" class="bold">{{stateProps.item.name}}</div>
+                    <div v-else>{{stateProps.item.name}}</div>
                 </template>
             </Timeline>
         </template>

@@ -69,7 +69,8 @@ export default defineComponent({
         function droneStateColor() {
             if (currentDroneState.value === 'Flying') {
                 return 'blue';
-            } else if (currentDroneState.value === 'Crashed') {
+            }
+            if (currentDroneState.value === 'Crashed') {
                 return 'red';
             }
             return 'gray';

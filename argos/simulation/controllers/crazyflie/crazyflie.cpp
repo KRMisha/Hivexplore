@@ -22,7 +22,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::UpdateCurrentVelocity() {
-    constexpr double SECONDS_PER_TICKS = 1.0f / Hivexplore::TICKS_PER_SECOND;
+    static constexpr double SECONDS_PER_TICKS = 1.0 / Hivexplore::TICKS_PER_SECOND;
     m_currentVelocity = (m_pcPos->GetReading().Position - m_lastDronePosition) / SECONDS_PER_TICKS;
 }
 

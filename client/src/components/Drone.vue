@@ -37,8 +37,6 @@ export default defineComponent({
     name: 'Drone',
     props: {
         droneId: String,
-        velocity: String,
-        droneState: String,
     },
     setup(props) {
         const socket: SocketClient | undefined = inject('socket');
@@ -49,12 +47,12 @@ export default defineComponent({
         });
 
         const velocity = ref(0);
-        socket!.bindDroneMessage('velocity', props.velocity!, (newVelocity: number) => {
+        socket!.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
         });
 
         const currentDroneState = ref('');
-        socket!.bindDroneMessage('drone-state', props.droneState!, (newCurrentMissionState: string) => {
+        socket!.bindDroneMessage('drone-state', props.droneId!, (newCurrentMissionState: string) => {
             currentDroneState.value = newCurrentMissionState;
         });
         currentDroneState.value = 'Flying'; // TODO: Set state dynamically
@@ -68,23 +66,23 @@ export default defineComponent({
             socket!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
         }
 
+        function droneStateColor() {
+            if (currentDroneState.value === 'Flying') {
+                return 'blue';
+            } else if (currentDroneState.value === 'Crashed') {
+                return 'red';
+            }
+            return 'gray';
+        }
+
         return {
             batteryLevel,
             velocity,
             isLedOn,
             changeLedStatus,
             currentDroneState,
+            droneStateColor,
         };
-    },
-    computed: {
-        droneStateColor() {
-            if (this.currentDroneState === 'Flying') {
-                return 'blue';
-            } else if (this.currentDroneState === 'Crashed') {
-                return 'red';
-            }
-            return 'gray';
-        }
     },
 });
 </script>

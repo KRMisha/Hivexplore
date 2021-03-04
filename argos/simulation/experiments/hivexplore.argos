@@ -62,9 +62,9 @@
         </box>
 
         <distribute>
-            <position method="uniform" min="1,0,0" max="1,0,0" />
-            <orientation method="uniform" min="0,0,0" max="0,0,0" />
-            <entity quantity="1" max_trials="100">
+            <position method="uniform" min="-1,-1,0" max="1,1,0" />
+            <orientation method="uniform" min="0,0,0" max="180,0,0" />
+            <entity quantity="4" max_trials="100">
                 <crazyflie id="s">
                     <controller config="cfc" />
                     <battery model="time_motion" delta="1e-3" pos_delta="1e-3" orient_delta="1e-3"/>
@@ -73,10 +73,10 @@
         </distribute>
 
         <distribute>
-            <position method="uniform" min="0,1,0" max="0,1,0" />
-            <orientation method="uniform" min="10,0,0" max="10,0,0" />
-            <entity quantity="1" max_trials="100">
-                <box id="b" size="0.2,1,2" movable="false" />
+            <position method="uniform" min="-5,-5,0" max="5,5,0" />
+            <orientation method="uniform" min="0,0,0" max="360,0,0" />
+            <entity quantity="5" max_trials="100">
+                <box id="b" size="0.2,2,2" movable="false" />
             </entity>
         </distribute>
     </arena>

@@ -14,7 +14,19 @@
 
 using namespace argos;
 
-enum class DroneState { Idle, Startup, Liftoff, Explore, Rotate, Land, OutOfService };
+enum class DroneState {
+    OnGround,
+    Takeoff,
+    WaitTakeoff,
+    ForwardMovement,
+    WaitForwardMovement,
+    BrakeMovement,
+    WaitBrakeMovement,
+    Rotate,
+    WaitRotation,
+    StopRotation,
+    WaitStopRotation,
+};
 
 class CCrazyflieController : public CCI_Controller {
 public:
@@ -28,7 +40,6 @@ public:
 
 private:
     void UpdateCurrentVelocity();
-    void SetWaypoint(double targetForwardVelocity, double targetLeftVelocity, double targetHeight, double targetYawRate) const;
 
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
@@ -39,9 +50,10 @@ private:
 
     CVector3 m_currentVelocity;
     CVector3 m_previousDronePosition;
-    CRadians m_currentYawRate;
-    CRadians m_previousDroneYaw;
-    DroneState m_currentState = DroneState::Idle;
+    CVector3 m_initialPosition;
+    CVector3 m_lastReferencePosition;
+    CRadians m_lastReferenceYaw;
+    DroneState m_currentState = DroneState::OnGround;
 };
 
 #endif

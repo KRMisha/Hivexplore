@@ -38,6 +38,12 @@ void CCrazyflieController::ControlStep() {
 
     UpdateCurrentVelocity();
 
+    static constexpr float distanceToRssiMultiplier = 5.0;
+    auto dronePosition = m_pcPos->GetReading().Position;
+    auto distanceToBase =
+        std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
+    m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
+
     switch (m_currentState) {
     case DroneState::OnGround:
         m_initialPosition = m_pcPos->GetReading().Position;
@@ -193,11 +199,6 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
 
     // RSSI group
     decltype(logDataMap)::mapped_type rssiLog;
-    static constexpr float distanceToRssiMultiplier = 5.0;
-    auto dronePosition = m_pcPos->GetReading().Position;
-    auto distanceToBase =
-        std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
-    m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
     rssiLog.emplace("radio.rssi", m_rssiReading);
     logDataMap.emplace("Rssi", rssiLog);
 

@@ -48,7 +48,7 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
-    float m_rssiReading = 0;
+    std::uint8_t m_rssiReading = 0;
 
     CVector3 m_currentVelocity;
     CVector3 m_previousDronePosition;

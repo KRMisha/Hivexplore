@@ -21,6 +21,7 @@ class ArgosManager:
         self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback)
         self._unix_socket_client.bind('Orientation', self._log_orientation_callback)
         self._unix_socket_client.bind('Position', self._log_position_callback)
+        self._unix_socket_client.bind('Velocity', self._log_velocity_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
 
         # Client bindings
@@ -60,6 +61,16 @@ class ArgosManager:
         }
         self._map_generator.add_position(measurements)
         print(f'Position from drone {drone_id}:')
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.6f}')
+
+    def _log_velocity_callback(self, drone_id, data):
+        measurements = {
+            'vx': data['stateEstimate.vx'],
+            'vy': data['stateEstimate.vy'],
+            'vz': data['stateEstimate.vz'],
+        }
+        print(f'Velocity from drone {drone_id}:')
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
 

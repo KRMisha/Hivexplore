@@ -1,5 +1,6 @@
 #include "crazyflie.h"
 #include <array>
+#include <cmath>
 #include <type_traits>
 #include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
@@ -189,6 +190,16 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     // TODO: Find sensor to get range.zrange value
     rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
     logDataMap.emplace("Range", rangeLog);
+
+    // RSSI group
+    decltype(logDataMap)::mapped_type rssiLog;
+    static constexpr float distanceToRssiMultiplier = 5.0;
+    auto dronePosition = m_pcPos->GetReading().Position;
+    auto distanceToBase =
+        std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
+    m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
+    rssiLog.emplace("radio.rssi", m_rssiReading);
+    logDataMap.emplace("Rssi", rssiLog);
 
     return logDataMap;
 }

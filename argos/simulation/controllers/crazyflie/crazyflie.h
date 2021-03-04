@@ -20,9 +20,6 @@ enum class DroneState {
     ForwardMovement,
     BrakeMovement,
     Rotate,
-    WaitRotation,
-    StopRotation,
-    WaitStopRotation,
 };
 
 class CCrazyflieController : public CCI_Controller {
@@ -57,6 +54,8 @@ private:
     bool m_isLiftoffCommandFinished = true;
     bool m_isForwardCommandFinished = true;
     bool m_isBrakeCommandFinished = true;
+
+    bool m_isRotateCommandFinished = true;
 };
 
 #endif

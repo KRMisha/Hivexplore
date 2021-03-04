@@ -24,10 +24,6 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
 
-    // Rotation constants
-    static const CRadians rotationAngle = CRadians::PI / 8;
-    static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
-
     static constexpr uint16_t obstacleDetectedThreshold = 500;
     static constexpr uint16_t edgeDetectedThreshold = 1000;
 
@@ -88,12 +84,12 @@ void CCrazyflieController::ControlStep() {
         }
 
         // If we detect a wall in front of us
+        static constexpr double distanceToTravelEpsilon = 0.005;
         if (sensorReadings["front"] <= edgeDetectedThreshold) {
             m_currentState = DroneState::BrakeMovement;
             m_isForwardCommandFinished = true;
         }
         // If we finished traveling
-        static constexpr double distanceToTravelEpsilon = 0.005;
         else if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
             m_isForwardCommandFinished = true;
         }
@@ -116,37 +112,25 @@ void CCrazyflieController::ControlStep() {
         m_lastReferencePosition = m_pcPos->GetReading().Position;
     } break;
     case DroneState::Rotate: {
-        if (sensorReadings["front"] > edgeDetectedThreshold) {
-            m_currentState = DroneState::ForwardMovement;
-        } else {
-            CRadians angle;
-            CVector3 vector;
-            m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
-            m_lastReferenceYaw = angle;
-            m_pcPropellers->SetRelativeYaw(rotationAngle);
-            m_currentState = DroneState::WaitRotation;
-        }
-    } break;
-    case DroneState::WaitRotation: {
-        CRadians angle;
-        CVector3 vector;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+        // Get currentYaw
+        CRadians currentYaw;
+        CVector3 rotationAxis;
+        m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
 
-        if (std::abs((angle - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
-            m_currentState = DroneState::Rotate;
+        static const CRadians rotationAngle = CRadians::PI / 8;
+        // Order rotation
+        if (m_isRotateCommandFinished) {
+                m_lastReferenceYaw = currentYaw;
+                m_pcPropellers->SetRelativeYaw(rotationAngle);
+                m_isRotateCommandFinished = false;
         }
-    } break;
-    case DroneState::StopRotation: {
-        m_pcPropellers->SetRelativeYaw(CRadians(0));
-        m_currentState = DroneState::WaitStopRotation;
-    } break;
-    case DroneState::WaitStopRotation: {
-        CRadians angle;
-        CVector3 vector;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
 
-        if (std::abs((angle - m_lastReferenceYaw).GetValue()) <= rotationAngleEpsilon.GetValue()) {
-            m_currentState = DroneState::ForwardMovement;
+        // Wait for rotation to finish
+        if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
+            m_isRotateCommandFinished = true;
+            if (sensorReadings["front"] > edgeDetectedThreshold) {
+                m_currentState = DroneState::ForwardMovement;
+            }
         }
     } break;
     }

@@ -20,6 +20,7 @@ enum class DroneState {
     ForwardMovement,
     BrakeMovement,
     Rotate,
+    Land,
 };
 
 class CCrazyflieController : public CCI_Controller {
@@ -56,6 +57,10 @@ private:
     bool m_isBrakeCommandFinished = true;
 
     bool m_isRotateCommandFinished = true;
+
+    // Emergency landing variables
+    bool m_isEmergencyLandingFinished = true;
+    CVector3 m_emergencyLandingPosition;
 };
 
 #endif

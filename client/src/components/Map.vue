@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
@@ -18,12 +18,10 @@ export default defineComponent({
         let renderer: THREE.WebGLRenderer;
         let mesh: THREE.Mesh;
 
+        let container: HTMLDivElement;
+
         function init() {
-            const container = document.getElementById('map-container');
-            if (container === null) {
-                console.error('No target found for three.js');
-                return;
-            }
+            container = document.getElementById('map-container')! as HTMLDivElement;
 
             camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.01, 10);
             camera.position.z = 1;
@@ -48,10 +46,23 @@ export default defineComponent({
             renderer.render(scene, camera);
         }
 
+        function onWindowResize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        window.addEventListener('resize', onWindowResize);
+
         onMounted(() => {
             init();
             animate();
         });
+
+        onUnmounted(() => {
+            window.removeEventListener('resize', onWindowResize);
+        })
     },
 });
 </script>

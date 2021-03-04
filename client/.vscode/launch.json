@@ -7,7 +7,7 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Vue.js",
+            "name": "Vue.js - Chrome",
             "url": "http://localhost:8080",
             "webRoot": "${workspaceFolder}",
             "breakOnLoad": true,
@@ -21,6 +21,15 @@
                 "/*": "*",
                 "/./~/*": "${webRoot}/node_modules/*"
             },
+            "preLaunchTask": "npm: serve"
+        },
+        {
+            "type": "firefox",
+            "request": "launch",
+            "name": "Vue.js - Firefox",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}/src",
+            "pathMappings": [{ "url": "webpack:///src/", "path": "${webRoot}/" }],
             "preLaunchTask": "npm: serve"
         }
     ]

@@ -37,6 +37,11 @@ npm run test:unit
 npm run lint
 ```
 
+### Use the Vue CLI UI
+```
+vue ui
+```
+
 > Note: this will also format files automatically.
 
 ### Customize configuration

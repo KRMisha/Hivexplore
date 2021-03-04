@@ -46,7 +46,7 @@ export default defineComponent({
             batteryLevel.value = newBatteryLevel;
         });
 
-        const velocity = ref(0); // TODO: Send message on server
+        const velocity = ref(0);
         socket!.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
         });

@@ -1,6 +1,7 @@
 import asyncio
 from typing import Dict
 import cflib
+import numpy
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.core.web_socket_server import WebSocketServer
@@ -174,6 +175,11 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
+
+        velocity_magnitude = numpy.linalg.norm([measurements['vx'], measurements['vy'], measurements['vz']])
+        print(f'Velocity magnitude: {velocity_magnitude}')
+
+        self._web_socket_server.send_drone_message('velocity', logconf.cf.link_uri, round(velocity_magnitude, 4))
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {

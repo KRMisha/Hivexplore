@@ -6,6 +6,7 @@ import Chip from 'primevue/chip';
 import Divider from 'primevue/divider';
 import InputSwitch from 'primevue/inputswitch';
 import Knob from 'primevue/knob';
+import Panel from 'primevue/panel';
 import PrimeVue from 'primevue/config';
 import Timeline from 'primevue/timeline';
 
@@ -22,6 +23,7 @@ app.component('Chip', Chip);
 app.component('Divider', Divider);
 app.component('InputSwitch', InputSwitch);
 app.component('Knob', Knob);
+app.component('Panel', Panel);
 app.component('Timeline', Timeline);
 
 app.mount('#app');

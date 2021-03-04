@@ -12,10 +12,12 @@
         "core-js": "^3.6.5",
         "primeicons": "^4.1.0",
         "primevue": "^3.3.4",
+        "three": "^0.126.1",
         "vue": "^3.0.0"
     },
     "devDependencies": {
         "@types/jest": "^24.0.19",
+        "@types/three": "^0.126.0",
         "@typescript-eslint/eslint-plugin": "^2.33.0",
         "@typescript-eslint/parser": "^2.33.0",
         "@vue/cli-plugin-babel": "~4.5.0",

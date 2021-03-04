@@ -1,5 +1,6 @@
 <template>
     <div class="container">
+        <Map class="map-container" />
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
             <template #marker="stateProps">
                 <div class="p-timeline-event-marker" :class="{ 'selected-marker': stateProps.item.name === missionState }"></div>
@@ -22,6 +23,7 @@
 <script lang="ts">
 import { defineComponent, onUnmounted } from 'vue';
 import Drone from './components/Drone.vue';
+import Map from './components/Map.vue';
 import SocketClient from './classes/socket-client';
 import { provide, ref } from 'vue';
 
@@ -29,6 +31,7 @@ export default defineComponent({
     name: 'App',
     components: {
         Drone,
+        Map,
     },
     setup() {
         const socket = new SocketClient();
@@ -63,8 +66,13 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     padding-left: 32px;
     padding-right: 32px;
+}
+
+.map-container {
+    width: 100%;
 }
 
 .timeline {

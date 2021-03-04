@@ -100,12 +100,13 @@ void CCrazyflieController::ControlStep() {
         }
         break;
     case DroneState::BrakeMovement:
-        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-        m_lastReferencePosition = m_pcPos->GetReading().Position;
-        m_currentState = DroneState::WaitBrakeMovement;
-        break;
-    case DroneState::WaitBrakeMovement:
+        if (m_isBrakeCommandFinished) {
+            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+            m_lastReferencePosition = m_pcPos->GetReading().Position;
+            m_isBrakeCommandFinished = false;
+        }
         if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() <= breakingAcuracyEpsilon) {
+            m_isBrakeCommandFinished = true;
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::Rotate;
         }

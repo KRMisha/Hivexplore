@@ -24,11 +24,6 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
 
-    // Forward movement constants
-    static constexpr double distanceToTravel = 0.07;
-    static constexpr double distanceToTravelEpsilon = 0.005;
-    static constexpr double breakingAcuracyEpsilon = 0.002;
-
     // Rotation constants
     static const CRadians rotationAngle = CRadians::PI / 8;
     static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
@@ -61,16 +56,16 @@ void CCrazyflieController::ControlStep() {
     }
 
     switch (m_currentState) {
-    case DroneState::OnGround:
+    case DroneState::OnGround: {
         m_initialPosition = m_pcPos->GetReading().Position;
         m_currentState = DroneState::Takeoff;
-        break;
-    case DroneState::Takeoff:
+    } break;
+    case DroneState::Takeoff: {
         // Takeoff constants
         static constexpr double targetDroneHeight = 0.5;
         static constexpr double targetDroneHeightEpsilon = 0.005;
 
-        // Order takeoff once
+        // Order takeoff
         if (m_isLiftoffCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, targetDroneHeight));
             m_isLiftoffCommandFinished = false;
@@ -82,37 +77,45 @@ void CCrazyflieController::ControlStep() {
             m_currentState = DroneState::ForwardMovement;
             m_isLiftoffCommandFinished = true;
         }
-        break;
-    case DroneState::ForwardMovement:
+    } break;
+    case DroneState::ForwardMovement: {
+        static constexpr double distanceToTravel = 0.07;
+        // Order forward movement
         if (m_isForwardCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
             m_lastReferencePosition = m_pcPos->GetReading().Position;
             m_isForwardCommandFinished = false;
         }
+
         // If we detect a wall in front of us
         if (sensorReadings["front"] <= edgeDetectedThreshold) {
             m_currentState = DroneState::BrakeMovement;
             m_isForwardCommandFinished = true;
         }
         // If we finished traveling
+        static constexpr double distanceToTravelEpsilon = 0.005;
         else if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
             m_isForwardCommandFinished = true;
         }
-        break;
-    case DroneState::BrakeMovement:
+    } break;
+    case DroneState::BrakeMovement: {
+        // Order brake
         if (m_isBrakeCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_lastReferencePosition = m_pcPos->GetReading().Position;
             m_isBrakeCommandFinished = false;
         }
+
+        // If position variation negligible, brake command finished
+        static constexpr double breakingAcuracyEpsilon = 0.002;
         if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() <= breakingAcuracyEpsilon) {
             m_isBrakeCommandFinished = true;
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::Rotate;
         }
         m_lastReferencePosition = m_pcPos->GetReading().Position;
-        break;
-    case DroneState::Rotate:
+    } break;
+    case DroneState::Rotate: {
         if (sensorReadings["front"] > edgeDetectedThreshold) {
             m_currentState = DroneState::ForwardMovement;
         } else {
@@ -123,7 +126,7 @@ void CCrazyflieController::ControlStep() {
             m_pcPropellers->SetRelativeYaw(rotationAngle);
             m_currentState = DroneState::WaitRotation;
         }
-        break;
+    } break;
     case DroneState::WaitRotation: {
         CRadians angle;
         CVector3 vector;
@@ -132,12 +135,11 @@ void CCrazyflieController::ControlStep() {
         if (std::abs((angle - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
             m_currentState = DroneState::Rotate;
         }
-        break;
-    }
-    case DroneState::StopRotation:
+    } break;
+    case DroneState::StopRotation: {
         m_pcPropellers->SetRelativeYaw(CRadians(0));
         m_currentState = DroneState::WaitStopRotation;
-        break;
+    } break;
     case DroneState::WaitStopRotation: {
         CRadians angle;
         CVector3 vector;
@@ -146,8 +148,7 @@ void CCrazyflieController::ControlStep() {
         if (std::abs((angle - m_lastReferenceYaw).GetValue()) <= rotationAngleEpsilon.GetValue()) {
             m_currentState = DroneState::ForwardMovement;
         }
-        break;
-    }
+    } break;
     }
     m_previousDronePosition = m_pcPos->GetReading().Position;
 }

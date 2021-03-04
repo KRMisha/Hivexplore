@@ -18,7 +18,6 @@ enum class DroneState {
     OnGround,
     Takeoff,
     ForwardMovement,
-    WaitForwardMovement,
     BrakeMovement,
     WaitBrakeMovement,
     Rotate,
@@ -57,6 +56,8 @@ private:
     // To avoid having multiple state to simulate drone control, we use bool within the
     // states to wait for movement commands to finish before executing one
     bool m_isLiftoffCommandFinished = true;
+
+    bool m_isForwardCommandFinished = true;
 };
 
 #endif

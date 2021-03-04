@@ -6,11 +6,6 @@
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"
 
-namespace {
-    uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
-        return obstacleThreshold - std::min(sensorReading, obstacleThreshold);
-    }
-}
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
     try {
         m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
@@ -89,18 +84,19 @@ void CCrazyflieController::ControlStep() {
         }
         break;
     case DroneState::ForwardMovement:
-        m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
-        m_lastReferencePosition = m_pcPos->GetReading().Position;
-        m_currentState = DroneState::WaitForwardMovement;
-        break;
-    case DroneState::WaitForwardMovement:
+        if (m_isForwardCommandFinished) {
+            m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
+            m_lastReferencePosition = m_pcPos->GetReading().Position;
+            m_isForwardCommandFinished = false;
+        }
         // If we detect a wall in front of us
         if (sensorReadings["front"] <= edgeDetectedThreshold) {
             m_currentState = DroneState::BrakeMovement;
+            m_isForwardCommandFinished = true;
         }
         // If we finished traveling
         else if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
-            m_currentState = DroneState::ForwardMovement;
+            m_isForwardCommandFinished = true;
         }
         break;
     case DroneState::BrakeMovement:

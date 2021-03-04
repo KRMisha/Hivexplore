@@ -28,9 +28,6 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
-    // Takeoff constants
-    static constexpr double targetDroneHeight = 0.5;
-    static constexpr double targetDroneHeightEpsilon = 0.005;
 
     // Forward movement constants
     static constexpr double distanceToTravel = 0.07;
@@ -41,11 +38,18 @@ void CCrazyflieController::ControlStep() {
     static const CRadians rotationAngle = CRadians::PI / 8;
     static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
 
-    std::unordered_map<std::string, float> sensorReadings;
+    static constexpr uint16_t obstacleDetectedThreshold = 500;
+    static constexpr uint16_t edgeDetectedThreshold = 1000;
+
+    // Sensor reading constants
     static constexpr std::int8_t sensorSaturated = -1;
     static constexpr std::int8_t sensorEmpty = -2;
     static constexpr std::uint8_t obstacleTooClose = 0;
     static constexpr std::uint16_t obstacleTooFar = 4000;
+
+    // Get sensor readings to avoid duplicate accessing logic
+    // TODO: extract this logic from GetLogData() and ControlStep()
+    std::unordered_map<std::string, float> sensorReadings;
     auto distanceReadings = m_pcDistance->GetReadingsMap();
     for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
         std::size_t index = std::distance(distanceReadings.begin(), it);
@@ -61,26 +65,27 @@ void CCrazyflieController::ControlStep() {
         sensorReadings.emplace(sensorDirection[index], rangeData);
     }
 
-    static constexpr uint16_t obstacleDetectedThreshold = 500;
-    static constexpr uint16_t edgeDetectedThreshold = 1000;
-    static constexpr float maximumVelocity = 1.0;
-    static constexpr float explorationHeight = 1.0;
-    static constexpr float cruiseVelocity = 0.2;
-
-
     switch (m_currentState) {
     case DroneState::OnGround:
         m_initialPosition = m_pcPos->GetReading().Position;
         m_currentState = DroneState::Takeoff;
         break;
     case DroneState::Takeoff:
-        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, targetDroneHeight));
-        m_currentState = DroneState::WaitTakeoff;
-        break;
-    case DroneState::WaitTakeoff:
+        // Takeoff constants
+        static constexpr double targetDroneHeight = 0.5;
+        static constexpr double targetDroneHeightEpsilon = 0.005;
+
+        // Order takeoff once
+        if (m_isLiftoffCommandFinished) {
+            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, targetDroneHeight));
+            m_isLiftoffCommandFinished = false;
+        }
+
+        // Change state when takeoff finished
         if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::ForwardMovement;
+            m_isLiftoffCommandFinished = true;
         }
         break;
     case DroneState::ForwardMovement:

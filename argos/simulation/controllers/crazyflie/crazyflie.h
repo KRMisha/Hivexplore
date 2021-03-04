@@ -17,7 +17,6 @@ using namespace argos;
 enum class DroneState {
     OnGround,
     Takeoff,
-    WaitTakeoff,
     ForwardMovement,
     WaitForwardMovement,
     BrakeMovement,
@@ -54,6 +53,10 @@ private:
     CVector3 m_lastReferencePosition;
     CRadians m_lastReferenceYaw;
     DroneState m_currentState = DroneState::OnGround;
+
+    // To avoid having multiple state to simulate drone control, we use bool within the
+    // states to wait for movement commands to finish before executing one
+    bool m_isLiftoffCommandFinished = true;
 };
 
 #endif

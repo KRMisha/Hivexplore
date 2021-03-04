@@ -1,4 +1,5 @@
 from typing import Any, Optional, Set
+import numpy
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
@@ -73,6 +74,11 @@ class ArgosManager:
         print(f'Velocity from drone {drone_id}:')
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
+
+        velocity_magnitude = numpy.linalg.norm([measurements['vx'], measurements['vy'], measurements['vz']])
+        print(f'Velocity magnitude: {velocity_magnitude}')
+
+        self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 4))
 
     def _log_range_callback(self, drone_id, data):
         measurements = {

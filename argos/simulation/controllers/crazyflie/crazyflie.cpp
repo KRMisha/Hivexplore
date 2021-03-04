@@ -195,10 +195,6 @@ void CCrazyflieController::SetParamData(const std::string& param, std::variant<b
     }
 }
 
-CVector3 CCrazyflieController::GetVelocity() const {
-    return m_currentVelocity;
-}
-
 void CCrazyflieController::UpdateCurrentVelocity() {
     static constexpr double secondsPerTick = 1.0 / Constants::ticksPerSecond;
     m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTick;

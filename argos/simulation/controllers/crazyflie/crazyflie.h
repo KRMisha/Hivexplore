@@ -38,8 +38,6 @@ public:
     std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> GetLogData() const;
     void SetParamData(const std::string& param, std::variant<bool> value);
 
-    CVector3 GetVelocity() const;
-
 private:
     void UpdateCurrentVelocity();
 

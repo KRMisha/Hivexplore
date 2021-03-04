@@ -31,6 +31,16 @@ export default defineComponent({
 
         let intervalId: number | undefined; // TODO: Remove
 
+        // TODO: Remove
+        function generateMockPoints() {
+            if (positionCount >= maxPoints) {
+                clearInterval(intervalId);
+                intervalId = undefined;
+            }
+
+            addPoint([(Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300]);
+        }
+
         function onWindowResize() {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
@@ -71,7 +81,7 @@ export default defineComponent({
 
             // TODO: Remove
             intervalId = setInterval(() => {
-                addPoint();
+                generateMockPoints();
             }, 5);
         }
 
@@ -83,20 +93,9 @@ export default defineComponent({
             stats.update();
         }
 
-        // TODO: Make this take a 3D point fed from the server
-        function addPoint() {
-            // TODO: Remove
-            if (positionCount >= maxPoints) {
-                clearInterval(intervalId);
-                intervalId = undefined;
-            }
-
-            // TODO: Generate more complex shape
-            const x = (Math.random() - 0.5) * 300;
-            const y = (Math.random() - 0.5) * 300;
-            const z = (Math.random() - 0.5) * 300;
-
-            points.geometry.attributes.position.setXYZ(positionCount, x, y, z);
+        // TODO: Bind this to server message
+        function addPoint(point: [number, number, number]) {
+            points.geometry.attributes.position.setXYZ(positionCount, ...point);
             positionCount += 3;
 
             points.geometry.setDrawRange(0, positionCount);
@@ -117,7 +116,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 #map-container {
-    height: 200px;
+    height: 300px;
     position: relative;
 }
 </style>

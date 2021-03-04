@@ -73,6 +73,7 @@ export default defineComponent({
 
 .map-container {
     width: 100%;
+    max-width: 1200px;
 }
 
 .timeline {

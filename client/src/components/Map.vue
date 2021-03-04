@@ -7,6 +7,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
+import Stats from 'three/examples/jsm/libs/stats.module';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
@@ -17,6 +18,8 @@ export default defineComponent({
         let scene: THREE.Scene;
         let renderer: THREE.WebGLRenderer;
         let mesh: THREE.Mesh;
+
+        let stats: Stats;
 
         let container: HTMLDivElement;
 
@@ -37,6 +40,12 @@ export default defineComponent({
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.append(renderer.domElement);
+
+            stats = Stats();
+            stats.dom.style.position = 'absolute';
+            container.append(stats.dom);
+
+            window.addEventListener('resize', onWindowResize);
         }
 
         function animate() {
@@ -44,6 +53,8 @@ export default defineComponent({
             mesh.rotation.x += 0.01;
             mesh.rotation.y += 0.02;
             renderer.render(scene, camera);
+
+            stats.update();
         }
 
         function onWindowResize() {
@@ -52,8 +63,6 @@ export default defineComponent({
 
             renderer.setSize(container.clientWidth, container.clientHeight);
         }
-
-        window.addEventListener('resize', onWindowResize);
 
         onMounted(() => {
             init();
@@ -70,5 +79,6 @@ export default defineComponent({
 <style scoped lang="scss">
 #map-container {
     height: 200px;
+    position: relative;
 }
 </style>

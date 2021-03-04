@@ -148,8 +148,6 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
-        self._web_socket_server.send_drone_message('orientation-data', logconf.cf.link_uri, measurements)
-
     def _log_position_callback(self, _timestamp, data, logconf):
         measurements = {
             'x': data['stateEstimate.x'],
@@ -160,8 +158,6 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
-
-        self._web_socket_server.send_drone_message('position-data', logconf.cf.link_uri, measurements)
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {
@@ -176,8 +172,6 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value}')
-
-        self._web_socket_server.send_drone_message('range-data', logconf.cf.link_uri, measurements)
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

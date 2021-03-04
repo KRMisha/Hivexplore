@@ -1,4 +1,5 @@
 import asyncio
+import math
 from typing import Dict
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -86,6 +87,12 @@ class CrazyflieManager:
                 'error_callback': self._log_error_callback,
             },
             {
+                'log_config': LogConfig(name='Velocity', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['stateEstimate.vx', 'stateEstimate.vy', 'stateEstimate.vz'],
+                'data_callback': self._log_velocity_callback,
+                'error_callback': self._log_error_callback,
+            },
+            {
                 'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['range.front', 'range.left', 'range.back', 'range.right', 'range.up', 'range.zrange'],
                 'data_callback': self._log_range_callback,
@@ -158,6 +165,21 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
+
+    def _log_velocity_callback(self, _timestamp, data, logconf):
+        measurements = {
+            'vx': data['stateEstimate.vx'],
+            'vy': data['stateEstimate.vy'],
+            'vz': data['stateEstimate.vz'],
+        }
+        print(logconf.name)
+        for key, value in measurements.items():
+            print(f'- {key}: {value:.6f}')
+
+        velocity_magnitude = math.sqrt(measurements['vx'] ** 2 + measurements['vy'] ** 2 + measurements['vz'] ** 2)
+        print(f'Velocity magnitude: {velocity_magnitude}')
+
+        self._web_socket_server.send_drone_message('velocity', logconf.cf.link_uri, round(velocity_magnitude, 4))
 
     def _log_range_callback(self, _timestamp, data, logconf):
         measurements = {

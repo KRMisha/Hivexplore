@@ -98,6 +98,12 @@ class CrazyflieManager:
                 'data_callback': self._log_range_callback,
                 'error_callback': self._log_error_callback,
             },
+            {
+                'log_config': LogConfig(name='Rssi', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['radio.rssi'],
+                'data_callback': self._log_rssi_callback,
+                'error_callback': self._log_error_callback,
+            },
         ]
 
         for log_config in log_configs:
@@ -194,6 +200,10 @@ class CrazyflieManager:
         print(logconf.name)
         for key, value in measurements.items():
             print(f'- {key}: {value}')
+
+    def _log_rssi_callback(self, _timestamp, data, logconf):
+        rssi = data['radio.rssi']
+        print(f'{logconf.name}: {rssi}')
 
     def _log_error_callback(self, logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')

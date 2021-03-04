@@ -38,7 +38,7 @@ export default defineComponent({
             droneIds.value = newDroneIds;
         });
 
-        const missionState = ref('Standby'); // TODO: Send message on server
+        const missionState = ref('Standby');
         socket!.bindMessage('state', (newMissionState: string) => {
             missionState.value = newMissionState;
         });

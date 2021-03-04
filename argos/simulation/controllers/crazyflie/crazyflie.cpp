@@ -156,7 +156,12 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
     logDataMap.emplace("Position", positionLog);
 
-    // TODO: Add velocity
+    // Velocity group
+    decltype(logDataMap)::mapped_type velocityLog;
+    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_currentVelocity.GetX()));
+    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_currentVelocity.GetY()));
+    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_currentVelocity.GetZ()));
+    logDataMap.emplace("Velocity", velocityLog);
 
     // Range group
     CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();

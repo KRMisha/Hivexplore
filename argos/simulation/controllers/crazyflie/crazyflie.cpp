@@ -1,5 +1,6 @@
 #include "crazyflie.h"
 #include <array>
+#include <cmath>
 #include <type_traits>
 #include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
@@ -36,6 +37,13 @@ void CCrazyflieController::ControlStep() {
     static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
 
     UpdateCurrentVelocity();
+
+    static constexpr float distanceToRssiMultiplier = 5.0;
+    CVector3 dronePosition = m_pcPos->GetReading().Position;
+    // Consider (0, 0, 0) as the base
+    double distanceToBase =
+        std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
+    m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 
     switch (m_currentState) {
     case DroneState::OnGround:
@@ -189,6 +197,11 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     // TODO: Find sensor to get range.zrange value
     rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
     logDataMap.emplace("Range", rangeLog);
+
+    // RSSI group
+    decltype(logDataMap)::mapped_type rssiLog;
+    rssiLog.emplace("radio.rssi", m_rssiReading);
+    logDataMap.emplace("Rssi", rssiLog);
 
     return logDataMap;
 }

@@ -22,101 +22,58 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
-    // Takeoff constants
-    static constexpr double targetDroneHeight = 0.5;
-    static constexpr double targetDroneHeightEpsilon = 0.005;
+    UpdateCurrentVelocity();
+    m_previousDronePosition = m_pcPos->GetReading().Position;
 
-    // Forward movement constants
-    static constexpr double distanceToTravel = 0.07;
-    static constexpr double distanceToTravelEpsilon = 0.005;
-    static constexpr double breakingAcuracyEpsilon = 0.002;
+    CVector3 targetVelocity;
+    double targetHeight = 0;
+    double targetYawRate = 0;
 
-    // Rotation constants
-    static const CRadians rotationAngle = CRadians::PI / 8;
-    static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
+    // if (m_currentState == DroneState::Takeoff || m_currentState == DroneState::Land) {
+    //     // Distance correction required to stay out of range of any obstacle
+    //     uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
+    //     uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
+    //     uint16_t frontDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, frontSensorReading);
+    //     uint16_t backDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, backSensorReading);
+
+    //     // Velocity required to apply distance correction
+    //     const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;
+    //     targetLeftVelocity += (rightDistanceCorrection - leftDistanceCorrection) * AVOIDANCE_SENSITIVITY;
+    //     targetForwardVelocity += (backDistanceCorrection - frontDistanceCorrection) * AVOIDANCE_SENSITIVITY;
+    // }
 
     UpdateCurrentVelocity();
-
     switch (m_currentState) {
-    case DroneState::OnGround:
-        m_initialPosition = m_pcPos->GetReading().Position;
-        m_currentState = DroneState::Takeoff;
-        break;
-    case DroneState::Takeoff:
-        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, targetDroneHeight));
-        m_currentState = DroneState::WaitTakeoff;
-        break;
-    case DroneState::WaitTakeoff:
-        if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-            m_currentState = DroneState::ForwardMovement;
-        }
-        break;
-    case DroneState::ForwardMovement:
-        m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
-        m_lastReferencePosition = m_pcPos->GetReading().Position;
-        m_currentState = DroneState::WaitForwardMovement;
-        break;
-    case DroneState::WaitForwardMovement:
-        // If we detect a wall in front of us
-        if (m_pcDistance->GetReadingsMap().begin()->second >= 0) {
-            m_currentState = DroneState::BrakeMovement;
-        }
-        // If we finished traveling
-        else if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
-            m_currentState = DroneState::ForwardMovement;
-        }
-        break;
-    case DroneState::BrakeMovement:
-        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-        m_lastReferencePosition = m_pcPos->GetReading().Position;
-        m_currentState = DroneState::WaitBrakeMovement;
-        break;
-    case DroneState::WaitBrakeMovement:
-        if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() <= breakingAcuracyEpsilon) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-            m_currentState = DroneState::Rotate;
-        }
-        m_lastReferencePosition = m_pcPos->GetReading().Position;
-        break;
-    case DroneState::Rotate:
-        if (m_pcDistance->GetReadingsMap().begin()->second < 0) {
-            m_currentState = DroneState::ForwardMovement;
-        } else {
-            CRadians angle;
-            CVector3 vector;
-            m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
-            m_lastReferenceYaw = angle;
-            m_pcPropellers->SetRelativeYaw(rotationAngle);
-            m_currentState = DroneState::WaitRotation;
-        }
-        break;
-    case DroneState::WaitRotation: {
-        CRadians angle;
-        CVector3 vector;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+        case DroneState::OnGround: {
+            // if (startMission)
+            //  get initial position
+            //  m_current_state = Drone::Takeoff;
+            m_currentState = DroneState::Takeoff;
+        } break;
 
-        if (std::abs((angle - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
-            m_currentState = DroneState::Rotate;
-        }
-        break;
-    }
-    case DroneState::StopRotation:
-        m_pcPropellers->SetRelativeYaw(CRadians(0));
-        m_currentState = DroneState::WaitStopRotation;
-        break;
-    case DroneState::WaitStopRotation: {
-        CRadians angle;
-        CVector3 vector;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
-
-        if (std::abs((angle - m_lastReferenceYaw).GetValue()) <= rotationAngleEpsilon.GetValue()) {
-            m_currentState = DroneState::ForwardMovement;
-        }
-        break;
-    }
+        case DroneState::Takeoff: {
+            targetHeight += 1;
+            // targetVelocity.SetX(targetVelocity.GetX() + 1);
+            static const auto heightEpsilon = 0.005;
+            if (std::abs(targetHeight - m_pcPos->GetReading().Position.GetZ()) < heightEpsilon) {
+                m_currentState = DroneState::Foward;
+            }
+        } break;
+        case DroneState::Foward: {
+            targetVelocity.SetX(targetVelocity.GetX() + 1);
+        } break;
+        case DroneState::Land: {
+            static const auto heightEpsilon = 0.005;
+            targetHeight += 0.02;
+            if (std::abs(targetHeight - m_pcPos->GetReading().Position.GetZ()) < heightEpsilon) {
+                m_currentState = DroneState::Takeoff;
+            }
+        } break;
     }
     m_previousDronePosition = m_pcPos->GetReading().Position;
+
+    // apply target speed
+    SetWaypoint(targetVelocity, targetHeight, targetYawRate);
 }
 
 void CCrazyflieController::Reset() {
@@ -196,8 +153,49 @@ void CCrazyflieController::SetParamData(const std::string& param, std::variant<b
 }
 
 void CCrazyflieController::UpdateCurrentVelocity() {
-    static constexpr double secondsPerTick = 1.0 / Constants::ticksPerSecond;
+    static constexpr double secondsPerTick = 1.0 / Constants::ticksPerSeconds;
     m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTick;
 }
+
+void CCrazyflieController::SetWaypoint(CVector3 targetVelocity, double targetHeight, double targetYawRate) const {
+    // const auto currentVelocityCorrection = targetVelocity - GetVelocity();
+
+    // CVector3 targetRelativePosition;
+    // static constexpr double positionToVelocityFactor = 0.01;
+    // targetRelativePosition.SetX(currentVelocityCorrection.GetX() * positionToVelocityFactor);
+    // targetRelativePosition.SetY(currentVelocityCorrection.GetY() * positionToVelocityFactor);
+    // LOG << m_pcPos->GetReading().Position.GetZ() << std::endl;
+    // static constexpr double zPositionEpsilon = 0.001;
+    // const double targetHeightVelocity = (targetHeight - m_pcPos->GetReading().Position.GetZ()) < zPositionEpsilon
+    //                                     && (targetHeight - m_pcPos->GetReading().Position.GetZ()) > -zPositionEpsilon
+    //                                     ? 0
+    //                                     : targetHeight - m_pcPos->GetReading().Position.GetZ();
+    // targetRelativePosition.SetZ((currentVelocityCorrection.GetZ() + targetHeightVelocity) * positionToVelocityFactor);
+    // m_pcPropellers->SetRelativePosition(CVector3(targetRelativePosition.GetX(), targetRelativePosition.GetY(), 0));
+    CVector3 targetAbsolutePosition;
+    const auto currentPosition = m_pcPos->GetReading().Position;
+    static constexpr double secondsPerTick = 1.0 / Constants::ticksPerSeconds;
+    // Split wanted speed using yaw (for both)
+    CRadians angle;
+    CVector3 vector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angle, vector);
+    LOG << "Angle: " << angle.GetValue() * 180 / M_PI << std::endl;
+    LOG << "Position x: " << m_pcPos->GetReading().Position.GetX() << std::endl;
+    LOG << "Position y: " << m_pcPos->GetReading().Position.GetY() << std::endl;
+    LOG << "Position z: " << m_pcPos->GetReading().Position.GetZ() << std::endl;
+    const auto xVelocity = std::cos(angle.GetValue()) * targetVelocity.GetX() + std::sin(angle.GetValue()) * targetVelocity.GetY();
+    const auto yVelocity = std::cos(angle.GetValue()) * targetVelocity.GetY() + std::sin(angle.GetValue()) * targetVelocity.GetX();
+    LOG << "xVelocity: " << xVelocity << std::endl;
+    LOG << "yVelocity: " << yVelocity << std::endl;
+    targetAbsolutePosition.SetX(xVelocity * secondsPerTick + currentPosition.GetX());
+    targetAbsolutePosition.SetY(yVelocity * secondsPerTick + currentPosition.GetY());
+    targetAbsolutePosition.SetZ(targetVelocity.GetZ() * secondsPerTick + targetHeight);
+    m_pcPropellers->SetAbsolutePosition(targetAbsolutePosition);
+    // if (m_currentState == DroneState::Foward) {
+    //     m_pcPropellers->SetRelativePosition(CVector3(targetVelocity.GetX(), targetVelocity.GetY(), targetVelocity.GetZ()) * secondsPerTick);
+    // } else {
+    // }
+}
+
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

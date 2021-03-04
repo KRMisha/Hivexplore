@@ -22,6 +22,14 @@ enum class DroneState {
     Brake,
     Rotate,
     Land,
+    ReturnToBase,
+};
+
+enum class EndMissionState {
+    LiftAboveObstacles,
+    Return,
+    Land,
+    Idle,
 };
 
 class CCrazyflieController : public CCI_Controller {
@@ -80,6 +88,9 @@ private:
     // Emergency landing variables
     bool m_isEmergencyLandingFinished = true;
     CVector3 m_emergencyLandingPosition;
+
+    // Return to base variables
+    EndMissionState m_endCurrentState = EndMissionState::LiftAboveObstacles;
 };
 
 #endif

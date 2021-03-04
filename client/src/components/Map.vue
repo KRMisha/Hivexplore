@@ -14,28 +14,39 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 export default defineComponent({
     name: 'Map',
     setup() {
+        const MAX_POINTS = 1_000_000;
+
         let camera: THREE.PerspectiveCamera;
         let scene: THREE.Scene;
         let renderer: THREE.WebGLRenderer;
-        let mesh: THREE.Mesh;
 
         let stats: Stats;
 
         let container: HTMLDivElement;
 
+        let points: THREE.Points;
+        let positionCount = 0;
+
+        let intervalId: number | undefined; // TODO: Remove
+
         function init() {
             container = document.getElementById('map-container')! as HTMLDivElement;
 
-            camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.01, 10);
-            camera.position.z = 1;
+            camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.1, 2000);
+            camera.position.y = 160;
+            camera.position.z = 400;
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             scene = new THREE.Scene();
 
-            const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-            const material = new THREE.MeshNormalMaterial();
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(MAX_POINTS * 3);
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-            mesh = new THREE.Mesh(geometry, material);
-            scene.add(mesh);
+            const material = new THREE.PointsMaterial({ size: 5, color: 0x00FF00 });
+
+            points = new THREE.Points(geometry, material);
+            scene.add(points);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
@@ -46,12 +57,17 @@ export default defineComponent({
             container.append(stats.dom);
 
             window.addEventListener('resize', onWindowResize);
+
+            // TODO: Remove
+            intervalId = setInterval(() => {
+                addPoint();
+            }, 5);
         }
 
         function animate() {
+            // TODO: Add controls
+
             requestAnimationFrame(animate);
-            mesh.rotation.x += 0.01;
-            mesh.rotation.y += 0.02;
             renderer.render(scene, camera);
 
             stats.update();
@@ -62,6 +78,26 @@ export default defineComponent({
             camera.updateProjectionMatrix();
 
             renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // TODO: Make this take a 3D point fed from the server
+        function addPoint() {
+            // TODO: Remove
+            if (positionCount >= MAX_POINTS) {
+                clearInterval(intervalId);
+                intervalId = undefined;
+            }
+
+            // TODO: Generate more complex shape
+            const x = (Math.random() - 0.5) * 300;
+            const y = (Math.random() - 0.5) * 300;
+            const z = (Math.random() - 0.5) * 300;
+
+            points.geometry.attributes.position.setXYZ(positionCount, x, y, z);
+            positionCount += 3;
+
+            points.geometry.setDrawRange(0, positionCount)
+            points.geometry.attributes.position.needsUpdate = true;
         }
 
         onMounted(() => {

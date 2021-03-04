@@ -42,7 +42,6 @@ void CCrazyflieController::ControlStep() {
     static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
 
     std::unordered_map<std::string, float> sensorReadings;
-    static const std::array<std::string, 4> sensorDirection = {"front", "left", "back", "right"};
     static constexpr std::int8_t sensorSaturated = -1;
     static constexpr std::int8_t sensorEmpty = -2;
     static constexpr std::uint8_t obstacleTooClose = 0;
@@ -58,6 +57,7 @@ void CCrazyflieController::ControlStep() {
         } else {
             rangeData *= 10;
         }
+        static const std::array<std::string, 4> sensorDirection = {"front", "left", "back", "right"};
         sensorReadings.emplace(sensorDirection[index], rangeData);
     }
 
@@ -90,7 +90,7 @@ void CCrazyflieController::ControlStep() {
         break;
     case DroneState::WaitForwardMovement:
         // If we detect a wall in front of us
-        if (m_pcDistance->GetReadingsMap().begin()->second >= 0) {
+        if (sensorReadings["front"] <= edgeDetectedThreshold) {
             m_currentState = DroneState::BrakeMovement;
         }
         // If we finished traveling
@@ -111,7 +111,7 @@ void CCrazyflieController::ControlStep() {
         m_lastReferencePosition = m_pcPos->GetReading().Position;
         break;
     case DroneState::Rotate:
-        if (m_pcDistance->GetReadingsMap().begin()->second < 0) {
+        if (sensorReadings["front"] > edgeDetectedThreshold) {
             m_currentState = DroneState::ForwardMovement;
         } else {
             CRadians angle;

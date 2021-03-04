@@ -31,6 +31,13 @@ export default defineComponent({
 
         let intervalId: number | undefined; // TODO: Remove
 
+        function onWindowResize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
         function init() {
             container = document.getElementById('map-container')! as HTMLDivElement;
 
@@ -44,7 +51,7 @@ export default defineComponent({
             const positions = new Float32Array(maxPoints * 3);
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-            const material = new THREE.PointsMaterial({ size: 5, color: 0x00FF00 });
+            const material = new THREE.PointsMaterial({ size: 5, color: 0x00ff00 });
 
             points = new THREE.Points(geometry, material);
             scene.add(points);
@@ -76,13 +83,6 @@ export default defineComponent({
             stats.update();
         }
 
-        function onWindowResize() {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        }
-
         // TODO: Make this take a 3D point fed from the server
         function addPoint() {
             // TODO: Remove
@@ -99,7 +99,7 @@ export default defineComponent({
             points.geometry.attributes.position.setXYZ(positionCount, x, y, z);
             positionCount += 3;
 
-            points.geometry.setDrawRange(0, positionCount)
+            points.geometry.setDrawRange(0, positionCount);
             points.geometry.attributes.position.needsUpdate = true;
         }
 
@@ -110,7 +110,7 @@ export default defineComponent({
 
         onUnmounted(() => {
             window.removeEventListener('resize', onWindowResize);
-        })
+        });
     },
 });
 </script>

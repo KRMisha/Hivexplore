@@ -24,6 +24,7 @@ class ArgosManager:
         self._unix_socket_client.bind('Position', self._log_position_callback)
         self._unix_socket_client.bind('Velocity', self._log_velocity_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
+        self._unix_socket_client.bind('Rssi', self._log_rssi_callback)
 
         # Client bindings
         self._web_socket_server.bind('connect', self._new_connection_callback)
@@ -93,6 +94,10 @@ class ArgosManager:
         print(f'Range from drone {drone_id}:')
         for key, value in measurements.items():
             print(f'- {key}: {value}')
+
+    def _log_rssi_callback(self, drone_id, data):
+        rssi = data['radio.rssi']
+        print(f'RSSI from drone {drone_id}: {rssi}')
 
     # Client callbacks
 

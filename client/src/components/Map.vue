@@ -7,6 +7,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
@@ -14,11 +15,12 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 export default defineComponent({
     name: 'Map',
     setup() {
-        const MAX_POINTS = 1_000_000;
+        const maxPoints = 1_000_000;
 
         let camera: THREE.PerspectiveCamera;
         let scene: THREE.Scene;
         let renderer: THREE.WebGLRenderer;
+        let controls: OrbitControls;
 
         let stats: Stats;
 
@@ -33,14 +35,13 @@ export default defineComponent({
             container = document.getElementById('map-container')! as HTMLDivElement;
 
             camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.1, 2000);
-            camera.position.y = 160;
-            camera.position.z = 400;
+            camera.position.set(0, 200, 400);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             scene = new THREE.Scene();
 
             const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(MAX_POINTS * 3);
+            const positions = new Float32Array(maxPoints * 3);
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
             const material = new THREE.PointsMaterial({ size: 5, color: 0x00FF00 });
@@ -51,6 +52,9 @@ export default defineComponent({
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.append(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
 
             stats = Stats();
             stats.dom.style.position = 'absolute';
@@ -65,9 +69,8 @@ export default defineComponent({
         }
 
         function animate() {
-            // TODO: Add controls
-
             requestAnimationFrame(animate);
+            controls.update();
             renderer.render(scene, camera);
 
             stats.update();
@@ -83,7 +86,7 @@ export default defineComponent({
         // TODO: Make this take a 3D point fed from the server
         function addPoint() {
             // TODO: Remove
-            if (positionCount >= MAX_POINTS) {
+            if (positionCount >= maxPoints) {
                 clearInterval(intervalId);
                 intervalId = undefined;
             }

@@ -39,7 +39,7 @@ void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
 
     static constexpr float distanceToRssiMultiplier = 5.0;
-    auto dronePosition = m_pcPos->GetReading().Position;
+    CVector3 dronePosition = m_pcPos->GetReading().Position;
     // Consider (0, 0, 0) as the base
     double distanceToBase =
         std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));

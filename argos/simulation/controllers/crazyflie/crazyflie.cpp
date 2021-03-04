@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
+#include "experiments/constants.h"
 
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
     try {
@@ -33,6 +34,8 @@ void CCrazyflieController::ControlStep() {
     // Rotation constants
     static const CRadians rotationAngle = CRadians::PI / 8;
     static const CRadians rotationAngleEpsilon = CRadians::PI / 128;
+
+    UpdateCurrentVelocity();
 
     switch (m_currentState) {
     case DroneState::OnGround:
@@ -113,6 +116,7 @@ void CCrazyflieController::ControlStep() {
         break;
     }
     }
+    m_previousDronePosition = m_pcPos->GetReading().Position;
 }
 
 void CCrazyflieController::Reset() {
@@ -189,6 +193,11 @@ void CCrazyflieController::SetParamData(const std::string& param, std::variant<b
         // Print LED state since simulated Crazyflie doesn't have LEDs
         RLOG << "LED changed: " << std::get<bool>(value) << '\n';
     }
+}
+
+void CCrazyflieController::UpdateCurrentVelocity() {
+    static constexpr double secondsPerTick = 1.0 / Constants::ticksPerSecond;
+    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / secondsPerTick;
 }
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

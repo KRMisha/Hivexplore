@@ -91,6 +91,7 @@ void appMain(void) {
     const logVarId_t rightSensorId = logGetVarId("range", "right");
     const logVarId_t frontSensorId = logGetVarId("range", "front");
     const logVarId_t backSensorId = logGetVarId("range", "back");
+    const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
@@ -118,6 +119,8 @@ void appMain(void) {
         uint16_t rightSensorReading = logGetUint(rightSensorId);
         uint16_t frontSensorReading = logGetUint(frontSensorId);
         uint16_t backSensorReading = logGetUint(backSensorId);
+
+        uint8_t rssiReading = logGetUint(rssiId);
 
         float targetForwardVelocity = 0;
         float targetLeftVelocity = 0;

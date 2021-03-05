@@ -48,7 +48,7 @@ export default defineComponent({
             // Camera
             const fov = 70;
             camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
-            camera.position.set(0, 200, 400);
+            camera.position.set(0, 100, 60);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Geometry - buffer to hold all point positions
@@ -107,7 +107,11 @@ export default defineComponent({
         socketClient!.bindMessage('map-points', (points: [number, number, number][]) => {
             for (const point of points) {
                 const coordinateScaleFactor = 10;
-                addPoint(point.map(x => x * coordinateScaleFactor) as [number, number, number]);
+                const scaledPoint = point.map(x => x * coordinateScaleFactor);
+
+                // Change point coordinates to match three.js coordinate system
+                // X: Right, Y: Up, Z: Out (towards user)
+                addPoint([scaledPoint[0], scaledPoint[2], scaledPoint[1]]);
             }
         });
 

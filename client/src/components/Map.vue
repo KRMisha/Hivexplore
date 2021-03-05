@@ -5,16 +5,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted } from 'vue';
+import { defineComponent, inject, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
+import SocketClient from '@/classes/socket-client';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
 export default defineComponent({
     name: 'Map',
     setup() {
+        const socketClient: SocketClient | undefined = inject('socketClient');
+
         const maxPoints = 1_000_000;
 
         let camera: THREE.PerspectiveCamera;
@@ -28,19 +31,6 @@ export default defineComponent({
 
         let points: THREE.Points;
         let pointCount = 0;
-
-        let intervalId: number | undefined; // TODO: Remove
-
-        // TODO: Remove
-        function generateMockPoints() {
-            if (positionCount >= maxPoints) {
-                clearInterval(intervalId);
-                intervalId = undefined;
-            }
-
-            const cubeWidth = 300;
-            addPoint([(Math.random() - 0.5) * cubeWidth, (Math.random() - 0.5) * cubeWidth, (Math.random() - 0.5) * cubeWidth]);
-        }
 
         function onWindowResize() {
             camera.aspect = container.clientWidth / container.clientHeight;
@@ -81,11 +71,6 @@ export default defineComponent({
             container.append(stats.dom);
 
             window.addEventListener('resize', onWindowResize);
-
-            // TODO: Remove
-            intervalId = setInterval(() => {
-                generateMockPoints();
-            }, 5);
         }
 
         function animate() {
@@ -96,7 +81,6 @@ export default defineComponent({
             stats.update();
         }
 
-        // TODO: Bind this to server message
         function addPoint(point: [number, number, number]) {
             points.geometry.attributes.position.setXYZ(pointCount, ...point);
             pointCount++;
@@ -104,6 +88,13 @@ export default defineComponent({
             points.geometry.setDrawRange(0, pointCount);
             points.geometry.attributes.position.needsUpdate = true;
         }
+
+        socketClient!.bindMessage('map-points', (points: [number, number, number][]) => {
+            for (const point of points) {
+                const coordinateScaleFactor = 10;
+                addPoint(point.map(x => x * coordinateScaleFactor) as [number, number, number]);
+            }
+        });
 
         onMounted(() => {
             init();

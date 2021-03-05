@@ -103,6 +103,7 @@ void CHivexploreLoopFunctions::PreStep() {
                     // Restart simulation in case of socket error
                     std::perror("Unix socket send");
                     Stop();
+                    return;
                 }
             }
         }

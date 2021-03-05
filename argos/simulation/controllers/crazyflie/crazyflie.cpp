@@ -82,6 +82,7 @@ void CCrazyflieController::ControlStep() {
             sensorReadings["back"] == obstacleTooFar
                 ? 0
                 : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["back"]) * avoidanceSensitivity;
+        // Y: Back, -Y: Forward, X: Left, -X: Right
         const auto positionCorrection =
             CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
         static constexpr double correctionEpsilon = 0.02;
@@ -91,12 +92,6 @@ void CCrazyflieController::ControlStep() {
             m_stateOnHold = m_currentState;
             m_currentState = DroneState::AvoidObstacle;
             m_obstacleDetectedPosition = m_pcPos->GetReading().Position;
-
-            // Y: Back, -Y: Forward, X: Left, -X: Right
-            const auto positionCorrection =
-                CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
-            static constexpr double correctionEpsilon = 0.015;
-            m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0 : positionCorrection.Length();
             m_pcPropellers->SetRelativePosition(positionCorrection);
             m_isAvoidObstacleCommandFinished = false;
         }

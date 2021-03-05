@@ -45,6 +45,7 @@ void CCrazyflieController::ControlStep() {
         } else if (rangeData == sensorEmpty) {
             rangeData = obstacleTooFar;
         } else {
+            // Convert cm to mm to reflect multiranger deck
             rangeData *= 10;
         }
         static const std::array<std::string, 4> sensorDirection = {"front", "left", "back", "right"};
@@ -85,10 +86,9 @@ void CCrazyflieController::ControlStep() {
             CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
         static constexpr double correctionEpsilon = 0.02;
         m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0 : positionCorrection.Length();
-
         // Avoid negligible corrections
         if (m_correctionDistance != 0) {
-            m_currentState = m_currentState;
+            m_stateOnHold = m_currentState;
             m_currentState = DroneState::AvoidObstacle;
             m_obstacleDetectedPosition = m_pcPos->GetReading().Position;
 
@@ -274,6 +274,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
         } else if (rangeData == sensorEmpty) {
             rangeData = obstacleTooFar;
         } else {
+            // Convert cm to mm to reflect multiranger deck
             rangeData *= 10;
         }
         rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));

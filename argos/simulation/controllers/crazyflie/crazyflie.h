@@ -49,8 +49,9 @@ private:
     CVector3 m_initialPosition;
     DroneState m_currentState = DroneState::Idle;
 
-    // To avoid having multiple state to simulate drone control, we use bool within the
-    // states to wait for movement commands to finish before executing one
+    // To avoid having multiple state to simulate drone control, we use bools within the
+    // states to wait for movement commands to finish before executing a new command
+
     // Obstacle avoidance variables
     bool m_isAvoidObstacleCommandFinished = true;
     DroneState m_stateOnHold = DroneState::Idle;

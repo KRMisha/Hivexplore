@@ -53,8 +53,8 @@ void CCrazyflieController::ControlStep() {
         sensorReadings.emplace(sensorDirection[index], rangeData);
     }
 
-    // Detect obstacles around drone, obstacle detection threshold is smaller than edge detected to avoid conflicts
-    // between drone collision avoidance logic and turn on map edge detection logic in explore state
+    // Detect obstacles around drone, the obstacle/drone detection threshold is smaller than the map edge
+    // detection threshold to avoid conflicts between drone collision avoidance and turn on map edge detection.
     static constexpr uint16_t obstacleDetectedThreshold = 600;
     static constexpr uint16_t edgeDetectedThreshold = 1200;
     bool shouldAvoid = false;
@@ -85,7 +85,7 @@ void CCrazyflieController::ControlStep() {
                 ? 0
                 : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["back"]) * avoidanceSensitivity;
         // Y: Back, -Y: Forward, X: Left, -X: Right
-        const auto positionCorrection =
+        auto positionCorrection =
             CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
         static constexpr double correctionEpsilon = 0.02;
         m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0 : positionCorrection.Length();
@@ -118,7 +118,6 @@ void CCrazyflieController::ControlStep() {
         }
     } break;
     case DroneState::Liftoff: {
-        // Liftoff constants
         static constexpr double targetDroneHeight = 0.5;
         static constexpr double targetDroneHeightEpsilon = 0.005;
 
@@ -128,7 +127,7 @@ void CCrazyflieController::ControlStep() {
             m_isLiftoffCommandFinished = false;
         }
 
-        // Change state when liftoff finished
+        // Change state when liftoff finishes
         if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::Explore;
@@ -164,7 +163,7 @@ void CCrazyflieController::ControlStep() {
             m_isBrakeCommandFinished = false;
         }
 
-        // If position variation negligible, brake command finished
+        // If position variation negligible, brake command finishes
         static constexpr double brakingAcuracyEpsilon = 0.002;
         if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));

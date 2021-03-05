@@ -7,8 +7,9 @@
 #include "experiments/constants.h"
 
 namespace {
-    double calculateDistanceCorrection(double threshold, double reading) { return threshold - std::min(threshold, reading); }
+    constexpr double calculateDistanceCorrection(double threshold, double reading) { return threshold - std::min(threshold, reading); }
 } // namespace
+
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
     try {
         m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
@@ -52,7 +53,8 @@ void CCrazyflieController::ControlStep() {
         sensorReadings.emplace(sensorDirection[index], rangeData);
     }
 
-    // Detect obstacles around drone, obstacle detection threshold is smaller than edge detected to avoid conflicting commands
+    // Detect obstacles around drone, obstacle detection threshold is smaller than edge detected to avoid conflicts
+    // between drone collision avoidance logic and turn on map edge detection logic in explore state
     static constexpr uint16_t obstacleDetectedThreshold = 600;
     static constexpr uint16_t edgeDetectedThreshold = 1200;
     bool shouldAvoid = false;
@@ -163,8 +165,8 @@ void CCrazyflieController::ControlStep() {
         }
 
         // If position variation negligible, brake command finished
-        static constexpr double breakingAcuracyEpsilon = 0.002;
-        if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= breakingAcuracyEpsilon) {
+        static constexpr double brakingAcuracyEpsilon = 0.002;
+        if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::Rotate;
             m_isBrakeCommandFinished = true;

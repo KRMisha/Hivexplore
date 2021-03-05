@@ -16,17 +16,13 @@
 using namespace argos;
 
 enum class DroneState {
-    OnGround,
-    Takeoff,
-    WaitTakeoff,
-    ForwardMovement,
-    WaitForwardMovement,
-    BrakeMovement,
-    WaitBrakeMovement,
+    Idle,
+    AvoidObstacle,
+    Liftoff,
+    Explore,
+    Brake,
     Rotate,
-    WaitRotation,
-    StopRotation,
-    WaitStopRotation,
+    Land,
 };
 
 class CCrazyflieController : public CCI_Controller {
@@ -46,6 +42,9 @@ public:
 private:
     void UpdateCurrentVelocity();
 
+    template<typename T, typename U = T>
+    std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;
+
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;
@@ -53,14 +52,39 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
+    DroneState m_currentState = DroneState::Idle;
+    CVector3 m_initialPosition;
+    CVector3 m_previousPosition;
+    CVector3 m_currentVelocity;
     std::uint8_t m_rssiReading = 0;
 
-    CVector3 m_currentVelocity;
-    CVector3 m_previousDronePosition;
-    CVector3 m_initialPosition;
-    CVector3 m_lastReferencePosition;
+    // To avoid having multiple states to simulate drone control, we use bools within the
+    // states to wait for movement commands to finish before executing a new command
+
+    // Obstacle avoidance variables
+    bool m_isAvoidObstacleCommandFinished = true;
+    DroneState m_stateOnHold = DroneState::Idle;
+    CVector3 m_obstacleDetectedPosition;
+    double m_correctionDistance = 0.0;
+
+    // Liftoff variables
+    bool m_isLiftoffCommandFinished = true;
+
+    // Exploration variables
+    bool m_isForwardCommandFinished = true;
+    CVector3 m_forwardCommandReferencePosition;
+
+    // Braking variables
+    bool m_isBrakeCommandFinished = true;
+    CVector3 m_brakingReferencePosition;
+
+    // Rotation variables
+    bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
-    DroneState m_currentState = DroneState::OnGround;
+
+    // Emergency landing variables
+    bool m_isEmergencyLandingFinished = true;
+    CVector3 m_emergencyLandingPosition;
 };
 
 #endif

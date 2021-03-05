@@ -16,6 +16,7 @@ using namespace argos;
 
 enum class DroneState {
     Idle,
+    AvoidObstacle,
     Liftoff,
     Explore,
     Brake,
@@ -56,6 +57,12 @@ private:
     bool m_isForwardCommandFinished = true;
     bool m_isBrakeCommandFinished = true;
     bool m_isRotateCommandFinished = true;
+
+    // Obstacle avoidance variables
+    bool m_isAvoidObstacleCommandFinished = true;
+    DroneState m_stateOnHold = DroneState::Idle;
+    CVector3 m_obstacleDetectedPosition;
+    double m_correctionDistance;
 
     // Emergency landing variables
     bool m_isEmergencyLandingFinished = true;

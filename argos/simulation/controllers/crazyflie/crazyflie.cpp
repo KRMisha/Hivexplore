@@ -6,6 +6,9 @@
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"
 
+namespace {
+    double calculateDistanceCorrection(double threshold, double reading) { return threshold - std::min(threshold, reading); }
+} // namespace
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
     try {
         m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
@@ -23,9 +26,6 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
-
-    static constexpr uint16_t obstacleDetectedThreshold = 500;
-    static constexpr uint16_t edgeDetectedThreshold = 1000;
 
     // Sensor reading constants
     static constexpr std::int8_t sensorSaturated = -1;
@@ -51,10 +51,72 @@ void CCrazyflieController::ControlStep() {
         sensorReadings.emplace(sensorDirection[index], rangeData);
     }
 
+    // Detect obstacles around drone, obstacle detection threshold is smaller than edge detected to avoid conflicting commands
+    static constexpr uint16_t obstacleDetectedThreshold = 600;
+    static constexpr uint16_t edgeDetectedThreshold = 1200;
+    bool shouldAvoid = false;
+    for (const auto& reading : sensorReadings) {
+        if (reading.second <= obstacleDetectedThreshold) {
+            shouldAvoid = true;
+        }
+    }
+
+    if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff) {
+        static constexpr double maximumVelocity = 1.0;
+        static constexpr double milimitersToMeterFactor = 1000;
+        static constexpr double avoidanceSensitivity = maximumVelocity / milimitersToMeterFactor;
+        double leftDistanceCorrection =
+            sensorReadings["left"] == obstacleTooFar
+                ? 0
+                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["left"]) * avoidanceSensitivity;
+        double rightDistanceCorrection =
+            sensorReadings["right"] == obstacleTooFar
+                ? 0
+                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["right"]) * avoidanceSensitivity;
+        double frontDistanceCorrection =
+            sensorReadings["front"] == obstacleTooFar
+                ? 0
+                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["front"]) * avoidanceSensitivity;
+        double backDistanceCorrection =
+            sensorReadings["back"] == obstacleTooFar
+                ? 0
+                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["back"]) * avoidanceSensitivity;
+        const auto positionCorrection =
+            CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
+        static const double correctionEpsilon = 0.02;
+        m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0 : positionCorrection.Length();
+
+        // Avoid negligible corrections
+        if (m_correctionDistance != 0) {
+            m_currentState = m_currentState;
+            m_currentState = DroneState::AvoidObstacle;
+            m_obstacleDetectedPosition = m_pcPos->GetReading().Position;
+
+            // Y: Back, -Y: Forward, X: Left, -X: Right
+            const auto positionCorrection =
+                CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
+            static const double correctionEpsilon = 0.015;
+            m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0 : positionCorrection.Length();
+            m_pcPropellers->SetRelativePosition(positionCorrection);
+            m_isAvoidObstacleCommandFinished = false;
+        }
+    }
+
     switch (m_currentState) {
     case DroneState::Idle: {
         m_initialPosition = m_pcPos->GetReading().Position;
         m_currentState = DroneState::Liftoff;
+    } break;
+    case DroneState::AvoidObstacle: {
+        static constexpr double distanceCorrectionEpsilon = 0.015;
+        if ((m_pcPos->GetReading().Position - m_obstacleDetectedPosition).Length() >= m_correctionDistance - distanceCorrectionEpsilon) {
+            m_currentState = m_stateOnHold;
+            m_isAvoidObstacleCommandFinished = true;
+            m_isLiftoffCommandFinished = true;
+            m_isForwardCommandFinished = true;
+            m_isBrakeCommandFinished = true;
+            m_isRotateCommandFinished = true;
+        }
     } break;
     case DroneState::Liftoff: {
         // Liftoff constants
@@ -105,9 +167,9 @@ void CCrazyflieController::ControlStep() {
         // If position variation negligible, brake command finished
         static constexpr double breakingAcuracyEpsilon = 0.002;
         if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() <= breakingAcuracyEpsilon) {
-            m_isBrakeCommandFinished = true;
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::Rotate;
+            m_isBrakeCommandFinished = true;
         }
         m_lastReferencePosition = m_pcPos->GetReading().Position;
     } break;
@@ -120,17 +182,17 @@ void CCrazyflieController::ControlStep() {
         static const CRadians rotationAngle = CRadians::PI / 8;
         // Order rotation
         if (m_isRotateCommandFinished) {
-                m_lastReferenceYaw = currentYaw;
-                m_pcPropellers->SetRelativeYaw(rotationAngle);
-                m_isRotateCommandFinished = false;
+            m_lastReferenceYaw = currentYaw;
+            m_pcPropellers->SetRelativeYaw(rotationAngle);
+            m_isRotateCommandFinished = false;
         }
 
         // Wait for rotation to finish
         if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
-            m_isRotateCommandFinished = true;
             if (sensorReadings["front"] > edgeDetectedThreshold) {
                 m_currentState = DroneState::Explore;
             }
+            m_isRotateCommandFinished = true;
         }
     } break;
     case DroneState::Land: {
@@ -144,9 +206,10 @@ void CCrazyflieController::ControlStep() {
         static const double landingAltitude = 0.015;
         static const double landingAltitudeEpsilon = 0.0001;
         if (currentPosition.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
-            m_pcPropellers->SetAbsolutePosition(CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));
-            m_isEmergencyLandingFinished = true;
+            m_pcPropellers->SetAbsolutePosition(
+                CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));
             m_currentState = DroneState::Idle;
+            m_isEmergencyLandingFinished = true;
         }
     } break;
     }

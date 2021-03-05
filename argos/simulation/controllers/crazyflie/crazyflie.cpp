@@ -55,14 +55,15 @@ void CCrazyflieController::ControlStep() {
         sensorReadings.emplace(sensorDirection[index], rangeData);
     }
 
-    // Detect obstacles around drone, the obstacle/drone detection threshold is smaller than the map edge
-    // detection threshold to avoid conflicts between drone collision avoidance and turn on map edge detection.
+    // The obstacle detection threshold (similar to the logic found in the drone firmware) is smaller than the map edge rotation
+    // detection threshold to avoid conflicts between the obstacle/drone collision avoidance and the exploration logic
     static constexpr uint16_t obstacleDetectedThreshold = 600;
     static constexpr uint16_t edgeDetectedThreshold = 1200;
     bool shouldAvoid = std::any_of(sensorReadings.begin(), sensorReadings.end(), [](const auto& reading) {
         return reading.second <= obstacleDetectedThreshold;
     });
 
+    // Calculate necessary correction to avoid obstacles
     if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff &&
         m_currentState != DroneState::Idle) {
         static constexpr double maximumVelocity = 1.0;
@@ -282,8 +283,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
         } else if (rangeData == sensorEmpty) {
             rangeData = obstacleTooFar;
         } else {
-            // Convert cm to mm to reflect multiranger deck
-            rangeData *= 10;
+            rangeData *= 10; // Convert cm to mm to reflect multiranger deck
         }
         rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));
     }

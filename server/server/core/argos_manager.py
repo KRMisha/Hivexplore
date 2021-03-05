@@ -1,7 +1,7 @@
 import math
 from typing import Any, Optional, Set
 from server.core.web_socket_server import WebSocketServer
-from server.core.map_generator import MapGenerator
+from server.core.map_generator import MapGenerator, Orientation, Point
 from server.core.unix_socket_client import UnixSocketClient
 
 # pylint: disable=no-self-use
@@ -43,6 +43,7 @@ class ArgosManager:
     def _log_battery_callback(self, drone_id, data):
         battery_level = data['pm.batteryLevel']
         print(f'BatteryLevel from drone {drone_id}: {battery_level}')
+
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data):
@@ -55,16 +56,19 @@ class ArgosManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.2f}')
 
+        self._map_generator.set_orientation(drone_id, Orientation(**measurements))
+
     def _log_position_callback(self, drone_id, data):
         measurements = {
             'x': data['stateEstimate.x'],
             'y': data['stateEstimate.y'],
             'z': data['stateEstimate.z'],
         }
-        self._map_generator.add_position(measurements)
         print(f'Position from drone {drone_id}:')
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
+
+        self._map_generator.set_position(drone_id, Point(**measurements))
 
     def _log_velocity_callback(self, drone_id, data):
         measurements = {
@@ -90,10 +94,11 @@ class ArgosManager:
             'up': data['range.up'],
             'zrange': data['range.zrange'],
         }
-        self._map_generator.add_points(measurements)
         print(f'Range from drone {drone_id}:')
         for key, value in measurements.items():
             print(f'- {key}: {value}')
+
+        self._map_generator.add_range_reading(drone_id, measurements)
 
     def _log_rssi_callback(self, drone_id, data):
         rssi = data['radio.rssi']

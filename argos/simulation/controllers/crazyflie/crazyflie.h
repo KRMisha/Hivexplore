@@ -47,22 +47,30 @@ private:
     CVector3 m_currentVelocity;
     CVector3 m_previousDronePosition;
     CVector3 m_initialPosition;
-    CVector3 m_lastReferencePosition;
-    CRadians m_lastReferenceYaw;
     DroneState m_currentState = DroneState::Idle;
 
     // To avoid having multiple state to simulate drone control, we use bool within the
     // states to wait for movement commands to finish before executing one
-    bool m_isLiftoffCommandFinished = true;
-    bool m_isForwardCommandFinished = true;
-    bool m_isBrakeCommandFinished = true;
-    bool m_isRotateCommandFinished = true;
-
     // Obstacle avoidance variables
     bool m_isAvoidObstacleCommandFinished = true;
     DroneState m_stateOnHold = DroneState::Idle;
     CVector3 m_obstacleDetectedPosition;
     double m_correctionDistance;
+
+    // Liftoff variables
+    bool m_isLiftoffCommandFinished = true;
+
+    // Exploration variables
+    bool m_isForwardCommandFinished = true;
+    CVector3 m_forwardCommandReferencePosition;
+
+    // Braking variables
+    bool m_isBrakeCommandFinished = true;
+    CVector3 m_brakingReferencePosition;
+
+    // Rotation variables
+    bool m_isRotateCommandFinished = true;
+    CRadians m_lastReferenceYaw;
 
     // Emergency landing variables
     bool m_isEmergencyLandingFinished = true;

@@ -143,7 +143,7 @@ void CCrazyflieController::ControlStep() {
         // Order exploration movement
         if (m_isForwardCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
-            m_lastReferencePosition = m_pcPos->GetReading().Position;
+            m_forwardCommandReferencePosition = m_pcPos->GetReading().Position;
             m_isForwardCommandFinished = false;
         }
 
@@ -154,7 +154,7 @@ void CCrazyflieController::ControlStep() {
             m_isForwardCommandFinished = true;
         }
         // If we finished traveling the exploration step
-        else if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
+        else if ((m_pcPos->GetReading().Position - m_forwardCommandReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
             m_isForwardCommandFinished = true;
         }
     } break;
@@ -162,18 +162,18 @@ void CCrazyflieController::ControlStep() {
         // Order brake
         if (m_isBrakeCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-            m_lastReferencePosition = m_pcPos->GetReading().Position;
+            m_brakingReferencePosition = m_pcPos->GetReading().Position;
             m_isBrakeCommandFinished = false;
         }
 
         // If position variation negligible, brake command finished
         static constexpr double breakingAcuracyEpsilon = 0.002;
-        if ((m_pcPos->GetReading().Position - m_lastReferencePosition).Length() <= breakingAcuracyEpsilon) {
+        if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= breakingAcuracyEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::Rotate;
             m_isBrakeCommandFinished = true;
         }
-        m_lastReferencePosition = m_pcPos->GetReading().Position;
+        m_brakingReferencePosition = m_pcPos->GetReading().Position;
     } break;
     case DroneState::Rotate: {
         // Get currentYaw

@@ -68,12 +68,14 @@ void CCrazyflieController::ControlStep() {
             sensorReadings["back"] == obstacleTooFar
                 ? 0.0
                 : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["back"]) * avoidanceSensitivity;
+
         // Y: Back, -Y: Forward, X: Left, -X: Right
         auto positionCorrection =
             CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
+
+        // Avoid negligible corrections
         static constexpr double correctionEpsilon = 0.02;
         m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0.0 : positionCorrection.Length();
-        // Avoid negligible corrections
         if (m_correctionDistance != 0.0) {
             m_stateOnHold = m_currentState;
             m_currentState = DroneState::AvoidObstacle;
@@ -100,7 +102,7 @@ void CCrazyflieController::ControlStep() {
         if ((m_pcPos->GetReading().Position - m_obstacleDetectedPosition).Length() >= m_correctionDistance - distanceCorrectionEpsilon) {
             m_isAvoidObstacleCommandFinished = true;
 
-            // Reset all states to avoid problems problems when going back to a state
+            // Reset all states to avoid problems when going back to a state
             m_isLiftoffCommandFinished = true;
             m_isForwardCommandFinished = true;
             m_isBrakeCommandFinished = true;
@@ -119,7 +121,7 @@ void CCrazyflieController::ControlStep() {
             m_isLiftoffCommandFinished = false;
         }
 
-        // Change state when liftoff finishes
+        // Wait for liftoff to finish
         if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
             m_currentState = DroneState::Explore;
@@ -128,6 +130,7 @@ void CCrazyflieController::ControlStep() {
     } break;
     case DroneState::Explore: {
         static constexpr double distanceToTravel = 0.07;
+
         // Order exploration movement
         if (m_isForwardCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
@@ -135,7 +138,7 @@ void CCrazyflieController::ControlStep() {
             m_isForwardCommandFinished = false;
         }
 
-        // If we detect a wall in front of us
+        // Change state when a wall is detected in front of the drone
         static constexpr double distanceToTravelEpsilon = 0.005;
         if (sensorReadings["front"] <= edgeDetectedThreshold) {
             m_currentState = DroneState::Brake;
@@ -155,7 +158,7 @@ void CCrazyflieController::ControlStep() {
             m_isBrakeCommandFinished = false;
         }
 
-        // If position variation negligible, brake command finishes
+        // If position variation is negligible, end the brake command
         static constexpr double brakingAcuracyEpsilon = 0.002;
         if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
@@ -165,12 +168,13 @@ void CCrazyflieController::ControlStep() {
         m_brakingReferencePosition = m_pcPos->GetReading().Position;
     } break;
     case DroneState::Rotate: {
-        // Get currentYaw
+        // Get current yaw
         CRadians currentYaw;
         CVector3 rotationAxis;
         m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
 
         static const CRadians rotationAngle = CRadians::PI / 8;
+
         // Order rotation
         if (m_isRotateCommandFinished) {
             m_lastReferenceYaw = currentYaw;
@@ -195,6 +199,8 @@ void CCrazyflieController::ControlStep() {
 
         static constexpr double landingAltitude = 0.015;
         static constexpr double landingAltitudeEpsilon = 0.0001;
+
+        // Wait for landing to finish
         if (m_pcPos->GetReading().Position.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));

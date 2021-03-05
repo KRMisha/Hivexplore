@@ -34,9 +34,9 @@ export default defineComponent({
     },
     setup() {
         const socketClient = new SocketClient();
-        const droneIds = ref<Array<string>>([]);
+        const droneIds = ref<string[]>([]);
 
-        socketClient.bindMessage('drone-ids', (newDroneIds: Array<string>) => {
+        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 

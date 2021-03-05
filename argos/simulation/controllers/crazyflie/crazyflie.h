@@ -37,6 +37,9 @@ public:
 private:
     void UpdateCurrentVelocity();
 
+    template<typename T, typename U = T>
+    std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;
+
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;

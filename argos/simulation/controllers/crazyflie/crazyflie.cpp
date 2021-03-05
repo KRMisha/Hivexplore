@@ -9,6 +9,12 @@
 #include "experiments/constants.h"
 
 namespace {
+    // Sensor reading constants
+    static constexpr std::uint8_t obstacleTooClose = 0;
+    static constexpr std::uint16_t obstacleTooFar = 4000;
+
+    static constexpr std::uint16_t meterToMillimeterFactor = 1000;
+
     constexpr double calculateDistanceCorrection(double threshold, double reading) { return threshold - std::min(threshold, reading); }
 } // namespace
 
@@ -30,29 +36,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
 
-    // Sensor reading constants
-    static constexpr std::uint8_t obstacleTooClose = 0;
-    static constexpr std::uint16_t obstacleTooFar = 4000;
-
-    // Get sensor readings to avoid duplicate accessing logic
-    // TODO: extract this logic from GetLogData() and ControlStep()
-    std::unordered_map<std::string, float> sensorReadings;
-    auto distanceReadings = m_pcDistance->GetReadingsMap();
-    for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
-        std::size_t index = std::distance(distanceReadings.begin(), it);
-        Real rangeData = it->second;
-        static constexpr std::int8_t sensorSaturated = -1;
-        static constexpr std::int8_t sensorEmpty = -2;
-        if (rangeData == sensorSaturated) {
-            rangeData = obstacleTooClose;
-        } else if (rangeData == sensorEmpty) {
-            rangeData = obstacleTooFar;
-        } else {
-            rangeData *= 10; // Convert cm to mm to reflect multiranger deck
-        }
-        static const std::array<std::string, 4> sensorDirection = {"front", "left", "back", "right"};
-        sensorReadings.emplace(sensorDirection[index], rangeData);
-    }
+    static const std::array<std::string, 6> sensorDirections = {"front", "left", "back", "right", "up", "down"};
+    std::unordered_map<std::string, float> sensorReadings = GetSensorReadings<float>(sensorDirections);
 
     // The obstacle detection threshold (similar to the logic found in the drone firmware) is smaller than the map edge rotation
     // detection threshold to avoid conflicts between the obstacle/drone collision avoidance and the exploration logic
@@ -66,8 +51,7 @@ void CCrazyflieController::ControlStep() {
     if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff &&
         m_currentState != DroneState::Idle) {
         static constexpr double maximumVelocity = 1.0;
-        static constexpr double milimitersToMeterFactor = 1000;
-        static constexpr double avoidanceSensitivity = maximumVelocity / milimitersToMeterFactor;
+        static constexpr double avoidanceSensitivity = maximumVelocity / meterToMillimeterFactor;
         double leftDistanceCorrection =
             sensorReadings["left"] == obstacleTooFar
                 ? 0
@@ -266,30 +250,9 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     logDataMap.emplace("Velocity", velocityLog);
 
     // Range group
-    CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
-    static const std::array<std::string, 4> rangeLogNames = {"range.front", "range.left", "range.back", "range.right"};
-    decltype(logDataMap)::mapped_type rangeLog;
-    static constexpr std::int8_t sensorSaturated = -1;
-    static constexpr std::int8_t sensorEmpty = -2;
-    static constexpr std::uint8_t obstacleTooClose = 0;
-    static constexpr std::uint16_t obstacleTooFar = 4000;
-
-    for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
-        std::size_t index = std::distance(distanceReadings.begin(), it);
-        Real rangeData = it->second;
-        if (rangeData == sensorSaturated) {
-            rangeData = obstacleTooClose;
-        } else if (rangeData == sensorEmpty) {
-            rangeData = obstacleTooFar;
-        } else {
-            rangeData *= 10; // Convert cm to mm to reflect multiranger deck
-        }
-        rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));
-    }
-    // TODO: Find sensor to get range.up value
-    rangeLog.emplace("range.up", static_cast<std::uint16_t>(0));
-    // TODO: Find sensor to get range.zrange value
-    rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
+    static const std::array<std::string, 6> rangeLogNames =
+        {"range.front", "range.left", "range.back", "range.right", "range.up", "range.zrange"};
+    decltype(logDataMap)::mapped_type rangeLog = GetSensorReadings<std::uint16_t, decltype(rangeLog)::mapped_type>(rangeLogNames);
     logDataMap.emplace("Range", rangeLog);
 
     // RSSI group
@@ -310,5 +273,39 @@ void CCrazyflieController::SetParamData(const std::string& param, std::variant<b
 void CCrazyflieController::UpdateCurrentVelocity() {
     m_currentVelocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
+
+template<typename T, typename U = T>
+std::unordered_map<std::string, U> CCrazyflieController::GetSensorReadings(const std::array<std::string, 6>& sensorNames) const {
+    std::unordered_map<std::string, U> sensorReadings;
+    CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
+    for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
+        std::size_t index = std::distance(distanceReadings.begin(), it);
+        Real rangeData = it->second;
+        static constexpr std::int8_t sensorSaturated = -1;
+        static constexpr std::int8_t sensorEmpty = -2;
+        if (rangeData == sensorSaturated) {
+            rangeData = obstacleTooClose;
+        } else if (rangeData == sensorEmpty) {
+            rangeData = obstacleTooFar;
+        } else {
+            rangeData *= 10; // Convert cm to mm to reflect multiranger deck
+        }
+
+        sensorReadings.emplace(sensorNames[index], static_cast<T>(rangeData));
+    }
+
+    // TODO: Find sensor to get range.up value
+    sensorReadings.emplace(sensorNames[4], static_cast<T>(0));
+    // TODO: Find sensor to get range.zrange value
+    sensorReadings.emplace(sensorNames[5], static_cast<T>(m_pcPos->GetReading().Position.GetZ() * meterToMillimeterFactor));
+
+    return sensorReadings;
+}
+
+template std::unordered_map<std::string, float> CCrazyflieController::GetSensorReadings<float>(
+    const std::array<std::string, 6>& sensorNames) const;
+
+template std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>> CCrazyflieController::GetSensorReadings<
+    std::uint16_t>(const std::array<std::string, 6>& sensorNames) const;
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

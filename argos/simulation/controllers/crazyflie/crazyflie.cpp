@@ -1,4 +1,5 @@
 #include "crazyflie.h"
+#include <algorithm>
 #include <array>
 #include <type_traits>
 #include <unordered_map>
@@ -57,12 +58,9 @@ void CCrazyflieController::ControlStep() {
     // detection threshold to avoid conflicts between drone collision avoidance and turn on map edge detection.
     static constexpr uint16_t obstacleDetectedThreshold = 600;
     static constexpr uint16_t edgeDetectedThreshold = 1200;
-    bool shouldAvoid = false;
-    for (const auto& reading : sensorReadings) {
-        if (reading.second <= obstacleDetectedThreshold) {
-            shouldAvoid = true;
-        }
-    }
+    bool shouldAvoid = std::any_of(sensorReadings.begin(), sensorReadings.end(),
+        [](std::pair<std::string, float> reading){ return reading.second <= obstacleDetectedThreshold; });
+
 
     if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff
         && m_currentState != DroneState::Idle) {

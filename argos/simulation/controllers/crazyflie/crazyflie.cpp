@@ -64,7 +64,8 @@ void CCrazyflieController::ControlStep() {
         }
     }
 
-    if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff) {
+    if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff
+        && m_currentState != DroneState::Idle) {
         static constexpr double maximumVelocity = 1.0;
         static constexpr double milimitersToMeterFactor = 1000;
         static constexpr double avoidanceSensitivity = maximumVelocity / milimitersToMeterFactor;
@@ -211,7 +212,7 @@ void CCrazyflieController::ControlStep() {
         }
     } break;
     }
-    m_previousDronePosition = m_pcPos->GetReading().Position;
+    m_previousPosition = m_pcPos->GetReading().Position;
 }
 
 void CCrazyflieController::Reset() {
@@ -292,7 +293,7 @@ void CCrazyflieController::SetParamData(const std::string& param, std::variant<b
 }
 
 void CCrazyflieController::UpdateCurrentVelocity() {
-    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousDronePosition) / Constants::secondsPerTick;
+    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

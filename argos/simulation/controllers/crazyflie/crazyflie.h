@@ -44,10 +44,10 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
-    CVector3 m_currentVelocity;
-    CVector3 m_previousDronePosition;
-    CVector3 m_initialPosition;
     DroneState m_currentState = DroneState::Idle;
+    CVector3 m_initialPosition;
+    CVector3 m_previousPosition;
+    CVector3 m_currentVelocity;
 
     // To avoid having multiple state to simulate drone control, we use bools within the
     // states to wait for movement commands to finish before executing a new command
@@ -56,7 +56,7 @@ private:
     bool m_isAvoidObstacleCommandFinished = true;
     DroneState m_stateOnHold = DroneState::Idle;
     CVector3 m_obstacleDetectedPosition;
-    double m_correctionDistance;
+    double m_correctionDistance = 0;
 
     // Liftoff variables
     bool m_isLiftoffCommandFinished = true;

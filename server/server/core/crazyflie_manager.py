@@ -1,6 +1,6 @@
 import asyncio
-import math
 from typing import Dict
+import numpy as np
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
@@ -187,7 +187,7 @@ class CrazyflieManager:
         for key, value in measurements.items():
             print(f'- {key}: {value:.6f}')
 
-        velocity_magnitude = math.sqrt(measurements['vx']**2 + measurements['vy']**2 + measurements['vz']**2)
+        velocity_magnitude = np.linalg.norm(list(measurements.values()))
         print(f'Velocity magnitude: {velocity_magnitude}')
 
         self._web_socket_server.send_drone_message('velocity', logconf.cf.link_uri, round(velocity_magnitude, 4))

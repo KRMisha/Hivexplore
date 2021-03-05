@@ -27,7 +27,7 @@ export default defineComponent({
         let container: HTMLDivElement;
 
         let points: THREE.Points;
-        let positionCount = 0;
+        let pointCount = 0;
 
         let intervalId: number | undefined; // TODO: Remove
 
@@ -62,6 +62,7 @@ export default defineComponent({
             const geometry = new THREE.BufferGeometry();
             const positions = new Float32Array(maxPoints * 3);
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setDrawRange(0, 0);
 
             const material = new THREE.PointsMaterial({ size: 5, color: 0x00ff00 });
 
@@ -97,10 +98,10 @@ export default defineComponent({
 
         // TODO: Bind this to server message
         function addPoint(point: [number, number, number]) {
-            points.geometry.attributes.position.setXYZ(positionCount, ...point);
-            positionCount += 3;
+            points.geometry.attributes.position.setXYZ(pointCount, ...point);
+            pointCount++;
 
-            points.geometry.setDrawRange(0, positionCount);
+            points.geometry.setDrawRange(0, pointCount);
             points.geometry.attributes.position.needsUpdate = true;
         }
 

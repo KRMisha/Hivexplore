@@ -85,12 +85,12 @@ void appMain(void) {
     setpoint_t setPoint;
     vTaskDelay(M2T(3000));
 
+    const logVarId_t frontSensorId = logGetVarId("range", "front");
+    const logVarId_t leftSensorId = logGetVarId("range", "left");
+    const logVarId_t backSensorId = logGetVarId("range", "back");
+    const logVarId_t rightSensorId = logGetVarId("range", "right");
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
-    const logVarId_t leftSensorId = logGetVarId("range", "left");
-    const logVarId_t rightSensorId = logGetVarId("range", "right");
-    const logVarId_t frontSensorId = logGetVarId("range", "front");
-    const logVarId_t backSensorId = logGetVarId("range", "back");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
@@ -113,12 +113,12 @@ void appMain(void) {
 
         ledSet(LED_GREEN_R, isM1LedOn);
 
+        uint16_t frontSensorReading = logGetUint(frontSensorId);
+        uint16_t leftSensorReading = logGetUint(leftSensorId);
+        uint16_t backSensorReading = logGetUint(backSensorId);
+        uint16_t rightSensorReading = logGetUint(rightSensorId);
         uint16_t upSensorReading = logGetUint(upSensorId);
         uint16_t downSensorReading = logGetUint(downSensorId);
-        uint16_t leftSensorReading = logGetUint(leftSensorId);
-        uint16_t rightSensorReading = logGetUint(rightSensorId);
-        uint16_t frontSensorReading = logGetUint(frontSensorId);
-        uint16_t backSensorReading = logGetUint(backSensorId);
 
         uint8_t rssiReading = logGetUint(rssiId);
 

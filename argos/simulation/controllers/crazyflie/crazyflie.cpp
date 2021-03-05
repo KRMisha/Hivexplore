@@ -258,7 +258,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     static const std::array<std::string, 6> rangeLogNames =
         {"range.front", "range.left", "range.back", "range.right", "range.up", "range.zrange"};
     LogVariableMap rangeLog = GetSensorReadings<std::uint16_t, LogVariableMap::mapped_type>(rangeLogNames);
-    logDataMap.emplace("Range", rangeLog);
+    logDataMap.emplace_back("Range", rangeLog);
 
     // RSSI group
     LogVariableMap rssiLog;
@@ -310,7 +310,7 @@ std::unordered_map<std::string, U> CCrazyflieController::GetSensorReadings(const
 template std::unordered_map<std::string, float> CCrazyflieController::GetSensorReadings<float>(
     const std::array<std::string, 6>& sensorNames) const;
 
-template std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>> CCrazyflieController::GetSensorReadings<
-    std::uint16_t>(const std::array<std::string, 6>& sensorNames) const;
+template CCrazyflieController::LogVariableMap CCrazyflieController::GetSensorReadings<std::uint16_t>(
+    const std::array<std::string, 6>& sensorNames) const;
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

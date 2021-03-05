@@ -1,8 +1,6 @@
 #include "crazyflie.h"
 #include <array>
 #include <cmath>
-#include <type_traits>
-#include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"
@@ -135,46 +133,45 @@ void CCrazyflieController::Destroy() {
 
 // Returns an unordered_map. The key is the log config name and the value is
 // an unordered_map that contains the log variables' names and their values
-std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::
-    GetLogData() const {
+CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     // Fill map progressively
-    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> logDataMap;
+    LogConfigs logDataMap;
 
     // BatteryLevel group
-    decltype(logDataMap)::mapped_type batteryLevelLog;
+    LogVariableMap batteryLevelLog;
     batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
-    logDataMap.emplace("BatteryLevel", batteryLevelLog);
+    logDataMap.emplace_back("BatteryLevel", batteryLevelLog);
 
     // Orientation group
     CRadians angleRadians;
     CVector3 vector;
     m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
     Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
-    decltype(logDataMap)::mapped_type orientationLog;
+    LogVariableMap orientationLog;
     orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
     orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
-    logDataMap.emplace("Orientation", orientationLog);
+    logDataMap.emplace_back("Orientation", orientationLog);
 
     // Position group
     CVector3 position = m_pcPos->GetReading().Position;
-    decltype(logDataMap)::mapped_type positionLog;
+    LogVariableMap positionLog;
     positionLog.emplace("stateEstimate.x", static_cast<float>(position.GetX()));
     positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
-    logDataMap.emplace("Position", positionLog);
+    logDataMap.emplace_back("Position", positionLog);
 
     // Velocity group
-    decltype(logDataMap)::mapped_type velocityLog;
+    LogVariableMap velocityLog;
     velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_currentVelocity.GetX()));
     velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_currentVelocity.GetY()));
     velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_currentVelocity.GetZ()));
-    logDataMap.emplace("Velocity", velocityLog);
+    logDataMap.emplace_back("Velocity", velocityLog);
 
-    // Range group
+    // Range group - must be added after orientation and position
     CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
     static const std::array<std::string, 4> rangeLogNames = {"range.front", "range.left", "range.back", "range.right"};
-    decltype(logDataMap)::mapped_type rangeLog;
+    LogVariableMap rangeLog;
     static constexpr std::int8_t sensorSaturated = -1;
     static constexpr std::int8_t sensorEmpty = -2;
     static constexpr std::uint8_t obstacleTooClose = 0;
@@ -196,12 +193,12 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     rangeLog.emplace("range.up", obstacleTooFar);
     // TODO: Find sensor to get range.zrange value
     rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
-    logDataMap.emplace("Range", rangeLog);
+    logDataMap.emplace_back("Range", rangeLog);
 
     // RSSI group
-    decltype(logDataMap)::mapped_type rssiLog;
+    LogVariableMap rssiLog;
     rssiLog.emplace("radio.rssi", m_rssiReading);
-    logDataMap.emplace("Rssi", rssiLog);
+    logDataMap.emplace_back("Rssi", rssiLog);
 
     return logDataMap;
 }

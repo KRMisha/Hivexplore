@@ -199,15 +199,14 @@ void CCrazyflieController::ControlStep() {
     } break;
     case DroneState::Land: {
         // Emergency land
-        const auto currentPosition = m_pcPos->GetReading().Position;
         if (m_isEmergencyLandingFinished) {
-            m_emergencyLandingPosition = currentPosition;
+            m_emergencyLandingPosition = m_pcPos->GetReading().Position;
             m_isEmergencyLandingFinished = false;
         }
 
         static constexpr double landingAltitude = 0.015;
         static constexpr double landingAltitudeEpsilon = 0.0001;
-        if (currentPosition.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
+        if (m_pcPos->GetReading().Position.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));
             m_currentState = DroneState::Idle;

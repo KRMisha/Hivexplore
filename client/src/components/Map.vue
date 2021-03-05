@@ -20,14 +20,14 @@ export default defineComponent({
 
         const maxPoints = 1_000_000;
 
-        let camera: THREE.PerspectiveCamera;
+        let container: HTMLDivElement;
+
         let scene: THREE.Scene;
+        let camera: THREE.PerspectiveCamera;
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
 
         let stats: Stats;
-
-        let container: HTMLDivElement;
 
         let points: THREE.Points;
         let pointCount = 0;
@@ -42,30 +42,38 @@ export default defineComponent({
         function init() {
             container = document.getElementById('map-container')! as HTMLDivElement;
 
+            // Scene
+            scene = new THREE.Scene();
+
+            // Camera
             const fov = 70;
             camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
             camera.position.set(0, 200, 400);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-            scene = new THREE.Scene();
-
+            // Geometry - buffer to hold all point positions
             const geometry = new THREE.BufferGeometry();
             const positions = new Float32Array(maxPoints * 3);
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setDrawRange(0, 0);
 
+            // Material
             const material = new THREE.PointsMaterial({ size: 5, color: 0x00ff00 });
 
+            // Points
             points = new THREE.Points(geometry, material);
             scene.add(points);
 
+            // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.append(renderer.domElement);
 
+            // Controls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
 
+            // Stats
             stats = Stats();
             stats.dom.style.position = 'absolute';
             container.append(stats.dom);

@@ -2,13 +2,15 @@ import math
 from collections import namedtuple
 from typing import Dict, List
 import numpy as np
+from server.core.web_socket_server import WebSocketServer
 
 Orientation = namedtuple('Orientation', ['roll', 'pitch', 'yaw'])
 Point = namedtuple('Point', ['x', 'y', 'z'])
 
 
 class MapGenerator:
-    def __init__(self):
+    def __init__(self, web_socket_server: WebSocketServer):
+        self._web_socket_server = web_socket_server
         self._last_orientations: Dict[str, Orientation] = {}
         self._last_positions: Dict[str, Point] = {}
         self._points: List[Point] = []
@@ -22,7 +24,7 @@ class MapGenerator:
     def add_range_reading(self, drone_id: str, range_reading: Dict[str, int]):
         points = self._calculate_points(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
         print(f'Points detected by drone {drone_id}: {points}')
-        # TODO: Forward to server
+        self._web_socket_server.send_message('map-points', points)
 
     def _calculate_points(self, last_orientation: Orientation, last_position: Point, range_reading: Dict[str, int]) -> List[Point]:
         IS_DOWN_SENSOR_PLOTTING_ENABLED = False

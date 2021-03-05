@@ -12,8 +12,8 @@ logging.basicConfig(level=logging.ERROR)
 class Server:
     def __init__(self, is_argos_simulation, enable_debug_driver=False):
         self._is_argos_simulation = is_argos_simulation
-        self._map_generator = MapGenerator()
         self._web_socket_server = WebSocketServer()
+        self._map_generator = MapGenerator(self._web_socket_server)
         self._crazyflie_manager = CrazyflieManager(self._web_socket_server, self._map_generator,
                                                    enable_debug_driver) if not is_argos_simulation else None
         self._argos_manager = ArgosManager(self._web_socket_server, self._map_generator) if is_argos_simulation else None

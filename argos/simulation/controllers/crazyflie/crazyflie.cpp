@@ -193,7 +193,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
         rangeLog.emplace(rangeLogNames[index], static_cast<std::uint16_t>(rangeData));
     }
     // TODO: Find sensor to get range.up value
-    rangeLog.emplace("range.up", static_cast<std::uint16_t>(0));
+    rangeLog.emplace("range.up", obstacleTooFar);
     // TODO: Find sensor to get range.zrange value
     rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
     logDataMap.emplace("Range", rangeLog);

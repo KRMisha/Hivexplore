@@ -38,7 +38,8 @@ export default defineComponent({
                 intervalId = undefined;
             }
 
-            addPoint([(Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300]);
+            const cubeWidth = 300;
+            addPoint([(Math.random() - 0.5) * cubeWidth, (Math.random() - 0.5) * cubeWidth, (Math.random() - 0.5) * cubeWidth]);
         }
 
         function onWindowResize() {
@@ -51,7 +52,8 @@ export default defineComponent({
         function init() {
             container = document.getElementById('map-container')! as HTMLDivElement;
 
-            camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.1, 2000);
+            const fov = 70;
+            camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
             camera.position.set(0, 200, 400);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 

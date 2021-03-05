@@ -41,8 +41,8 @@ void CCrazyflieController::ControlStep() {
 
     // The obstacle detection threshold (similar to the logic found in the drone firmware) is smaller than the map edge rotation
     // detection threshold to avoid conflicts between the obstacle/drone collision avoidance and the exploration logic
-    static constexpr uint16_t obstacleDetectedThreshold = 600;
-    static constexpr uint16_t edgeDetectedThreshold = 1200;
+    static constexpr std::uint16_t obstacleDetectedThreshold = 600;
+    static constexpr std::uint16_t edgeDetectedThreshold = 1200;
     bool shouldAvoid = std::any_of(sensorReadings.begin(), sensorReadings.end(), [](const auto& reading) {
         return reading.second <= obstacleDetectedThreshold;
     });
@@ -83,7 +83,7 @@ void CCrazyflieController::ControlStep() {
         }
     }
 
-    static constexpr float distanceToRssiMultiplier = 5.0;
+    static constexpr double distanceToRssiMultiplier = 5.0;
     CVector3 dronePosition = m_pcPos->GetReading().Position;
     // Consider (0, 0, 0) as the base
     double distanceToBase =
@@ -203,6 +203,7 @@ void CCrazyflieController::ControlStep() {
         }
     } break;
     }
+
     m_previousPosition = m_pcPos->GetReading().Position;
 }
 

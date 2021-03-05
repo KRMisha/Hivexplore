@@ -28,8 +28,6 @@ void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
 
     // Sensor reading constants
-    static constexpr std::int8_t sensorSaturated = -1;
-    static constexpr std::int8_t sensorEmpty = -2;
     static constexpr std::uint8_t obstacleTooClose = 0;
     static constexpr std::uint16_t obstacleTooFar = 4000;
 
@@ -40,6 +38,8 @@ void CCrazyflieController::ControlStep() {
     for (auto it = distanceReadings.begin(); it != distanceReadings.end(); ++it) {
         std::size_t index = std::distance(distanceReadings.begin(), it);
         Real rangeData = it->second;
+        static constexpr std::int8_t sensorSaturated = -1;
+        static constexpr std::int8_t sensorEmpty = -2;
         if (rangeData == sensorSaturated) {
             rangeData = obstacleTooClose;
         } else if (rangeData == sensorEmpty) {
@@ -83,7 +83,7 @@ void CCrazyflieController::ControlStep() {
                 : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["back"]) * avoidanceSensitivity;
         const auto positionCorrection =
             CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
-        static const double correctionEpsilon = 0.02;
+        static constexpr double correctionEpsilon = 0.02;
         m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0 : positionCorrection.Length();
 
         // Avoid negligible corrections
@@ -95,7 +95,7 @@ void CCrazyflieController::ControlStep() {
             // Y: Back, -Y: Forward, X: Left, -X: Right
             const auto positionCorrection =
                 CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
-            static const double correctionEpsilon = 0.015;
+            static constexpr double correctionEpsilon = 0.015;
             m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0 : positionCorrection.Length();
             m_pcPropellers->SetRelativePosition(positionCorrection);
             m_isAvoidObstacleCommandFinished = false;
@@ -110,12 +110,14 @@ void CCrazyflieController::ControlStep() {
     case DroneState::AvoidObstacle: {
         static constexpr double distanceCorrectionEpsilon = 0.015;
         if ((m_pcPos->GetReading().Position - m_obstacleDetectedPosition).Length() >= m_correctionDistance - distanceCorrectionEpsilon) {
-            m_currentState = m_stateOnHold;
             m_isAvoidObstacleCommandFinished = true;
+            // Reset all states to avoid problems problems when going back to a state
             m_isLiftoffCommandFinished = true;
             m_isForwardCommandFinished = true;
             m_isBrakeCommandFinished = true;
             m_isRotateCommandFinished = true;
+            m_isEmergencyLandingFinished = true;
+            m_currentState = m_stateOnHold;
         }
     } break;
     case DroneState::Liftoff: {
@@ -203,8 +205,8 @@ void CCrazyflieController::ControlStep() {
             m_isEmergencyLandingFinished = false;
         }
 
-        static const double landingAltitude = 0.015;
-        static const double landingAltitudeEpsilon = 0.0001;
+        static constexpr double landingAltitude = 0.015;
+        static constexpr double landingAltitudeEpsilon = 0.0001;
         if (currentPosition.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));

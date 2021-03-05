@@ -154,7 +154,8 @@ void CCrazyflieController::ControlStep() {
             m_isForwardCommandFinished = true;
         }
         // If we finished traveling the exploration step
-        else if ((m_pcPos->GetReading().Position - m_forwardCommandReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
+        else if ((m_pcPos->GetReading().Position - m_forwardCommandReferencePosition).Length() >=
+                 distanceToTravel - distanceToTravelEpsilon) {
             m_isForwardCommandFinished = true;
         }
     } break;

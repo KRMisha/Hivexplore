@@ -50,7 +50,7 @@ private:
     CVector3 m_currentVelocity;
     std::uint8_t m_rssiReading = 0;
 
-    // To avoid having multiple state to simulate drone control, we use bools within the
+    // To avoid having multiple states to simulate drone control, we use bools within the
     // states to wait for movement commands to finish before executing a new command
 
     // Obstacle avoidance variables

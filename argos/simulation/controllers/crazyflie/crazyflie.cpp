@@ -48,8 +48,7 @@ void CCrazyflieController::ControlStep() {
         } else if (rangeData == sensorEmpty) {
             rangeData = obstacleTooFar;
         } else {
-            // Convert cm to mm to reflect multiranger deck
-            rangeData *= 10;
+            rangeData *= 10; // Convert cm to mm to reflect multiranger deck
         }
         static const std::array<std::string, 4> sensorDirection = {"front", "left", "back", "right"};
         sensorReadings.emplace(sensorDirection[index], rangeData);

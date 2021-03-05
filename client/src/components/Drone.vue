@@ -6,8 +6,8 @@
         <template #content>
             <div class="card-container">
                 <div class="item-container">
-                    <h4>Velocity 🐝</h4>
-                    <Knob v-model="velocity" readonly :size="128" />
+                    <h4>Velocity (m/s) 🐝</h4>
+                    <Knob v-model="velocity" readonly :size="128" :max="5" />
                 </div>
                 <div class="item-container middle-container">
                     <div class="item-container">

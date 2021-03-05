@@ -1,6 +1,7 @@
 #include "crazyflie.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <type_traits>
 #include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
@@ -97,6 +98,13 @@ void CCrazyflieController::ControlStep() {
             m_isAvoidObstacleCommandFinished = false;
         }
     }
+
+    static constexpr float distanceToRssiMultiplier = 5.0;
+    CVector3 dronePosition = m_pcPos->GetReading().Position;
+    // Consider (0, 0, 0) as the base
+    double distanceToBase =
+        std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
+    m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 
     switch (m_currentState) {
     case DroneState::Idle: {
@@ -250,7 +258,12 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
     logDataMap.emplace("Position", positionLog);
 
-    // TODO: Add velocity
+    // Velocity group
+    decltype(logDataMap)::mapped_type velocityLog;
+    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_currentVelocity.GetX()));
+    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_currentVelocity.GetY()));
+    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_currentVelocity.GetZ()));
+    logDataMap.emplace("Velocity", velocityLog);
 
     // Range group
     CCI_CrazyflieDistanceScannerSensor::TReadingsMap distanceReadings = m_pcDistance->GetReadingsMap();
@@ -279,6 +292,11 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     // TODO: Find sensor to get range.zrange value
     rangeLog.emplace("range.zrange", static_cast<std::uint16_t>(position.GetZ() * 1000));
     logDataMap.emplace("Range", rangeLog);
+
+    // RSSI group
+    decltype(logDataMap)::mapped_type rssiLog;
+    rssiLog.emplace("radio.rssi", m_rssiReading);
+    logDataMap.emplace("Rssi", rssiLog);
 
     return logDataMap;
 }

@@ -59,12 +59,12 @@ void CCrazyflieController::ControlStep() {
     // detection threshold to avoid conflicts between drone collision avoidance and turn on map edge detection.
     static constexpr uint16_t obstacleDetectedThreshold = 600;
     static constexpr uint16_t edgeDetectedThreshold = 1200;
-    bool shouldAvoid = std::any_of(sensorReadings.begin(), sensorReadings.end(),
-        [](std::pair<std::string, float> reading){ return reading.second <= obstacleDetectedThreshold; });
+    bool shouldAvoid = std::any_of(sensorReadings.begin(), sensorReadings.end(), [](const auto& reading) {
+        return reading.second <= obstacleDetectedThreshold;
+    });
 
-
-    if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff
-        && m_currentState != DroneState::Idle) {
+    if (shouldAvoid && m_currentState != DroneState::AvoidObstacle && m_currentState != DroneState::Liftoff &&
+        m_currentState != DroneState::Idle) {
         static constexpr double maximumVelocity = 1.0;
         static constexpr double milimitersToMeterFactor = 1000;
         static constexpr double avoidanceSensitivity = maximumVelocity / milimitersToMeterFactor;

@@ -99,6 +99,7 @@ void CCrazyflieController::ControlStep() {
         static constexpr double distanceCorrectionEpsilon = 0.015;
         if ((m_pcPos->GetReading().Position - m_obstacleDetectedPosition).Length() >= m_correctionDistance - distanceCorrectionEpsilon) {
             m_isAvoidObstacleCommandFinished = true;
+
             // Reset all states to avoid problems problems when going back to a state
             m_isLiftoffCommandFinished = true;
             m_isForwardCommandFinished = true;

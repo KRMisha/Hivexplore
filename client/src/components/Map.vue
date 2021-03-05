@@ -73,11 +73,18 @@ export default defineComponent({
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
 
+            // Helpers
+            const axesHelper = new THREE.AxesHelper(25);
+            scene.add(axesHelper);
+            const gridHelper = new THREE.GridHelper(125, 10);
+            scene.add(gridHelper);
+
             // Stats
             stats = Stats();
             stats.dom.style.position = 'absolute';
             container.append(stats.dom);
 
+            // Resize canvas on window resize
             window.addEventListener('resize', onWindowResize);
         }
 

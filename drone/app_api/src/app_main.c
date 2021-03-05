@@ -122,10 +122,10 @@ void appMain(void) {
 
         uint8_t rssiReading = logGetUint(rssiId);
 
-        float targetForwardVelocity = 0;
-        float targetLeftVelocity = 0;
-        float targetHeight = 0;
-        float targetYawRate = 0;
+        float targetForwardVelocity = 0.0;
+        float targetLeftVelocity = 0.0;
+        float targetHeight = 0.0;
+        float targetYawRate = 0.0;
 
         // Global obstacle avoidance
         if (currentState == LIFTOFF || currentState == EXPLORE || currentState == ROTATE || currentState == LAND) {

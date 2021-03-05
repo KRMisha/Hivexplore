@@ -60,7 +60,7 @@ private:
     bool m_isAvoidObstacleCommandFinished = true;
     DroneState m_stateOnHold = DroneState::Idle;
     CVector3 m_obstacleDetectedPosition;
-    double m_correctionDistance = 0;
+    double m_correctionDistance = 0.0;
 
     // Liftoff variables
     bool m_isLiftoffCommandFinished = true;

@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
-import SocketClient from './../classes/socket-client';
+import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
     name: 'Drone',

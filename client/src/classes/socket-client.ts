@@ -1,6 +1,6 @@
 const serverUrl = 'ws:localhost:5678';
 
-export default class SocketClient {
+export class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

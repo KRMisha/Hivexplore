@@ -9,7 +9,7 @@ import { defineComponent, inject, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import SocketClient from '@/classes/socket-client';
+import { SocketClient } from '@/classes/socket-client';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 

@@ -22,9 +22,9 @@
 
 <script lang="ts">
 import { defineComponent, onUnmounted, provide, ref } from 'vue';
-import Drone from './components/Drone.vue';
-import Map from './components/Map.vue';
-import SocketClient from './classes/socket-client';
+import Drone from '@/components/Drone.vue';
+import Map from '@/components/Map.vue';
+import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
     name: 'App',

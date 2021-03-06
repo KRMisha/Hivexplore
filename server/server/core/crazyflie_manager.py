@@ -66,7 +66,6 @@ class CrazyflieManager:
         # Log config setup with the logged variables and success/error logging callbacks
         POLLING_PERIOD_MS = 1000
 
-        # TODO: Add log config for velocity (from state estimate group)
         log_configs = [
             {
                 'log_config': LogConfig(name='BatteryLevel', period_in_ms=POLLING_PERIOD_MS),

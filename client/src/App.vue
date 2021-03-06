@@ -6,12 +6,12 @@
                 label="Start mission"
                 class="left-button"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Standby"
-                @click="setMissionState(MissionState.Mission)"
+                @click="setMissionState(MissionState.Exploring)"
             />
             <Button
                 label="Return to base"
                 class="p-button-info"
-                :disabled="droneIds.length === 0 || missionState !== MissionState.Mission"
+                :disabled="droneIds.length === 0 || missionState !== MissionState.Exploring"
                 @click="setMissionState(MissionState.Returning)"
             />
         </div>

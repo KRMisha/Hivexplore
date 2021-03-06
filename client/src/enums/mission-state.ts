@@ -1,5 +1,5 @@
 export enum MissionState {
     Standby = 'Standby',
-    Mission = 'Mission',
+    Exploring = 'Exploring',
     Returning = 'Returning',
 }

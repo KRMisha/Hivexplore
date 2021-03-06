@@ -29,8 +29,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { inject, computed } from 'vue';
+import { computed, defineComponent, inject, ref } from 'vue';
 import SocketClient from './../classes/socket-client';
 
 export default defineComponent({
@@ -39,30 +38,30 @@ export default defineComponent({
         droneId: String,
     },
     setup(props) {
-        const socket: SocketClient | undefined = inject('socket');
+        const socketClient: SocketClient | undefined = inject('socketClient');
 
         const batteryLevel = ref(0);
-        socket!.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
+        socketClient!.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
             batteryLevel.value = newBatteryLevel;
         });
 
-        const velocity = ref(0); // TODO: Send message on server
-        socket!.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
+        const velocity = ref(0);
+        socketClient!.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
         });
 
         const droneState = ref('Standby'); // TODO: Send message on server
-        socket!.bindDroneMessage('drone-state', props.droneId!, (newDroneState: string) => {
+        socketClient!.bindDroneMessage('drone-state', props.droneId!, (newDroneState: string) => {
             droneState.value = newDroneState;
         });
 
         const isLedOn = ref(false);
-        socket!.bindDroneMessage('set-led', props.droneId!, (newIsLedOn: boolean) => {
+        socketClient!.bindDroneMessage('set-led', props.droneId!, (newIsLedOn: boolean) => {
             isLedOn.value = newIsLedOn;
         });
 
         function changeLedStatus() {
-            socket!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
+            socketClient!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
         }
 
         const droneStateColor = computed((): string | undefined => {

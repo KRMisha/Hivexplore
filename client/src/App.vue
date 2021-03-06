@@ -21,11 +21,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted } from 'vue';
+import { defineComponent, onUnmounted, provide, ref } from 'vue';
 import Drone from './components/Drone.vue';
 import Map from './components/Map.vue';
 import SocketClient from './classes/socket-client';
-import { provide, ref } from 'vue';
 
 export default defineComponent({
     name: 'App',
@@ -34,22 +33,22 @@ export default defineComponent({
         Map,
     },
     setup() {
-        const socket = new SocketClient();
-        const droneIds = ref<Array<string>>([]);
+        const socketClient = new SocketClient();
+        const droneIds = ref<string[]>([]);
 
-        socket.bindMessage('drone-ids', (newDroneIds: Array<string>) => {
+        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 
-        const missionState = ref('Standby');
-        socket!.bindMessage('state', (newMissionState: string) => {
+        const missionState = ref('Standby'); // TODO: Send message on server
+        socketClient!.bindMessage('state', (newMissionState: string) => {
             missionState.value = newMissionState;
         });
 
-        provide('socket', socket);
+        provide('socketClient', socketClient);
 
         onUnmounted(() => {
-            socket.close();
+            socketClient.close();
         });
 
         return {

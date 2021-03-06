@@ -2,8 +2,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <type_traits>
-#include <unordered_map>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"
@@ -85,9 +83,9 @@ void CCrazyflieController::ControlStep() {
         }
     }
 
+    // Simulate RSSI, considering (0, 0, 0) as the base
     static constexpr double distanceToRssiMultiplier = 5.0;
     CVector3 dronePosition = m_pcPos->GetReading().Position;
-    // Consider (0, 0, 0) as the base
     double distanceToBase =
         std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
@@ -221,52 +219,51 @@ void CCrazyflieController::Destroy() {
 
 // Returns an unordered_map. The key is the log config name and the value is
 // an unordered_map that contains the log variables' names and their values
-std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> CCrazyflieController::
-    GetLogData() const {
+CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     // Fill map progressively
-    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> logDataMap;
+    LogConfigs logDataMap;
 
     // BatteryLevel group
-    decltype(logDataMap)::mapped_type batteryLevelLog;
+    LogVariableMap batteryLevelLog;
     batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
-    logDataMap.emplace("BatteryLevel", batteryLevelLog);
+    logDataMap.emplace_back("BatteryLevel", batteryLevelLog);
 
     // Orientation group
     CRadians angleRadians;
     CVector3 vector;
     m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
     Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
-    decltype(logDataMap)::mapped_type orientationLog;
+    LogVariableMap orientationLog;
     orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
     orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
-    logDataMap.emplace("Orientation", orientationLog);
+    logDataMap.emplace_back("Orientation", orientationLog);
 
     // Position group
     CVector3 position = m_pcPos->GetReading().Position;
-    decltype(logDataMap)::mapped_type positionLog;
+    LogVariableMap positionLog;
     positionLog.emplace("stateEstimate.x", static_cast<float>(position.GetX()));
     positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
-    logDataMap.emplace("Position", positionLog);
+    logDataMap.emplace_back("Position", positionLog);
 
     // Velocity group
-    decltype(logDataMap)::mapped_type velocityLog;
+    LogVariableMap velocityLog;
     velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_currentVelocity.GetX()));
     velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_currentVelocity.GetY()));
     velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_currentVelocity.GetZ()));
-    logDataMap.emplace("Velocity", velocityLog);
+    logDataMap.emplace_back("Velocity", velocityLog);
 
-    // Range group
+    // Range group - must be added after orientation and position
     static const std::array<std::string, 6> rangeLogNames =
         {"range.front", "range.left", "range.back", "range.right", "range.up", "range.zrange"};
-    decltype(logDataMap)::mapped_type rangeLog = GetSensorReadings<std::uint16_t, decltype(rangeLog)::mapped_type>(rangeLogNames);
-    logDataMap.emplace("Range", rangeLog);
+    LogVariableMap rangeLog = GetSensorReadings<std::uint16_t, LogVariableMap::mapped_type>(rangeLogNames);
+    logDataMap.emplace_back("Range", rangeLog);
 
     // RSSI group
-    decltype(logDataMap)::mapped_type rssiLog;
+    LogVariableMap rssiLog;
     rssiLog.emplace("radio.rssi", m_rssiReading);
-    logDataMap.emplace("Rssi", rssiLog);
+    logDataMap.emplace_back("Rssi", rssiLog);
 
     return logDataMap;
 }
@@ -303,7 +300,7 @@ std::unordered_map<std::string, U> CCrazyflieController::GetSensorReadings(const
     }
 
     // TODO: Find sensor to get range.up value
-    sensorReadings.emplace(sensorNames[4], static_cast<T>(0));
+    sensorReadings.emplace(sensorNames[4], static_cast<T>(obstacleTooFar));
     // TODO: Find sensor to get range.zrange value
     sensorReadings.emplace(sensorNames[5], static_cast<T>(m_pcPos->GetReading().Position.GetZ() * meterToMillimeterFactor));
 
@@ -313,7 +310,7 @@ std::unordered_map<std::string, U> CCrazyflieController::GetSensorReadings(const
 template std::unordered_map<std::string, float> CCrazyflieController::GetSensorReadings<float>(
     const std::array<std::string, 6>& sensorNames) const;
 
-template std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>> CCrazyflieController::GetSensorReadings<
-    std::uint16_t>(const std::array<std::string, 6>& sensorNames) const;
+template CCrazyflieController::LogVariableMap CCrazyflieController::GetSensorReadings<std::uint16_t>(
+    const std::array<std::string, 6>& sensorNames) const;
 
 REGISTER_CONTROLLER(CCrazyflieController, "crazyflie_controller")

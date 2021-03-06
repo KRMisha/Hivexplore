@@ -206,7 +206,7 @@ void CCrazyflieController::ControlStep() {
             m_isEmergencyLandingFinished = true;
         }
     } break;
-    case DroneState::ReturnToBase: {
+    case DroneState::Returning: {
         static constexpr double targetDroneHeightAboveObstacles = 2.5;
         static constexpr double targetDroneLandHeight = 0.05;
         static constexpr double targetDroneHeightEpsilon = 0.05;

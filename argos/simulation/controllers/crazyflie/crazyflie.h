@@ -23,7 +23,7 @@ enum class DroneState {
     Brake,
     Rotate,
     Land,
-    ReturnToBase,
+    Returning,
 };
 
 enum class ReturningState {

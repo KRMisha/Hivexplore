@@ -52,6 +52,7 @@ private:
     void Return();
 
     void UpdateCurrentVelocity();
+    void UpdateRssi();
 
     template<typename T, typename U = T>
     std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;

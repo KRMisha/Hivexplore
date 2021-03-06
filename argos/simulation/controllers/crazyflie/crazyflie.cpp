@@ -33,6 +33,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
+    UpdateRssi();
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -167,13 +168,6 @@ void CCrazyflieController::Explore() {
         }
     }
 
-    // Simulate RSSI, considering (0, 0, 0) as the base
-    static constexpr double distanceToRssiMultiplier = 5.0;
-    CVector3 dronePosition = m_pcPos->GetReading().Position;
-    double distanceToBase =
-        std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
-    m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
-
     switch (m_exploringState) {
     case ExploringState::Idle: {
         m_initialPosition = m_pcPos->GetReading().Position;
@@ -298,6 +292,15 @@ void CCrazyflieController::Return() {
 
 void CCrazyflieController::UpdateCurrentVelocity() {
     m_velocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
+}
+
+void CCrazyflieController::UpdateRssi() {
+    // Simulate RSSI, considering (0, 0, 0) as the base
+    static constexpr double distanceToRssiMultiplier = 5.0;
+    CVector3 dronePosition = m_pcPos->GetReading().Position;
+    double distanceToBase =
+        std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
+    m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 }
 
 template<typename T, typename U = T>

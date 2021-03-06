@@ -48,7 +48,7 @@ export default defineComponent({
             // Camera
             const fov = 70;
             camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
-            camera.position.set(0, 100, 60);
+            camera.position.set(0, 10, 6);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Geometry - buffer to hold all point positions
@@ -58,7 +58,7 @@ export default defineComponent({
             geometry.setDrawRange(0, 0);
 
             // Material
-            const material = new THREE.PointsMaterial({ size: 5, color: 0x00ff00 });
+            const material = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 });
 
             // Points
             points = new THREE.Points(geometry, material);
@@ -74,9 +74,9 @@ export default defineComponent({
             controls.enableDamping = true;
 
             // Helpers
-            const axesHelper = new THREE.AxesHelper(25);
+            const axesHelper = new THREE.AxesHelper(2);
             scene.add(axesHelper);
-            const gridHelper = new THREE.GridHelper(125, 10);
+            const gridHelper = new THREE.GridHelper(16, 16);
             scene.add(gridHelper);
 
             // Stats
@@ -106,12 +106,9 @@ export default defineComponent({
 
         socketClient!.bindMessage('map-points', (points: [number, number, number][]) => {
             for (const point of points) {
-                const coordinateScaleFactor = 10;
-                const scaledPoint = point.map(x => x * coordinateScaleFactor);
-
                 // Change point coordinates to match three.js coordinate system
                 // X: Right, Y: Up, Z: Out (towards user)
-                addPoint([scaledPoint[0], scaledPoint[2], scaledPoint[1]]);
+                addPoint([point[0], point[2], point[1]]);
             }
         });
 

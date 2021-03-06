@@ -22,11 +22,11 @@ class MapGenerator:
         self._last_positions[drone_id] = position
 
     def add_range_reading(self, drone_id: str, range_reading: Dict[str, int]):
-        points = self._calculate_points(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
+        points = self._calculate_points_from_readings(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
         print(f'Points detected by drone {drone_id}: {points}')
         self._web_socket_server.send_message('map-points', points)
 
-    def _calculate_points(self, last_orientation: Orientation, last_position: Point, range_reading: Dict[str, int]) -> List[Point]:
+    def _calculate_points_from_readings(self, last_orientation: Orientation, last_position: Point, range_reading: Dict[str, int]) -> List[Point]:
         IS_DOWN_SENSOR_PLOTTING_ENABLED = False
         SENSOR_THRESHOLD = 2000
         METER_TO_MILLIMETER_FACTOR = 1000
@@ -93,23 +93,23 @@ class MapGenerator:
         sin_pitch = math.sin(math.radians(orientation.pitch))
         sin_yaw = math.sin(math.radians(orientation.yaw))
 
-        rotation_yaw = np.array([
+        yaw_rotation = np.array([
             [cos_yaw, -sin_yaw, 0],
             [sin_yaw, cos_yaw, 0],
             [0, 0, 1],
         ])
-        rotation_pitch = np.array([
+        pitch_rotation = np.array([
             [cos_pitch, 0, sin_pitch],
             [0, 1, 0],
             [-sin_pitch, 0, cos_pitch],
         ])
-        rotation_roll = np.array([
+        roll_rotation = np.array([
             [1, 0, 0],
             [0, cos_roll, -sin_roll],
             [0, sin_roll, cos_roll],
         ])
 
-        rotation_matrix = np.array(rotation_yaw @ rotation_pitch @ rotation_roll)
+        rotation_matrix = np.array(yaw_rotation @ pitch_rotation @ roll_rotation)
 
         rotated_point = (rotation_matrix @ (np.subtract(point, origin))) + origin
 

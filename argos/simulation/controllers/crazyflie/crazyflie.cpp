@@ -34,17 +34,16 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
 
-    switch(m_missionState) {
-        case MissionState::Standby:
-            break;
-        case MissionState::Exploring:
-            Explore();
-            break;
-        case MissionState::Returning:
-            Return();
-            break;
+    switch (m_missionState) {
+    case MissionState::Standby:
+        break;
+    case MissionState::Exploring:
+        Explore();
+        break;
+    case MissionState::Returning:
+        Return();
+        break;
     }
-
 
     m_previousPosition = m_pcPos->GetReading().Position;
 }

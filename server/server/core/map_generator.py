@@ -93,23 +93,23 @@ class MapGenerator:
         sin_pitch = math.sin(math.radians(orientation.pitch))
         sin_yaw = math.sin(math.radians(orientation.yaw))
 
-        rotation_yaw = np.array([
+        yaw_rotation = np.array([
             [cos_yaw, -sin_yaw, 0],
             [sin_yaw, cos_yaw, 0],
             [0, 0, 1],
         ])
-        rotation_pitch = np.array([
+        pitch_rotation = np.array([
             [cos_pitch, 0, sin_pitch],
             [0, 1, 0],
             [-sin_pitch, 0, cos_pitch],
         ])
-        rotation_roll = np.array([
+        roll_rotation = np.array([
             [1, 0, 0],
             [0, cos_roll, -sin_roll],
             [0, sin_roll, cos_roll],
         ])
 
-        rotation_matrix = np.array(rotation_yaw @ rotation_pitch @ rotation_roll)
+        rotation_matrix = np.array(yaw_rotation @ pitch_rotation @ roll_rotation)
 
         rotated_point = (rotation_matrix @ (np.subtract(point, origin))) + origin
 

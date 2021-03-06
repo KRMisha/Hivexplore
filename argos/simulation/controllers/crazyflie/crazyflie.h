@@ -54,7 +54,7 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
-    DroneState m_currentState = DroneState::Idle;
+    DroneState m_droneState = DroneState::Idle;
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
     CVector3 m_currentVelocity;

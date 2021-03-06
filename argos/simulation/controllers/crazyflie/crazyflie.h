@@ -73,6 +73,8 @@ private:
 
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
+    ReturningState m_returningState = ReturningState::Return;
+
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
     CVector3 m_velocity;
@@ -105,9 +107,6 @@ private:
     // Emergency landing variables
     bool m_isEmergencyLandingFinished = true;
     CVector3 m_emergencyLandingPosition;
-
-    // Returning state variables
-    ReturningState m_returningState = ReturningState::Return;
 };
 
 #endif

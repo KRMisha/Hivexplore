@@ -283,7 +283,7 @@ void CCrazyflieController::Explore() {
             m_isEmergencyLandingFinished = true;
         }
     } break;
-    case DroneState::Returning: {
+    case ExploringState::Returning: {
         static constexpr double targetDroneHeightAboveObstacles = 2.5;
         static constexpr double targetDroneLandHeight = 0.05;
         static constexpr double targetDroneHeightEpsilon = 0.05;
@@ -305,7 +305,7 @@ void CCrazyflieController::Explore() {
                 m_returningState = ReturningState::Idle;
             }
             break;
-        // TODO: Go back to DroneState::Idle
+        // TODO: Go back to ExploringState::Idle
         case ReturningState::Idle:
             break;
         }

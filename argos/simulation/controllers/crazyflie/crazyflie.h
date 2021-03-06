@@ -12,8 +12,10 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_actuator.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_battery_sensor.h>
+#include "libs/json.hpp"
 
 using namespace argos;
+using json = nlohmann::json;
 
 enum class DroneState {
     Idle,
@@ -37,7 +39,7 @@ public:
     virtual void Destroy() override;
 
     LogConfigs GetLogData() const;
-    void SetParamData(const std::string& param, std::variant<bool> value);
+    void SetParamData(const std::string& param, json value);
 
 private:
     void UpdateCurrentVelocity();

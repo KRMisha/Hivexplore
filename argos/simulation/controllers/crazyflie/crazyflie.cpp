@@ -268,10 +268,14 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     return logDataMap;
 }
 
-void CCrazyflieController::SetParamData(const std::string& param, std::variant<bool> value) {
-    if (param == "hivexplore.isM1LedOn") {
+void CCrazyflieController::SetParamData(const std::string& param, json value) {
+    if (param == "hivexplore.missionState") {
+        // TODO
+    } else if (param == "hivexplore.isM1LedOn") {
         // Print LED state since simulated Crazyflie doesn't have LEDs
-        RLOG << "LED changed: " << std::get<bool>(value) << '\n';
+        RLOG << "LED changed: " << value.get<bool>() << '\n';
+    } else {
+        RLOG << "Unknown param: " << param << '\n';
     }
 }
 

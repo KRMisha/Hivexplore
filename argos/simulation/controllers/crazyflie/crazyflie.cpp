@@ -166,7 +166,6 @@ void CCrazyflieController::ControlStep() {
         m_brakingReferencePosition = m_pcPos->GetReading().Position;
     } break;
     case DroneState::Rotate: {
-
         // Get current yaw
         CRadians currentYaw;
         CVector3 rotationAxis;
@@ -213,36 +212,36 @@ void CCrazyflieController::ControlStep() {
         static constexpr double targetDroneHeightEpsilon = 0.05;
         static constexpr double distanceToReturnEpsilon = 0.05;
 
-        switch (m_endCurrentState) {
+        switch (m_returningState) {
         // This case is bypassed for now because the return to base seems to be working without it
-        case ReturnToBaseState::LiftAboveObstacles:
+        case ReturningState::LiftAboveObstacles:
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneHeightAboveObstacles));
             if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeightAboveObstacles - targetDroneHeightEpsilon) {
                 RLOG << "Ready to return" << std::endl;
                 m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-                m_endCurrentState = ReturnToBaseState::Return;
+                m_returningState = ReturningState::Return;
             }
             break;
-        case ReturnToBaseState::Return:
+        case ReturningState::Return:
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));
             if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
                 std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
                 RLOG << "Ready to land" << std::endl;
                 m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-                m_endCurrentState = ReturnToBaseState::Land;
+                m_returningState = ReturningState::Land;
             }
             break;
-        case ReturnToBaseState::Land:
+        case ReturningState::Land:
             m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
             if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
                 RLOG << "DONE" << std::endl;
-                m_endCurrentState = ReturnToBaseState::Idle;
+                m_returningState = ReturningState::Idle;
             }
             break;
         // TODO: Go back to the DroneState::Idle
-        case ReturnToBaseState::Idle:
+        case ReturningState::Idle:
             break;
         }
     } break;

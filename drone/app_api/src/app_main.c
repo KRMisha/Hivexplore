@@ -53,7 +53,7 @@
 #define MIN(a, b) ((a < b) ? a : b)
 
 typedef enum { STANDBY, EXPLORING, RETURNING } mission_state_t;
-typedef enum { IDLE, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND } explore_state_t;
+typedef enum { IDLE, LIFTOFF, EXPLORE, ROTATE, LAND } explore_state_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -154,11 +154,9 @@ void appMain(void) {
 
             switch (exploreState) {
             case IDLE: {
-                DEBUG_PRINT("Startup\n");
-                exploreState = STARTUP;
+                DEBUG_PRINT("Idle\n");
                 memset(&setPoint, 0, sizeof(setpoint_t));
-            } break;
-            case STARTUP: {
+
                 // Check if any obstacle is in the way before taking off
                 if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                     DEBUG_PRINT("Liftoff\n");

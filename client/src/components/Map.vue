@@ -5,42 +5,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted } from 'vue';
+import { defineComponent, inject, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
+import SocketClient from '@/classes/socket-client';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
 export default defineComponent({
     name: 'Map',
     setup() {
+        const socketClient: SocketClient | undefined = inject('socketClient');
+
         const maxPoints = 1_000_000;
 
-        let camera: THREE.PerspectiveCamera;
+        let container: HTMLDivElement;
+
         let scene: THREE.Scene;
+        let camera: THREE.PerspectiveCamera;
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
 
         let stats: Stats;
 
-        let container: HTMLDivElement;
-
         let points: THREE.Points;
-        let positionCount = 0;
-
-        let intervalId: number | undefined; // TODO: Remove
-
-        // TODO: Remove
-        function generateMockPoints() {
-            if (positionCount >= maxPoints) {
-                clearInterval(intervalId);
-                intervalId = undefined;
-            }
-
-            const cubeWidth = 300;
-            addPoint([(Math.random() - 0.5) * cubeWidth, (Math.random() - 0.5) * cubeWidth, (Math.random() - 0.5) * cubeWidth]);
-        }
+        let pointCount = 0;
 
         function onWindowResize() {
             camera.aspect = container.clientWidth / container.clientHeight;
@@ -52,39 +42,50 @@ export default defineComponent({
         function init() {
             container = document.getElementById('map-container')! as HTMLDivElement;
 
-            const fov = 70;
-            camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
-            camera.position.set(0, 200, 400);
-            camera.lookAt(new THREE.Vector3(0, 0, 0));
-
+            // Scene
             scene = new THREE.Scene();
 
+            // Camera
+            const fov = 70;
+            camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
+            camera.position.set(0, 10, 6);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+            // Geometry - buffer to hold all point positions
             const geometry = new THREE.BufferGeometry();
             const positions = new Float32Array(maxPoints * 3);
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setDrawRange(0, 0);
 
-            const material = new THREE.PointsMaterial({ size: 5, color: 0x00ff00 });
+            // Material
+            const material = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 });
 
+            // Points
             points = new THREE.Points(geometry, material);
             scene.add(points);
 
+            // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.append(renderer.domElement);
 
+            // Controls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
 
+            // Helpers
+            const axesHelper = new THREE.AxesHelper(2);
+            scene.add(axesHelper);
+            const gridHelper = new THREE.GridHelper(16, 16);
+            scene.add(gridHelper);
+
+            // Stats
             stats = Stats();
             stats.dom.style.position = 'absolute';
             container.append(stats.dom);
 
+            // Resize canvas on window resize
             window.addEventListener('resize', onWindowResize);
-
-            // TODO: Remove
-            intervalId = setInterval(() => {
-                generateMockPoints();
-            }, 5);
         }
 
         function animate() {
@@ -95,14 +96,21 @@ export default defineComponent({
             stats.update();
         }
 
-        // TODO: Bind this to server message
         function addPoint(point: [number, number, number]) {
-            points.geometry.attributes.position.setXYZ(positionCount, ...point);
-            positionCount += 3;
+            points.geometry.attributes.position.setXYZ(pointCount, ...point);
+            pointCount++;
 
-            points.geometry.setDrawRange(0, positionCount);
+            points.geometry.setDrawRange(0, pointCount);
             points.geometry.attributes.position.needsUpdate = true;
         }
+
+        socketClient!.bindMessage('map-points', (points: [number, number, number][]) => {
+            for (const point of points) {
+                // Change point coordinates to match three.js coordinate system
+                // X: Right, Y: Up, Z: Out (towards user)
+                addPoint([point[0], point[2], point[1]]);
+            }
+        });
 
         onMounted(() => {
             init();

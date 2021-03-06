@@ -2,6 +2,7 @@
 #define CRAZYFLIE_H
 
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <string>
 #include <argos3/core/control_interface/ci_controller.h>
@@ -34,12 +35,16 @@ enum class ReturnToBaseState {
 
 class CCrazyflieController : public CCI_Controller {
 public:
+    // Use vector of pairs to preserve insertion order (required to receive orientation and position data before range data for mapping)
+    using LogVariableMap = std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>;
+    using LogConfigs = std::vector<std::pair<std::string, LogVariableMap>>;
+
     virtual void Init(TConfigurationNode& t_node) override;
     virtual void ControlStep() override;
     virtual void Reset() override;
     virtual void Destroy() override;
 
-    std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>> GetLogData() const;
+    LogConfigs GetLogData() const;
     void SetParamData(const std::string& param, std::variant<bool> value);
 
 private:

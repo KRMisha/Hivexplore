@@ -121,6 +121,7 @@ void appMain(void) {
         uint16_t downSensorReading = logGetUint(downSensorId);
 
         uint8_t rssiReading = logGetUint(rssiId);
+        (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
 
         float targetForwardVelocity = 0.0;
         float targetLeftVelocity = 0.0;

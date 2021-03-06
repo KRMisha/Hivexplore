@@ -218,7 +218,6 @@ void CCrazyflieController::ControlStep() {
                 CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));
             if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
                 std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
-                RLOG << "Ready to land" << std::endl;
                 m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
                 m_returningState = ReturningState::Land;
             }
@@ -226,11 +225,10 @@ void CCrazyflieController::ControlStep() {
         case ReturningState::Land:
             m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
             if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
-                RLOG << "DONE" << std::endl;
                 m_returningState = ReturningState::Idle;
             }
             break;
-        // TODO: Go back to the DroneState::Idle
+        // TODO: Go back to DroneState::Idle
         case ReturningState::Idle:
             break;
         }

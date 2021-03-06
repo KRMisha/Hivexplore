@@ -53,7 +53,7 @@
 #define MIN(a, b) ((a < b) ? a : b)
 
 typedef enum { STANDBY, EXPLORING, RETURNING } mission_state_t;
-typedef enum { IDLE, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND, OUT_OF_SERVICE } explore_state_t;
+typedef enum { IDLE, STARTUP, LIFTOFF, EXPLORE, ROTATE, LAND } explore_state_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -95,25 +95,29 @@ void appMain(void) {
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
-    paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
-    paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
+    const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
+    const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
     explore_state_t exploreState = IDLE;
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
+    const bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
     if (!isFlowDeckInitialized) {
         DEBUG_PRINT("FlowDeckV2 is not connected\n");
-        exploreState = OUT_OF_SERVICE;
     }
     if (!isMultirangerInitialized) {
         DEBUG_PRINT("Multiranger is not connected\n");
-        exploreState = OUT_OF_SERVICE;
     }
 
     while (true) {
         vTaskDelay(M2T(10));
 
         ledSet(LED_GREEN_R, isM1LedOn);
+
+        if (isOutOfService) {
+            ledSet(LED_RED_R, true);
+            continue;
+        }
 
         switch (missionState) {
         case STANDBY:
@@ -209,10 +213,6 @@ void appMain(void) {
                     DEBUG_PRINT("Landed\n");
                     exploreState = IDLE;
                 }
-            } break;
-            case OUT_OF_SERVICE: {
-                ledSet(LED_RED_R, true);
-                memset(&setPoint, 0, sizeof(setpoint_t));
             } break;
             }
 

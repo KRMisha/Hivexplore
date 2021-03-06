@@ -23,7 +23,7 @@ enum class MissionState {
     Returning,
 };
 
-enum class DroneState {
+enum class ExploreState {
     Idle,
     AvoidObstacle,
     Liftoff,
@@ -64,7 +64,7 @@ private:
     CCI_BatterySensor* m_pcBattery = nullptr;
 
     MissionState m_missionState = MissionState::Standby;
-    DroneState m_droneState = DroneState::Idle;
+    ExploreState m_exploreState = ExploreState::Idle;
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
     CVector3 m_velocity;
@@ -75,7 +75,7 @@ private:
 
     // Obstacle avoidance variables
     bool m_isAvoidObstacleCommandFinished = true;
-    DroneState m_stateOnHold = DroneState::Idle;
+    ExploreState m_stateOnHold = ExploreState::Idle;
     CVector3 m_obstacleDetectedPosition;
     double m_correctionDistance = 0.0;
 

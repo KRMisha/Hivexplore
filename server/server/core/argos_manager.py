@@ -28,6 +28,7 @@ class ArgosManager:
 
         # Client bindings
         self._web_socket_server.bind('connect', self._new_connection_callback)
+        self._web_socket_server.bind('mission-state', self._set_mission_state)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
         await self._unix_socket_client.serve()
@@ -108,6 +109,13 @@ class ArgosManager:
 
     def _new_connection_callback(self, client_id):
         self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._drone_ids))
+
+    def _set_mission_state(self, mission_state: str):
+        print('Set mission state:', mission_state)
+        for drone_id in self._drone_ids:
+            # crazyflie.param.set_value('hivexplore.missionState', mission_state) # TODO: Check type to send
+            pass
+        self._web_socket_server.send_message('mission-state', mission_state)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if drone_id in self._drone_ids:

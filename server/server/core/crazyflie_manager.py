@@ -23,6 +23,7 @@ class CrazyflieManager:
     async def start(self):
         await self._find_crazyflies()
         self._web_socket_server.bind('connect', self._new_connection_callback)
+        self._web_socket_server.bind('mission-state', self._set_mission_state)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     async def _find_crazyflies(self):
@@ -120,6 +121,7 @@ class CrazyflieManager:
                 print(f'Could not add log configuration, error: {exc}')
 
     def _setup_param(self, crazyflie: Crazyflie):
+        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=self._param_update_callback)
         crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
 
     # Connection callbacks
@@ -216,12 +218,19 @@ class CrazyflieManager:
     # Param callbacks
 
     def _param_update_callback(self, name, value):
-        print(f'Readback: {name}={value}')
+        print(f'Param readback: {name}={value}')
 
     # Client callbacks
 
     def _new_connection_callback(self, client_id):
         self._send_drone_ids(client_id)
+
+    def _set_mission_state(self, mission_state: str):
+        print('Set mission state:', mission_state)
+        for crazyflie in self._crazyflies.values():
+            # crazyflie.param.set_value('hivexplore.missionState', mission_state) # TODO: Check type to send
+            pass
+        self._web_socket_server.send_message('mission-state', mission_state)
 
     def _set_led_enabled(self, drone_id, is_enabled: bool):
         if drone_id in self._crazyflies:

@@ -6,6 +6,7 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator, Orientation, Point
+from server.managers.mission_state import MissionState
 from server import config
 
 # pylint: disable=no-self-use
@@ -225,12 +226,17 @@ class CrazyflieManager:
     def _new_connection_callback(self, client_id):
         self._send_drone_ids(client_id)
 
-    def _set_mission_state(self, mission_state: str):
+    def _set_mission_state(self, mission_state_str: str):
+        try:
+            mission_state = MissionState[mission_state_str.upper()]
+        except KeyError:
+            print('CrazyflieManager error: Unknown mission state received:', mission_state_str)
+            return
+
         print('Set mission state:', mission_state)
         for crazyflie in self._crazyflies.values():
-            # crazyflie.param.set_value('hivexplore.missionState', mission_state) # TODO: Check type to send
-            pass
-        self._web_socket_server.send_message('mission-state', mission_state)
+            crazyflie.param.set_value('hivexplore.missionState', mission_state)
+        self._web_socket_server.send_message('mission-state', mission_state_str)
 
     def _set_led_enabled(self, drone_id, is_enabled: bool):
         if drone_id in self._crazyflies:

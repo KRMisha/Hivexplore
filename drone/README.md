@@ -10,14 +10,14 @@ The Hivexplore drone logic is contained the `app_api` directory.
     - Ubuntu 20.04+
 
         ```
-        sudo apt-get install make gcc-arm-none-eabi
+        sudo apt install gcc-arm-none-eabi
         ```
 
     - Ubuntu 16.04 & 18.04:
 
         ```
         sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
-        sudo apt-get update
+        sudo apt update
         sudo apt install gcc-arm-embedded
         ```
 

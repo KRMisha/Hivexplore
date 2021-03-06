@@ -214,38 +214,37 @@ void CCrazyflieController::ControlStep() {
     } break;
     case DroneState::ReturnToBase: {
 
-        static constexpr double targetDroneHeightAbove = 2.5;
+        static constexpr double targetDroneHeightAboveObstacles = 2.5;
+        static constexpr double targetDroneLandHeight = 0.05;
+        static constexpr double targetDroneHeightEpsilon = 0.05;
+        static constexpr double distanceToTravelEpsilon = 0.05;
+
         switch(m_endCurrentState){
         case EndMissionState::LiftAboveObstacles:
             m_pcPropellers->SetAbsolutePosition(CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneHeightAbove));
-            if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeightAbove - targetDroneHeightEpsilon){
+            if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeightAboveObstacles - targetDroneHeightEpsilon) {
                 RLOG << "Ready to return" <<  std::endl;
                 m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
                 m_endCurrentState = EndMissionState::Return;
             }
         break;
         case EndMissionState::Return:
-            RLOG << "End mission begins" <<  std::endl;
-            m_pcPropellers->SetAbsolutePosition(CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), targetDroneHeightAbove));
-        if (m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY() >= -distanceToTravelEpsilon &&
-            m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY() <= distanceToTravelEpsilon &&
-            m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX() >= -distanceToTravelEpsilon &&
-            m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX() <= distanceToTravelEpsilon) {
-            RLOG << "Ready to land" <<  std::endl;
+            m_pcPropellers->SetAbsolutePosition(CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));
+            if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToTravelEpsilon &&
+                std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToTravelEpsilon) {
+                RLOG << "Ready to land" <<  std::endl;
                 m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
                 m_endCurrentState = EndMissionState::Land;
             }
         break;
         case EndMissionState::Land:
-            m_pcPropellers->SetAbsolutePosition(CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), 0.0));
-            if (m_pcPos->GetReading().Position.GetZ() <= targetDroneHeightEpsilon){
-                m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+            m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
+            if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
                 RLOG << "DONE" <<  std::endl;
                 m_endCurrentState = EndMissionState::Idle;
             }
         break;
         case EndMissionState::Idle:
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
         break;
         }
     } break;

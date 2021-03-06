@@ -213,16 +213,6 @@ void CCrazyflieController::ControlStep() {
         static constexpr double distanceToReturnEpsilon = 0.05;
 
         switch (m_returningState) {
-        // This case is bypassed for now because the return to base seems to be working without it
-        case ReturningState::LiftAboveObstacles:
-            m_pcPropellers->SetAbsolutePosition(
-                CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneHeightAboveObstacles));
-            if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeightAboveObstacles - targetDroneHeightEpsilon) {
-                RLOG << "Ready to return" << std::endl;
-                m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-                m_returningState = ReturningState::Return;
-            }
-            break;
         case ReturningState::Return:
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));

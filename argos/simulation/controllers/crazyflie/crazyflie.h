@@ -27,7 +27,6 @@ enum class DroneState {
 };
 
 enum class ReturningState {
-    LiftAboveObstacles,
     Return,
     Land,
     Idle,

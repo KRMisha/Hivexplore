@@ -90,7 +90,7 @@ private:
     CVector3 m_emergencyLandingPosition;
 
     // Return to base variables
-    EndMissionState m_endCurrentState = EndMissionState::LiftAboveObstacles;
+    EndMissionState m_endCurrentState = EndMissionState::Return;
 };
 
 #endif

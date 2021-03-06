@@ -25,7 +25,7 @@ enum class DroneState {
     ReturnToBase,
 };
 
-enum class EndMissionState {
+enum class ReturnToBaseState {
     LiftAboveObstacles,
     Return,
     Land,
@@ -90,7 +90,7 @@ private:
     CVector3 m_emergencyLandingPosition;
 
     // Return to base variables
-    EndMissionState m_endCurrentState = EndMissionState::Return;
+    ReturnToBaseState m_endCurrentState = ReturnToBaseState::Return;
 };
 
 #endif

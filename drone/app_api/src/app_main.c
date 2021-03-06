@@ -150,10 +150,8 @@ void appMain(void) {
 
             switch (exploreState) {
             case IDLE: {
-                if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                    DEBUG_PRINT("Startup\n");
-                    exploreState = STARTUP;
-                }
+                DEBUG_PRINT("Startup\n");
+                exploreState = STARTUP;
                 memset(&setPoint, 0, sizeof(setpoint_t));
             } break;
             case STARTUP: {

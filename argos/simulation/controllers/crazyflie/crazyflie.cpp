@@ -130,8 +130,8 @@ void CCrazyflieController::Explore() {
     });
 
     // Calculate necessary correction to avoid obstacles
-    if (shouldAvoid && m_exploreState != ExploreState::AvoidObstacle && m_exploreState != ExploreState::Liftoff &&
-        m_exploreState != ExploreState::Idle) {
+    if (shouldAvoid && m_exploringState != ExploringState::AvoidObstacle && m_exploringState != ExploringState::Liftoff &&
+        m_exploringState != ExploringState::Idle) {
         static constexpr double maximumVelocity = 1.0;
         static constexpr double avoidanceSensitivity = maximumVelocity / meterToMillimeterFactor;
         double leftDistanceCorrection =
@@ -159,8 +159,8 @@ void CCrazyflieController::Explore() {
         static constexpr double correctionEpsilon = 0.02;
         m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0.0 : positionCorrection.Length();
         if (m_correctionDistance != 0.0) {
-            m_stateOnHold = m_exploreState;
-            m_exploreState = ExploreState::AvoidObstacle;
+            m_stateOnHold = m_exploringState;
+            m_exploringState = ExploringState::AvoidObstacle;
             m_obstacleDetectedPosition = m_pcPos->GetReading().Position;
             m_pcPropellers->SetRelativePosition(positionCorrection);
             m_isAvoidObstacleCommandFinished = false;
@@ -174,12 +174,12 @@ void CCrazyflieController::Explore() {
         std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 
-    switch (m_exploreState) {
-    case ExploreState::Idle: {
+    switch (m_exploringState) {
+    case ExploringState::Idle: {
         m_initialPosition = m_pcPos->GetReading().Position;
-        m_exploreState = ExploreState::Liftoff;
+        m_exploringState = ExploringState::Liftoff;
     } break;
-    case ExploreState::AvoidObstacle: {
+    case ExploringState::AvoidObstacle: {
         static constexpr double distanceCorrectionEpsilon = 0.015;
         if ((m_pcPos->GetReading().Position - m_obstacleDetectedPosition).Length() >= m_correctionDistance - distanceCorrectionEpsilon) {
             m_isAvoidObstacleCommandFinished = true;
@@ -190,10 +190,10 @@ void CCrazyflieController::Explore() {
             m_isBrakeCommandFinished = true;
             m_isRotateCommandFinished = true;
             m_isEmergencyLandingFinished = true;
-            m_exploreState = m_stateOnHold;
+            m_exploringState = m_stateOnHold;
         }
     } break;
-    case ExploreState::Liftoff: {
+    case ExploringState::Liftoff: {
         static constexpr double targetDroneHeight = 0.5;
         static constexpr double targetDroneHeightEpsilon = 0.005;
 
@@ -206,11 +206,11 @@ void CCrazyflieController::Explore() {
         // Wait for liftoff to finish
         if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-            m_exploreState = ExploreState::Explore;
+            m_exploringState = ExploringState::Explore;
             m_isLiftoffCommandFinished = true;
         }
     } break;
-    case ExploreState::Explore: {
+    case ExploringState::Explore: {
         static constexpr double distanceToTravel = 0.07;
 
         // Order exploration movement
@@ -223,7 +223,7 @@ void CCrazyflieController::Explore() {
         // Change state when a wall is detected in front of the drone
         static constexpr double distanceToTravelEpsilon = 0.005;
         if (sensorReadings["front"] <= edgeDetectedThreshold) {
-            m_exploreState = ExploreState::Brake;
+            m_exploringState = ExploringState::Brake;
             m_isForwardCommandFinished = true;
         }
         // If we finished traveling the exploration step
@@ -232,7 +232,7 @@ void CCrazyflieController::Explore() {
             m_isForwardCommandFinished = true;
         }
     } break;
-    case ExploreState::Brake: {
+    case ExploringState::Brake: {
         // Order brake
         if (m_isBrakeCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
@@ -244,12 +244,12 @@ void CCrazyflieController::Explore() {
         static constexpr double brakingAcuracyEpsilon = 0.002;
         if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-            m_exploreState = ExploreState::Rotate;
+            m_exploringState = ExploringState::Rotate;
             m_isBrakeCommandFinished = true;
         }
         m_brakingReferencePosition = m_pcPos->GetReading().Position;
     } break;
-    case ExploreState::Rotate: {
+    case ExploringState::Rotate: {
         // Get current yaw
         CRadians currentYaw;
         CVector3 rotationAxis;
@@ -267,12 +267,12 @@ void CCrazyflieController::Explore() {
         // Wait for rotation to finish
         if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
             if (sensorReadings["front"] > edgeDetectedThreshold) {
-                m_exploreState = ExploreState::Explore;
+                m_exploringState = ExploringState::Explore;
             }
             m_isRotateCommandFinished = true;
         }
     } break;
-    case ExploreState::Land: {
+    case ExploringState::Land: {
         if (m_isEmergencyLandingFinished) {
             m_emergencyLandingPosition = m_pcPos->GetReading().Position;
             m_isEmergencyLandingFinished = false;
@@ -285,7 +285,7 @@ void CCrazyflieController::Explore() {
         if (m_pcPos->GetReading().Position.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));
-            m_exploreState = ExploreState::Idle;
+            m_exploringState = ExploringState::Idle;
             m_isEmergencyLandingFinished = true;
         }
     } break;

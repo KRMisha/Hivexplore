@@ -23,7 +23,7 @@ enum class MissionState {
     Returning,
 };
 
-enum class ExploreState {
+enum class ExploringState {
     Idle,
     AvoidObstacle,
     Liftoff,
@@ -64,7 +64,7 @@ private:
     CCI_BatterySensor* m_pcBattery = nullptr;
 
     MissionState m_missionState = MissionState::Standby;
-    ExploreState m_exploreState = ExploreState::Idle;
+    ExploringState m_exploringState = ExploringState::Idle;
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
     CVector3 m_velocity;
@@ -75,7 +75,7 @@ private:
 
     // Obstacle avoidance variables
     bool m_isAvoidObstacleCommandFinished = true;
-    ExploreState m_stateOnHold = ExploreState::Idle;
+    ExploringState m_stateOnHold = ExploringState::Idle;
     CVector3 m_obstacleDetectedPosition;
     double m_correctionDistance = 0.0;
 

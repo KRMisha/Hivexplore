@@ -249,9 +249,9 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Velocity group
     LogVariableMap velocityLog;
-    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_currentVelocity.GetX()));
-    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_currentVelocity.GetY()));
-    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_currentVelocity.GetZ()));
+    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocity.GetX()));
+    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocity.GetY()));
+    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocity.GetZ()));
     logDataMap.emplace_back("Velocity", velocityLog);
 
     // Range group - must be added after orientation and position
@@ -280,7 +280,7 @@ void CCrazyflieController::SetParamData(const std::string& param, json value) {
 }
 
 void CCrazyflieController::UpdateCurrentVelocity() {
-    m_currentVelocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
+    m_velocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
 
 template<typename T, typename U = T>

@@ -57,7 +57,7 @@ private:
     DroneState m_droneState = DroneState::Idle;
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
-    CVector3 m_currentVelocity;
+    CVector3 m_velocity;
     std::uint8_t m_rssiReading = 0;
 
     // To avoid having multiple states to simulate drone control, we use bools within the

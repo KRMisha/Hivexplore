@@ -1,9 +1,9 @@
 import asyncio
 import logging
-from server.core.crazyflie_manager import CrazyflieManager
-from server.core.argos_manager import ArgosManager
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
+from server.managers.crazyflie_manager import CrazyflieManager
+from server.managers.argos_manager import ArgosManager
 
 # Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)

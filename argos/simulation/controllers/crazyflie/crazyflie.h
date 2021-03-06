@@ -17,6 +17,12 @@
 using namespace argos;
 using json = nlohmann::json;
 
+enum class MissionState {
+    Standby,
+    Exploring,
+    Returning,
+};
+
 enum class DroneState {
     Idle,
     AvoidObstacle,
@@ -42,6 +48,9 @@ public:
     void SetParamData(const std::string& param, json value);
 
 private:
+    void Explore();
+    void Return();
+
     void UpdateCurrentVelocity();
 
     template<typename T, typename U = T>
@@ -54,6 +63,7 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
+    MissionState m_missionState = MissionState::Standby;
     DroneState m_droneState = DroneState::Idle;
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;

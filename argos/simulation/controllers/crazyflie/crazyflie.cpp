@@ -34,6 +34,91 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 void CCrazyflieController::ControlStep() {
     UpdateCurrentVelocity();
 
+    switch(m_missionState) {
+        case MissionState::Standby:
+            break;
+        case MissionState::Exploring:
+            Explore();
+            break;
+        case MissionState::Returning:
+            Return();
+            break;
+    }
+
+
+    m_previousPosition = m_pcPos->GetReading().Position;
+}
+
+void CCrazyflieController::Reset() {
+}
+
+void CCrazyflieController::Destroy() {
+}
+
+// Returns an unordered_map. The key is the log config name and the value is
+// an unordered_map that contains the log variables' names and their values
+CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
+    // Fill map progressively
+    LogConfigs logDataMap;
+
+    // BatteryLevel group
+    LogVariableMap batteryLevelLog;
+    batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
+    logDataMap.emplace_back("BatteryLevel", batteryLevelLog);
+
+    // Orientation group
+    CRadians angleRadians;
+    CVector3 vector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
+    Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
+    LogVariableMap orientationLog;
+    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
+    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
+    logDataMap.emplace_back("Orientation", orientationLog);
+
+    // Position group
+    CVector3 position = m_pcPos->GetReading().Position;
+    LogVariableMap positionLog;
+    positionLog.emplace("stateEstimate.x", static_cast<float>(position.GetX()));
+    positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
+    positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
+    logDataMap.emplace_back("Position", positionLog);
+
+    // Velocity group
+    LogVariableMap velocityLog;
+    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocity.GetX()));
+    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocity.GetY()));
+    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocity.GetZ()));
+    logDataMap.emplace_back("Velocity", velocityLog);
+
+    // Range group - must be added after orientation and position
+    static const std::array<std::string, 6> rangeLogNames =
+        {"range.front", "range.left", "range.back", "range.right", "range.up", "range.zrange"};
+    LogVariableMap rangeLog = GetSensorReadings<std::uint16_t, LogVariableMap::mapped_type>(rangeLogNames);
+    logDataMap.emplace_back("Range", rangeLog);
+
+    // RSSI group
+    LogVariableMap rssiLog;
+    rssiLog.emplace("radio.rssi", m_rssiReading);
+    logDataMap.emplace_back("Rssi", rssiLog);
+
+    return logDataMap;
+}
+
+void CCrazyflieController::SetParamData(const std::string& param, json value) {
+    if (param == "hivexplore.missionState") {
+        m_missionState = static_cast<MissionState>(value.get<std::uint8_t>());
+        LOG << "Set mission state: " << static_cast<std::uint8_t>(m_missionState) << '\n';
+    } else if (param == "hivexplore.isM1LedOn") {
+        // Print LED state since simulated Crazyflie doesn't have LEDs
+        RLOG << "Set LED state: " << value.get<bool>() << '\n';
+    } else {
+        RLOG << "Unknown param: " << param << '\n';
+    }
+}
+
+void CCrazyflieController::Explore() {
     static const std::array<std::string, 6> sensorDirections = {"front", "left", "back", "right", "up", "down"};
     std::unordered_map<std::string, float> sensorReadings = GetSensorReadings<float>(sensorDirections);
 
@@ -207,76 +292,10 @@ void CCrazyflieController::ControlStep() {
         }
     } break;
     }
-
-    m_previousPosition = m_pcPos->GetReading().Position;
 }
 
-void CCrazyflieController::Reset() {
-}
-
-void CCrazyflieController::Destroy() {
-}
-
-// Returns an unordered_map. The key is the log config name and the value is
-// an unordered_map that contains the log variables' names and their values
-CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
-    // Fill map progressively
-    LogConfigs logDataMap;
-
-    // BatteryLevel group
-    LogVariableMap batteryLevelLog;
-    batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
-    logDataMap.emplace_back("BatteryLevel", batteryLevelLog);
-
-    // Orientation group
-    CRadians angleRadians;
-    CVector3 vector;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
-    Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
-    LogVariableMap orientationLog;
-    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
-    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
-    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
-    logDataMap.emplace_back("Orientation", orientationLog);
-
-    // Position group
-    CVector3 position = m_pcPos->GetReading().Position;
-    LogVariableMap positionLog;
-    positionLog.emplace("stateEstimate.x", static_cast<float>(position.GetX()));
-    positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
-    positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
-    logDataMap.emplace_back("Position", positionLog);
-
-    // Velocity group
-    LogVariableMap velocityLog;
-    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocity.GetX()));
-    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocity.GetY()));
-    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocity.GetZ()));
-    logDataMap.emplace_back("Velocity", velocityLog);
-
-    // Range group - must be added after orientation and position
-    static const std::array<std::string, 6> rangeLogNames =
-        {"range.front", "range.left", "range.back", "range.right", "range.up", "range.zrange"};
-    LogVariableMap rangeLog = GetSensorReadings<std::uint16_t, LogVariableMap::mapped_type>(rangeLogNames);
-    logDataMap.emplace_back("Range", rangeLog);
-
-    // RSSI group
-    LogVariableMap rssiLog;
-    rssiLog.emplace("radio.rssi", m_rssiReading);
-    logDataMap.emplace_back("Rssi", rssiLog);
-
-    return logDataMap;
-}
-
-void CCrazyflieController::SetParamData(const std::string& param, json value) {
-    if (param == "hivexplore.missionState") {
-        // TODO
-    } else if (param == "hivexplore.isM1LedOn") {
-        // Print LED state since simulated Crazyflie doesn't have LEDs
-        RLOG << "LED changed: " << value.get<bool>() << '\n';
-    } else {
-        RLOG << "Unknown param: " << param << '\n';
-    }
+void CCrazyflieController::Return() {
+    // TODO
 }
 
 void CCrazyflieController::UpdateCurrentVelocity() {

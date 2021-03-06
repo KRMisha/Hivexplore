@@ -23,6 +23,13 @@ enum class DroneState {
     Brake,
     Rotate,
     Land,
+    Returning,
+};
+
+enum class ReturningState {
+    Return,
+    Land,
+    Idle,
 };
 
 class CCrazyflieController : public CCI_Controller {
@@ -85,6 +92,9 @@ private:
     // Emergency landing variables
     bool m_isEmergencyLandingFinished = true;
     CVector3 m_emergencyLandingPosition;
+
+    // Returning state variables
+    ReturningState m_returningState = ReturningState::Return;
 };
 
 #endif

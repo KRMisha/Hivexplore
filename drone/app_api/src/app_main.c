@@ -96,16 +96,16 @@ void appMain(void) {
     paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
-    drone_state_t currentState = IDLE;
+    drone_state_t droneState = IDLE;
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
     if (!isFlowDeckInitialized) {
         DEBUG_PRINT("FlowDeckV2 is not connected\n");
-        currentState = OUT_OF_SERVICE;
+        droneState = OUT_OF_SERVICE;
     }
     if (!isMultirangerInitialized) {
         DEBUG_PRINT("Multiranger is not connected\n");
-        currentState = OUT_OF_SERVICE;
+        droneState = OUT_OF_SERVICE;
     }
 
     while (true) {
@@ -129,7 +129,7 @@ void appMain(void) {
         float targetYawRate = 0.0;
 
         // Global obstacle avoidance
-        if (currentState == LIFTOFF || currentState == EXPLORE || currentState == ROTATE || currentState == LAND) {
+        if (droneState == LIFTOFF || droneState == EXPLORE || droneState == ROTATE || droneState == LAND) {
             // Distance correction required to stay out of range of any obstacle
             uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
             uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
@@ -142,11 +142,11 @@ void appMain(void) {
             targetForwardVelocity += (backDistanceCorrection - frontDistanceCorrection) * AVOIDANCE_SENSITIVITY;
         }
 
-        switch (currentState) {
+        switch (droneState) {
         case IDLE: {
             if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
                 DEBUG_PRINT("Startup\n");
-                currentState = STARTUP;
+                droneState = STARTUP;
             }
             memset(&setPoint, 0, sizeof(setpoint_t));
         } break;
@@ -154,7 +154,7 @@ void appMain(void) {
             // Check if any obstacle is in the way before taking off
             if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                 DEBUG_PRINT("Liftoff\n");
-                currentState = LIFTOFF;
+                droneState = LIFTOFF;
             }
         } break;
         case LIFTOFF: {
@@ -162,12 +162,12 @@ void appMain(void) {
             setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
             if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                 DEBUG_PRINT("Liftoff finished\n");
-                currentState = EXPLORE;
+                droneState = EXPLORE;
             }
 
             // TODO: Remove in final algorithm, currently used to make drone land
             if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                currentState = LAND;
+                droneState = LAND;
             }
         } break;
         case EXPLORE: {
@@ -176,18 +176,18 @@ void appMain(void) {
             setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
 
             if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
-                currentState = ROTATE;
+                droneState = ROTATE;
             }
 
             // TODO: Remove in final algorithm, currently used to make drone land
             if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                currentState = LAND;
+                droneState = LAND;
             }
         } break;
         case ROTATE: {
             static const uint16_t OPEN_SPACE_THRESHOLD = 300;
             if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
-                currentState = EXPLORE;
+                droneState = EXPLORE;
             }
             targetHeight += EXPLORATION_HEIGHT;
             targetYawRate = 50;
@@ -195,7 +195,7 @@ void appMain(void) {
 
             // TODO: Remove in final algorithm, currently used to make drone land
             if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                currentState = LAND;
+                droneState = LAND;
             }
         } break;
         case LAND: {
@@ -203,7 +203,7 @@ void appMain(void) {
             static const uint16_t LANDED_HEIGHT = 50;
             if (downSensorReading < LANDED_HEIGHT) {
                 DEBUG_PRINT("Landed\n");
-                currentState = IDLE;
+                droneState = IDLE;
             }
         } break;
         case OUT_OF_SERVICE: {

@@ -91,8 +91,6 @@ private:
 
     // Return to base variables
     EndMissionState m_endCurrentState = EndMissionState::Return;
-    DroneState m_stateBeforeBrake =  DroneState::Explore;
-    std::uint8_t m_previousRssiReading = 0;
 };
 
 #endif

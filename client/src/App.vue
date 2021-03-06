@@ -2,11 +2,17 @@
     <div class="container">
         <Map class="map-container" />
         <div class="button-container">
-            <Button label="Start mission" class="left-button" :disabled="droneIds.length === 0 || missionState !== MissionState.Standby" />
+            <Button
+                label="Start mission"
+                class="left-button"
+                :disabled="droneIds.length === 0 || missionState !== MissionState.Standby"
+                @click="setMissionState(MissionState.Mission)"
+            />
             <Button
                 label="Return to base"
                 class="p-button-info"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Mission"
+                @click="setMissionState(MissionState.Returning)"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
@@ -49,10 +55,14 @@ export default defineComponent({
             droneIds.value = newDroneIds;
         });
 
-        const missionState = ref(MissionState.Standby); // TODO: Send message on server
-        socketClient!.bindMessage('state', (newMissionState: MissionState) => {
+        const missionState = ref(MissionState.Standby);
+        socketClient.bindMessage('mission-state', (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
+
+        function setMissionState(missionState: MissionState) {
+            socketClient.sendMessage('mission-state', missionState);
+        }
 
         provide('socketClient', socketClient);
 
@@ -65,6 +75,7 @@ export default defineComponent({
             missionState,
             missionStates: Object.values(MissionState),
             MissionState,
+            setMissionState,
         };
     },
 });

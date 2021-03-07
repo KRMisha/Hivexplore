@@ -284,34 +284,35 @@ void CCrazyflieController::Explore() {
             m_isEmergencyLandingFinished = true;
         }
     } break;
-    case ExploringState::Returning: {
-        static constexpr double targetDroneHeightAboveObstacles = 2.5;
-        static constexpr double targetDroneLandHeight = 0.05;
-        static constexpr double targetDroneHeightEpsilon = 0.05;
+    }
+}
+
+void CCrazyflieController::Return() {
+    switch (m_returningState) {
+    case ReturningState::Return: {
         static constexpr double distanceToReturnEpsilon = 0.05;
 
-        switch (m_returningState) {
-        case ReturningState::Return:
             m_pcPropellers->SetAbsolutePosition(
                 CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));
+
             if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
                 std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
                 m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
                 m_returningState = ReturningState::Land;
             }
-            break;
-        case ReturningState::Land:
+    } break;
+    case ReturningState::Land: {
+        static constexpr double targetDroneLandHeight = 0.05;
+        static constexpr double targetDroneHeightEpsilon = 0.05;
+
             m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
             if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
                 m_returningState = ReturningState::Idle;
             }
-            break;
-        // TODO: Go back to ExploringState::Idle
+    } break;
         case ReturningState::Idle:
             break;
         }
-    } break;
-    }
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

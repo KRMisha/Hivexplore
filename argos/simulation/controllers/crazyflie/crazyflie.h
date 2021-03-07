@@ -12,18 +12,24 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_actuator.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_battery_sensor.h>
+#include "libs/json.hpp"
 
 using namespace argos;
+using json = nlohmann::json;
 
-enum class DroneState {
+enum class MissionState {
+    Standby,
+    Exploring,
+    Returning,
+};
+
+enum class ExploringState {
     Idle,
-    AvoidObstacle,
     Liftoff,
     Explore,
     Brake,
     Rotate,
     Land,
-    Returning,
 };
 
 enum class ReturningState {
@@ -44,14 +50,21 @@ public:
     virtual void Destroy() override;
 
     LogConfigs GetLogData() const;
-    void SetParamData(const std::string& param, std::variant<bool> value);
+    void SetParamData(const std::string& param, json value);
 
 private:
-    void UpdateCurrentVelocity();
+    bool AvoidObstacle();
+    void Explore();
+    void Return();
+
+    void UpdateSensorReadings();
+    void UpdateVelocity();
+    void UpdateRssi();
 
     template<typename T, typename U = T>
     std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;
 
+    // Sensors and actuators
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;
@@ -59,20 +72,27 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
-    DroneState m_currentState = DroneState::Idle;
+    // States
+    MissionState m_missionState = MissionState::Standby;
+    ExploringState m_exploringState = ExploringState::Idle;
+    ReturningState m_returningState = ReturningState::Return;
+
+    // Data
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
-    CVector3 m_currentVelocity;
+    CVector3 m_velocity;
+    std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
+
+    // Obstacle avoidance variables
+    bool m_isAvoidingObstacle = false;
+    ExploringState m_exploringStateOnHold = ExploringState::Idle;
+    ReturningState m_returningStateOnHold = ReturningState::Return;
+    CVector3 m_obstacleDetectedPosition;
+    double m_correctionDistance = 0.0;
 
     // To avoid having multiple states to simulate drone control, we use bools within the
     // states to wait for movement commands to finish before executing a new command
-
-    // Obstacle avoidance variables
-    bool m_isAvoidObstacleCommandFinished = true;
-    DroneState m_stateOnHold = DroneState::Idle;
-    CVector3 m_obstacleDetectedPosition;
-    double m_correctionDistance = 0.0;
 
     // Liftoff variables
     bool m_isLiftoffCommandFinished = true;
@@ -92,9 +112,6 @@ private:
     // Emergency landing variables
     bool m_isEmergencyLandingFinished = true;
     CVector3 m_emergencyLandingPosition;
-
-    // Returning state variables
-    ReturningState m_returningState = ReturningState::Return;
 };
 
 #endif

@@ -30,7 +30,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
-import SocketClient from './../classes/socket-client';
+import { SocketClient } from '@/classes/socket-client';
+import { DroneState } from '@/enums/drone-state';
 
 export default defineComponent({
     name: 'Drone',
@@ -50,8 +51,8 @@ export default defineComponent({
             velocity.value = newVelocity;
         });
 
-        const droneState = ref('Standby'); // TODO: Send message on server
-        socketClient!.bindDroneMessage('drone-state', props.droneId!, (newDroneState: string) => {
+        const droneState = ref(DroneState.Standby); // TODO: Send message on server
+        socketClient!.bindDroneMessage('drone-state', props.droneId!, (newDroneState: DroneState) => {
             droneState.value = newDroneState;
         });
 
@@ -66,11 +67,11 @@ export default defineComponent({
 
         const droneStateColor = computed((): string | undefined => {
             switch (droneState.value) {
-                case 'Standby':
+                case DroneState.Standby:
                     return undefined; // Default background color
-                case 'Flying':
+                case DroneState.Flying:
                     return 'var(--primary-color)';
-                case 'Crashed':
+                case DroneState.Crashed:
                     return 'var(--orange-400)';
                 default:
                     return undefined;

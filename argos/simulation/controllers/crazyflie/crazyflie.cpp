@@ -32,6 +32,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
+    UpdateSensorReadings();
     UpdateCurrentVelocity();
     UpdateRssi();
 
@@ -313,8 +314,9 @@ void CCrazyflieController::Explore() {
     }
 }
 
-void CCrazyflieController::Return() {
-    // TODO
+void CCrazyflieController::UpdateSensorReadings() {
+    static const std::array<std::string, 6> sensorDirections = {"front", "left", "back", "right", "up", "down"};
+    m_sensorReadings = GetSensorReadings<float>(sensorDirections);
 }
 
 void CCrazyflieController::UpdateCurrentVelocity() {

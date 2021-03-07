@@ -58,12 +58,14 @@ private:
     void Explore();
     void Return();
 
+    void UpdateSensorReadings();
     void UpdateCurrentVelocity();
     void UpdateRssi();
 
     template<typename T, typename U = T>
     std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;
 
+    // Sensors and actuators
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance = nullptr;
     CCI_QuadRotorPositionActuator* m_pcPropellers = nullptr;
     CCI_RangeAndBearingActuator* m_pcRABA = nullptr;
@@ -71,13 +73,16 @@ private:
     CCI_PositioningSensor* m_pcPos = nullptr;
     CCI_BatterySensor* m_pcBattery = nullptr;
 
+    // States
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
     ReturningState m_returningState = ReturningState::Return;
 
+    // Data
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
     CVector3 m_velocity;
+    std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
 
     // To avoid having multiple states to simulate drone control, we use bools within the

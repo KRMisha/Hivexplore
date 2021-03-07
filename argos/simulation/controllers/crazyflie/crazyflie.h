@@ -25,7 +25,6 @@ enum class MissionState {
 
 enum class ExploringState {
     Idle,
-    AvoidObstacle,
     Liftoff,
     Explore,
     Brake,
@@ -54,6 +53,7 @@ public:
     void SetParamData(const std::string& param, json value);
 
 private:
+    bool AvoidObstacle();
     void Explore();
     void Return();
 
@@ -84,14 +84,15 @@ private:
     std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
 
-    // To avoid having multiple states to simulate drone control, we use bools within the
-    // states to wait for movement commands to finish before executing a new command
-
     // Obstacle avoidance variables
-    bool m_isAvoidObstacleCommandFinished = true;
-    ExploringState m_stateOnHold = ExploringState::Idle;
+    bool m_isAvoidingObstacle = false;
+    ExploringState m_exploringStateOnHold = ExploringState::Idle;
+    ReturningState m_returningStateOnHold = ReturningState::Return;
     CVector3 m_obstacleDetectedPosition;
     double m_correctionDistance = 0.0;
+
+    // To avoid having multiple states to simulate drone control, we use bools within the
+    // states to wait for movement commands to finish before executing a new command
 
     // Liftoff variables
     bool m_isLiftoffCommandFinished = true;

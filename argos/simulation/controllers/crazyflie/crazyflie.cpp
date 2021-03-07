@@ -40,10 +40,14 @@ void CCrazyflieController::ControlStep() {
     case MissionState::Standby:
         break;
     case MissionState::Exploring:
-        Explore();
+        if (!AvoidObstacle()) {
+            Explore();
+        }
         break;
     case MissionState::Returning:
-        Return();
+        if (!AvoidObstacle()) {
+            Return();
+        }
         break;
     }
 
@@ -119,65 +123,66 @@ void CCrazyflieController::SetParamData(const std::string& param, json value) {
     }
 }
 
-void CCrazyflieController::Explore() {
-    static const std::array<std::string, 6> sensorDirections = {"front", "left", "back", "right", "up", "down"};
-    std::unordered_map<std::string, float> sensorReadings = GetSensorReadings<float>(sensorDirections);
-
+bool CCrazyflieController::AvoidObstacle() {
     // The obstacle detection threshold (similar to the logic found in the drone firmware) is smaller than the map edge rotation
     // detection threshold to avoid conflicts between the obstacle/drone collision avoidance and the exploration logic
     static constexpr std::uint16_t obstacleDetectedThreshold = 600;
-    static constexpr std::uint16_t edgeDetectedThreshold = 1200;
-    bool shouldAvoid = std::any_of(sensorReadings.begin(), sensorReadings.end(), [](const auto& reading) {
+
+    bool isObstacleDetected = std::any_of(m_sensorReadings.begin(), m_sensorReadings.end(), [](const auto& reading) {
         return reading.second <= obstacleDetectedThreshold;
     });
 
+    bool isExploringAvoidanceDisallowed = m_missionState == MissionState::Exploring &&
+                                          (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff ||
+                                           m_exploringState == ExploringState::Land);
+    bool isReturningAvoidanceDisallowed =
+        m_missionState == MissionState::Returning && (m_returningState == ReturningState::Idle || m_returningState == ReturningState::Land);
+
+    bool shouldStartAvoidance =
+        !m_isAvoidingObstacle && isObstacleDetected && !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
+
     // Calculate necessary correction to avoid obstacles
-    if (shouldAvoid && m_exploringState != ExploringState::AvoidObstacle && m_exploringState != ExploringState::Liftoff &&
-        m_exploringState != ExploringState::Idle) {
+    if (shouldStartAvoidance) {
         static constexpr double maximumVelocity = 1.0;
         static constexpr double avoidanceSensitivity = maximumVelocity / meterToMillimeterFactor;
         double leftDistanceCorrection =
-            sensorReadings["left"] == obstacleTooFar
+            m_sensorReadings["left"] == obstacleTooFar
                 ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["left"]) * avoidanceSensitivity;
+                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
         double rightDistanceCorrection =
-            sensorReadings["right"] == obstacleTooFar
+            m_sensorReadings["right"] == obstacleTooFar
                 ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["right"]) * avoidanceSensitivity;
+                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
         double frontDistanceCorrection =
-            sensorReadings["front"] == obstacleTooFar
+            m_sensorReadings["front"] == obstacleTooFar
                 ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["front"]) * avoidanceSensitivity;
+                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
         double backDistanceCorrection =
-            sensorReadings["back"] == obstacleTooFar
+            m_sensorReadings["back"] == obstacleTooFar
                 ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, sensorReadings["back"]) * avoidanceSensitivity;
+                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
 
         // Y: Back, -Y: Forward, X: Left, -X: Right
         auto positionCorrection =
             CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
 
-        // Avoid negligible corrections
+        // Start obstacle avoidance if correction is not negligible
         static constexpr double correctionEpsilon = 0.02;
         m_correctionDistance = positionCorrection.Length() <= correctionEpsilon ? 0.0 : positionCorrection.Length();
         if (m_correctionDistance != 0.0) {
-            m_stateOnHold = m_exploringState;
-            m_exploringState = ExploringState::AvoidObstacle;
+            m_isAvoidingObstacle = true;
+            m_exploringStateOnHold = m_exploringState;
+            m_returningStateOnHold = m_returningState;
             m_obstacleDetectedPosition = m_pcPos->GetReading().Position;
             m_pcPropellers->SetRelativePosition(positionCorrection);
-            m_isAvoidObstacleCommandFinished = false;
         }
     }
 
-    switch (m_exploringState) {
-    case ExploringState::Idle: {
-        m_initialPosition = m_pcPos->GetReading().Position;
-        m_exploringState = ExploringState::Liftoff;
-    } break;
-    case ExploringState::AvoidObstacle: {
+    // Check if obstacle avoidance is finished
+    if (m_isAvoidingObstacle) {
         static constexpr double distanceCorrectionEpsilon = 0.015;
         if ((m_pcPos->GetReading().Position - m_obstacleDetectedPosition).Length() >= m_correctionDistance - distanceCorrectionEpsilon) {
-            m_isAvoidObstacleCommandFinished = true;
+            m_isAvoidingObstacle = false;
 
             // Reset all states to avoid problems when going back to a state
             m_isLiftoffCommandFinished = true;
@@ -185,8 +190,21 @@ void CCrazyflieController::Explore() {
             m_isBrakeCommandFinished = true;
             m_isRotateCommandFinished = true;
             m_isEmergencyLandingFinished = true;
-            m_exploringState = m_stateOnHold;
+            m_exploringState = m_exploringStateOnHold;
+            m_returningState = m_returningStateOnHold;
         }
+    }
+
+    return m_isAvoidingObstacle;
+}
+
+void CCrazyflieController::Explore() {
+    static constexpr std::uint16_t edgeDetectedThreshold = 1200;
+
+    switch (m_exploringState) {
+    case ExploringState::Idle: {
+        m_initialPosition = m_pcPos->GetReading().Position;
+        m_exploringState = ExploringState::Liftoff;
     } break;
     case ExploringState::Liftoff: {
         static constexpr double targetDroneHeight = 0.5;
@@ -217,7 +235,7 @@ void CCrazyflieController::Explore() {
 
         // Change state when a wall is detected in front of the drone
         static constexpr double distanceToTravelEpsilon = 0.005;
-        if (sensorReadings["front"] <= edgeDetectedThreshold) {
+        if (m_sensorReadings["front"] <= edgeDetectedThreshold) {
             m_exploringState = ExploringState::Brake;
             m_isForwardCommandFinished = true;
         }
@@ -261,12 +279,13 @@ void CCrazyflieController::Explore() {
 
         // Wait for rotation to finish
         if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
-            if (sensorReadings["front"] > edgeDetectedThreshold) {
+            if (m_sensorReadings["front"] > edgeDetectedThreshold) {
                 m_exploringState = ExploringState::Explore;
             }
             m_isRotateCommandFinished = true;
         }
     } break;
+    // TODO: Move emergency landing to MissionState switch
     case ExploringState::Land: {
         if (m_isEmergencyLandingFinished) {
             m_emergencyLandingPosition = m_pcPos->GetReading().Position;
@@ -292,27 +311,27 @@ void CCrazyflieController::Return() {
     case ReturningState::Return: {
         static constexpr double distanceToReturnEpsilon = 0.05;
 
-            m_pcPropellers->SetAbsolutePosition(
-                CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));
+        m_pcPropellers->SetAbsolutePosition(
+            CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));
 
-            if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
-                std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
-                m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-                m_returningState = ReturningState::Land;
-            }
+        if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
+            std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
+            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+            m_returningState = ReturningState::Land;
+        }
     } break;
     case ReturningState::Land: {
         static constexpr double targetDroneLandHeight = 0.05;
         static constexpr double targetDroneHeightEpsilon = 0.05;
 
-            m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
-            if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
-                m_returningState = ReturningState::Idle;
-            }
-    } break;
-        case ReturningState::Idle:
-            break;
+        m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
+        if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
+            m_returningState = ReturningState::Idle;
         }
+    } break;
+    case ReturningState::Idle:
+        break;
+    }
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

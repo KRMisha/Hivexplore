@@ -123,6 +123,9 @@ void appMain(void) {
         case STANDBY:
             break;
         case EXPLORING: {
+            // TODO: Move this to explore() function (like in ARGoS)
+            // Note: many variables will need to be hoisted out globally to be accessible to both explore() and return() (ex: readings)
+
             uint16_t frontSensorReading = logGetUint(frontSensorId);
             uint16_t leftSensorReading = logGetUint(leftSensorId);
             uint16_t backSensorReading = logGetUint(backSensorId);
@@ -218,6 +221,7 @@ void appMain(void) {
             commanderSetSetpoint(&setPoint, TASK_PRIORITY);
         } break;
         case RETURNING:
+            // TODO: Call return() function
             break;
         }
     }

@@ -58,7 +58,7 @@ private:
     void Return();
 
     void UpdateSensorReadings();
-    void UpdateCurrentVelocity();
+    void UpdateVelocity();
     void UpdateRssi();
 
     template<typename T, typename U = T>

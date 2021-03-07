@@ -33,7 +33,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 
 void CCrazyflieController::ControlStep() {
     UpdateSensorReadings();
-    UpdateCurrentVelocity();
+    UpdateVelocity();
     UpdateRssi();
 
     switch (m_missionState) {
@@ -339,7 +339,7 @@ void CCrazyflieController::UpdateSensorReadings() {
     m_sensorReadings = GetSensorReadings<float>(sensorDirections);
 }
 
-void CCrazyflieController::UpdateCurrentVelocity() {
+void CCrazyflieController::UpdateVelocity() {
     m_velocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
 

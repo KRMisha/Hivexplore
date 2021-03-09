@@ -1,21 +1,28 @@
+from abc import ABCMeta, abstractmethod
 import numpy as np
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator, Orientation, Point
+from server.managers.mission_state import MissionState
 
 # pylint: disable=no-self-use
 
 
-class DroneManager:
+class DroneManager(metaclass=ABCMeta):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
 
-    # Getters
-
+    @abstractmethod
     def _get_drone_ids(self):
-        raise NotImplementedError()
+        pass
 
-    # Methods
+    @abstractmethod
+    def _set_drone_param(self, param, drone_id, value):
+        pass
+
+    @abstractmethod
+    def _is_drone_id_valid(self, drone_id):
+        pass
 
     def _send_drone_ids(self, client_id=None):
         if client_id is None:
@@ -90,5 +97,26 @@ class DroneManager:
         print(f'RSSI from drone {drone_id}: {rssi}')
 
     # Client callbacks
+
     def _new_connection_callback(self, client_id):
         self._send_drone_ids(client_id)
+
+    def _set_mission_state(self, mission_state_str: str):
+        try:
+            mission_state = MissionState[mission_state_str.upper()]
+        except KeyError:
+            print('ArgosManager error: Unknown mission state received:', mission_state_str)
+            return
+
+        print('Set mission state:', mission_state)
+        for drone_id in self._get_drone_ids():
+            self._set_drone_param('hivexplore.missionState', drone_id, mission_state)
+        self._web_socket_server.send_message('mission-state', mission_state_str)
+
+    def _set_led_enabled(self, drone_id, is_enabled: bool):
+        if self._is_drone_id_valid(drone_id):
+            print(f'Set LED state for drone {drone_id}: {is_enabled}')
+            self._set_drone_param('hivexplore.isM1LedOn', drone_id, is_enabled)
+            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
+        else:
+            print('CrazyflieManager error: Unknown drone ID received:', drone_id)

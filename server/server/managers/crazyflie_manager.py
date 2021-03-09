@@ -6,7 +6,6 @@ from cflib.crazyflie.log import LogConfig
 from server.managers.drone_manager import DroneManager
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
-from server.managers.mission_state import MissionState
 from server import config
 
 # pylint: disable=no-self-use
@@ -16,7 +15,7 @@ from server import config
 
 class CrazyflieManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
-        DroneManager.__init__(self, web_socket_server, map_generator)
+        super().__init__(web_socket_server, map_generator)
         self._crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
@@ -57,6 +56,12 @@ class CrazyflieManager(DroneManager):
 
     def _get_drone_ids(self):
         return list(self._crazyflies.keys())
+
+    def _set_drone_param(self, param, drone_id, value):
+        self._crazyflies[drone_id].param.set_value(param, value)
+
+    def _is_drone_id_valid(self, drone_id):
+        return drone_id in self._crazyflies
 
     # Setup
 
@@ -151,25 +156,3 @@ class CrazyflieManager(DroneManager):
 
     def _param_update_callback(self, name, value):
         print(f'Param readback: {name}={value}')
-
-    # Client callbacks
-
-    def _set_mission_state(self, mission_state_str: str):
-        try:
-            mission_state = MissionState[mission_state_str.upper()]
-        except KeyError:
-            print('CrazyflieManager error: Unknown mission state received:', mission_state_str)
-            return
-
-        print('Set mission state:', mission_state)
-        for crazyflie in self._crazyflies.values():
-            crazyflie.param.set_value('hivexplore.missionState', mission_state)
-        self._web_socket_server.send_message('mission-state', mission_state_str)
-
-    def _set_led_enabled(self, drone_id, is_enabled: bool):
-        if drone_id in self._crazyflies:
-            print(f'Set LED state for drone {drone_id}: {is_enabled}')
-            self._crazyflies[drone_id].param.set_value('hivexplore.isM1LedOn', is_enabled)
-            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
-        else:
-            print('CrazyflieManager error: Unknown drone ID received:', drone_id)

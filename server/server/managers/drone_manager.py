@@ -13,6 +13,10 @@ class DroneManager(metaclass=ABCMeta):
         self._map_generator = map_generator
 
     @abstractmethod
+    async def start(self):
+        pass
+
+    @abstractmethod
     def _get_drone_ids(self):
         pass
 

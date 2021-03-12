@@ -22,7 +22,6 @@ class ArgosManager(DroneManager):
         self._unix_socket_client.bind('Rssi', DroneManager._log_rssi_callback)
 
         # Client bindings
-        self._web_socket_server.bind('connect', self._new_connection_callback)
         self._web_socket_server.bind('mission-state', self._set_mission_state)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 

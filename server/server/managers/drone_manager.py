@@ -12,6 +12,9 @@ class DroneManager(metaclass=ABCMeta):
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
 
+        # Client bindings
+        self._web_socket_server.bind('connect', self._web_socket_connect_callback)
+
     @abstractmethod
     async def start(self):
         pass
@@ -91,7 +94,7 @@ class DroneManager(metaclass=ABCMeta):
 
     # Client callbacks
 
-    def _new_connection_callback(self, client_id: str):
+    def _web_socket_connect_callback(self, client_id: str):
         self._send_drone_ids(client_id)
 
     def _set_mission_state(self, mission_state_str: str):

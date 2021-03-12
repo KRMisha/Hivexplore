@@ -51,7 +51,6 @@ class DroneManager(ABC):
             pitch=data['stateEstimate.pitch'],
             yaw=data['stateEstimate.yaw'],
         )
-
         print(f'Orientation from drone {drone_id}: {orientation}')
         self._map_generator.set_orientation(drone_id, orientation)
 
@@ -82,7 +81,7 @@ class DroneManager(ABC):
             back=data['range.back'],
             right=data['range.right'],
             up=data['range.up'],
-            zrange=data['range.zrange'],
+            down=data['range.zrange'],
         )
         print(f'Range from drone {drone_id}: {range_reading}')
         self._map_generator.add_range_reading(drone_id, range_reading)

@@ -6,7 +6,7 @@ from server.core.web_socket_server import WebSocketServer
 
 Orientation = namedtuple('Orientation', ['roll', 'pitch', 'yaw'])
 Point = namedtuple('Point', ['x', 'y', 'z'])
-Range = namedtuple('Range', ['front', 'left', 'back', 'right', 'up', 'zrange'])
+Range = namedtuple('Range', ['front', 'left', 'back', 'right', 'up', 'down'])
 
 
 class MapGenerator:
@@ -74,11 +74,11 @@ class MapGenerator:
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 
-        if range_reading.zrange < SENSOR_THRESHOLD and IS_DOWN_SENSOR_PLOTTING_ENABLED:
+        if range_reading.down < SENSOR_THRESHOLD and IS_DOWN_SENSOR_PLOTTING_ENABLED:
             point = Point(
                 last_position.x,
                 last_position.y,
-                last_position.z - range_reading.zrange / METER_TO_MILLIMETER_FACTOR,
+                last_position.z - range_reading.down / METER_TO_MILLIMETER_FACTOR,
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 

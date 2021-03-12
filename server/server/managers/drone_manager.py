@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from collections import namedtuple
 from typing import Dict, List
 import numpy as np
@@ -7,7 +7,7 @@ from server.core.map_generator import MapGenerator, Orientation, Point, Range
 from server.managers.mission_state import MissionState
 
 
-class DroneManager(metaclass=ABCMeta):
+class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator

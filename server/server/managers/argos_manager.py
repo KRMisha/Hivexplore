@@ -19,6 +19,7 @@ class ArgosManager:
 
     async def start(self):
         # ARGoS bindings
+        self._unix_socket_client.bind('disconnect', self._on_unix_socket_disconnected)
         self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
         self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback)
         self._unix_socket_client.bind('Orientation', self._log_orientation_callback)
@@ -26,9 +27,6 @@ class ArgosManager:
         self._unix_socket_client.bind('Velocity', self._log_velocity_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
         self._unix_socket_client.bind('Rssi', self._log_rssi_callback)
-
-        # Unix Sockets bindings
-        self._unix_socket_client.bind('disconnect', self._on_unix_socket_disconnected)
 
         # Client bindings
         self._web_socket_server.bind('connect', self._new_connection_callback)
@@ -38,6 +36,10 @@ class ArgosManager:
         await self._unix_socket_client.serve()
 
     # ARGoS callbacks
+
+    def _on_unix_socket_disconnected(self):
+        self._drone_ids = []
+        self._web_socket_server.send_message('drone-ids', list(self._drone_ids))
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data
@@ -108,12 +110,6 @@ class ArgosManager:
     def _log_rssi_callback(self, drone_id, data):
         rssi = data['radio.rssi']
         print(f'RSSI from drone {drone_id}: {rssi}')
-
-    # Unix Sockets callbacks
-
-    def _on_unix_socket_disconnected(self):
-        self._drone_ids = []
-        self._web_socket_server.send_message('drone-ids', list(self._drone_ids))
 
     # Client callbacks
 

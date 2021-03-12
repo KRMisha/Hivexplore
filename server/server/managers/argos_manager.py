@@ -33,7 +33,7 @@ class ArgosManager(DroneManager):
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         return drone_id in self._drone_ids
 
-    def _set_drone_param(self, param: str, drone_id: str, value):
+    def _set_drone_param(self, param: str, drone_id: str, value: Any):
         self._unix_socket_client.send(param, drone_id, value)
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):

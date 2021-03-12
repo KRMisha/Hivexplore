@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List
+from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
@@ -55,7 +55,7 @@ class CrazyflieManager(DroneManager):
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         return drone_id in self._crazyflies
 
-    def _set_drone_param(self, param: str, drone_id: str, value):
+    def _set_drone_param(self, param: str, drone_id: str, value: Any):
         self._crazyflies[drone_id].param.set_value(param, value)
 
     # Setup

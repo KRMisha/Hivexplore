@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from typing import Dict, List
+from typing import Any, Dict, List
 import numpy as np
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator, Orientation, Point, Range
@@ -28,7 +28,7 @@ class DroneManager(ABC):
         pass
 
     @abstractmethod
-    def _set_drone_param(self, param: str, drone_id: str, value):
+    def _set_drone_param(self, param: str, drone_id: str, value: Any):
         pass
 
     def _send_drone_ids(self, client_id=None):

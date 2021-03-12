@@ -35,6 +35,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
+    pingOtherDrones();
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
@@ -346,6 +347,12 @@ void CCrazyflieController::UpdateRssi() {
     double distanceToBase =
         std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
+}
+
+void CCrazyflieController::pingOtherDrones() {
+    static CByteArray buffer(10);
+    buffer[0] = 0;
+    m_pcRABA->SetData(buffer);
 }
 
 template<typename T, typename U = T>

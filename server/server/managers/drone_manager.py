@@ -4,8 +4,6 @@ from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator, Orientation, Point
 from server.managers.mission_state import MissionState
 
-# pylint: disable=no-self-use
-
 
 class DroneManager(metaclass=ABCMeta):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
@@ -96,10 +94,10 @@ class DroneManager(metaclass=ABCMeta):
 
         self._map_generator.add_range_reading(drone_id, measurements)
 
-    def _log_rssi_callback(self, drone_id, data):
+    @staticmethod
+    def _log_rssi_callback(drone_id, data):
         rssi = data['radio.rssi']
         print(f'RSSI from drone {drone_id}: {rssi}')
-
     # Client callbacks
 
     def _new_connection_callback(self, client_id):

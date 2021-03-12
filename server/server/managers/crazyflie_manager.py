@@ -8,10 +8,6 @@ from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server import config
 
-# pylint: disable=no-self-use
-
-# TODO: Refactor common code between CrazyflieManager and ArgosManager
-
 
 class CrazyflieManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
@@ -103,7 +99,7 @@ class CrazyflieManager(DroneManager):
             {
                 'log_config': LogConfig(name='Rssi', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['radio.rssi'],
-                'data_callback': lambda _timestamp, data, logconf: self._log_rssi_callback(logconf.cf.link_uri, data),
+                'data_callback': lambda _timestamp, data, logconf: DroneManager._log_rssi_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
         ]
@@ -122,16 +118,17 @@ class CrazyflieManager(DroneManager):
             except AttributeError as exc:
                 print(f'Could not add log configuration, error: {exc}')
 
-    def _setup_param(self, crazyflie: Crazyflie):
-        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=self._param_update_callback)
-        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
+    @staticmethod
+    def _setup_param(crazyflie: Crazyflie):
+        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=CrazyflieManager._param_update_callback)
+        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=CrazyflieManager._param_update_callback)
 
     # Connection callbacks
 
     def _connected(self, link_uri):
         print(f'Connected to {link_uri}')
         self._setup_log(self._crazyflies[link_uri])
-        self._setup_param(self._crazyflies[link_uri])
+        CrazyflieManager._setup_param(self._crazyflies[link_uri])
         self._send_drone_ids()
 
     def _disconnected(self, link_uri):
@@ -149,10 +146,12 @@ class CrazyflieManager(DroneManager):
 
     # Log callbacks
 
-    def _log_error_callback(self, logconf, msg):
+    @staticmethod
+    def _log_error_callback(logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')
 
     # Param callbacks
 
-    def _param_update_callback(self, name, value):
+    @staticmethod
+    def _param_update_callback(name, value):
         print(f'Param readback: {name}={value}')

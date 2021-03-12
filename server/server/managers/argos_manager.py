@@ -4,8 +4,6 @@ from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
 from server.core.unix_socket_client import UnixSocketClient
 
-# pylint: disable=no-self-use
-
 
 class ArgosManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
@@ -21,7 +19,7 @@ class ArgosManager(DroneManager):
         self._unix_socket_client.bind('Position', self._log_position_callback)
         self._unix_socket_client.bind('Velocity', self._log_velocity_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
-        self._unix_socket_client.bind('Rssi', self._log_rssi_callback)
+        self._unix_socket_client.bind('Rssi', DroneManager._log_rssi_callback)
 
         # Client bindings
         self._web_socket_server.bind('connect', self._new_connection_callback)

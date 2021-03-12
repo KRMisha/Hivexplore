@@ -24,11 +24,11 @@ class DroneManager(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _is_drone_id_valid(self, drone_id) -> bool:
+    def _is_drone_id_valid(self, drone_id: str) -> bool:
         pass
 
     @abstractmethod
-    def _set_drone_param(self, param, drone_id, value):
+    def _set_drone_param(self, param: str, drone_id: str, value: str):
         pass
 
     def _send_drone_ids(self, client_id=None):
@@ -39,7 +39,7 @@ class DroneManager(metaclass=ABCMeta):
 
     # Drone callbacks
 
-    def _log_battery_callback(self, drone_id, data: Dict[str, float]):
+    def _log_battery_callback(self, drone_id, data: Dict[str, int]):
         battery_level = data['pm.batteryLevel']
         print(f'BatteryLevel from drone {drone_id}: {battery_level}')
 

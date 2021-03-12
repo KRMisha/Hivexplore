@@ -1,8 +1,8 @@
 from typing import Any, Optional, Set, List
 from server.managers.drone_manager import DroneManager
-from server.core.web_socket_server import WebSocketServer
-from server.core.map_generator import MapGenerator
-from server.core.unix_socket_client import UnixSocketClient
+from server.map_generator import MapGenerator
+from server.sockets.unix_socket_client import UnixSocketClient
+from server.sockets.web_socket_server import WebSocketServer
 
 
 class ArgosManager(DroneManager):

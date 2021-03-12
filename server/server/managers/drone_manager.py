@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 from typing import Any, Dict, List
 import numpy as np
-from server.core.web_socket_server import WebSocketServer
-from server.core.map_generator import MapGenerator, Orientation, Point, Range
 from server.managers.mission_state import MissionState
+from server.map_generator import MapGenerator, Orientation, Point, Range
+from server.sockets.web_socket_server import WebSocketServer
 
 
 class DroneManager(ABC):

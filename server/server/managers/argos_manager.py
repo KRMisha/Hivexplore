@@ -19,6 +19,7 @@ class ArgosManager:
 
     async def start(self):
         # ARGoS bindings
+        self._unix_socket_client.bind('disconnect', self._unix_socket_disconnect_callback)
         self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
         self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback)
         self._unix_socket_client.bind('Orientation', self._log_orientation_callback)
@@ -28,13 +29,17 @@ class ArgosManager:
         self._unix_socket_client.bind('Rssi', self._log_rssi_callback)
 
         # Client bindings
-        self._web_socket_server.bind('connect', self._new_connection_callback)
+        self._web_socket_server.bind('connect', self._web_socket_connect_callback)
         self._web_socket_server.bind('mission-state', self._set_mission_state)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
         await self._unix_socket_client.serve()
 
     # ARGoS callbacks
+
+    def _unix_socket_disconnect_callback(self):
+        self._drone_ids = []
+        self._web_socket_server.send_message('drone-ids', list(self._drone_ids))
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data
@@ -108,7 +113,7 @@ class ArgosManager:
 
     # Client callbacks
 
-    def _new_connection_callback(self, client_id):
+    def _web_socket_connect_callback(self, client_id):
         self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._drone_ids))
 
     def _set_mission_state(self, mission_state_str: str):

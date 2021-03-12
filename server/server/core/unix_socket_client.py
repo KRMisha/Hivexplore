@@ -4,6 +4,8 @@ import socket
 from typing import Any, Callable, Dict, List, Optional
 from server import config
 
+EVENT_DENYLIST = {'disconnect'}
+
 
 class UnixSocketError(Exception):
     pass
@@ -43,6 +45,10 @@ class UnixSocketClient:
                     await asyncio.gather(*tasks)
                 except (UnixSocketError, ConnectionResetError) as exc:
                     print('UnixSocketClient communication error:', exc)
+
+                    for callback in self._callbacks.get('disconnect', []):
+                        callback()
+
                     for task in tasks:
                         task.cancel()
                     self._socket.close()
@@ -73,6 +79,10 @@ class UnixSocketClient:
 
             try:
                 message = json.loads(message_bytes.decode('utf-8'))
+
+                if message['logName'] in EVENT_DENYLIST:
+                    print('UnixSocketClient error: Invalid event received:', message['logName'])
+                    continue
 
                 try:
                     callbacks = self._callbacks[message['logName']]

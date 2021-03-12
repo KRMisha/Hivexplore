@@ -21,9 +21,8 @@ RUN apt-get update && apt-get install -y \
     clang clang-format
 
 # Build ARGoS from source
-RUN git clone https://github.com/MISTLab/argos3.git && \
+RUN git clone https://github.com/KRMisha/argos3 && \
     cd argos3 && \
-    git checkout inf3995 && \
     mkdir build_simulator && cd build_simulator && \
     cmake -DCMAKE_BUILD_TYPE=Release ../src && \
     make -j$(nproc)

@@ -86,6 +86,7 @@ class WebSocketServer:
         async for message_str in websocket:
             try:
                 message = json.loads(message_str)
+
                 if message['event'] in EVENT_DENYLIST:
                     print('WebSocketServer error: Invalid event received:', message['event'])
                     continue

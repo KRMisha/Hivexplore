@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict
+from typing import Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
@@ -50,14 +50,14 @@ class CrazyflieManager(DroneManager):
                 await asyncio.sleep(timeout_s)
                 timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
 
-    def _get_drone_ids(self):
+    def _get_drone_ids(self) -> List[str]:
         return list(self._crazyflies.keys())
+
+    def _is_drone_id_valid(self, drone_id) -> bool:
+        return drone_id in self._crazyflies
 
     def _set_drone_param(self, param, drone_id, value):
         self._crazyflies[drone_id].param.set_value(param, value)
-
-    def _is_drone_id_valid(self, drone_id):
-        return drone_id in self._crazyflies
 
     # Setup
 

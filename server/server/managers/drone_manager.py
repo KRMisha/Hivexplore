@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
+from typing import Dict, List
 import numpy as np
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator, Orientation, Point, Range
@@ -16,15 +17,15 @@ class DroneManager(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _get_drone_ids(self):
+    def _get_drone_ids(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    def _is_drone_id_valid(self, drone_id) -> bool:
         pass
 
     @abstractmethod
     def _set_drone_param(self, param, drone_id, value):
-        pass
-
-    @abstractmethod
-    def _is_drone_id_valid(self, drone_id):
         pass
 
     def _send_drone_ids(self, client_id=None):
@@ -35,13 +36,13 @@ class DroneManager(metaclass=ABCMeta):
 
     # Drone callbacks
 
-    def _log_battery_callback(self, drone_id, data):
+    def _log_battery_callback(self, drone_id, data: Dict[str, float]):
         battery_level = data['pm.batteryLevel']
         print(f'BatteryLevel from drone {drone_id}: {battery_level}')
 
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
-    def _log_orientation_callback(self, drone_id, data):
+    def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
             roll=data['stateEstimate.roll'],
             pitch=data['stateEstimate.pitch'],
@@ -51,7 +52,7 @@ class DroneManager(metaclass=ABCMeta):
         print(f'Orientation from drone {drone_id}: {orientation}')
         self._map_generator.set_orientation(drone_id, orientation)
 
-    def _log_position_callback(self, drone_id, data):
+    def _log_position_callback(self, drone_id, data: Dict[str, float]):
         point = Point(
             x=data['stateEstimate.x'],
             y=data['stateEstimate.y'],
@@ -60,9 +61,9 @@ class DroneManager(metaclass=ABCMeta):
         print(f'Position from drone {drone_id}: {point}')
         self._map_generator.set_position(drone_id, point)
 
-    def _log_velocity_callback(self, drone_id, data):
+    def _log_velocity_callback(self, drone_id, data: Dict[str, float]):
         Velocity = namedtuple('Velocity', ['vx', 'vy', 'vz'])
-        velocity = Velocity (
+        velocity = Velocity(
             vx=data['stateEstimate.vx'],
             vy=data['stateEstimate.vy'],
             vz=data['stateEstimate.vz'],
@@ -71,7 +72,7 @@ class DroneManager(metaclass=ABCMeta):
         print(f'Velocity from drone {drone_id}: {velocity} | Magnitude: {velocity_magnitude}')
         self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 4))
 
-    def _log_range_callback(self, drone_id, data):
+    def _log_range_callback(self, drone_id, data: Dict[str, float]):
         range_reading = Range(
             front=data['range.front'],
             left=data['range.left'],
@@ -84,12 +85,13 @@ class DroneManager(metaclass=ABCMeta):
         self._map_generator.add_range_reading(drone_id, range_reading)
 
     @staticmethod
-    def _log_rssi_callback(drone_id, data):
+    def _log_rssi_callback(drone_id, data: Dict[str, float]):
         rssi = data['radio.rssi']
         print(f'RSSI from drone {drone_id}: {rssi}')
+
     # Client callbacks
 
-    def _new_connection_callback(self, client_id):
+    def _new_connection_callback(self, client_id: str):
         self._send_drone_ids(client_id)
 
     def _set_mission_state(self, mission_state_str: str):

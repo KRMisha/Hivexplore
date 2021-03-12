@@ -1,4 +1,4 @@
-from typing import Any, Optional, Set
+from typing import Any, Optional, Set, List
 from server.managers.drone_manager import DroneManager
 from server.core.web_socket_server import WebSocketServer
 from server.core.map_generator import MapGenerator
@@ -28,14 +28,14 @@ class ArgosManager(DroneManager):
 
         await self._unix_socket_client.serve()
 
-    def _get_drone_ids(self):
+    def _get_drone_ids(self) -> List[str]:
         return list(self._drone_ids)
+
+    def _is_drone_id_valid(self, drone_id) -> bool:
+        return drone_id in self._drone_ids
 
     def _set_drone_param(self, param, drone_id, value):
         self._unix_socket_client.send(param, drone_id, value)
-
-    def _is_drone_id_valid(self, drone_id):
-        return drone_id in self._drone_ids
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data

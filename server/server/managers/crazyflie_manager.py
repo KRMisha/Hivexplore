@@ -23,7 +23,7 @@ class CrazyflieManager:
 
     async def start(self):
         await self._find_crazyflies()
-        self._web_socket_server.bind('connect', self._new_connection_callback)
+        self._web_socket_server.bind('connect', self._web_socket_connect_callback)
         self._web_socket_server.bind('mission-state', self._set_mission_state)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
@@ -223,7 +223,7 @@ class CrazyflieManager:
 
     # Client callbacks
 
-    def _new_connection_callback(self, client_id):
+    def _web_socket_connect_callback(self, client_id):
         self._send_drone_ids(client_id)
 
     def _set_mission_state(self, mission_state_str: str):

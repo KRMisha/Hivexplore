@@ -98,7 +98,7 @@ class CrazyflieManager(DroneManager):
             {
                 'log_config': LogConfig(name='Rssi', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['radio.rssi'],
-                'data_callback': lambda _timestamp, data, logconf: DroneManager._log_rssi_callback(logconf.cf.link_uri, data),
+                'data_callback': lambda _timestamp, data, logconf: self._log_rssi_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
         ]

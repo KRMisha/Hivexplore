@@ -55,7 +55,7 @@ class CrazyflieManager(DroneManager):
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         return drone_id in self._crazyflies
 
-    def _set_drone_param(self, param: str, drone_id: str, value: str):
+    def _set_drone_param(self, param: str, drone_id: str, value):
         self._crazyflies[drone_id].param.set_value(param, value)
 
     # Setup

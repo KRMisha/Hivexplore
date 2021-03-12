@@ -28,7 +28,7 @@ class DroneManager(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _set_drone_param(self, param: str, drone_id: str, value: str):
+    def _set_drone_param(self, param: str, drone_id: str, value):
         pass
 
     def _send_drone_ids(self, client_id=None):

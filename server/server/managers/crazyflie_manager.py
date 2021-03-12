@@ -127,7 +127,7 @@ class CrazyflieManager(DroneManager):
     def _connected(self, link_uri):
         print(f'Connected to {link_uri}')
         self._setup_log(self._crazyflies[link_uri])
-        CrazyflieManager._setup_param(self._crazyflies[link_uri])
+        self._setup_param(self._crazyflies[link_uri])
         self._send_drone_ids()
 
     def _disconnected(self, link_uri):

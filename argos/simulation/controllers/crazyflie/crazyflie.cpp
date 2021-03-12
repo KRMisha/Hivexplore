@@ -13,7 +13,10 @@ namespace {
 
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
-    constexpr double calculateDistanceCorrection(double threshold, double reading) { return threshold - std::min(threshold, reading); }
+    constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
+        return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
+    }
+
 } // namespace
 
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
@@ -146,21 +149,14 @@ bool CCrazyflieController::AvoidObstacle() {
         static constexpr double maximumVelocity = 1.0;
         static constexpr double avoidanceSensitivity = maximumVelocity / meterToMillimeterFactor;
         double leftDistanceCorrection =
-            m_sensorReadings["left"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
         double rightDistanceCorrection =
-            m_sensorReadings["right"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
         double frontDistanceCorrection =
-            m_sensorReadings["front"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
         double backDistanceCorrection =
-            m_sensorReadings["back"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
+
 
         // Y: Back, -Y: Forward, X: Left, -X: Right
         auto positionCorrection =

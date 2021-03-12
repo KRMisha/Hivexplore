@@ -39,7 +39,7 @@ class DroneManager(ABC):
 
     # Drone callbacks
 
-    def _log_battery_callback(self, drone_id, data: Dict[str, int]):
+    def _log_battery_callback(self, drone_id: str, data: Dict[str, int]):
         battery_level = data['pm.batteryLevel']
         print(f'BatteryLevel from drone {drone_id}: {battery_level}')
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
@@ -53,7 +53,7 @@ class DroneManager(ABC):
         print(f'Orientation from drone {drone_id}: {orientation}')
         self._map_generator.set_orientation(drone_id, orientation)
 
-    def _log_position_callback(self, drone_id, data: Dict[str, float]):
+    def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
         point = Point(
             x=data['stateEstimate.x'],
             y=data['stateEstimate.y'],
@@ -62,7 +62,7 @@ class DroneManager(ABC):
         print(f'Position from drone {drone_id}: {point}')
         self._map_generator.set_position(drone_id, point)
 
-    def _log_velocity_callback(self, drone_id, data: Dict[str, float]):
+    def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
         Velocity = namedtuple('Velocity', ['vx', 'vy', 'vz'])
         velocity = Velocity(
             vx=data['stateEstimate.vx'],
@@ -73,7 +73,7 @@ class DroneManager(ABC):
         print(f'Velocity from drone {drone_id}: {velocity} | Magnitude: {velocity_magnitude}')
         self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 4))
 
-    def _log_range_callback(self, drone_id, data: Dict[str, float]):
+    def _log_range_callback(self, drone_id: str, data: Dict[str, float]):
         range_reading = Range(
             front=data['range.front'],
             left=data['range.left'],
@@ -86,7 +86,7 @@ class DroneManager(ABC):
         self._map_generator.add_range_reading(drone_id, range_reading)
 
     @staticmethod
-    def _log_rssi_callback(drone_id, data: Dict[str, float]):
+    def _log_rssi_callback(drone_id: str, data: Dict[str, float]):
         rssi = data['radio.rssi']
         print(f'RSSI from drone {drone_id}: {rssi}')
 

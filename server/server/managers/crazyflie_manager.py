@@ -4,8 +4,8 @@ import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.managers.drone_manager import DroneManager
-from server.core.web_socket_server import WebSocketServer
-from server.core.map_generator import MapGenerator
+from server.map_generator import MapGenerator
+from server.sockets.web_socket_server import WebSocketServer
 from server import config
 
 

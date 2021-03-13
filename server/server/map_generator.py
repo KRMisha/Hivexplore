@@ -2,7 +2,7 @@ import math
 from collections import namedtuple
 from typing import Dict, List
 import numpy as np
-from server.core.web_socket_server import WebSocketServer
+from server.sockets.web_socket_server import WebSocketServer
 
 Orientation = namedtuple('Orientation', ['roll', 'pitch', 'yaw'])
 Point = namedtuple('Point', ['x', 'y', 'z'])

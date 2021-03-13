@@ -11,6 +11,7 @@ class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
+        self._mission_state = MissionState.STANDBY
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -97,14 +98,14 @@ class DroneManager(ABC):
 
     def _set_mission_state(self, mission_state_str: str):
         try:
-            mission_state = MissionState[mission_state_str.upper()]
+            self._mission_state = MissionState[mission_state_str.upper()]
         except KeyError:
             print('ArgosManager error: Unknown mission state received:', mission_state_str)
             return
 
-        print('Set mission state:', mission_state)
+        print('Set mission state:', self._mission_state)
         for drone_id in self._get_drone_ids():
-            self._set_drone_param('hivexplore.missionState', drone_id, mission_state)
+            self._set_drone_param('hivexplore.missionState', drone_id, self._mission_state)
         self._web_socket_server.send_message('mission-state', mission_state_str)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
@@ -113,4 +114,4 @@ class DroneManager(ABC):
             self._set_drone_param('hivexplore.isM1LedOn', drone_id, is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
         else:
-            print('CrazyflieManager error: Unknown drone ID received:', drone_id)
+            print('Drone error: Unknown drone ID received:', drone_id)

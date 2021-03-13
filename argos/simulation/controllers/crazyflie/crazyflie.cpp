@@ -15,6 +15,10 @@ namespace {
 
     double sign(double value) { return value / std::abs(value); }
 
+    double calculateDroneDistanceCorrection(double threshold, double distance) {
+        return sign(distance) * (threshold - std::abs(distance));
+    }
+
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
     }
@@ -172,8 +176,8 @@ bool CCrazyflieController::AvoidObstacle() {
                 // Convert packet range from cm to mm
                 const auto vectorToDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
                 static const double droneAvoidanceSensitivity = 1.0 / 3000.0;
-                leftDroneAvoidanceCorrection += sign(vectorToDrone.GetX()) * (obstacleDetectedThreshold - std::abs(vectorToDrone.GetX())) * droneAvoidanceSensitivity;
-                backDroneAvoidanceCorrection += sign(vectorToDrone.GetY()) * (obstacleDetectedThreshold - std::abs(vectorToDrone.GetY())) * droneAvoidanceSensitivity;
+                leftDroneAvoidanceCorrection += calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetX()) * droneAvoidanceSensitivity;
+                backDroneAvoidanceCorrection += calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetY()) * droneAvoidanceSensitivity;
             }
         }
         // Y: Back, -Y: Forward, X: Left, -X: Right

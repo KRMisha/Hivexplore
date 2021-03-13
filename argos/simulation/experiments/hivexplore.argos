@@ -63,7 +63,7 @@
 
         <distribute>
             <position method="uniform" min="-1,-1,0" max="1,1,0" />
-            <orientation method="uniform" min="0,0,0" max="180,0,0" />
+            <orientation method="uniform" min="0,0,0" max="360,0,0" />
             <entity quantity="4" max_trials="100">
                 <crazyflie id="s">
                     <controller config="cfc" />
@@ -72,11 +72,39 @@
             </entity>
         </distribute>
 
+        <!-- Top obstacles -->
         <distribute>
-            <position method="uniform" min="-5,-5,0" max="5,5,0" />
+            <position method="uniform" min="-5,-5,0" max="5,-2,0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
-            <entity quantity="5" max_trials="100">
-                <box id="b" size="0.2,2,2" movable="false" />
+            <entity quantity="6" max_trials="100">
+                <box id="tb" size="0.5,0.5,2" movable="false" />
+            </entity>
+        </distribute>
+
+        <!-- Bottom obstacles -->
+        <distribute>
+            <position method="uniform" min="-5,2,0" max="5,5,0" />
+            <orientation method="uniform" min="0,0,0" max="360,0,0" />
+            <entity quantity="6" max_trials="100">
+                <box id="bb" size="0.5,0.5,2" movable="false" />
+            </entity>
+        </distribute>
+
+        <!-- Left obstacles -->
+        <distribute>
+            <position method="uniform" min="-5,-2,0" max="-2,2,0" />
+            <orientation method="uniform" min="0,0,0" max="360,0,0" />
+            <entity quantity="2" max_trials="100">
+                <box id="lb" size="0.7,0.7,2" movable="false" />
+            </entity>
+        </distribute>
+
+        <!-- Right obstacles -->
+        <distribute>
+            <position method="uniform" min="2,-2,0" max="5,2,0" />
+            <orientation method="uniform" min="0,0,0" max="360,0,0" />
+            <entity quantity="2" max_trials="100">
+                <box id="rb" size="0.7,0.7,2" movable="false" />
             </entity>
         </distribute>
     </arena>

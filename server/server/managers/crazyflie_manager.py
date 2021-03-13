@@ -1,22 +1,19 @@
 from typing import Any, Dict, List
-import json
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
+from server.managers.uris_manager import get_crazyflie_uris_from_file, set_crazyflie_radio_address
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
-
-CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.txt'
-
 
 class CrazyflieManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
         super().__init__(web_socket_server, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
-        self._crazyflie_uris = self._get_crazyflie_uris()
+        self._crazyflie_uris: List[str] = []
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
@@ -24,25 +21,12 @@ class CrazyflieManager(DroneManager):
         self._web_socket_server.bind('mission-state', self._set_mission_state)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
-    @staticmethod
-    def _get_crazyflie_uris():
-        with open(CRAZYFLIE_URIS_FILENAME, 'w+') as uris_file:
-            try:
-                data = json.load(uris_file)
-                uris = data['crazyflie_uris']
-                if len(uris) > 0:
-                    return uris
-            except ValueError:
-                pass
-
-            DEFAULT_URIS = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
-            json.dump({'crazyflie_uris': DEFAULT_URIS}, uris_file)
-            uris_file.write('\n')
-
-            return DEFAULT_URIS
-
     def _connect_crazyflies(self):
+        self._crazyflie_uris = get_crazyflie_uris_from_file()
         for uri in self._crazyflie_uris:
+            if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
+                continue
+
             print(f'Trying connection to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
 
@@ -136,7 +120,9 @@ class CrazyflieManager(DroneManager):
         self._connected_crazyflies[link_uri] = self._pending_crazyflies[link_uri]
         del self._pending_crazyflies[link_uri]
 
-        if self._mission_state is MissionState.STANDBY:
+        set_crazyflie_radio_address(self._connected_crazyflies[link_uri], 0xE7E7E7E7E7)
+
+        if self._mission_state == MissionState.STANDBY:
             self._setup_log(self._connected_crazyflies[link_uri])
             self._setup_param(self._connected_crazyflies[link_uri])
             self._send_drone_ids()
@@ -146,7 +132,10 @@ class CrazyflieManager(DroneManager):
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')
-        del self._connected_crazyflies[link_uri]
+        if link_uri in self._connected_crazyflies:
+            del self._connected_crazyflies[link_uri]
+        else:
+            del self._pending_crazyflies[link_uri]
         self._send_drone_ids()
 
     def _connection_failed(self, link_uri, msg):

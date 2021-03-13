@@ -13,6 +13,8 @@ namespace {
 
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
+    double sign(double value) { return value / std::abs(value); }
+
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
     }
@@ -136,6 +138,10 @@ bool CCrazyflieController::AvoidObstacle() {
         return reading.second <= obstacleDetectedThreshold;
     });
 
+    bool isOtherDroneDetected = std::any_of(m_pcRABS->GetReadings().begin(), m_pcRABS->GetReadings().end(), [](const auto& packet) {
+        return packet.Range * 10 <= obstacleDetectedThreshold; // Convert range from cm to mm
+    });
+
     bool isExploringAvoidanceDisallowed = m_missionState == MissionState::Exploring &&
                                           (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff ||
                                            m_exploringState == ExploringState::Land);
@@ -143,8 +149,7 @@ bool CCrazyflieController::AvoidObstacle() {
         m_missionState == MissionState::Returning && (m_returningState == ReturningState::Idle || m_returningState == ReturningState::Land);
 
     bool shouldStartAvoidance =
-        !m_isAvoidingObstacle && isObstacleDetected && !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
-
+        !m_isAvoidingObstacle && (isObstacleDetected || isOtherDroneDetected) && !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
     // Calculate necessary correction to avoid obstacles
     if (shouldStartAvoidance) {
         static constexpr double maximumVelocity = 1.0;
@@ -158,10 +163,24 @@ bool CCrazyflieController::AvoidObstacle() {
         double backDistanceCorrection =
                 calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
 
-
+        // Drone collision avoidance
+        double leftDroneAvoidanceCorrection = 0;
+        double backDroneAvoidanceCorrection = 0;
+        if (isOtherDroneDetected) {
+            for (const auto& packet : m_pcRABS->GetReadings()) {
+                const double horizontalAngle = packet.HorizontalBearing.GetValue();
+                // Convert packet range from cm to mm
+                const auto vectorToDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
+                static const double droneAvoidanceSensitivity = 1.0 / 3000.0;
+                leftDroneAvoidanceCorrection += sign(vectorToDrone.GetX()) * (obstacleDetectedThreshold - std::abs(vectorToDrone.GetX())) * droneAvoidanceSensitivity;
+                backDroneAvoidanceCorrection += sign(vectorToDrone.GetY()) * (obstacleDetectedThreshold - std::abs(vectorToDrone.GetY())) * droneAvoidanceSensitivity;
+            }
+        }
         // Y: Back, -Y: Forward, X: Left, -X: Right
         auto positionCorrection =
-            CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);
+            CVector3(rightDistanceCorrection - leftDistanceCorrection - leftDroneAvoidanceCorrection,
+                     frontDistanceCorrection - backDistanceCorrection - backDroneAvoidanceCorrection, 0.0);
+
 
         // Start obstacle avoidance if correction is not negligible
         static constexpr double correctionEpsilon = 0.02;

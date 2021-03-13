@@ -1,1 +1,0 @@
-{"crazyflie_addresses": ["radio://0/80/2M/E7E7E7E701", "radio://0/80/2M/E7E7E7E702"]}

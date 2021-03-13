@@ -8,7 +8,7 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
 
-CRAZYFLIE_ADDRESSES_FILENAME = 'server/config/crazyflie_addresses.txt'
+CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.txt'
 
 
 class CrazyflieManager(DroneManager):
@@ -16,7 +16,7 @@ class CrazyflieManager(DroneManager):
         super().__init__(web_socket_server, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
-        self._crazyflie_addresses = self._get_crazyflie_addresses()
+        self._crazyflie_uris = self._get_crazyflie_uris()
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
@@ -25,24 +25,24 @@ class CrazyflieManager(DroneManager):
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     @staticmethod
-    def _get_crazyflie_addresses():
-        with open(CRAZYFLIE_ADDRESSES_FILENAME, 'w+') as addresses_file:
+    def _get_crazyflie_uris():
+        with open(CRAZYFLIE_URIS_FILENAME, 'w+') as uris_file:
             try:
-                data = json.load(addresses_file)
-                addresses = data['crazyflie_addresses']
-                if len(addresses) > 0:
-                    return addresses
+                data = json.load(uris_file)
+                uris = data['crazyflie_uris']
+                if len(uris) > 0:
+                    return uris
             except ValueError:
                 pass
 
-            DEFAULT_ADDRESSES = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
-            json.dump({'crazyflie_addresses': DEFAULT_ADDRESSES}, addresses_file)
-            addresses_file.write('\n')
+            DEFAULT_URIS = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
+            json.dump({'crazyflie_uris': DEFAULT_URIS}, uris_file)
+            uris_file.write('\n')
 
-            return DEFAULT_ADDRESSES
+            return DEFAULT_URIS
 
     def _connect_crazyflies(self):
-        for uri in self._crazyflie_addresses:
+        for uri in self._crazyflie_uris:
             print(f'Trying connection to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
 

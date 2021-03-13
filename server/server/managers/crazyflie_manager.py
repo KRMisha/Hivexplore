@@ -4,9 +4,10 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
-from server.managers.uris_manager import get_crazyflie_uris_from_file, set_crazyflie_radio_address
+from server.managers.uris_manager import get_crazyflie_uris_from_file
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
+
 
 class CrazyflieManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
@@ -27,7 +28,7 @@ class CrazyflieManager(DroneManager):
             if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
                 continue
 
-            print(f'Trying connection to: {uri}')
+            print(f'Trying to connect to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
 
             crazyflie.connected.add_callback(self._connected)
@@ -119,8 +120,6 @@ class CrazyflieManager(DroneManager):
         # Move the newly connected drone from pending to connected
         self._connected_crazyflies[link_uri] = self._pending_crazyflies[link_uri]
         del self._pending_crazyflies[link_uri]
-
-        set_crazyflie_radio_address(self._connected_crazyflies[link_uri], 0xE7E7E7E7E7)
 
         if self._mission_state == MissionState.STANDBY:
             self._setup_log(self._connected_crazyflies[link_uri])

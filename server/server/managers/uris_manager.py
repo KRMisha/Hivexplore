@@ -5,6 +5,7 @@ from cflib.utils.power_switch import PowerSwitch
 
 CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
 
+
 def get_crazyflie_uris_from_file():
     with open(CRAZYFLIE_URIS_FILENAME, 'r+') as uris_file:
         try:
@@ -20,6 +21,7 @@ def get_crazyflie_uris_from_file():
         uris_file.write('\n')
         return DEFAULT_URIS
 
+
 def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
     eeprom = crazyflie.mem.get_mems(MemoryElement.TYPE_I2C)[0]
     print(eeprom.id)
@@ -31,8 +33,10 @@ def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
     eeprom.elements['radio_address'] = radio_address
     eeprom.write_data(lambda eeprom, addr: _data_written(crazyflie, eeprom, addr))
 
+
 def _data_written(crazyflie: Crazyflie, eeprom, _addr):
     eeprom.update(lambda eeprom: _data_updated(crazyflie, eeprom))
+
 
 def _data_updated(crazyflie: Crazyflie, eeprom):
     old_address = crazyflie.link_uri.split('/')[-1]
@@ -44,8 +48,13 @@ def _data_updated(crazyflie: Crazyflie, eeprom):
 
     PowerSwitch(crazyflie.link_uri).stm_power_cycle()
 
-    old_uris = get_crazyflie_uris_from_file()
+    uris = get_crazyflie_uris_from_file()
+    try:
+        uris.remove(crazyflie.link_uri)
+    except ValueError:
+        pass
+    uris.append(new_uri)
+
     with open(CRAZYFLIE_URIS_FILENAME, 'w+') as uris_file:
-        new_uris = [uri if uri != crazyflie.link_uri else new_uri for uri in old_uris]
-        json.dump({'crazyflie_uris': new_uris}, uris_file)
+        json.dump({'crazyflie_uris': uris}, uris_file)
         uris_file.write('\n')

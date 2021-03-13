@@ -26,26 +26,20 @@ class CrazyflieManager(DroneManager):
 
     @staticmethod
     def _get_crazyflie_addresses():
-        def get_default_addresses():
-            DEFAULT_ADDRESSES = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
-            CrazyflieManager._write_crazyflie_addresses(DEFAULT_ADDRESSES)
-            return DEFAULT_ADDRESSES
-
         with open(CRAZYFLIE_ADDRESSES_FILENAME, 'w+') as addresses_file:
             try:
                 data = json.load(addresses_file)
                 addresses = data['crazyflie_addresses']
-                if len(addresses) == 0:
-                    return get_default_addresses()
-                return addresses
+                if len(addresses) > 0:
+                    return addresses
             except ValueError:
-                return get_default_addresses()
+                pass
 
-    @staticmethod
-    def _write_crazyflie_addresses(crazyflie_addresses: List[str]):
-        with open(CRAZYFLIE_ADDRESSES_FILENAME, 'w+') as addresses_file:
-            json.dump({'crazyflie_addresses': crazyflie_addresses}, addresses_file)
+            DEFAULT_ADDRESSES = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
+            json.dump({'crazyflie_addresses': DEFAULT_ADDRESSES}, addresses_file)
             addresses_file.write('\n')
+
+            return DEFAULT_ADDRESSES
 
     def _connect_crazyflies(self):
         for uri in self._crazyflie_addresses:

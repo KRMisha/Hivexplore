@@ -6,6 +6,7 @@ from server.core.web_socket_server import WebSocketServer
 
 Orientation = namedtuple('Orientation', ['roll', 'pitch', 'yaw'])
 Point = namedtuple('Point', ['x', 'y', 'z'])
+Range = namedtuple('Range', ['front', 'left', 'back', 'right', 'up', 'down'])
 
 
 class MapGenerator:
@@ -21,63 +22,63 @@ class MapGenerator:
     def set_position(self, drone_id: str, position: Point):
         self._last_positions[drone_id] = position
 
-    def add_range_reading(self, drone_id: str, range_reading: Dict[str, int]):
+    def add_range_reading(self, drone_id: str, range_reading: Range):
         points = self._calculate_points_from_readings(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
         print(f'Points detected by drone {drone_id}: {points}')
         self._web_socket_server.send_message('map-points', points)
 
-    def _calculate_points_from_readings(self, last_orientation: Orientation, last_position: Point, range_reading: Dict[str, int]) -> List[Point]:
+    def _calculate_points_from_readings(self, last_orientation: Orientation, last_position: Point, range_reading: Range) -> List[Point]:
         IS_DOWN_SENSOR_PLOTTING_ENABLED = False
         SENSOR_THRESHOLD = 2000
         METER_TO_MILLIMETER_FACTOR = 1000
 
         detected_points = []
 
-        if range_reading['front'] < SENSOR_THRESHOLD:
+        if range_reading.front < SENSOR_THRESHOLD:
             point = Point(
-                last_position.x + range_reading['front'] / METER_TO_MILLIMETER_FACTOR,
+                last_position.x + range_reading.front / METER_TO_MILLIMETER_FACTOR,
                 last_position.y,
                 last_position.z,
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 
-        if range_reading['left'] < SENSOR_THRESHOLD:
+        if range_reading.left < SENSOR_THRESHOLD:
             point = Point(
                 last_position.x,
-                last_position.y + range_reading['left'] / METER_TO_MILLIMETER_FACTOR,
+                last_position.y + range_reading.left / METER_TO_MILLIMETER_FACTOR,
                 last_position.z,
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 
-        if range_reading['back'] < SENSOR_THRESHOLD:
+        if range_reading.back < SENSOR_THRESHOLD:
             point = Point(
-                last_position.x - range_reading['back'] / METER_TO_MILLIMETER_FACTOR,
+                last_position.x - range_reading.back / METER_TO_MILLIMETER_FACTOR,
                 last_position.y,
                 last_position.z,
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 
-        if range_reading['right'] < SENSOR_THRESHOLD:
+        if range_reading.right < SENSOR_THRESHOLD:
             point = Point(
                 last_position.x,
-                last_position.y - range_reading['right'] / METER_TO_MILLIMETER_FACTOR,
+                last_position.y - range_reading.right / METER_TO_MILLIMETER_FACTOR,
                 last_position.z,
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 
-        if range_reading['up'] < SENSOR_THRESHOLD:
+        if range_reading.up < SENSOR_THRESHOLD:
             point = Point(
                 last_position.x,
                 last_position.y,
-                last_position.z + range_reading['up'] / METER_TO_MILLIMETER_FACTOR,
+                last_position.z + range_reading.up / METER_TO_MILLIMETER_FACTOR,
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 
-        if range_reading['zrange'] < SENSOR_THRESHOLD and IS_DOWN_SENSOR_PLOTTING_ENABLED:
+        if range_reading.down < SENSOR_THRESHOLD and IS_DOWN_SENSOR_PLOTTING_ENABLED:
             point = Point(
                 last_position.x,
                 last_position.y,
-                last_position.z - range_reading['zrange'] / METER_TO_MILLIMETER_FACTOR,
+                last_position.z - range_reading.down / METER_TO_MILLIMETER_FACTOR,
             )
             detected_points.append(self._rotate_point(last_orientation, last_position, point))
 

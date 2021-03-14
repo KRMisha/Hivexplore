@@ -111,6 +111,12 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     return logDataMap;
 }
 
+std::vector<std::string> CCrazyflieController::GetConsoleLogData() {
+    std::vector<std::string> previousStepConsoleLog = consoleLog;
+    consoleLog.clear();
+    return previousStepConsoleLog;
+}
+
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
     if (param == "hivexplore.missionState") {
         m_missionState = static_cast<MissionState>(value.get<std::uint8_t>());
@@ -350,6 +356,11 @@ void CCrazyflieController::UpdateRssi() {
     double distanceToBase =
         std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
+}
+
+void CCrazyflieController::debugPrint(std::string consoleText) {
+    RLOG << consoleText << "\n";
+    consoleLog.push_back(consoleText);
 }
 
 template<typename T, typename U = T>

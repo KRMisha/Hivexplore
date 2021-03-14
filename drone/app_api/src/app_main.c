@@ -124,8 +124,8 @@ void appMain(void) {
 
     while (true) {
         vTaskDelay(M2T(10));
-        updateDroneStatus();
 
+        updateDroneStatus();
         ledSet(LED_GREEN_R, isM1LedOn);
 
         if (isOutOfService) {

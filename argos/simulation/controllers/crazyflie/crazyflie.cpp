@@ -35,7 +35,7 @@ void CCrazyflieController::ControlStep() {
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
-    UpdateDroneState();
+    UpdateDroneStatus();
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -109,10 +109,10 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     rssiLog.emplace("radio.rssi", m_rssiReading);
     logDataMap.emplace_back("Rssi", rssiLog);
 
-    // DroneState group
-    LogVariableMap droneStateLog;
-    droneStateLog.emplace("hivexplore.droneState", static_cast<std::uint8_t>(m_droneState));
-    logDataMap.emplace_back("DroneState", droneStateLog);
+    // DroneStatus group
+    LogVariableMap droneStatusLog;
+    droneStatusLog.emplace("hivexplore.droneStatus", static_cast<std::uint8_t>(m_droneStatus));
+    logDataMap.emplace_back("DroneStatus", droneStatusLog);
 
     return logDataMap;
 }
@@ -358,12 +358,12 @@ void CCrazyflieController::UpdateRssi() {
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 }
 
-void CCrazyflieController::UpdateDroneState() {
+void CCrazyflieController::UpdateDroneStatus() {
     // TODO: Handle crash state
     if (m_missionState == MissionState::Standby || m_exploringState == ExploringState::Idle || m_returningState == ReturningState::Idle) {
-        m_droneState = DroneState::Standby;
+        m_droneStatus = DroneStatus::Standby;
     } else {
-        m_droneState = DroneState::Flying;
+        m_droneStatus = DroneStatus::Flying;
     }
 }
 

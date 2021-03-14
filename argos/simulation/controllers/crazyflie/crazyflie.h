@@ -23,7 +23,7 @@ enum class MissionState {
     Returning,
 };
 
-enum class DroneState {
+enum class DroneStatus {
     Standby,
     Flying,
     Crashed,
@@ -66,7 +66,7 @@ private:
     void UpdateSensorReadings();
     void UpdateVelocity();
     void UpdateRssi();
-    void UpdateDroneState();
+    void UpdateDroneStatus();
 
     template<typename T, typename U = T>
     std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;
@@ -81,7 +81,6 @@ private:
 
     // States
     MissionState m_missionState = MissionState::Standby;
-    DroneState m_droneState = DroneState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
     ReturningState m_returningState = ReturningState::Return;
 
@@ -91,6 +90,7 @@ private:
     CVector3 m_velocity;
     std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
+    DroneStatus m_droneStatus = DroneStatus::Standby;
 
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;

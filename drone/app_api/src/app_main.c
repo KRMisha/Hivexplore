@@ -53,7 +53,7 @@
 #define MIN(a, b) ((a < b) ? a : b)
 
 typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING } mission_state_t;
-typedef enum { DRONE_STANDBY, DRONE_FLYING, DRONE_CRASHED } drone_state_t;
+typedef enum { DRONE_STANDBY, DRONE_FLYING, DRONE_CRASHED } drone_status_t;
 typedef enum { EXPLORING_IDLE, EXPLORING_LIFTOFF, EXPLORING_EXPLORE, EXPLORING_ROTATE, EXPLORING_LAND } exploring_state_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
@@ -67,7 +67,7 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static bool isM1LedOn = false;
 
-static drone_state_t droneStatus = DRONE_STANDBY;
+static drone_status_t droneStatus = DRONE_STANDBY;
 
 static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
     setPoint->velocity_body = true;

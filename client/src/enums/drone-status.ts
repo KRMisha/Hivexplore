@@ -1,4 +1,4 @@
-export enum DroneState {
+export enum DroneStatus {
     Standby = 'Standby',
     Flying = 'Flying',
     Crashed = 'Crashed',

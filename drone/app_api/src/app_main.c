@@ -241,11 +241,11 @@ void appMain(void) {
     }
 }
 
+LOG_GROUP_START(hivexplore)
+LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
+LOG_GROUP_STOP(hivexplore)
+
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
 PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
 PARAM_GROUP_STOP(hivexplore)
-
-LOG_GROUP_START(hivexplore)
-LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
-LOG_GROUP_STOP(hivexplore)

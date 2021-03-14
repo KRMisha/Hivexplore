@@ -129,6 +129,9 @@ class CrazyflieManager(DroneManager):
         self._setup_log(self._crazyflies[link_uri])
         self._setup_param(self._crazyflies[link_uri])
         self._send_drone_ids()
+        # Setup console logging
+        self._crazyflies[link_uri].console.receivedChar.add_callback(self._log_console_callback)
+
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')

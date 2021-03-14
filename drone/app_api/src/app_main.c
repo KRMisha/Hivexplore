@@ -54,7 +54,7 @@
 
 typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING } mission_state_t;
 typedef enum { EXPLORING_IDLE, EXPLORING_LIFTOFF, EXPLORING_EXPLORE, EXPLORING_ROTATE, EXPLORING_LAND } exploring_state_t;
-typedef enum { DRONE_STANDBY, DRONE_FLYING, DRONE_CRASHED } drone_status_t;
+typedef enum { STATUS_STANDBY, STATUS_FLYING, STATUS_CRASHED } drone_status_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -67,7 +67,7 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 
 static bool isM1LedOn = false;
-static drone_status_t droneStatus = DRONE_STANDBY;
+static drone_status_t droneStatus = STATUS_STANDBY;
 
 static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
     setPoint->velocity_body = true;
@@ -87,9 +87,9 @@ static void updateDroneStatus() {
     // TODO: Handle crash state
     // TODO: Handle returning IDLE state
     if (missionState == MISSION_STANDBY || exploringState == EXPLORING_IDLE) {
-        droneStatus = DRONE_STANDBY;
+        droneStatus = STATUS_STANDBY;
     } else {
-        droneStatus = DRONE_FLYING;
+        droneStatus = STATUS_FLYING;
     }
 }
 

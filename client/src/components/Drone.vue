@@ -12,7 +12,7 @@
                 <div class="item-container middle-container">
                     <div class="item-container">
                         <h4>Status 🍯</h4>
-                        <Chip :label="droneState" :style="{ 'background-color': droneStateColor }" />
+                        <Chip :label="droneStatus" :style="{ 'background-color': droneStatusColor }" />
                     </div>
                     <div class="item-container">
                         <h4>LED 💡</h4>
@@ -31,7 +31,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
-import { DroneState } from '@/enums/drone-state';
+import { DroneStatus } from '@/enums/drone-status';
 
 export default defineComponent({
     name: 'Drone',
@@ -51,9 +51,9 @@ export default defineComponent({
             velocity.value = newVelocity;
         });
 
-        const droneState = ref(DroneState.Standby);
-        socketClient!.bindDroneMessage('drone-state', props.droneId!, (newDroneState: DroneState) => {
-            droneState.value = newDroneState;
+        const droneStatus = ref(DroneStatus.Standby);
+        socketClient!.bindDroneMessage('drone-status', props.droneId!, (newDroneStatus: DroneStatus) => {
+            droneStatus.value = newDroneStatus;
         });
 
         const isLedOn = ref(false);
@@ -65,13 +65,13 @@ export default defineComponent({
             socketClient!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
         }
 
-        const droneStateColor = computed((): string | undefined => {
-            switch (droneState.value) {
-                case DroneState.Standby:
+        const droneStatusColor = computed((): string | undefined => {
+            switch (droneStatus.value) {
+                case DroneStatus.Standby:
                     return undefined; // Default background color
-                case DroneState.Flying:
+                case DroneStatus.Flying:
                     return 'var(--primary-color)';
-                case DroneState.Crashed:
+                case DroneStatus.Crashed:
                     return 'var(--orange-400)';
                 default:
                     return undefined;
@@ -83,8 +83,8 @@ export default defineComponent({
             velocity,
             isLedOn,
             changeLedStatus,
-            droneState,
-            droneStateColor,
+            droneStatus,
+            droneStatusColor,
         };
     },
 });

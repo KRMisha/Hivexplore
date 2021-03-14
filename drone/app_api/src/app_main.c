@@ -65,7 +65,7 @@ static const float MAXIMUM_VELOCITY = 1.0f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
 static mission_state_t missionState = STANDBY;
-static drone_state_t droneState = STANDSTILL;
+static drone_state_t droneStatus = STANDSTILL;
 static exploring_state_t exploringState = IDLE;
 static bool isM1LedOn = false;
 
@@ -83,13 +83,13 @@ static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float
     setPoint->position.z = targetHeight;
 }
 
-static void updateDroneState() {
+static void updateDroneStatus() {
     // TODO: Handle crash state
     // TODO: Handle returning IDLE state
     if (missionState == STANDBY || exploringState == IDLE) {
-        droneState = STANDSTILL;
+        droneStatus = STANDSTILL;
     } else {
-        droneState = FLYING;
+        droneStatus = FLYING;
     }
 }
 
@@ -124,7 +124,7 @@ void appMain(void) {
 
     while (true) {
         vTaskDelay(M2T(10));
-        updateDroneState();
+        updateDroneStatus();
 
         ledSet(LED_GREEN_R, isM1LedOn);
 
@@ -247,5 +247,5 @@ PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
 PARAM_GROUP_STOP(hivexplore)
 
 LOG_GROUP_START(hivexplore)
-LOG_ADD(LOG_UINT8, droneState, &droneState)
+LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)

@@ -102,8 +102,8 @@ class CrazyflieManager(DroneManager):
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='DroneState', period_in_ms=POLLING_PERIOD_MS),
-                'variables': ['hivexplore.droneState'],
+                'log_config': LogConfig(name='DroneStatus', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['hivexplore.droneStatus'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_drone_state_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },

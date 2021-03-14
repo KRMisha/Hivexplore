@@ -106,6 +106,21 @@ void CHivexploreLoopFunctions::PreStep() {
                     return;
                 }
             }
+            // Send console log data
+            std::vector<std::string> consoleLogData = controller.get().GetConsoleLogData();
+            json packet = {
+                {"logName", "ConsoleLog"},
+                {"droneId", controller.get().GetId()},
+                {"variables", consoleLogData},
+            };
+            std::string serializedPacket = packet.dump();
+            ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
+            if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+                std::perror("Unix socket send");
+                Stop();
+                return;
+
+            }
         }
     }
 }

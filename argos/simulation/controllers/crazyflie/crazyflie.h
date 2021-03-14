@@ -23,12 +23,6 @@ enum class MissionState {
     Returning,
 };
 
-enum class DroneStatus {
-    Standby,
-    Flying,
-    Crashed,
-};
-
 enum class ExploringState {
     Idle,
     Liftoff,
@@ -42,6 +36,12 @@ enum class ReturningState {
     Return,
     Land,
     Idle,
+};
+
+enum class DroneStatus {
+    Standby,
+    Flying,
+    Crashed,
 };
 
 class CCrazyflieController : public CCI_Controller {

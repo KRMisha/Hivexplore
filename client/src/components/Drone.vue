@@ -51,7 +51,7 @@ export default defineComponent({
             velocity.value = newVelocity;
         });
 
-        const droneState = ref(DroneState.Standby); // TODO: Send message on server
+        const droneState = ref(DroneState.Standby);
         socketClient!.bindDroneMessage('drone-state', props.droneId!, (newDroneState: DroneState) => {
             droneState.value = newDroneState;
         });

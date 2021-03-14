@@ -53,6 +53,7 @@
 #define MIN(a, b) ((a < b) ? a : b)
 
 typedef enum { STANDBY, EXPLORING, RETURNING } mission_state_t;
+typedef enum { STANDBY, FLYING, CRASHED } drone_state_t;
 typedef enum { IDLE, LIFTOFF, EXPLORE, ROTATE, LAND } exploring_state_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
@@ -63,6 +64,8 @@ static const float MAXIMUM_VELOCITY = 1.0f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
 static mission_state_t missionState = STANDBY;
+static drone_state_t droneState = STANDBY;
+static exploring_state_t exploringState = IDLE;
 static bool isM1LedOn = false;
 
 static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
@@ -77,6 +80,16 @@ static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float
 
     setPoint->mode.z = modeAbs;
     setPoint->position.z = targetHeight;
+}
+
+static void updateDroneState() {
+    // TODO: Handle crash state
+    // TODO: Handle returning IDLE state
+    if (missionState == STANDBY || exploringState == IDLE) {
+        droneState = STANDBY;
+    } else {
+        droneState = FLYING;
+    }
 }
 
 static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
@@ -98,7 +111,6 @@ void appMain(void) {
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
-    exploring_state_t exploringState = IDLE;
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
     const bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
@@ -111,6 +123,7 @@ void appMain(void) {
 
     while (true) {
         vTaskDelay(M2T(10));
+        updateDroneState();
 
         ledSet(LED_GREEN_R, isM1LedOn);
 
@@ -231,3 +244,7 @@ PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
 PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
 PARAM_GROUP_STOP(hivexplore)
+
+LOG_GROUP_START(hivexplore)
+LOG_ADD(PARAM_UINT8, droneState, &droneState)
+LOG_GROUP_STOP(hivexplore)

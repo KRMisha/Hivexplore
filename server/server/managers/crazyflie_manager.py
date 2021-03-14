@@ -132,7 +132,6 @@ class CrazyflieManager(DroneManager):
         # Setup console logging
         self._crazyflies[link_uri].console.receivedChar.add_callback(self._console_log_callback)
 
-
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')
         del self._crazyflies[link_uri]

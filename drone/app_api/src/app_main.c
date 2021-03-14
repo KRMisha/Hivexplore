@@ -66,8 +66,8 @@ static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 
-static bool isM1LedOn = false;
 static drone_status_t droneStatus = STATUS_STANDBY;
+static bool isM1LedOn = false;
 
 static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
     setPoint->velocity_body = true;

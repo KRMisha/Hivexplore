@@ -16,7 +16,7 @@
                     </div>
                     <div class="item-container">
                         <h4>LED 💡</h4>
-                        <InputSwitch v-model="isLedOn" @change="changeLedStatus" />
+                        <InputSwitch v-model="isLedEnabled" @change="setLedEnabled" />
                     </div>
                 </div>
                 <div class="item-container">
@@ -56,13 +56,13 @@ export default defineComponent({
             droneStatus.value = newDroneStatus;
         });
 
-        const isLedOn = ref(false);
-        socketClient!.bindDroneMessage('set-led', props.droneId!, (newIsLedOn: boolean) => {
-            isLedOn.value = newIsLedOn;
+        const isLedEnabled = ref(false);
+        socketClient!.bindDroneMessage('set-led', props.droneId!, (newIsLedEnabled: boolean) => {
+            isLedEnabled.value = newIsLedEnabled;
         });
 
-        function changeLedStatus() {
-            socketClient!.sendDroneMessage('set-led', props.droneId!, isLedOn.value);
+        function setLedEnabled() {
+            socketClient!.sendDroneMessage('set-led', props.droneId!, isLedEnabled.value);
         }
 
         const droneStatusColor = computed((): string | undefined => {
@@ -81,9 +81,9 @@ export default defineComponent({
         return {
             batteryLevel,
             velocity,
-            isLedOn,
-            changeLedStatus,
             droneStatus,
+            isLedEnabled,
+            setLedEnabled,
             droneStatusColor,
         };
     },

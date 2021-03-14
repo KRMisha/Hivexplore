@@ -21,6 +21,7 @@ class ArgosManager(DroneManager):
         self._unix_socket_client.bind('Velocity', self._log_velocity_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
         self._unix_socket_client.bind('Rssi', self._log_rssi_callback)
+        self._unix_socket_client.bind('ConsoleLog', self._get_console_log_callback)
 
         # Client bindings
         self._web_socket_server.bind('mission-state', self._set_mission_state)
@@ -44,5 +45,8 @@ class ArgosManager(DroneManager):
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data
         self._send_drone_ids()
+
+    def _get_console_log_callback(self, console_text: Optional[str], data: Any):
+        self._console_log_callback(data)
 
         print('Received drone IDs:', self._drone_ids)

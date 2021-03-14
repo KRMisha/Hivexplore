@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 from typing import Any, Dict, List
 import numpy as np
+from server.managers.drone_state import DroneState
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator, Orientation, Point, Range
 from server.sockets.web_socket_server import WebSocketServer
@@ -89,6 +90,11 @@ class DroneManager(ABC):
     def _log_rssi_callback(drone_id: str, data: Dict[str, float]):
         rssi = data['radio.rssi']
         print(f'RSSI from drone {drone_id}: {rssi}')
+
+    def _log_drone_state_callback(self, drone_id: str, data: Dict[str, int]):
+        drone_state = data['hivexplore.droneState']
+        print(f'Drone state from drone {drone_id}: {drone_state}')
+        self._web_socket_server.send_drone_message('drone-state', drone_id, DroneState(drone_state).name)
 
     # Client callbacks
 

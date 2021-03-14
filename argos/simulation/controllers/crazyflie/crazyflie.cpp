@@ -109,7 +109,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     rssiLog.emplace("radio.rssi", m_rssiReading);
     logDataMap.emplace_back("Rssi", rssiLog);
 
-    // BatteryLevel group
+    // DroneState group
     LogVariableMap droneStateLog;
     droneStateLog.emplace("hivexplore.droneState", static_cast<std::uint8_t>(m_droneState));
     logDataMap.emplace_back("DroneState", droneStateLog);

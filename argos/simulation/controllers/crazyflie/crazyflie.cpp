@@ -111,10 +111,10 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     return logDataMap;
 }
 
-std::vector<std::string> CCrazyflieController::GetConsoleLogData() {
-    std::vector<std::string> previousStepConsoleLog = consoleLog;
-    consoleLog.clear();
-    return previousStepConsoleLog;
+std::vector<std::string> CCrazyflieController::GetLogConsoleData() {
+    std::vector<std::string> previousStepLogConsole = logConsole;
+    logConsole.clear();
+    return previousStepLogConsole;
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
@@ -360,7 +360,7 @@ void CCrazyflieController::UpdateRssi() {
 
 void CCrazyflieController::debugPrint(std::string consoleText) {
     RLOG << consoleText << "\n";
-    consoleLog.push_back(consoleText);
+    logConsole.push_back(consoleText);
 }
 
 template<typename T, typename U = T>

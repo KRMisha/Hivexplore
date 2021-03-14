@@ -107,11 +107,11 @@ void CHivexploreLoopFunctions::PreStep() {
                 }
             }
             // Send console log data
-            std::vector<std::string> consoleLogData = controller.get().GetConsoleLogData();
+            std::vector<std::string> logConsoleData = controller.get().GetLogConsoleData();
             json packet = {
-                {"logName", "ConsoleLog"},
+                {"logName", "LogConsole"},
                 {"droneId", controller.get().GetId()},
-                {"variables", consoleLogData},
+                {"variables", logConsoleData},
             };
             std::string serializedPacket = packet.dump();
             ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);

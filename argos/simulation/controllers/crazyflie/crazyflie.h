@@ -44,7 +44,7 @@ public:
     using LogVariableMap = std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>;
     using LogConfigs = std::vector<std::pair<std::string, LogVariableMap>>;
 
-    std::vector<std::string> consoleLog;
+    std::vector<std::string> logConsole;
 
     virtual void Init(TConfigurationNode& t_node) override;
     virtual void ControlStep() override;
@@ -52,7 +52,7 @@ public:
     virtual void Destroy() override;
 
     LogConfigs GetLogData() const;
-    std::vector<std::string> GetConsoleLogData();
+    std::vector<std::string> GetLogConsoleData();
     void SetParamData(const std::string& param, json value);
 
 private:

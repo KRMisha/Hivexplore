@@ -74,7 +74,7 @@
 
         <!-- Top obstacles -->
         <distribute>
-            <position method="uniform" min="-5,-5,0" max="5,-2,0" />
+            <position method="uniform" min="-5,-5,0" max="-2,5,0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
             <entity quantity="6" max_trials="100">
                 <box id="tb" size="0.5,0.5,2" movable="false" />
@@ -83,8 +83,8 @@
 
         <!-- Bottom obstacles -->
         <distribute>
-            <position method="uniform" min="-5,2,0" max="5,5,0" />
-            <orientation method="uniform" min="0,0,0" max="360,0,0" />
+            <position method="uniform" min="2,-5,0" max="5,5,0" />
+            <orientation method="constant" values="0,0,0" />
             <entity quantity="6" max_trials="100">
                 <box id="bb" size="0.5,0.5,2" movable="false" />
             </entity>
@@ -92,19 +92,19 @@
 
         <!-- Left obstacles -->
         <distribute>
-            <position method="uniform" min="-5,-2,0" max="-2,2,0" />
+            <position method="uniform" min="-2,-5,0" max="2,-2,0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
             <entity quantity="2" max_trials="100">
-                <box id="lb" size="0.7,0.7,2" movable="false" />
+                <box id="lw" size="0.7,0.7,2" movable="false" />
             </entity>
         </distribute>
 
         <!-- Right obstacles -->
         <distribute>
-            <position method="uniform" min="2,-2,0" max="5,2,0" />
+            <position method="uniform" min="-2,2,0" max="2,5,0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
             <entity quantity="2" max_trials="100">
-                <box id="rb" size="0.7,0.7,2" movable="false" />
+                <box id="rw" size="0.7,0.7,2" movable="false" />
             </entity>
         </distribute>
     </arena>

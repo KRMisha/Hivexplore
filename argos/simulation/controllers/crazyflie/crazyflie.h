@@ -50,8 +50,6 @@ public:
     using LogVariableMap = std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>;
     using LogConfigs = std::vector<std::pair<std::string, LogVariableMap>>;
 
-    std::vector<std::string> consoleLogs;
-
     virtual void Init(TConfigurationNode& t_node) override;
     virtual void ControlStep() override;
     virtual void Reset() override;
@@ -96,6 +94,7 @@ private:
     std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
     DroneStatus m_droneStatus = DroneStatus::Standby;
+    std::vector<std::string> m_consoleLogs;
 
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;

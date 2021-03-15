@@ -32,7 +32,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
-    consoleLogs.clear();
+    m_consoleLogs.clear();
 
     UpdateSensorReadings();
     UpdateVelocity();
@@ -120,7 +120,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 }
 
 std::vector<std::string> CCrazyflieController::GetConsoleLogs() const {
-    return consoleLogs;
+    return m_consoleLogs;
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
@@ -375,7 +375,7 @@ void CCrazyflieController::UpdateDroneStatus() {
 
 void CCrazyflieController::DebugPrint(const std::string& text) {
     RLOG << text << "\n";
-    consoleLogs.push_back(text);
+    m_consoleLogs.push_back(text);
 }
 
 template<typename T, typename U = T>

@@ -1,5 +1,5 @@
-# Install stage
-FROM ubuntu:20.04 AS install
+# Base stage
+FROM ubuntu:20.04 AS base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -36,7 +36,7 @@ RUN cd argos3/build_simulator && \
 WORKDIR /hivexplore
 
 # Production stage
-FROM install as production
+FROM base as prod
 
 COPY simulation .
 

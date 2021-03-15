@@ -20,7 +20,7 @@ clean-config:
 	rm -f $(LOCAL_ARGOS_VSCODE_CONFIG)
 
 image:
-	docker build -t hivexplore/argos:dev --target install .
+	docker build -t hivexplore/argos:dev --target base .
 
 image-prod:
 	docker build -t hivexplore/argos .

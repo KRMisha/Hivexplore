@@ -96,16 +96,9 @@ void CHivexploreLoopFunctions::PreStep() {
                     {"variables", variablesJson},
                 };
 
-                std::string serializedPacket = packet.dump();
-
-                ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
-                if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-                    // Restart simulation in case of socket error
-                    std::perror("Unix socket send");
-                    Stop();
-                    return;
-                }
+                Send(packet);
             }
+
             // Send console log data
             std::vector<std::string> consoleLogs = controller.get().GetConsoleLogs();
             json packet = {
@@ -113,17 +106,12 @@ void CHivexploreLoopFunctions::PreStep() {
                 {"droneId", controller.get().GetId()},
                 {"variables", consoleLogs},
             };
-            std::string serializedPacket = packet.dump();
-            ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
-            if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-                std::perror("Unix socket send");
-                Stop();
-                return;
 
-            }
+            Send(packet);
         }
     }
 }
+
 
 void CHivexploreLoopFunctions::PostStep() {
 }
@@ -188,6 +176,18 @@ void CHivexploreLoopFunctions::StartSocket() {
     std::cout << "Unix socket connection accepted\n";
 }
 
+void CHivexploreLoopFunctions::Send(json packet) {
+    std::string serializedPacket = packet.dump();
+    ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
+    if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+        // Restart simulation in case of socket error
+        std::perror("Unix socket send");
+        Stop();
+        return;
+
+    }
+}
+
 void CHivexploreLoopFunctions::Stop() {
     LOG << "Stopping simulation...\n"
            "Please do the following to restart the mission:\n"
@@ -210,13 +210,8 @@ void CHivexploreLoopFunctions::SendDroneIdsToServer() {
         {"droneId", nullptr},
         {"variables", droneIds},
     };
-    std::string serializedPacket = packet.dump();
 
-    ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
-    if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-        std::perror("Unix socket send");
-        Stop();
-    }
+    Send(packet);
 }
 
 std::vector<std::reference_wrapper<CCrazyflieController>> CHivexploreLoopFunctions::GetControllers() {

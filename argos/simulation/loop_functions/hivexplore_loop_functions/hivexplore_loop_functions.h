@@ -19,6 +19,7 @@ public:
 
 private:
     void StartSocket();
+    void Send(json packet);
     void Stop();
     void SendDroneIdsToServer();
     std::vector<std::reference_wrapper<CCrazyflieController>> GetControllers();

@@ -60,7 +60,7 @@ private:
     void UpdateSensorReadings();
     void UpdateVelocity();
     void UpdateRssi();
-    void pingOtherDrones();
+    void PingOtherDrones();
 
     template<typename T, typename U = T>
     std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;

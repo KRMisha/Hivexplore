@@ -93,18 +93,18 @@
         <!-- Left obstacles -->
         <distribute>
             <position method="uniform" min="-2,-5,0" max="2,-2,0" />
-            <orientation method="uniform" min="0,0,0" max="360,0,0" />
+            <orientation method="uniform" min="70,0,0" max="110,0,0" />
             <entity quantity="2" max_trials="100">
-                <box id="lw" size="0.7,0.7,2" movable="false" />
+                <box id="lw" size="0.2,2,2" movable="false" />
             </entity>
         </distribute>
 
         <!-- Right obstacles -->
         <distribute>
             <position method="uniform" min="-2,2,0" max="2,5,0" />
-            <orientation method="uniform" min="0,0,0" max="360,0,0" />
+            <orientation method="uniform" min="70,0,0" max="110,0,0" />
             <entity quantity="2" max_trials="100">
-                <box id="rw" size="0.7,0.7,2" movable="false" />
+                <box id="rw" size="0.2,2,2" movable="false" />
             </entity>
         </distribute>
     </arena>

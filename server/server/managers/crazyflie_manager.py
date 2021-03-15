@@ -14,7 +14,6 @@ class CrazyflieManager(DroneManager):
         super().__init__(web_socket_server, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
-        self._crazyflie_uris: List[str] = []
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
@@ -23,8 +22,8 @@ class CrazyflieManager(DroneManager):
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     def _connect_crazyflies(self):
-        self._crazyflie_uris = get_crazyflie_uris_from_file()
-        for uri in self._crazyflie_uris:
+        crazyflie_uris = get_crazyflie_uris_from_file()
+        for uri in crazyflie_uris:
             if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
                 continue
 

@@ -41,6 +41,7 @@ enum class ReturningState {
 enum class DroneStatus {
     Standby,
     Flying,
+    Landed,
     Crashed,
 };
 
@@ -83,6 +84,7 @@ private:
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
     ReturningState m_returningState = ReturningState::Return;
+    bool droneIsLanding = false;
 
     // Data
     CVector3 m_initialPosition;

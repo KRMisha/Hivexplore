@@ -10,8 +10,14 @@
             />
             <Button
                 label="Return to base"
-                class="p-button-info"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Exploring"
+                @click="setMissionState(MissionState.Returning)"
+            />
+            <Button
+                :label="endMissionButtonLabel"
+                class="right-button"
+                :style="{ 'background-color': endMissionButtonColor }"
+                :disabled="droneIds.length === 0 || missionState === MissionState.Standby"
                 @click="setMissionState(MissionState.Returning)"
             />
         </div>
@@ -35,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, provide, ref } from 'vue';
+import { computed, defineComponent, onUnmounted, provide, ref } from 'vue';
 import Drone from '@/components/Drone.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
@@ -64,6 +70,14 @@ export default defineComponent({
             socketClient.sendMessage('mission-state', missionState);
         }
 
+        const endMissionButtonLabel = computed((): string => {
+            return (missionState.value === MissionState.Landed ? 'End mission' : 'Emergency land');
+        });
+
+        const endMissionButtonColor = computed((): string => {
+            return (missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red');
+        });
+
         provide('socketClient', socketClient);
 
         onUnmounted(() => {
@@ -76,6 +90,8 @@ export default defineComponent({
             missionStates: Object.values(MissionState),
             MissionState,
             setMissionState,
+            endMissionButtonLabel,
+            endMissionButtonColor,
         };
     },
 });
@@ -103,6 +119,10 @@ export default defineComponent({
 
 .left-button {
     margin-right: 16px;
+}
+
+.right-button {
+    margin-left: 16px;
 }
 
 .timeline {

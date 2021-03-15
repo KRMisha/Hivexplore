@@ -360,9 +360,15 @@ void CCrazyflieController::UpdateRssi() {
 
 void CCrazyflieController::UpdateDroneStatus() {
     // TODO: Handle crash state
-    if (m_missionState == MissionState::Standby || m_exploringState == ExploringState::Idle || m_returningState == ReturningState::Idle) {
+    if (m_missionState == MissionState::Standby) {
         m_droneStatus = DroneStatus::Standby;
-    } else {
+    } else if (droneIsLanding && m_returningState == ReturningState::Idle) {
+        droneIsLanding = false;
+        m_droneStatus = DroneStatus::Landed;
+    // TODO: Do we need ExploringState::Land??
+    } else if (m_exploringState == ExploringState::Land || m_returningState == ReturningState::Land) {
+        droneIsLanding = true;
+    } else if (m_missionState != MissionState::Standby && m_exploringState != ExploringState::Idle && m_returningState != ReturningState::Idle) {
         m_droneStatus = DroneStatus::Flying;
     }
 }

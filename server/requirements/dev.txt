@@ -1,0 +1,6 @@
+-r common.txt
+mypy
+pylint
+pytest==6.2.2
+rope
+yapf

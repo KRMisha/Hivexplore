@@ -76,8 +76,8 @@
         <distribute>
             <position method="uniform" min="-5,-5,0" max="-2,5,0" />
             <orientation method="uniform" min="0,0,0" max="360,0,0" />
-            <entity quantity="6" max_trials="100">
-                <box id="tb" size="0.5,0.5,2" movable="false" />
+            <entity quantity="3" max_trials="100">
+                <box id="tb" size="2,2,2" movable="false" />
             </entity>
         </distribute>
 
@@ -85,8 +85,8 @@
         <distribute>
             <position method="uniform" min="2,-5,0" max="5,5,0" />
             <orientation method="constant" values="0,0,0" />
-            <entity quantity="6" max_trials="100">
-                <cylinder id="bc" height="2" radius="0.3" movable="false" />
+            <entity quantity="5" max_trials="100">
+                <cylinder id="bc" height="2" radius="0.4" movable="false" />
             </entity>
         </distribute>
 

@@ -52,7 +52,7 @@ public:
     virtual void Destroy() override;
 
     LogConfigs GetLogData() const;
-    std::vector<std::string> GetLogConsoleData();
+    std::vector<std::string> GetLogConsoleData() const;
     void SetParamData(const std::string& param, json value);
 
 private:
@@ -64,7 +64,7 @@ private:
     void UpdateVelocity();
     void UpdateRssi();
 
-    void debugPrint(std::string consoleText);
+    void DebugPrint(const std::string& text);
 
     template<typename T, typename U = T>
     std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;

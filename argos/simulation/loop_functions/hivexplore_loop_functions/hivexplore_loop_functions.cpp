@@ -109,7 +109,7 @@ void CHivexploreLoopFunctions::PreStep() {
             // Send console log data
             std::vector<std::string> logConsoleData = controller.get().GetLogConsoleData();
             json packet = {
-                {"logName", "LogConsole"},
+                {"logName", "Console"},
                 {"droneId", controller.get().GetId()},
                 {"variables", logConsoleData},
             };

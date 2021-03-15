@@ -90,8 +90,8 @@ class DroneManager(ABC):
         rssi = data['radio.rssi']
         print(f'RSSI from drone {drone_id}: {rssi}')
 
-    def _log_console_callback(self, console_text):
-        print(f'Console log: {console_text}')
+    def _log_console_callback(self, text):
+        print(f'Console log: {text}')
         # TODO: send console log to client through self._web_socket_server.send_drone_message
 
     # Client callbacks

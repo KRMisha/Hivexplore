@@ -41,10 +41,10 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
-    PingOtherDrones();
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
+    PingOtherDrones();
 
     switch (m_missionState) {
     case MissionState::Standby:

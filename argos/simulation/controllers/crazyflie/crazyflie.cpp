@@ -164,32 +164,38 @@ bool CCrazyflieController::AvoidObstacle() {
     if (shouldStartAvoidance) {
         static constexpr double maximumVelocity = 1.0;
         static constexpr double avoidanceSensitivity = maximumVelocity / meterToMillimeterFactor;
-        double leftDistanceCorrection =
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
-        double rightDistanceCorrection =
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
-        double frontDistanceCorrection =
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
-        double backDistanceCorrection =
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
+        double leftDistanceCorrection = 0.0;
+        double rightDistanceCorrection = 0.0;
+        double frontDistanceCorrection = 0.0;
+        double backDistanceCorrection = 0.0;
+
+        // Obstacle collision avoidance
+        if (isObstacleDetected) {
+            leftDistanceCorrection +=
+                    calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
+            rightDistanceCorrection +=
+                    calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
+            frontDistanceCorrection +=
+                    calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
+            backDistanceCorrection +=
+                    calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
+        }
 
         // Drone collision avoidance
-        double leftDroneAvoidanceCorrection = 0;
-        double backDroneAvoidanceCorrection = 0;
         if (isOtherDroneDetected) {
             for (const auto& packet : m_pcRABS->GetReadings()) {
                 const double horizontalAngle = packet.HorizontalBearing.GetValue();
                 // Convert packet range from cm to mm
                 const auto vectorToDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
                 static const double droneAvoidanceSensitivity = 1.0 / 3000.0;
-                leftDroneAvoidanceCorrection += calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetX()) * droneAvoidanceSensitivity;
-                backDroneAvoidanceCorrection += calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetY()) * droneAvoidanceSensitivity;
+                leftDistanceCorrection += calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetX()) * droneAvoidanceSensitivity;
+                backDistanceCorrection += calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetY()) * droneAvoidanceSensitivity;
             }
         }
         // Y: Back, -Y: Forward, X: Left, -X: Right
         auto positionCorrection =
-            CVector3(rightDistanceCorrection - leftDistanceCorrection - leftDroneAvoidanceCorrection,
-                     frontDistanceCorrection - backDistanceCorrection - backDroneAvoidanceCorrection, 0.0);
+            CVector3(rightDistanceCorrection - leftDistanceCorrection,
+                     frontDistanceCorrection - backDistanceCorrection, 0.0);
 
 
         // Start obstacle avoidance if correction is not negligible

@@ -17,6 +17,7 @@ def get_crazyflie_uris_from_file():
             pass
 
         DEFAULT_URIS = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
+        print('get_crazyflie_uris_from_file warning: Using default uris:', DEFAULT_URIS)
         json.dump({'crazyflie_uris': DEFAULT_URIS}, uris_file)
         uris_file.write('\n')
         return DEFAULT_URIS
@@ -24,13 +25,17 @@ def get_crazyflie_uris_from_file():
 
 def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
     eeprom = crazyflie.mem.get_mems(MemoryElement.TYPE_I2C)[0]
-    print(eeprom.id)
+
+    # Write default values in eeprom
     eeprom.elements['version'] = 1
     eeprom.elements['pitch_trim'] = 0.0
     eeprom.elements['roll_trim'] = 0.0
     eeprom.elements['radio_channel'] = 80
     eeprom.elements['radio_speed'] = 2 # 2 is the index pointing to 2M
+
+    # Write radio address
     eeprom.elements['radio_address'] = radio_address
+
     eeprom.write_data(lambda eeprom, addr: _data_written(crazyflie, eeprom, addr))
 
 
@@ -49,10 +54,14 @@ def _data_updated(crazyflie: Crazyflie, eeprom):
     PowerSwitch(crazyflie.link_uri).stm_power_cycle()
 
     uris = get_crazyflie_uris_from_file()
+
+    # Remove old drone URI
     try:
         uris.remove(crazyflie.link_uri)
     except ValueError:
         pass
+
+    # Append the new one
     uris.append(new_uri)
 
     with open(CRAZYFLIE_URIS_FILENAME, 'w+') as uris_file:

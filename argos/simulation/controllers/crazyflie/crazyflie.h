@@ -38,6 +38,12 @@ enum class ReturningState {
     Idle,
 };
 
+enum class DroneStatus {
+    Standby,
+    Flying,
+    Crashed,
+};
+
 class CCrazyflieController : public CCI_Controller {
 public:
     // Use vector of pairs to preserve insertion order (required to receive orientation and position data before range data for mapping)
@@ -60,6 +66,7 @@ private:
     void UpdateSensorReadings();
     void UpdateVelocity();
     void UpdateRssi();
+    void UpdateDroneStatus();
 
     template<typename T, typename U = T>
     std::unordered_map<std::string, U> GetSensorReadings(const std::array<std::string, 6>& sensorNames) const;
@@ -83,6 +90,7 @@ private:
     CVector3 m_velocity;
     std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
+    DroneStatus m_droneStatus = DroneStatus::Standby;
 
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;

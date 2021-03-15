@@ -52,8 +52,9 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
 
-typedef enum { STANDBY, EXPLORING, RETURNING } mission_state_t;
-typedef enum { IDLE, LIFTOFF, EXPLORE, ROTATE, LAND } exploring_state_t;
+typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING } mission_state_t;
+typedef enum { EXPLORING_IDLE, EXPLORING_LIFTOFF, EXPLORING_EXPLORE, EXPLORING_ROTATE, EXPLORING_LAND } exploring_state_t;
+typedef enum { STATUS_STANDBY, STATUS_FLYING, STATUS_CRASHED } drone_status_t;
 
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -62,7 +63,10 @@ static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 1.0f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
-static mission_state_t missionState = STANDBY;
+static mission_state_t missionState = MISSION_STANDBY;
+static exploring_state_t exploringState = EXPLORING_IDLE;
+
+static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isM1LedOn = false;
 
 static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
@@ -77,6 +81,16 @@ static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float
 
     setPoint->mode.z = modeAbs;
     setPoint->position.z = targetHeight;
+}
+
+static void updateDroneStatus() {
+    // TODO: Handle crash state
+    // TODO: Handle returning IDLE state
+    if (missionState == MISSION_STANDBY || exploringState == EXPLORING_IDLE) {
+        droneStatus = STATUS_STANDBY;
+    } else {
+        droneStatus = STATUS_FLYING;
+    }
 }
 
 static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
@@ -98,7 +112,6 @@ void appMain(void) {
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
-    exploring_state_t exploringState = IDLE;
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
     const bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
@@ -112,6 +125,7 @@ void appMain(void) {
     while (true) {
         vTaskDelay(M2T(10));
 
+        updateDroneStatus();
         ledSet(LED_GREEN_R, isM1LedOn);
 
         if (isOutOfService) {
@@ -120,9 +134,9 @@ void appMain(void) {
         }
 
         switch (missionState) {
-        case STANDBY:
+        case MISSION_STANDBY:
             break;
-        case EXPLORING: {
+        case MISSION_EXPLORING: {
             // TODO: Move this to explore() function (like in ARGoS)
             // Note: many variables will need to be hoisted out globally to be accessible to both explore() and return() (ex: readings)
 
@@ -142,7 +156,7 @@ void appMain(void) {
             float targetYawRate = 0.0;
 
             // Global obstacle avoidance
-            if (exploringState == LIFTOFF || exploringState == EXPLORE || exploringState == ROTATE || exploringState == LAND) {
+            if (exploringState == EXPLORING_LIFTOFF || exploringState == EXPLORING_EXPLORE || exploringState == EXPLORING_ROTATE || exploringState == EXPLORING_LAND) {
                 // Distance correction required to stay out of range of any obstacle
                 uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
                 uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
@@ -156,47 +170,47 @@ void appMain(void) {
             }
 
             switch (exploringState) {
-            case IDLE: {
+            case EXPLORING_IDLE: {
                 DEBUG_PRINT("Idle\n");
                 memset(&setPoint, 0, sizeof(setpoint_t));
 
                 // Check if any obstacle is in the way before taking off
                 if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                     DEBUG_PRINT("Liftoff\n");
-                    exploringState = LIFTOFF;
+                    exploringState = EXPLORING_LIFTOFF;
                 }
             } break;
-            case LIFTOFF: {
+            case EXPLORING_LIFTOFF: {
                 targetHeight += EXPLORATION_HEIGHT;
                 setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
                 if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
                     DEBUG_PRINT("Liftoff finished\n");
-                    exploringState = EXPLORE;
+                    exploringState = EXPLORING_EXPLORE;
                 }
 
                 // TODO: Remove in final algorithm, currently used to make drone land
                 if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                    exploringState = LAND;
+                    exploringState = EXPLORING_LAND;
                 }
             } break;
-            case EXPLORE: {
+            case EXPLORING_EXPLORE: {
                 targetHeight += EXPLORATION_HEIGHT;
                 targetForwardVelocity += CRUISE_VELOCITY;
                 setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
 
                 if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
-                    exploringState = ROTATE;
+                    exploringState = EXPLORING_ROTATE;
                 }
 
                 // TODO: Remove in final algorithm, currently used to make drone land
                 if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                    exploringState = LAND;
+                    exploringState = EXPLORING_LAND;
                 }
             } break;
-            case ROTATE: {
+            case EXPLORING_ROTATE: {
                 static const uint16_t OPEN_SPACE_THRESHOLD = 300;
                 if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
-                    exploringState = EXPLORE;
+                    exploringState = EXPLORING_EXPLORE;
                 }
                 targetHeight += EXPLORATION_HEIGHT;
                 targetYawRate = 50;
@@ -204,15 +218,15 @@ void appMain(void) {
 
                 // TODO: Remove in final algorithm, currently used to make drone land
                 if (upSensorReading < OBSTACLE_DETECTED_THRESHOLD) {
-                    exploringState = LAND;
+                    exploringState = EXPLORING_LAND;
                 }
             } break;
-            case LAND: {
+            case EXPLORING_LAND: {
                 setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
                 static const uint16_t LANDED_HEIGHT = 50;
                 if (downSensorReading < LANDED_HEIGHT) {
                     DEBUG_PRINT("Landed\n");
-                    exploringState = IDLE;
+                    exploringState = EXPLORING_IDLE;
                 }
             } break;
             }
@@ -220,12 +234,16 @@ void appMain(void) {
             static const uint8_t TASK_PRIORITY = 3;
             commanderSetSetpoint(&setPoint, TASK_PRIORITY);
         } break;
-        case RETURNING:
+        case MISSION_RETURNING:
             // TODO: Call return() function
             break;
         }
     }
 }
+
+LOG_GROUP_START(hivexplore)
+LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
+LOG_GROUP_STOP(hivexplore)
 
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)

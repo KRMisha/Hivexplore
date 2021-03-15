@@ -10,15 +10,9 @@
             />
             <Button
                 label="Return to base"
+                class="p-button-info"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Exploring"
                 @click="setMissionState(MissionState.Returning)"
-            />
-            <!-- TODO: Add dialog when pressing "end mission" to confirm that some drones will emergency land if some drones have not yet returned  -->
-            <Button
-                label="End mission"
-                class="right-button"
-                :disabled="droneIds.length === 0 || missionState !== MissionState.Exploring"
-                @click="setMissionState(MissionState.Landing)"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
@@ -109,10 +103,6 @@ export default defineComponent({
 
 .left-button {
     margin-right: 16px;
-}
-
-.right-button {
-    margin-left: 16px;
 }
 
 .timeline {

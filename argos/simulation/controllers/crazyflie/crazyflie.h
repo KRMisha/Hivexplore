@@ -21,7 +21,6 @@ enum class MissionState {
     Standby,
     Exploring,
     Returning,
-    Landing,
 };
 
 enum class ExploringState {
@@ -30,6 +29,7 @@ enum class ExploringState {
     Explore,
     Brake,
     Rotate,
+    Land,
 };
 
 enum class ReturningState {
@@ -62,7 +62,6 @@ private:
     bool AvoidObstacle();
     void Explore();
     void Return();
-    void Land();
 
     void UpdateSensorReadings();
     void UpdateVelocity();

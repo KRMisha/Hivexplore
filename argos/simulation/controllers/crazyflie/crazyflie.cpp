@@ -13,10 +13,10 @@ namespace {
 
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
-    double sign(double value) { return value / std::abs(value); }
+    constexpr double calculateSign(double value) { return value < 0 ? -1 : 1; }
 
-    double calculateDroneDistanceCorrection(double threshold, double distance) {
-        return sign(distance) * (threshold - std::abs(distance));
+    constexpr double calculateDroneDistanceCorrection(double threshold, double distance) {
+        return calculateSign(distance) * (threshold - std::abs(distance));
     }
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {

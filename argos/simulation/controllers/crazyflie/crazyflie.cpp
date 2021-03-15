@@ -33,6 +33,7 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 
 void CCrazyflieController::ControlStep() {
     consoleLogs.clear();
+
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();

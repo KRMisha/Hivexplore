@@ -21,6 +21,7 @@ class ArgosManager(DroneManager):
         self._unix_socket_client.bind('Velocity', self._log_velocity_callback)
         self._unix_socket_client.bind('Range', self._log_range_callback)
         self._unix_socket_client.bind('Rssi', self._log_rssi_callback)
+        self._unix_socket_client.bind('DroneStatus', self._log_drone_status_callback)
         self._unix_socket_client.bind('Console', self._log_console_callback)
 
         # Client bindings

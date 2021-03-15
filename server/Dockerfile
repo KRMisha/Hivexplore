@@ -1,23 +1,17 @@
-# Install stage (slim-buster?)
+# Install stage
 FROM python:3.8-slim-buster as install
 
-# Activate virtual environment
-ENV VIRTUAL_ENV=../.venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-# Install dependencies
-COPY requirements.txt .
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
-
-# Create working directory
 WORKDIR /hivexplore
 
+COPY requirements/prod.txt .
+RUN pip3 install -r requirements/prod.txt
+
+# Production stage
 FROM install as production
 
 COPY . .
 
 EXPOSE 5678
 
-CMD ["python3", "-m", "server.main", "argos"]
+# TODO: Provide argument
+CMD [ "python3", "-m", "server.main", "argos" ]

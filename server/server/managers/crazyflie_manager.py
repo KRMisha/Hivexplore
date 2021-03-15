@@ -1,29 +1,22 @@
 import asyncio
-from typing import Dict
-import numpy as np
+from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
-from server.core.web_socket_server import WebSocketServer
-from server.core.map_generator import MapGenerator, Orientation, Point
-from server.managers.mission_state import MissionState
+from server.managers.drone_manager import DroneManager
+from server.map_generator import MapGenerator
+from server.sockets.web_socket_server import WebSocketServer
 from server import config
 
-# pylint: disable=no-self-use
 
-# TODO: Refactor common code between CrazyflieManager and ArgosManager
-
-
-class CrazyflieManager:
+class CrazyflieManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
-        self._web_socket_server = web_socket_server
-        self._map_generator = map_generator
+        super().__init__(web_socket_server, map_generator)
         self._crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
         await self._find_crazyflies()
-        self._web_socket_server.bind('connect', self._new_connection_callback)
         self._web_socket_server.bind('mission-state', self._set_mission_state)
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
@@ -56,11 +49,14 @@ class CrazyflieManager:
                 await asyncio.sleep(timeout_s)
                 timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
 
-    def _send_drone_ids(self, client_id=None):
-        if client_id is None:
-            self._web_socket_server.send_message('drone-ids', list(self._crazyflies.keys()))
-        else:
-            self._web_socket_server.send_message_to_client(client_id, 'drone-ids', list(self._crazyflies.keys()))
+    def _get_drone_ids(self) -> List[str]:
+        return list(self._crazyflies.keys())
+
+    def _is_drone_id_valid(self, drone_id: str) -> bool:
+        return drone_id in self._crazyflies
+
+    def _set_drone_param(self, param: str, drone_id: str, value: Any):
+        self._crazyflies[drone_id].param.set_value(param, value)
 
     # Setup
 
@@ -72,37 +68,43 @@ class CrazyflieManager:
             {
                 'log_config': LogConfig(name='BatteryLevel', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['pm.batteryLevel'],
-                'data_callback': self._log_battery_callback,
+                'data_callback': lambda _timestamp, data, logconf: self._log_battery_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
                 'log_config': LogConfig(name='Orientation', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.roll', 'stateEstimate.pitch', 'stateEstimate.yaw'],
-                'data_callback': self._log_orientation_callback,
+                'data_callback': lambda _timestamp, data, logconf: self._log_orientation_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
                 'log_config': LogConfig(name='Position', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
-                'data_callback': self._log_position_callback,
+                'data_callback': lambda _timestamp, data, logconf: self._log_position_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
                 'log_config': LogConfig(name='Velocity', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.vx', 'stateEstimate.vy', 'stateEstimate.vz'],
-                'data_callback': self._log_velocity_callback,
+                'data_callback': lambda _timestamp, data, logconf: self._log_velocity_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
                 'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS), # Must be added after orientation and position
                 'variables': ['range.front', 'range.left', 'range.back', 'range.right', 'range.up', 'range.zrange'],
-                'data_callback': self._log_range_callback,
+                'data_callback': lambda _timestamp, data, logconf: self._log_range_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
                 'log_config': LogConfig(name='Rssi', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['radio.rssi'],
-                'data_callback': self._log_rssi_callback,
+                'data_callback': lambda _timestamp, data, logconf: self._log_rssi_callback(logconf.cf.link_uri, data),
+                'error_callback': self._log_error_callback,
+            },
+            {
+                'log_config': LogConfig(name='DroneStatus', period_in_ms=POLLING_PERIOD_MS),
+                'variables': ['hivexplore.droneStatus'],
+                'data_callback': lambda _timestamp, data, logconf: self._log_drone_status_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
         ]
@@ -121,9 +123,10 @@ class CrazyflieManager:
             except AttributeError as exc:
                 print(f'Could not add log configuration, error: {exc}')
 
-    def _setup_param(self, crazyflie: Crazyflie):
-        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=self._param_update_callback)
-        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
+    @staticmethod
+    def _setup_param(crazyflie: Crazyflie):
+        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=CrazyflieManager._param_update_callback)
+        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=CrazyflieManager._param_update_callback)
 
     # Connection callbacks
 
@@ -148,100 +151,12 @@ class CrazyflieManager:
 
     # Log callbacks
 
-    def _log_battery_callback(self, _timestamp, data, logconf):
-        battery_level = data['pm.batteryLevel']
-        print(f'{logconf.name}: {battery_level}')
-
-        self._web_socket_server.send_drone_message('battery-level', logconf.cf.link_uri, battery_level)
-
-    def _log_orientation_callback(self, _timestamp, data, logconf):
-        measurements = {
-            'roll': data['stateEstimate.roll'],
-            'pitch': data['stateEstimate.pitch'],
-            'yaw': data['stateEstimate.yaw'],
-        }
-        print(logconf.name)
-        for key, value in measurements.items():
-            print(f'- {key}: {value:.2f}')
-
-        self._map_generator.set_orientation(logconf.cf.link_uri, Orientation(**measurements))
-
-    def _log_position_callback(self, _timestamp, data, logconf):
-        measurements = {
-            'x': data['stateEstimate.x'],
-            'y': data['stateEstimate.y'],
-            'z': data['stateEstimate.z'],
-        }
-
-        print(logconf.name)
-        for key, value in measurements.items():
-            print(f'- {key}: {value:.6f}')
-
-        self._map_generator.set_position(logconf.cf.link_uri, Point(**measurements))
-
-    def _log_velocity_callback(self, _timestamp, data, logconf):
-        measurements = {
-            'vx': data['stateEstimate.vx'],
-            'vy': data['stateEstimate.vy'],
-            'vz': data['stateEstimate.vz'],
-        }
-        print(logconf.name)
-        for key, value in measurements.items():
-            print(f'- {key}: {value:.6f}')
-
-        velocity_magnitude = np.linalg.norm(list(measurements.values()))
-        print(f'Velocity magnitude: {velocity_magnitude}')
-
-        self._web_socket_server.send_drone_message('velocity', logconf.cf.link_uri, round(velocity_magnitude, 4))
-
-    def _log_range_callback(self, _timestamp, data, logconf):
-        measurements = {
-            'front': data['range.front'],
-            'left': data['range.left'],
-            'back': data['range.back'],
-            'right': data['range.right'],
-            'up': data['range.up'],
-            'zrange': data['range.zrange'],
-        }
-        print(logconf.name)
-        for key, value in measurements.items():
-            print(f'- {key}: {value}')
-
-        self._map_generator.add_range_reading(logconf.cf.link_uri, measurements)
-
-    def _log_rssi_callback(self, _timestamp, data, logconf):
-        rssi = data['radio.rssi']
-        print(f'{logconf.name}: {rssi}')
-
-    def _log_error_callback(self, logconf, msg):
+    @staticmethod
+    def _log_error_callback(logconf, msg):
         print(f'Error when logging {logconf.name}: {msg}')
 
     # Param callbacks
 
-    def _param_update_callback(self, name, value):
+    @staticmethod
+    def _param_update_callback(name, value):
         print(f'Param readback: {name}={value}')
-
-    # Client callbacks
-
-    def _new_connection_callback(self, client_id):
-        self._send_drone_ids(client_id)
-
-    def _set_mission_state(self, mission_state_str: str):
-        try:
-            mission_state = MissionState[mission_state_str.upper()]
-        except KeyError:
-            print('CrazyflieManager error: Unknown mission state received:', mission_state_str)
-            return
-
-        print('Set mission state:', mission_state)
-        for crazyflie in self._crazyflies.values():
-            crazyflie.param.set_value('hivexplore.missionState', mission_state)
-        self._web_socket_server.send_message('mission-state', mission_state_str)
-
-    def _set_led_enabled(self, drone_id, is_enabled: bool):
-        if drone_id in self._crazyflies:
-            print(f'Set LED state for drone {drone_id}: {is_enabled}')
-            self._crazyflies[drone_id].param.set_value('hivexplore.isM1LedOn', is_enabled)
-            self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
-        else:
-            print('CrazyflieManager error: Unknown drone ID received:', drone_id)

@@ -50,6 +50,11 @@ void CCrazyflieController::ControlStep() {
             Return();
         }
         break;
+    case MissionState::Landing:
+        if (!AvoidObstacle()) {
+            Land();
+        }
+        break;
     }
 
     m_previousPosition = m_pcPos->GetReading().Position;
@@ -114,6 +119,11 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     droneStatusLog.emplace("hivexplore.droneStatus", static_cast<std::uint8_t>(m_droneStatus));
     logDataMap.emplace_back("DroneStatus", droneStatusLog);
 
+    // MissionState group
+    LogVariableMap missionStateLog;
+    missionStateLog.emplace("hivexplore.missionState", static_cast<std::uint8_t>(m_missionState));
+    logDataMap.emplace_back("MissionState", missionStateLog);
+
     return logDataMap;
 }
 
@@ -139,8 +149,7 @@ bool CCrazyflieController::AvoidObstacle() {
     });
 
     bool isExploringAvoidanceDisallowed = m_missionState == MissionState::Exploring &&
-                                          (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff ||
-                                           m_exploringState == ExploringState::Land);
+                                          (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff);
     bool isReturningAvoidanceDisallowed =
         m_missionState == MissionState::Returning && (m_returningState == ReturningState::Idle || m_returningState == ReturningState::Land);
 
@@ -291,24 +300,6 @@ void CCrazyflieController::Explore() {
             m_isRotateCommandFinished = true;
         }
     } break;
-    // TODO: Move emergency landing to MissionState switch
-    case ExploringState::Land: {
-        if (m_isEmergencyLandingFinished) {
-            m_emergencyLandingPosition = m_pcPos->GetReading().Position;
-            m_isEmergencyLandingFinished = false;
-        }
-
-        static constexpr double landingAltitude = 0.015;
-        static constexpr double landingAltitudeEpsilon = 0.0001;
-
-        // Wait for landing to finish
-        if (m_pcPos->GetReading().Position.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
-            m_pcPropellers->SetAbsolutePosition(
-                CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));
-            m_exploringState = ExploringState::Idle;
-            m_isEmergencyLandingFinished = true;
-        }
-    } break;
     }
 }
 
@@ -326,18 +317,42 @@ void CCrazyflieController::Return() {
             m_returningState = ReturningState::Land;
         }
     } break;
-    case ReturningState::Land: {
-        static constexpr double targetDroneLandHeight = 0.05;
-        static constexpr double targetDroneHeightEpsilon = 0.05;
-
-        m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
-        if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
-            m_returningState = ReturningState::Idle;
-        }
-    } break;
+    case ReturningState::Land:
+        m_missionState = MissionState::Landing;
+        m_returningState = ReturningState::Idle;
+        break;
     case ReturningState::Idle:
         break;
     }
+}
+
+void CCrazyflieController::Land() {
+    static constexpr double targetDroneLandHeight = 0.05;
+    static constexpr double targetDroneHeightEpsilon = 0.05;
+
+    m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
+    if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
+        m_missionState = MissionState::Standby;
+    }
+
+    // FROM ExploringState:
+    // case ExploringState::Land: {
+    //     if (m_isEmergencyLandingFinished) {
+    //         m_emergencyLandingPosition = m_pcPos->GetReading().Position;
+    //         m_isEmergencyLandingFinished = false;
+    //     }
+
+    //     static constexpr double landingAltitude = 0.015;
+    //     static constexpr double landingAltitudeEpsilon = 0.0001;
+
+    //     // Wait for landing to finish
+    //     if (m_pcPos->GetReading().Position.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
+    //         m_pcPropellers->SetAbsolutePosition(
+    //             CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));
+    //         m_exploringState = ExploringState::Idle;
+    //         m_isEmergencyLandingFinished = true;
+    //     }
+    // } break;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

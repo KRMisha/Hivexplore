@@ -96,6 +96,11 @@ class DroneManager(ABC):
         print(f'Drone status from drone {drone_id}: {drone_status}')
         self._web_socket_server.send_drone_message('drone-status', drone_id, DroneStatus(drone_status).name)
 
+    def _log_mission_state_callback(self, drone_id: str, data: Dict[str, int]):
+        mission_state = data['hivexplore.missionState']
+        print(f'Mission state from drone {drone_id}: {mission_state}')
+        self._web_socket_server.send_message('mission-state', MissionState(mission_state).name)
+
     # Client callbacks
 
     def _web_socket_connect_callback(self, client_id: str):
@@ -103,7 +108,7 @@ class DroneManager(ABC):
 
     def _set_mission_state(self, mission_state_str: str):
         try:
-            mission_state = MissionState[mission_state_str.upper()]
+            mission_state = MissionState[mission_state_str]
         except KeyError:
             print('ArgosManager error: Unknown mission state received:', mission_state_str)
             return
@@ -111,7 +116,6 @@ class DroneManager(ABC):
         print('Set mission state:', mission_state)
         for drone_id in self._get_drone_ids():
             self._set_drone_param('hivexplore.missionState', drone_id, mission_state)
-        self._web_socket_server.send_message('mission-state', mission_state_str)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):

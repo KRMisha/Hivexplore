@@ -32,9 +32,12 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
+    logConsole.clear();
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
+
+    DebugPrint("it works");
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -111,10 +114,8 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     return logDataMap;
 }
 
-std::vector<std::string> CCrazyflieController::GetLogConsoleData() {
-    std::vector<std::string> previousStepLogConsole = logConsole;
-    logConsole.clear();
-    return previousStepLogConsole;
+std::vector<std::string> CCrazyflieController::GetLogConsoleData() const {
+    return logConsole;
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
@@ -358,9 +359,9 @@ void CCrazyflieController::UpdateRssi() {
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 }
 
-void CCrazyflieController::debugPrint(std::string consoleText) {
-    RLOG << consoleText << "\n";
-    logConsole.push_back(consoleText);
+void CCrazyflieController::DebugPrint(const std::string& text) {
+    RLOG << text << "\n";
+    logConsole.push_back(text);
 }
 
 template<typename T, typename U = T>

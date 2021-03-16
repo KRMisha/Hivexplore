@@ -13,10 +13,11 @@ namespace {
 
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
-    constexpr double calculateSign(double value) { return value < 0 ? -1 : 1; }
+    template<typename T>
+    constexpr std::int8_t getSign(T value) { return value < 0 ? -1 : 1; }
 
     constexpr double calculateDroneDistanceCorrection(double threshold, double distance) {
-        return calculateSign(distance) * (threshold - std::abs(distance));
+        return getSign(distance) * (threshold - std::abs(distance));
     }
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
@@ -194,6 +195,7 @@ bool CCrazyflieController::AvoidObstacle() {
                     calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetY()) * droneAvoidanceSensitivity;
             }
         }
+
         // Y: Back, -Y: Forward, X: Left, -X: Right
         auto positionCorrection =
             CVector3(rightDistanceCorrection - leftDistanceCorrection, frontDistanceCorrection - backDistanceCorrection, 0.0);

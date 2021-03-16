@@ -119,7 +119,7 @@ class CrazyflieManager(DroneManager):
 
     # Connection callbacks
 
-    def _connected(self, link_uri):
+    def _connected(self, link_uri: str):
         print(f'Connected to {link_uri}')
 
         # Move the newly connected drone from pending to connected
@@ -142,7 +142,7 @@ class CrazyflieManager(DroneManager):
             self._pending_crazyflies[link_uri].close_link()
 
 
-    def _disconnected(self, link_uri):
+    def _disconnected(self, link_uri: str):
         print(f'Disconnected from {link_uri}')
         if link_uri in self._connected_crazyflies:
             del self._connected_crazyflies[link_uri]
@@ -150,11 +150,11 @@ class CrazyflieManager(DroneManager):
             del self._pending_crazyflies[link_uri]
         self._send_drone_ids()
 
-    def _connection_failed(self, link_uri, msg):
+    def _connection_failed(self, link_uri: str, msg: str):
         print(f'Connection to {link_uri} failed: {msg}')
         del self._pending_crazyflies[link_uri]
 
-    def _connection_lost(self, link_uri, msg):
+    def _connection_lost(self, link_uri: str, msg: str):
         print(f'Connection to {link_uri} lost: {msg}')
         self._connected_crazyflies.pop(link_uri, None) # Avoid double delete when Crazyflie disconnects
 

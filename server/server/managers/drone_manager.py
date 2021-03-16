@@ -107,8 +107,9 @@ class DroneManager(ABC):
             if DroneStatus[self._drones_status[_drone_id]] == DroneStatus.Landed:
                 drones_landed += 1
         if drones_landed == len(all_drone_ids):
-            print('All drones have landed!!!')
-            self._web_socket_server.send_message('mission-state', MissionState.Landed.name)
+            mission_state_landed = MissionState.Landed.name
+            self._web_socket_server.send_message('mission-state', mission_state_landed)
+            print(f'Mission state: {mission_state_landed}')
 
 
     # Client callbacks
@@ -127,6 +128,7 @@ class DroneManager(ABC):
         for drone_id in self._get_drone_ids():
             self._set_drone_param('hivexplore.missionState', drone_id, mission_state)
         self._web_socket_server.send_message('mission-state', mission_state_str)
+        print(f'Mission state: {mission_state_str}')
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):

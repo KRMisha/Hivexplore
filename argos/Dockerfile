@@ -28,14 +28,12 @@ RUN apt-get update && apt-get install -y \
     libxi-dev \
     libxmu-dev
 
-# Build ARGoS from source
+# Build and install ARGoS from source
 RUN git clone https://github.com/KRMisha/argos3 && \
     cd argos3 && \
     mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DARGOS_INSTALL_LDSOCONF=OFF ../src && \
     make -j$(nproc)
-
-# Install ARGoS
 RUN cd argos3/build && \
     make doc && \
     make install
@@ -56,14 +54,30 @@ RUN apt-get update && apt-get install -y \
     git \
     liblua5.3-dev
 
-# Production stage
-FROM base AS prod
-
-COPY simulation .
+# Production simulation build stage
+FROM base as build-prod
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    freeglut3-dev \
+    liblua5.3-dev
 
 # Build simulation
-RUN mkdir -p build && cd build && \
-    cmake -DCMAKE_BUILD_TYPE=Debug .. && \
+COPY simulation .
+RUN mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. && \
     make -j$(nproc)
 
+# Production stage
+FROM base AS prod
+COPY --from=build-prod /hivexplore .
 CMD [ "argos3", "-c", "experiments/hivexplore.argos" ]
+
+# TODO: Remove the useless simulation/ subdir
+# TODO: Multi-stage production stage to build simulation
+
+# TODO: Check if more lightweight distro than Ubuntu works
+# TODO: --no-install-recommends
+# TODO: Check if clang is necessary for clang-format
+
+# TODO: Rename Makefile targets for Docker (no -prod, rather -dev and no suffix for "prod")

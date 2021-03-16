@@ -2,6 +2,7 @@
     <div class="container">
         <Map class="map-container" />
         <div class="button-container">
+            <!-- TODO: Add dialog if we had an emergency landing -->
             <Button
                 label="Start mission"
                 class="left-button"
@@ -13,12 +14,13 @@
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Exploring"
                 @click="setMissionState(MissionState.Returning)"
             />
+            <!-- TODO: Add dialog when Emergency land -->
             <Button
                 :label="endMissionButtonLabel"
                 class="right-button"
                 :style="{ 'background-color': endMissionButtonColor }"
                 :disabled="droneIds.length === 0 || missionState === MissionState.Standby"
-                @click="setMissionState(MissionState.Returning)"
+                @click="setMissionState(MissionState.Standby)"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">

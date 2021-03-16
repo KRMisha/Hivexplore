@@ -12,6 +12,7 @@ class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
+        self._drones_status: Dict[str, str] = {}
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -94,7 +95,21 @@ class DroneManager(ABC):
     def _log_drone_status_callback(self, drone_id: str, data: Dict[str, int]):
         drone_status = data['hivexplore.droneStatus']
         print(f'Drone status from drone {drone_id}: {drone_status}')
-        self._web_socket_server.send_drone_message('drone-status', drone_id, DroneStatus(drone_status).name)
+
+        drone_status_name = DroneStatus(drone_status).name
+        self._drones_status[drone_id] = drone_status_name
+        self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status_name)
+
+        # Check if all drones status is "Landed"
+        all_drone_ids = self._get_drone_ids()
+        drones_landed = 0
+        for _drone_id in all_drone_ids:
+            if DroneStatus[self._drones_status[_drone_id]] == DroneStatus.Landed:
+                drones_landed += 1
+        if drones_landed == len(all_drone_ids):
+            print('All drones have landed!!!')
+            self._web_socket_server.send_message('mission-state', MissionState.Landed.name)
+
 
     # Client callbacks
 
@@ -103,7 +118,7 @@ class DroneManager(ABC):
 
     def _set_mission_state(self, mission_state_str: str):
         try:
-            mission_state = MissionState[mission_state_str.upper()]
+            mission_state = MissionState[mission_state_str]
         except KeyError:
             print('ArgosManager error: Unknown mission state received:', mission_state_str)
             return

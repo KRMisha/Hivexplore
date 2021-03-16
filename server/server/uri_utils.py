@@ -16,11 +16,11 @@ def load_crazyflie_uris_from_file():
         except ValueError:
             pass
 
-        DEFAULT_URIS = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
-        print('load_crazyflie_uris_from_file warning: Using default uris:', DEFAULT_URIS)
-        json.dump({'crazyflie_uris': DEFAULT_URIS}, uris_file)
+        FALLBACK_URIS = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
+        print('load_crazyflie_uris_from_file warning: Using fallback uris:', FALLBACK_URIS)
+        json.dump({'crazyflie_uris': FALLBACK_URIS}, uris_file)
         uris_file.write('\n')
-        return DEFAULT_URIS
+        return FALLBACK_URIS
 
 
 def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
@@ -61,9 +61,9 @@ def _data_updated(crazyflie: Crazyflie, eeprom):
     except ValueError:
         pass
 
-    # Append the new one
+    # Append new drone URI
     uris.append(new_uri)
 
-    with open(CRAZYFLIE_URIS_FILENAME, 'w+') as uris_file:
+    with open(CRAZYFLIE_URIS_FILENAME, 'w') as uris_file:
         json.dump({'crazyflie_uris': uris}, uris_file)
         uris_file.write('\n')

@@ -10,7 +10,7 @@ def main():
         sys.exit(1)
 
     if sys.argv[1] not in load_crazyflie_uris_from_file():
-        print('Warning: uri of drone is not in config file')
+        print('Warning: URI of drone not in config file')
 
     cflib.crtp.init_drivers(enable_debug_driver=False)
 

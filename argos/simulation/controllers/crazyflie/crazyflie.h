@@ -85,7 +85,7 @@ private:
     // States
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
-    ReturningState m_returningState = ReturningState::Return;
+    ReturningState m_returningState = ReturningState::Return; // TODO: Why not Idle?
     bool droneIsLanding = false;
 
     // Data

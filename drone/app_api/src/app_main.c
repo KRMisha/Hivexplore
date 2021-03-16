@@ -25,11 +25,13 @@
  *             sure they are compiled in CI.
  */
 
+#include "app.h"
+
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "app.h"
+#include "app_main.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -51,13 +53,6 @@
 // Min max helper macros
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
-
-// Enums
-typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING, MISSION_EMERGENCY } mission_state_t;
-typedef enum { EXPLORING_IDLE, EXPLORING_LIFTOFF, EXPLORING_EXPLORE, EXPLORING_ROTATE } exploring_state_t;
-typedef enum { RETURNING_RETURN, RETURNING_LAND, RETURNING_IDLE } returning_state_t;
-typedef enum { EMERGENCY_LAND, EMERGENCY_IDLE } emergency_state_t;
-typedef enum { STATUS_STANDBY, STATUS_FLYING, STATUS_LANDED, STATUS_CRASHED } drone_status_t;
 
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
@@ -103,36 +98,67 @@ float targetLeftVelocity;
 float targetHeight;
 float targetYawRate;
 
-static void updateWaypoint(void) {
-    setPoint.velocity_body = true;
-    setPoint.mode.x = modeVelocity;
-    setPoint.mode.y = modeVelocity;
-    setPoint.velocity.x = targetForwardVelocity;
-    setPoint.velocity.y = targetLeftVelocity;
+void appMain(void) {
+    vTaskDelay(M2T(3000));
 
-    setPoint.mode.yaw = modeVelocity;
-    setPoint.attitudeRate.yaw = targetYawRate;
+    const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
+    const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
 
-    setPoint.mode.z = modeAbs;
-    setPoint.position.z = targetHeight;
-}
-
-static void updateDroneStatus(void) {
-    // TODO: Handle crash state
-    if (missionState == MISSION_STANDBY) {
-        droneStatus = STATUS_STANDBY;
-    } else if (droneIsLanding && returningState == RETURNING_IDLE) {
-        droneIsLanding = false;
-        droneStatus = STATUS_LANDED;
-    } else if (missionState == MISSION_EMERGENCY || returningState == RETURNING_LAND) {
-        droneIsLanding = true;
-    } else if (missionState == MISSION_STANDBY && exploringState == EXPLORING_IDLE && returningState == RETURNING_IDLE) {
-        droneStatus = STATUS_FLYING;
+    const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
+    const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
+    const bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
+    if (!isFlowDeckInitialized) {
+        DEBUG_PRINT("FlowDeckV2 is not connected\n");
     }
-}
+    if (!isMultirangerInitialized) {
+        DEBUG_PRINT("Multiranger is not connected\n");
+    }
 
-static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
-    return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
+    while (true) {
+        vTaskDelay(M2T(10));
+
+        updateDroneStatus();
+        ledSet(LED_GREEN_R, isM1LedOn);
+
+        if (isOutOfService) {
+            ledSet(LED_RED_R, true);
+            continue;
+        }
+
+        frontSensorReading = logGetUint(frontSensorId);
+        leftSensorReading = logGetUint(leftSensorId);
+        backSensorReading = logGetUint(backSensorId);
+        rightSensorReading = logGetUint(rightSensorId);
+        upSensorReading = logGetUint(upSensorId);
+        downSensorReading = logGetUint(downSensorId);
+
+        rssiReading = logGetUint(rssiId);
+        (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
+
+        targetForwardVelocity = 0.0;
+        targetLeftVelocity = 0.0;
+        targetHeight = 0.0;
+        targetYawRate = 0.0;
+
+        switch (missionState) {
+        case MISSION_STANDBY:
+            break;
+        case MISSION_EXPLORING:
+            avoidObstacle();
+            explore();
+            break;
+        case MISSION_RETURNING:
+            avoidObstacle();
+            returnToBase();
+            break;
+        case MISSION_EMERGENCY:
+            emergencyLand();
+            break;
+        }
+
+        static const uint8_t TASK_PRIORITY = 3;
+        commanderSetSetpoint(&setPoint, TASK_PRIORITY);
+    }
 }
 
 static void avoidObstacle(void) {
@@ -198,15 +224,6 @@ static void explore(void) {
     }
 }
 
-static bool land(void) {
-    updateWaypoint();
-    static const uint16_t LANDED_HEIGHT = 50;
-    if (downSensorReading < LANDED_HEIGHT) {
-        return true;
-    }
-    return false;
-}
-
 static void returnToBase(void) {
     switch (returningState) {
     case RETURNING_RETURN: {
@@ -238,67 +255,45 @@ static void emergencyLand(void) {
     }
 }
 
-void appMain(void) {
-    vTaskDelay(M2T(3000));
-
-    const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
-    const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
-
-    const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
-    const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
-    const bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
-    if (!isFlowDeckInitialized) {
-        DEBUG_PRINT("FlowDeckV2 is not connected\n");
+static bool land(void) {
+    updateWaypoint();
+    static const uint16_t LANDED_HEIGHT = 50;
+    if (downSensorReading < LANDED_HEIGHT) {
+        return true;
     }
-    if (!isMultirangerInitialized) {
-        DEBUG_PRINT("Multiranger is not connected\n");
+    return false;
+}
+
+static void updateWaypoint(void) {
+    setPoint.velocity_body = true;
+    setPoint.mode.x = modeVelocity;
+    setPoint.mode.y = modeVelocity;
+    setPoint.velocity.x = targetForwardVelocity;
+    setPoint.velocity.y = targetLeftVelocity;
+
+    setPoint.mode.yaw = modeVelocity;
+    setPoint.attitudeRate.yaw = targetYawRate;
+
+    setPoint.mode.z = modeAbs;
+    setPoint.position.z = targetHeight;
+}
+
+static void updateDroneStatus(void) {
+    // TODO: Handle crash state
+    if (missionState == MISSION_STANDBY) {
+        droneStatus = STATUS_STANDBY;
+    } else if (droneIsLanding && returningState == RETURNING_IDLE) {
+        droneIsLanding = false;
+        droneStatus = STATUS_LANDED;
+    } else if (missionState == MISSION_EMERGENCY || returningState == RETURNING_LAND) {
+        droneIsLanding = true;
+    } else if (missionState == MISSION_STANDBY && exploringState == EXPLORING_IDLE && returningState == RETURNING_IDLE) {
+        droneStatus = STATUS_FLYING;
     }
+}
 
-    while (true) {
-        vTaskDelay(M2T(10));
-
-        updateDroneStatus();
-        ledSet(LED_GREEN_R, isM1LedOn);
-
-        if (isOutOfService) {
-            ledSet(LED_RED_R, true);
-            continue;
-        }
-
-        frontSensorReading = logGetUint(frontSensorId);
-        leftSensorReading = logGetUint(leftSensorId);
-        backSensorReading = logGetUint(backSensorId);
-        rightSensorReading = logGetUint(rightSensorId);
-        upSensorReading = logGetUint(upSensorId);
-        downSensorReading = logGetUint(downSensorId);
-
-        rssiReading = logGetUint(rssiId);
-        (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
-
-        targetForwardVelocity = 0.0;
-        targetLeftVelocity = 0.0;
-        targetHeight = 0.0;
-        targetYawRate = 0.0;
-
-        switch (missionState) {
-        case MISSION_STANDBY:
-            break;
-        case MISSION_EXPLORING:
-            avoidObstacle();
-            explore();
-            break;
-        case MISSION_RETURNING:
-            avoidObstacle();
-            returnToBase();
-            break;
-        case MISSION_EMERGENCY:
-            emergencyLand();
-            break;
-        }
-
-        static const uint8_t TASK_PRIORITY = 3;
-        commanderSetSetpoint(&setPoint, TASK_PRIORITY);
-    }
+static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
+    return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
 LOG_GROUP_START(hivexplore)

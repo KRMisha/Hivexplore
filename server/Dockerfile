@@ -28,6 +28,4 @@ COPY server server
 EXPOSE 5678
 ENTRYPOINT [ "python3", "-m", "server.main" ]
 
-# TODO: Fix /tmp/hivexplore volume mount permissions when created with Docker
-# TODO: Run container as non-root user
 # TODO: Check if dev requirements should also be frozen

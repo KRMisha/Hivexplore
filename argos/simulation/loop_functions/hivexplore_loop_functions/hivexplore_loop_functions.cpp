@@ -90,28 +90,21 @@ void CHivexploreLoopFunctions::PreStep() {
                                variant);
                 }
 
-                json packet = {
-                    {"logName", logName},
-                    {"droneId", controller.get().GetId()},
-                    {"variables", variablesJson},
-                };
-
-                Send(packet);
+                if (!Send(logName, controller.get().GetId(), variablesJson)) {
+                    return;
+                }
             }
 
             // Send console log data
             std::vector<std::string> consoleLogs = controller.get().GetConsoleLogs();
-            json packet = {
-                {"logName", "Console"},
-                {"droneId", controller.get().GetId()},
-                {"variables", consoleLogs},
-            };
+            std::string logName = "Console";
 
-            Send(packet);
+            if (!Send(logName, controller.get().GetId(), consoleLogs)) {
+                return;
+            }
         }
     }
 }
-
 
 void CHivexploreLoopFunctions::PostStep() {
 }
@@ -176,16 +169,25 @@ void CHivexploreLoopFunctions::StartSocket() {
     std::cout << "Unix socket connection accepted\n";
 }
 
-void CHivexploreLoopFunctions::Send(json packet) {
+bool CHivexploreLoopFunctions::Send(const std::string& logName, json droneId, const json& variables) {
+    json packet = {
+        {"logName", logName},
+        {"droneId", droneId},
+        {"variables", variables},
+    };
+
     std::string serializedPacket = packet.dump();
+
     ssize_t count = send(m_dataSocket, serializedPacket.c_str(), serializedPacket.size(), MSG_DONTWAIT);
-    if (count == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+    bool isSent = !(count == -1 && errno != EAGAIN && errno != EWOULDBLOCK);
+
+    if (!isSent) {
         // Restart simulation in case of socket error
         std::perror("Unix socket send");
         Stop();
-        return;
-
     }
+
+    return isSent;
 }
 
 void CHivexploreLoopFunctions::Stop() {
@@ -205,13 +207,10 @@ void CHivexploreLoopFunctions::SendDroneIdsToServer() {
         return controller.get().GetId();
     });
 
-    json packet = {
-        {"logName", "drone-ids"},
-        {"droneId", nullptr},
-        {"variables", droneIds},
-    };
-
-    Send(packet);
+    std::string logName = "drone-ids";
+    if (!Send(logName, nullptr, droneIds)) {
+        return;
+    }
 }
 
 std::vector<std::reference_wrapper<CCrazyflieController>> CHivexploreLoopFunctions::GetControllers() {

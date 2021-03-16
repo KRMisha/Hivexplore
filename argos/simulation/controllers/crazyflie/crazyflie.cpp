@@ -40,10 +40,10 @@ void CCrazyflieController::ControlStep() {
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
-    UpdateDroneStatus();
 
     switch (m_missionState) {
     case MissionState::Standby:
+        m_droneStatus = DroneStatus::Standby;
         break;
     case MissionState::Exploring:
         if (!AvoidObstacle()) {
@@ -220,10 +220,14 @@ void CCrazyflieController::Explore() {
 
     switch (m_exploringState) {
     case ExploringState::Idle: {
+        m_droneStatus = DroneStatus::Standby;
+
         m_initialPosition = m_pcPos->GetReading().Position;
         m_exploringState = ExploringState::Liftoff;
     } break;
     case ExploringState::Liftoff: {
+        m_droneStatus = DroneStatus::Flying;
+
         static constexpr double targetDroneHeight = 0.5;
         static constexpr double targetDroneHeightEpsilon = 0.005;
 
@@ -241,6 +245,8 @@ void CCrazyflieController::Explore() {
         }
     } break;
     case ExploringState::Explore: {
+        m_droneStatus = DroneStatus::Flying;
+
         static constexpr double distanceToTravel = 0.07;
 
         // Order exploration movement
@@ -263,6 +269,8 @@ void CCrazyflieController::Explore() {
         }
     } break;
     case ExploringState::Brake: {
+        m_droneStatus = DroneStatus::Flying;
+
         // Order brake
         if (m_isBrakeCommandFinished) {
             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
@@ -280,6 +288,8 @@ void CCrazyflieController::Explore() {
         m_brakingReferencePosition = m_pcPos->GetReading().Position;
     } break;
     case ExploringState::Rotate: {
+        m_droneStatus = DroneStatus::Flying;
+
         // Get current yaw
         CRadians currentYaw;
         CVector3 rotationAxis;
@@ -308,6 +318,8 @@ void CCrazyflieController::Explore() {
 void CCrazyflieController::ReturnToBase() {
     switch (m_returningState) {
     case ReturningState::Return: {
+        m_droneStatus = DroneStatus::Flying;
+
         static constexpr double distanceToReturnEpsilon = 0.05;
 
         m_pcPropellers->SetAbsolutePosition(
@@ -320,11 +332,14 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::Land: {
+        m_droneStatus = DroneStatus::Flying;
+
         if (Land()) {
             m_returningState = ReturningState::Idle;
         }
     } break;
     case ReturningState::Idle:
+        m_droneStatus = DroneStatus::Landed;
         break;
     }
 }
@@ -332,11 +347,14 @@ void CCrazyflieController::ReturnToBase() {
 void CCrazyflieController::EmergencyLand() {
     switch (m_emergencyState) {
     case EmergencyState::Land: {
+        m_droneStatus = DroneStatus::Flying;
+
         if(Land()) {
             m_emergencyState = EmergencyState::Idle;
         }
     } break;
     case EmergencyState::Idle:
+        m_droneStatus = DroneStatus::Landed;
         break;
     }
 }
@@ -347,6 +365,7 @@ bool CCrazyflieController::Land() {
 
     m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
     if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
+        m_droneStatus = DroneStatus::Landed;
         return true;
     }
     return false;
@@ -387,20 +406,6 @@ void CCrazyflieController::UpdateRssi() {
     double distanceToBase =
         std::sqrt(std::pow(dronePosition.GetX(), 2) + std::pow(dronePosition.GetY(), 2) + std::pow(dronePosition.GetZ(), 2));
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
-}
-
-void CCrazyflieController::UpdateDroneStatus() {
-    // TODO: Handle crash state
-    if (m_missionState == MissionState::Standby) {
-        m_droneStatus = DroneStatus::Standby;
-    } else if (droneIsLanding && m_returningState == ReturningState::Idle) {
-        droneIsLanding = false;
-        m_droneStatus = DroneStatus::Landed;
-    } else if (m_missionState == MissionState::Emergency || m_returningState == ReturningState::Land) {
-        droneIsLanding = true;
-    } else if (m_missionState != MissionState::Standby && m_exploringState != ExploringState::Idle && m_returningState != ReturningState::Idle) {
-        m_droneStatus = DroneStatus::Flying;
-    }
 }
 
 void CCrazyflieController::DebugPrint(const std::string& text) {

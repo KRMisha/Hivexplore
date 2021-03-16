@@ -76,7 +76,6 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_RETURN;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
-static bool droneIsLanding = false;
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
@@ -117,7 +116,6 @@ void appMain(void) {
     while (true) {
         vTaskDelay(M2T(10));
 
-        updateDroneStatus();
         ledSet(LED_GREEN_R, isM1LedOn);
 
         if (isOutOfService) {
@@ -142,6 +140,7 @@ void appMain(void) {
 
         switch (missionState) {
         case MISSION_STANDBY:
+            droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
             avoidObstacle();
@@ -186,6 +185,8 @@ static void avoidObstacle(void) {
 static void explore(void) {
     switch (exploringState) {
     case EXPLORING_IDLE: {
+        droneStatus = STATUS_STANDBY;
+
         DEBUG_PRINT("Idle\n");
         memset(&setPoint, 0, sizeof(setpoint_t));
 
@@ -196,6 +197,8 @@ static void explore(void) {
         }
     } break;
     case EXPLORING_LIFTOFF: {
+        droneStatus = STATUS_FLYING;
+
         targetHeight += EXPLORATION_HEIGHT;
         updateWaypoint();
         if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
@@ -204,6 +207,8 @@ static void explore(void) {
         }
     } break;
     case EXPLORING_EXPLORE: {
+        droneStatus = STATUS_FLYING;
+
         targetHeight += EXPLORATION_HEIGHT;
         targetForwardVelocity += CRUISE_VELOCITY;
         updateWaypoint();
@@ -213,6 +218,8 @@ static void explore(void) {
         }
     } break;
     case EXPLORING_ROTATE: {
+        droneStatus = STATUS_FLYING;
+
         static const uint16_t OPEN_SPACE_THRESHOLD = 300;
         if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
             exploringState = EXPLORING_EXPLORE;
@@ -227,16 +234,22 @@ static void explore(void) {
 static void returnToBase(void) {
     switch (returningState) {
     case RETURNING_RETURN: {
+        droneStatus = STATUS_FLYING;
+
         // TODO: Add return logic
         vTaskDelay(M2T(5000));
         returningState = RETURNING_LAND;
     } break;
     case RETURNING_LAND: {
+        droneStatus = STATUS_FLYING;
+
         if (land()) {
             returningState = RETURNING_IDLE;
         }
     } break;
     case RETURNING_IDLE: {
+        droneStatus = STATUS_LANDED;
+
         memset(&setPoint, 0, sizeof(setpoint_t));
     } break;
     }
@@ -245,11 +258,15 @@ static void returnToBase(void) {
 static void emergencyLand(void) {
     switch (emergencyState) {
     case EMERGENCY_LAND:
+        droneStatus = STATUS_FLYING;
+
         if (land()) {
             emergencyState = EMERGENCY_IDLE;
         }
         break;
     case EMERGENCY_IDLE:
+        droneStatus = STATUS_LANDED;
+
         memset(&setPoint, 0, sizeof(setpoint_t));
         break;
     }
@@ -259,6 +276,7 @@ static bool land(void) {
     updateWaypoint();
     static const uint16_t LANDED_HEIGHT = 50;
     if (downSensorReading < LANDED_HEIGHT) {
+        droneStatus = STATUS_LANDED;
         return true;
     }
     return false;
@@ -276,20 +294,6 @@ static void updateWaypoint(void) {
 
     setPoint.mode.z = modeAbs;
     setPoint.position.z = targetHeight;
-}
-
-static void updateDroneStatus(void) {
-    // TODO: Handle crash state
-    if (missionState == MISSION_STANDBY) {
-        droneStatus = STATUS_STANDBY;
-    } else if (droneIsLanding && returningState == RETURNING_IDLE) {
-        droneIsLanding = false;
-        droneStatus = STATUS_LANDED;
-    } else if (missionState == MISSION_EMERGENCY || returningState == RETURNING_LAND) {
-        droneIsLanding = true;
-    } else if (missionState == MISSION_STANDBY && exploringState == EXPLORING_IDLE && returningState == RETURNING_IDLE) {
-        droneStatus = STATUS_FLYING;
-    }
 }
 
 static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {

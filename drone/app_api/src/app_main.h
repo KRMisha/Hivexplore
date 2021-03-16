@@ -15,7 +15,6 @@ void emergencyLand(void);
 bool land(void);
 
 void updateWaypoint(void);
-void updateDroneStatus(void);
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);
 
 #endif

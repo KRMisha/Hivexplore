@@ -75,7 +75,6 @@ private:
     void UpdateSensorReadings();
     void UpdateVelocity();
     void UpdateRssi();
-    void UpdateDroneStatus();
 
     void DebugPrint(const std::string& text);
 
@@ -95,7 +94,6 @@ private:
     ExploringState m_exploringState = ExploringState::Idle;
     ReturningState m_returningState = ReturningState::Return;
     EmergencyState m_emergencyState = EmergencyState::Land;
-    bool droneIsLanding = false;
 
     // Data
     CVector3 m_initialPosition;

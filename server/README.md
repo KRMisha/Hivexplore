@@ -64,12 +64,12 @@ make run
 
 ### Assign a drone's address
 ```
-python3 -m server.assign_crazyflie_address radio://0/80/2M/[current address] [new address]
+python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/[current address] [new address]
 ```
 
 Example:
 ```
-python3 -m server.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7E7E7E701
+python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7E7E7E701
 ```
 
 ### Run program to connect with the ARGoS simulation

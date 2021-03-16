@@ -44,6 +44,11 @@ COPY --from=build /usr/local /usr/local
 RUN echo /usr/local/lib/argos3 > /etc/ld.so.conf.d/argos3.conf && ldconfig
 WORKDIR /hivexplore
 
+# Format stage
+FROM base AS format
+RUN apt-get update && apt-get install -y clang-format
+# TODO: RUN to check if clang-format spots differences
+
 # Dev container stage
 FROM base AS devcontainer
 RUN apt-get update && apt-get install -y \

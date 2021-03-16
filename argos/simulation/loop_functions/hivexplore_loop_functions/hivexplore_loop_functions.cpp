@@ -95,12 +95,15 @@ void CHivexploreLoopFunctions::PreStep() {
                 }
             }
 
-            // Send console log data
-            std::vector<std::string> consoleLogs = controller.get().GetConsoleLogs();
-            std::string logName = "Console";
+            // Send console log data if it has been flushed in the previous step
+            std::string debugPrint = controller.get().GetDebugPrint();
 
-            if (!Send(logName, controller.get().GetId(), consoleLogs)) {
-                return;
+            if (debugPrint.find("\n") != std::string::npos) {
+                std::string logName = "Console";
+
+                if (!Send(logName, controller.get().GetId(), debugPrint)) {
+                    return;
+                }
             }
         }
     }

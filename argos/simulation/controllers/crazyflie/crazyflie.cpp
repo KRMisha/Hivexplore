@@ -32,7 +32,10 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
-    m_consoleLogs.clear();
+    // Clear the debug print only if it has been flushed in the previous step
+    if (m_debugPrint.find("\n")) {
+        m_debugPrint.erase();
+    }
 
     UpdateSensorReadings();
     UpdateVelocity();
@@ -119,8 +122,8 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     return logDataMap;
 }
 
-const std::vector<std::string>& CCrazyflieController::GetConsoleLogs() const {
-    return m_consoleLogs;
+const std::string& CCrazyflieController::GetDebugPrint() const {
+    return m_debugPrint;
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
@@ -374,8 +377,8 @@ void CCrazyflieController::UpdateDroneStatus() {
 }
 
 void CCrazyflieController::DebugPrint(const std::string& text) {
-    RLOG << text << "\n";
-    m_consoleLogs.push_back(text);
+    RLOG << text;
+    m_debugPrint += text;
 }
 
 template<typename T, typename U = T>

@@ -56,7 +56,7 @@ public:
     virtual void Destroy() override;
 
     LogConfigs GetLogData() const;
-    const std::vector<std::string>& GetConsoleLogs() const;
+    const std::string& GetDebugPrint() const;
     void SetParamData(const std::string& param, json value);
 
 private:
@@ -94,7 +94,7 @@ private:
     std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
     DroneStatus m_droneStatus = DroneStatus::Standby;
-    std::vector<std::string> m_consoleLogs;
+    std::string m_debugPrint;
 
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;

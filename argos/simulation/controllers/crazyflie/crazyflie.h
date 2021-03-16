@@ -56,7 +56,7 @@ public:
     virtual void Destroy() override;
 
     LogConfigs GetLogData() const;
-    std::vector<std::string> GetConsoleLogs() const;
+    const std::vector<std::string>& GetConsoleLogs() const;
     void SetParamData(const std::string& param, json value);
 
 private:

@@ -119,7 +119,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     return logDataMap;
 }
 
-std::vector<std::string> CCrazyflieController::GetConsoleLogs() const {
+const std::vector<std::string>& CCrazyflieController::GetConsoleLogs() const {
     return m_consoleLogs;
 }
 

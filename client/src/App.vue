@@ -20,7 +20,7 @@
                 class="right-button"
                 :style="{ 'background-color': endMissionButtonColor }"
                 :disabled="droneIds.length === 0 || missionState === MissionState.Standby"
-                @click="setMissionState(MissionState.Standby)"
+                @click="endMissionButtonClick()"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
@@ -80,6 +80,10 @@ export default defineComponent({
             return (missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red');
         });
 
+        const endMissionButtonClick = computed((): void => {
+            missionState.value === MissionState.Landed ? setMissionState(MissionState.Standby) : setMissionState(MissionState.Emergency);
+        });
+
         provide('socketClient', socketClient);
 
         onUnmounted(() => {
@@ -94,6 +98,7 @@ export default defineComponent({
             setMissionState,
             endMissionButtonLabel,
             endMissionButtonColor,
+            endMissionButtonClick,
         };
     },
 });

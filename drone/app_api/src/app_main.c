@@ -52,7 +52,7 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
 
-typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING } mission_state_t;
+typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING, MISSION_EMERGENCY } mission_state_t;
 typedef enum { EXPLORING_IDLE, EXPLORING_LIFTOFF, EXPLORING_EXPLORE, EXPLORING_ROTATE, EXPLORING_LAND } exploring_state_t;
 typedef enum { RETURNING_RETURN, RETURNING_LAND, RETURNING_IDLE } returning_state_t;
 typedef enum { STATUS_STANDBY, STATUS_FLYING, STATUS_LANDED, STATUS_CRASHED } drone_status_t;
@@ -93,8 +93,8 @@ static void updateDroneStatus() {
     } else if (droneIsLanding && returningState == RETURNING_IDLE) {
         droneIsLanding = false;
         droneStatus = STATUS_LANDED;
-    // TODO: Do we need ExploringState::Land??
-    } else if (exploringState == EXPLORING_LAND || returningState == RETURNING_LAND) {
+    // TODO: Do we need EXPLORING_LAND??
+    } else if (missionState == MISSION_EMERGENCY || exploringState == EXPLORING_LAND || returningState == RETURNING_LAND) {
         droneIsLanding = true;
     } else if (missionState == MISSION_STANDBY && exploringState == EXPLORING_IDLE && returningState == RETURNING_IDLE) {
         droneStatus = STATUS_FLYING;
@@ -202,6 +202,12 @@ static void Explore() {
     commanderSetSetpoint(&setPoint, TASK_PRIORITY);
 }
 
+static void Land() {
+    // TODO: Add land logic
+    vTaskDelay(M2T(1000));
+    returningState = RETURNING_IDLE
+}
+
 static void Return() {
     // TODO: Add return logic
     switch (returningState) {
@@ -210,8 +216,7 @@ static void Return() {
         returningState = RETURNING_LAND
     } break;
     case RETURNING_LAND: {
-        vTaskDelay(M2T(1000));
-        returningState = RETURNING_IDLE
+        Land();
     } break;
     case RETURNING_IDLE:
         break;
@@ -262,6 +267,9 @@ void appMain(void) {
         } break;
         case MISSION_RETURNING: {
             Return();
+        } break;
+        case MISSION_EMERGENCY: {
+            Land();
         } break;
         }
     }

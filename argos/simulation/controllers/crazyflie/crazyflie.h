@@ -21,6 +21,7 @@ enum class MissionState {
     Standby,
     Exploring,
     Returning,
+    Emergency,
 };
 
 enum class ExploringState {
@@ -63,6 +64,7 @@ private:
     bool AvoidObstacle();
     void Explore();
     void Return();
+    void Land();
 
     void UpdateSensorReadings();
     void UpdateVelocity();

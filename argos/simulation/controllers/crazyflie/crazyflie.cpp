@@ -50,6 +50,11 @@ void CCrazyflieController::ControlStep() {
             Return();
         }
         break;
+    case MissionState::Emergency:
+        if (!AvoidObstacle()) {
+            Land();
+        }
+        break;
     }
 
     m_previousPosition = m_pcPos->GetReading().Position;
@@ -327,16 +332,20 @@ void CCrazyflieController::Return() {
         }
     } break;
     case ReturningState::Land: {
-        static constexpr double targetDroneLandHeight = 0.05;
-        static constexpr double targetDroneHeightEpsilon = 0.05;
-
-        m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
-        if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
-            m_returningState = ReturningState::Idle;
-        }
+        Land();
     } break;
     case ReturningState::Idle:
         break;
+    }
+}
+
+void CCrazyflieController::Land() {
+    static constexpr double targetDroneLandHeight = 0.05;
+    static constexpr double targetDroneHeightEpsilon = 0.05;
+
+    m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
+    if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
+        m_returningState = ReturningState::Idle;
     }
 }
 
@@ -366,7 +375,7 @@ void CCrazyflieController::UpdateDroneStatus() {
         droneIsLanding = false;
         m_droneStatus = DroneStatus::Landed;
     // TODO: Do we need ExploringState::Land??
-    } else if (m_exploringState == ExploringState::Land || m_returningState == ReturningState::Land) {
+    } else if (m_missionState == MissionState::Emergency || m_exploringState == ExploringState::Land || m_returningState == ReturningState::Land) {
         droneIsLanding = true;
     } else if (m_missionState != MissionState::Standby && m_exploringState != ExploringState::Idle && m_returningState != ReturningState::Idle) {
         m_droneStatus = DroneStatus::Flying;

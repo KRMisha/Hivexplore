@@ -13,15 +13,15 @@ namespace {
 
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
+    constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
+        return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
+    }
+
     template<typename T>
     constexpr std::int8_t getSign(T value) { return value < 0 ? -1 : 1; }
 
     constexpr double calculateDroneDistanceCorrection(double threshold, double distance) {
         return getSign(distance) * (threshold - std::abs(distance));
-    }
-
-    constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
-        return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
     }
 
 } // namespace

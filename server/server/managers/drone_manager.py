@@ -110,7 +110,7 @@ class DroneManager(ABC):
         try:
             self._mission_state = MissionState[mission_state_str.upper()]
         except KeyError:
-            print('ArgosManager error: Unknown mission state received:', mission_state_str)
+            print('DroneManager error: Unknown mission state received:', mission_state_str)
             return
 
         print('Set mission state:', self._mission_state)
@@ -124,4 +124,4 @@ class DroneManager(ABC):
             self._set_drone_param('hivexplore.isM1LedOn', drone_id, is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
         else:
-            print('Drone error: Unknown drone ID received:', drone_id)
+            print('DroneManager error: Unknown drone ID received:', drone_id)

@@ -6,7 +6,7 @@ from cflib.utils.power_switch import PowerSwitch
 CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
 
 
-def get_crazyflie_uris_from_file():
+def load_crazyflie_uris_from_file():
     with open(CRAZYFLIE_URIS_FILENAME, 'r+') as uris_file:
         try:
             data = json.load(uris_file)
@@ -17,7 +17,7 @@ def get_crazyflie_uris_from_file():
             pass
 
         DEFAULT_URIS = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
-        print('get_crazyflie_uris_from_file warning: Using default uris:', DEFAULT_URIS)
+        print('load_crazyflie_uris_from_file warning: Using default uris:', DEFAULT_URIS)
         json.dump({'crazyflie_uris': DEFAULT_URIS}, uris_file)
         uris_file.write('\n')
         return DEFAULT_URIS
@@ -53,7 +53,7 @@ def _data_updated(crazyflie: Crazyflie, eeprom):
 
     PowerSwitch(crazyflie.link_uri).stm_power_cycle()
 
-    uris = get_crazyflie_uris_from_file()
+    uris = load_crazyflie_uris_from_file()
 
     # Remove old drone URI
     try:

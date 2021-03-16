@@ -4,7 +4,7 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
-from server.managers.uris_manager import get_crazyflie_uris_from_file
+from server.uri_utils import load_crazyflie_uris_from_file
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
 
@@ -22,7 +22,7 @@ class CrazyflieManager(DroneManager):
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     def _connect_crazyflies(self):
-        crazyflie_uris = get_crazyflie_uris_from_file()
+        crazyflie_uris = load_crazyflie_uris_from_file()
         for uri in crazyflie_uris:
             if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
                 continue

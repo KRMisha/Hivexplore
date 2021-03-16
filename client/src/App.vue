@@ -80,9 +80,9 @@ export default defineComponent({
             return (missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red');
         });
 
-        const endMissionButtonClick = computed((): void => {
+        function endMissionButtonClick() {
             missionState.value === MissionState.Landed ? setMissionState(MissionState.Standby) : setMissionState(MissionState.Emergency);
-        });
+        }
 
         provide('socketClient', socketClient);
 

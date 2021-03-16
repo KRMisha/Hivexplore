@@ -396,9 +396,8 @@ void CCrazyflieController::UpdateDroneStatus() {
 }
 
 void CCrazyflieController::PingOtherDrones() {
-    static CByteArray buffer(10);
-    buffer[0] = 0;
-    m_pcRABA->SetData(buffer);
+    static constexpr uint8_t pingData = 0;
+    m_pcRABA->SetData(sizeof(pingData), pingData);
 }
 
 template<typename T, typename U = T>

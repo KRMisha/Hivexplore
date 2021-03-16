@@ -1,5 +1,5 @@
 # Base stage
-FROM python:3.8-slim-buster AS base
+FROM python:3.8-slim AS base
 WORKDIR /hivexplore
 COPY requirements requirements
 RUN pip3 install -r requirements/common.txt

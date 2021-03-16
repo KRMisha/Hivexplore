@@ -97,7 +97,6 @@ void CHivexploreLoopFunctions::PreStep() {
 
             // Send console log data if it has been flushed (with '\n') in the previous step
             std::string debugPrint = controller.get().GetDebugPrint();
-
             if (debugPrint.find('\n') != std::string::npos) {
                 if (!Send("Console", controller.get().GetId(), debugPrint)) {
                     return;

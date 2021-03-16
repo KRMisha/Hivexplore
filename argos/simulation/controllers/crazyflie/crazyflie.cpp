@@ -33,8 +33,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 
 void CCrazyflieController::ControlStep() {
     // Clear the debug print only if it has been flushed (with '\n') in the previous step
-    if (debugPrint.find('\n') != std::string::npos) {
-        m_debugPrint.erase();
+    if (m_debugPrint.find('\n') != std::string::npos) {
+        m_debugPrint.clear();
     }
 
     UpdateSensorReadings();

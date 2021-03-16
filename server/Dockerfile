@@ -2,7 +2,6 @@
 FROM python:3.8-slim-buster as base
 WORKDIR /hivexplore
 COPY requirements requirements
-RUN ls -lA
 RUN pip3 install -r requirements/common.txt
 
 # Dev stage

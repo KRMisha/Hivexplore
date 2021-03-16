@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Optional
 import uuid
 import websockets
 
-IP_ADDRESS = '172.17.0.2'
+IP_ADDRESS = ''
 PORT = 5678
 EVENT_DENYLIST = {'connect'}
 

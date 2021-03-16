@@ -1,28 +1,28 @@
 # Base stage
-FROM python:3.8-slim-buster as base
+FROM python:3.8-slim-buster AS base
 WORKDIR /hivexplore
 COPY requirements requirements
 RUN pip3 install -r requirements/common.txt
 
 # Dev stage
-FROM base as dev
+FROM base AS dev
 RUN pip3 install -r requirements/dev.txt
 COPY . .
 
 # Format stage
-FROM dev as format
+FROM dev AS format
 RUN yapf --diff --parallel --recursive .
 
 # Lint stage
-FROM dev as lint
+FROM dev AS lint
 RUN pylint server tests && mypy server tests
 
 # Test stage
-FROM dev as test
+FROM dev AS test
 RUN pytest
 
 # Production stage
-FROM base as prod
+FROM base AS prod
 RUN pip3 install -r requirements/prod.txt
 COPY server server
 EXPOSE 5678

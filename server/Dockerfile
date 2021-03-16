@@ -27,5 +27,3 @@ RUN pip3 install -r requirements/prod.txt
 COPY server server
 EXPOSE 5678
 ENTRYPOINT [ "python3", "-m", "server.main" ]
-
-# TODO: Check if dev requirements should also be frozen

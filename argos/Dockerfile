@@ -46,6 +46,16 @@ COPY --from=build /usr/local /usr/local
 RUN echo /usr/local/lib/argos3 > /etc/ld.so.conf.d/argos3.conf && ldconfig
 WORKDIR /hivexplore
 
+# Dev container stage
+FROM base AS devcontainer
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    clang-format \
+    cmake \
+    freeglut3-dev \
+    git \
+    liblua5.3-dev
+
 # Production stage
 FROM base AS prod
 

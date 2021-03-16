@@ -38,6 +38,11 @@ enum class ReturningState {
     Idle,
 };
 
+enum class EmergencyState {
+    Land,
+    Idle,
+};
+
 enum class DroneStatus {
     Standby,
     Flying,
@@ -63,7 +68,8 @@ private:
     bool AvoidObstacle();
     void Explore();
     void ReturnToBase();
-    void Land();
+    void EmergencyLand();
+    bool Land();
 
     void UpdateSensorReadings();
     void UpdateVelocity();
@@ -85,6 +91,7 @@ private:
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
     ReturningState m_returningState = ReturningState::Return;
+    EmergencyState m_emergencyState = EmergencyState::Land;
     bool droneIsLanding = false;
 
     // Data

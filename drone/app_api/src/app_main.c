@@ -12,8 +12,7 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, in version 3.
- *
- * This program is distributed in the hope that it will be useful,
+ ** This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -49,14 +48,18 @@
 
 #define DEBUG_MODULE "APPAPI"
 
+// Min max helper macros
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
 
+// Enums
 typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING, MISSION_EMERGENCY } mission_state_t;
 typedef enum { EXPLORING_IDLE, EXPLORING_LIFTOFF, EXPLORING_EXPLORE, EXPLORING_ROTATE } exploring_state_t;
 typedef enum { RETURNING_RETURN, RETURNING_LAND, RETURNING_IDLE } returning_state_t;
+typedef enum { EMERGENCY_LAND, EMERGENCY_IDLE } emergency_state_t;
 typedef enum { STATUS_STANDBY, STATUS_FLYING, STATUS_LANDED, STATUS_CRASHED } drone_status_t;
 
+// Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
 static const float EXPLORATION_HEIGHT = 0.5f;
@@ -64,29 +67,57 @@ static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 1.0f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
+// Sensors
+static const logVarId_t frontSensorId = logGetVarId("range", "front");
+static const logVarId_t leftSensorId = logGetVarId("range", "left");
+static const logVarId_t backSensorId = logGetVarId("range", "back");
+static const logVarId_t rightSensorId = logGetVarId("range", "right");
+static const logVarId_t upSensorId = logGetVarId("range", "up");
+static const logVarId_t downSensorId = logGetVarId("range", "zrange");
+static const logVarId_t rssiId = logGetVarId("radio", "rssi");
+
+// States
 static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_RETURN;
+static emergency_state_t emergencyState = EMERGENCY_LAND;
 static bool droneIsLanding = false;
 
+// Data
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isM1LedOn = false;
+static setpoint_t setPoint;
 
-static void setWaypoint(setpoint_t* setPoint, float targetForwardVelocity, float targetLeftVelocity, float targetHeight, float yaw) {
-    setPoint->velocity_body = true;
-    setPoint->mode.x = modeVelocity;
-    setPoint->mode.y = modeVelocity;
-    setPoint->velocity.x = targetForwardVelocity;
-    setPoint->velocity.y = targetLeftVelocity;
+// Readings
+uint16_t frontSensorReading;
+uint16_t leftSensorReading;
+uint16_t backSensorReading;
+uint16_t rightSensorReading;
+uint16_t upSensorReading;
+uint16_t downSensorReading;
+uint8_t rssiReading;
 
-    setPoint->mode.yaw = modeVelocity;
-    setPoint->attitudeRate.yaw = yaw;
+// Targets
+float targetForwardVelocity;
+float targetLeftVelocity;
+float targetHeight;
+float targetYawRate;
 
-    setPoint->mode.z = modeAbs;
-    setPoint->position.z = targetHeight;
+static void updateWaypoint(void) {
+    setPoint.velocity_body = true;
+    setPoint.mode.x = modeVelocity;
+    setPoint.mode.y = modeVelocity;
+    setPoint.velocity.x = targetForwardVelocity;
+    setPoint.velocity.y = targetLeftVelocity;
+
+    setPoint.mode.yaw = modeVelocity;
+    setPoint.attitudeRate.yaw = targetYawRate;
+
+    setPoint.mode.z = modeAbs;
+    setPoint.position.z = targetHeight;
 }
 
-static void updateDroneStatus() {
+static void updateDroneStatus(void) {
     // TODO: Handle crash state
     if (missionState == MISSION_STANDBY) {
         droneStatus = STATUS_STANDBY;
@@ -104,25 +135,15 @@ static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
-static void explore() {
-    // TODO: many variables will need to be hoisted out globally to be accessible to both explore() and return() (ex: readings)
-    uint16_t frontSensorReading = logGetUint(frontSensorId);
-    uint16_t leftSensorReading = logGetUint(leftSensorId);
-    uint16_t backSensorReading = logGetUint(backSensorId);
-    uint16_t rightSensorReading = logGetUint(rightSensorId);
-    uint16_t upSensorReading = logGetUint(upSensorId);
-    uint16_t downSensorReading = logGetUint(downSensorId);
+static void avoidObstacle(void) {
+    bool isExploringAvoidanceDisallowed =
+        missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF);
+    bool isReturningAvoidanceDisallowed =
+        missionState == MISSION_RETURNING && (returningState == RETURNING_LAND || returningState == RETURNING_LAND);
 
-    uint8_t rssiReading = logGetUint(rssiId);
-    (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
+    bool isAvoidanceAllowed = !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
 
-    float targetForwardVelocity = 0.0;
-    float targetLeftVelocity = 0.0;
-    float targetHeight = 0.0;
-    float targetYawRate = 0.0;
-
-    // Global obstacle avoidance
-    if (exploringState == EXPLORING_LIFTOFF || exploringState == EXPLORING_EXPLORE || exploringState == EXPLORING_ROTATE) {
+    if (isAvoidanceAllowed) {
         // Distance correction required to stay out of range of any obstacle
         uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
         uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
@@ -134,7 +155,9 @@ static void explore() {
         targetLeftVelocity += (rightDistanceCorrection - leftDistanceCorrection) * AVOIDANCE_SENSITIVITY;
         targetForwardVelocity += (backDistanceCorrection - frontDistanceCorrection) * AVOIDANCE_SENSITIVITY;
     }
+}
 
+static void explore(void) {
     switch (exploringState) {
     case EXPLORING_IDLE: {
         DEBUG_PRINT("Idle\n");
@@ -148,7 +171,7 @@ static void explore() {
     } break;
     case EXPLORING_LIFTOFF: {
         targetHeight += EXPLORATION_HEIGHT;
-        setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
+        updateWaypoint();
         if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
             DEBUG_PRINT("Liftoff finished\n");
             exploringState = EXPLORING_EXPLORE;
@@ -157,7 +180,7 @@ static void explore() {
     case EXPLORING_EXPLORE: {
         targetHeight += EXPLORATION_HEIGHT;
         targetForwardVelocity += CRUISE_VELOCITY;
-        setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
+        updateWaypoint();
 
         if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
             exploringState = EXPLORING_ROTATE;
@@ -170,49 +193,53 @@ static void explore() {
         }
         targetHeight += EXPLORATION_HEIGHT;
         targetYawRate = 50;
-        setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
+        updateWaypoint();
     } break;
     }
-
-    static const uint8_t TASK_PRIORITY = 3;
-    commanderSetSetpoint(&setPoint, TASK_PRIORITY);
 }
 
-static void land() {
-    setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
+static bool land(void) {
+    updateWaypoint();
     static const uint16_t LANDED_HEIGHT = 50;
     if (downSensorReading < LANDED_HEIGHT) {
-        DEBUG_PRINT("Landed\n");
+        return true;
     }
-    returningState = RETURNING_IDLE;
+    return false;
 }
 
-static void returnToBase() {
+static void returnToBase(void) {
     switch (returningState) {
     case RETURNING_RETURN: {
         // TODO: Add return logic
         vTaskDelay(M2T(5000));
-        returningState = RETURNING_LAND
+        returningState = RETURNING_LAND;
     } break;
     case RETURNING_LAND: {
-        land();
+        if (land()) {
+            returningState = RETURNING_IDLE;
+        }
     } break;
-    case RETURNING_IDLE:
+    case RETURNING_IDLE: {
+        memset(&setPoint, 0, sizeof(setpoint_t));
+    } break;
+    }
+}
+
+static void emergencyLand(void) {
+    switch (emergencyState) {
+    case EMERGENCY_LAND:
+        if (land()) {
+            emergencyState = EMERGENCY_IDLE;
+        }
+        break;
+    case EMERGENCY_IDLE:
+        memset(&setPoint, 0, sizeof(setpoint_t));
         break;
     }
 }
 
 void appMain(void) {
-    setpoint_t setPoint;
     vTaskDelay(M2T(3000));
-
-    const logVarId_t frontSensorId = logGetVarId("range", "front");
-    const logVarId_t leftSensorId = logGetVarId("range", "left");
-    const logVarId_t backSensorId = logGetVarId("range", "back");
-    const logVarId_t rightSensorId = logGetVarId("range", "right");
-    const logVarId_t upSensorId = logGetVarId("range", "up");
-    const logVarId_t downSensorId = logGetVarId("range", "zrange");
-    const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
@@ -238,19 +265,39 @@ void appMain(void) {
             continue;
         }
 
+        frontSensorReading = logGetUint(frontSensorId);
+        leftSensorReading = logGetUint(leftSensorId);
+        backSensorReading = logGetUint(backSensorId);
+        rightSensorReading = logGetUint(rightSensorId);
+        upSensorReading = logGetUint(upSensorId);
+        downSensorReading = logGetUint(downSensorId);
+
+        rssiReading = logGetUint(rssiId);
+        (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
+
+        targetForwardVelocity = 0.0;
+        targetLeftVelocity = 0.0;
+        targetHeight = 0.0;
+        targetYawRate = 0.0;
+
         switch (missionState) {
         case MISSION_STANDBY:
             break;
         case MISSION_EXPLORING:
+            avoidObstacle();
             explore();
             break;
         case MISSION_RETURNING:
+            avoidObstacle();
             returnToBase();
             break;
         case MISSION_EMERGENCY:
-            land();
+            emergencyLand();
             break;
         }
+
+        static const uint8_t TASK_PRIORITY = 3;
+        commanderSetSetpoint(&setPoint, TASK_PRIORITY);
     }
 }
 

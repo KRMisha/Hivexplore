@@ -51,9 +51,7 @@ void CCrazyflieController::ControlStep() {
         }
         break;
     case MissionState::Emergency:
-        if (!AvoidObstacle()) {
-            Land();
-        }
+        EmergencyLand();
         break;
     }
 
@@ -313,21 +311,36 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::Land: {
-        Land();
+        if (Land()) {
+            m_returningState = ReturningState::Idle;
+        }
     } break;
     case ReturningState::Idle:
         break;
     }
 }
 
-void CCrazyflieController::Land() {
+void CCrazyflieController::EmergencyLand() {
+    switch (m_emergencyState) {
+    case EmergencyState::Land: {
+        if(Land()) {
+            m_emergencyState = EmergencyState::Idle;
+        }
+    } break;
+    case EmergencyState::Idle:
+        break;
+    }
+}
+
+bool CCrazyflieController::Land() {
     static constexpr double targetDroneLandHeight = 0.05;
     static constexpr double targetDroneHeightEpsilon = 0.05;
 
     m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
     if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
-        m_returningState = ReturningState::Idle;
+        return true;
     }
+    return false;
 
     // TODO: Move emergency landing to MissionState switch
     // case ExploringState::Land: {

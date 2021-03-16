@@ -32,8 +32,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
-    // Clear the debug print only if it has been flushed in the previous step
-    if (m_debugPrint.find("\n")) {
+    // Clear the debug print only if it has been flushed (with '\n') in the previous step
+    if (m_debugPrint.find('\n')) {
         m_debugPrint.erase();
     }
 

@@ -30,7 +30,6 @@ enum class ExploringState {
     Explore,
     Brake,
     Rotate,
-    Land,
 };
 
 enum class ReturningState {

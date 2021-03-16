@@ -122,25 +122,24 @@ class CrazyflieManager(DroneManager):
     def _connected(self, link_uri: str):
         print(f'Connected to {link_uri}')
 
-        # Move the newly connected drone from pending to connected
+        if self._mission_state != MissionState.STANDBY:
+            print('CrazyflieManager warning: Ignoring drone connection during mission:', link_uri)
+            self._pending_crazyflies[link_uri].close_link()
+            return
+
         self._connected_crazyflies[link_uri] = self._pending_crazyflies[link_uri]
         del self._pending_crazyflies[link_uri]
 
-        if self._mission_state == MissionState.STANDBY:
-            self._setup_log(self._connected_crazyflies[link_uri])
-            self._setup_param(self._connected_crazyflies[link_uri])
-            self._send_drone_ids()
-            self._setup_log(self._connected_crazyflies[link_uri])
-            self._setup_param(self._connected_crazyflies[link_uri])
+        self._setup_log(self._connected_crazyflies[link_uri])
+        self._setup_param(self._connected_crazyflies[link_uri])
+        self._send_drone_ids()
+        self._setup_log(self._connected_crazyflies[link_uri])
+        self._setup_param(self._connected_crazyflies[link_uri])
 
-            # Setup console logging
-            self._connected_crazyflies[link_uri].console.receivedChar.add_callback(lambda data: self._log_console_callback(link_uri, data))
+        # Setup console logging
+        self._connected_crazyflies[link_uri].console.receivedChar.add_callback(lambda data: self._log_console_callback(link_uri, data))
 
-            self._send_drone_ids()
-        else:
-            print('CrazyflieManager warning: Ignoring drone connection during mission:', link_uri)
-            self._pending_crazyflies[link_uri].close_link()
-
+        self._send_drone_ids()
 
     def _disconnected(self, link_uri: str):
         print(f'Disconnected from {link_uri}')

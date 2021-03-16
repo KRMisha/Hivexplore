@@ -84,19 +84,19 @@ static bool isM1LedOn = false;
 static setpoint_t setPoint;
 
 // Readings
-uint16_t frontSensorReading;
-uint16_t leftSensorReading;
-uint16_t backSensorReading;
-uint16_t rightSensorReading;
-uint16_t upSensorReading;
-uint16_t downSensorReading;
-uint8_t rssiReading;
+static uint16_t frontSensorReading;
+static uint16_t leftSensorReading;
+static uint16_t backSensorReading;
+static uint16_t rightSensorReading;
+static uint16_t upSensorReading;
+static uint16_t downSensorReading;
+static uint8_t rssiReading;
 
 // Targets
-float targetForwardVelocity;
-float targetLeftVelocity;
-float targetHeight;
-float targetYawRate;
+static float targetForwardVelocity;
+static float targetLeftVelocity;
+static float targetHeight;
+static float targetYawRate;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));

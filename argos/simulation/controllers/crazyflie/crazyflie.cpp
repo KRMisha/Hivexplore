@@ -42,6 +42,11 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
+    // Clear the debug print only if it has been flushed (with '\n') in the previous step
+    if (m_debugPrint.find('\n') != std::string::npos) {
+        m_debugPrint.clear();
+    }
+
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
@@ -126,6 +131,10 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     logDataMap.emplace_back("DroneStatus", droneStatusLog);
 
     return logDataMap;
+}
+
+const std::string& CCrazyflieController::GetDebugPrint() const {
+    return m_debugPrint;
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
@@ -398,6 +407,11 @@ void CCrazyflieController::UpdateDroneStatus() {
 void CCrazyflieController::PingOtherDrones() {
     static constexpr uint8_t pingData = 0;
     m_pcRABA->SetData(sizeof(pingData), pingData);
+}
+
+void CCrazyflieController::DebugPrint(const std::string& text) {
+    RLOG << text;
+    m_debugPrint += text;
 }
 
 template<typename T, typename U = T>

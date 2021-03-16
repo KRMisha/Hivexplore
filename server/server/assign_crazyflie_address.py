@@ -6,7 +6,7 @@ from server.uri_utils import load_crazyflie_uris_from_file, set_crazyflie_radio_
 
 def main():
     if len(sys.argv) != 3:
-        print('Incorrect program usage. Example usage: python3 -m server.change_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7E7E7E701')
+        print('Incorrect program usage. Example usage: python3 -m server.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7E7E7E701')
         return
 
     if sys.argv[1] not in load_crazyflie_uris_from_file():

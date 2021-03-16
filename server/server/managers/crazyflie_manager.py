@@ -130,16 +130,17 @@ class CrazyflieManager(DroneManager):
             self._setup_log(self._connected_crazyflies[link_uri])
             self._setup_param(self._connected_crazyflies[link_uri])
             self._send_drone_ids()
+            self._setup_log(self._connected_crazyflies[link_uri])
+            self._setup_param(self._connected_crazyflies[link_uri])
+
+            # Setup console logging
+            self._connected_crazyflies[link_uri].console.receivedChar.add_callback(lambda data: self._log_console_callback(link_uri, data))
+
+            self._send_drone_ids()
         else:
             print('CrazyflieManager warning: Ignoring drone connection during mission:', link_uri)
             self._pending_crazyflies[link_uri].close_link()
-        self._setup_log(self._crazyflies[link_uri])
-        self._setup_param(self._crazyflies[link_uri])
 
-        # Setup console logging
-        self._crazyflies[link_uri].console.receivedChar.add_callback(lambda data: self._log_console_callback(link_uri, data))
-
-        self._send_drone_ids()
 
     def _disconnected(self, link_uri):
         print(f'Disconnected from {link_uri}')

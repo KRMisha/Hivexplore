@@ -62,7 +62,7 @@ public:
 private:
     bool AvoidObstacle();
     void Explore();
-    void Return();
+    void ReturnToBase();
     void Land();
 
     void UpdateSensorReadings();
@@ -84,7 +84,7 @@ private:
     // States
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
-    ReturningState m_returningState = ReturningState::Return; // TODO: Why not Idle?
+    ReturningState m_returningState = ReturningState::Return;
     bool droneIsLanding = false;
 
     // Data

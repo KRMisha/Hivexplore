@@ -104,7 +104,7 @@ static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
-static void Explore() {
+static void explore() {
     // TODO: many variables will need to be hoisted out globally to be accessible to both explore() and return() (ex: readings)
     uint16_t frontSensorReading = logGetUint(frontSensorId);
     uint16_t leftSensorReading = logGetUint(leftSensorId);
@@ -178,16 +178,16 @@ static void Explore() {
     commanderSetSetpoint(&setPoint, TASK_PRIORITY);
 }
 
-static void Land() {
+static void land() {
     setWaypoint(&setPoint, targetForwardVelocity, targetLeftVelocity, targetHeight, targetYawRate);
     static const uint16_t LANDED_HEIGHT = 50;
     if (downSensorReading < LANDED_HEIGHT) {
         DEBUG_PRINT("Landed\n");
     }
-    returningState = RETURNING_IDLE
+    returningState = RETURNING_IDLE;
 }
 
-static void Return() {
+static void returnToBase() {
     switch (returningState) {
     case RETURNING_RETURN: {
         // TODO: Add return logic
@@ -195,7 +195,7 @@ static void Return() {
         returningState = RETURNING_LAND
     } break;
     case RETURNING_LAND: {
-        Land();
+        land();
     } break;
     case RETURNING_IDLE:
         break;
@@ -241,15 +241,15 @@ void appMain(void) {
         switch (missionState) {
         case MISSION_STANDBY:
             break;
-        case MISSION_EXPLORING: {
-            Explore();
-        } break;
-        case MISSION_RETURNING: {
-            Return();
-        } break;
-        case MISSION_EMERGENCY: {
-            Land();
-        } break;
+        case MISSION_EXPLORING:
+            explore();
+            break;
+        case MISSION_RETURNING:
+            returnToBase();
+            break;
+        case MISSION_EMERGENCY:
+            land();
+            break;
         }
     }
 }

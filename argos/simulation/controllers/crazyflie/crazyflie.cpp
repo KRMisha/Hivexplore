@@ -47,7 +47,7 @@ void CCrazyflieController::ControlStep() {
         break;
     case MissionState::Returning:
         if (!AvoidObstacle()) {
-            Return();
+            ReturnToBase();
         }
         break;
     case MissionState::Emergency:
@@ -298,7 +298,7 @@ void CCrazyflieController::Explore() {
     }
 }
 
-void CCrazyflieController::Return() {
+void CCrazyflieController::ReturnToBase() {
     switch (m_returningState) {
     case ReturningState::Return: {
         static constexpr double distanceToReturnEpsilon = 0.05;

@@ -1,6 +1,7 @@
 import json
 from typing import List
 from cflib.crazyflie.mem import MemoryElement
+from cflib.crazyflie.mem.i2c_element import I2CElement
 from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
 
@@ -40,11 +41,11 @@ def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
     eeprom.write_data(lambda eeprom, addr: _data_written(crazyflie, eeprom, addr))
 
 
-def _data_written(crazyflie: Crazyflie, eeprom, _addr):
+def _data_written(crazyflie: Crazyflie, eeprom: I2CElement, _addr: int):
     eeprom.update(lambda eeprom: _data_updated(crazyflie, eeprom))
 
 
-def _data_updated(crazyflie: Crazyflie, eeprom):
+def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
     old_address = crazyflie.link_uri.split('/')[-1]
     new_address = format(eeprom.elements['radio_address'], 'X')
     new_uri = crazyflie.link_uri.replace(old_address, new_address)

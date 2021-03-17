@@ -10,19 +10,19 @@
                 label="Start mission"
                 class="left-button"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Standby"
-                @click="startMissionButtonClick()"
+                @click="onStartMissionButtonClick()"
             />
             <Button
                 label="Return to base"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Exploring"
-                @click="returnToBaseButtonClick()"
+                @click="onReturnToBaseButtonClick()"
             />
             <Button
                 :label="endMissionButtonLabel"
                 class="right-button"
                 :style="{ 'background-color': endMissionButtonColor }"
                 :disabled="droneIds.length === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
-                @click="endMissionButtonClick()"
+                @click="onEndMissionButtonClick()"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
@@ -79,7 +79,7 @@ export default defineComponent({
             socketClient.sendMessage('mission-state', missionState);
         }
 
-        function startMissionButtonClick() {
+        function onStartMissionButtonClick() {
             // If last mission ended with an emergency landing
             if (wasEmergencyLandingCalled) {
                 confirm.require({
@@ -104,7 +104,7 @@ export default defineComponent({
             }
         }
 
-        function returnToBaseButtonClick() {
+        function onReturnToBaseButtonClick() {
             toast.add({severity:'success', summary:'Initiated', detail:'Return to base initiated', life: 3000});
             setMissionState(MissionState.Returning);
         }
@@ -117,7 +117,7 @@ export default defineComponent({
             return (missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red');
         });
 
-        function endMissionButtonClick() {
+        function onEndMissionButtonClick() {
             // Emergency land
             if (missionState.value !== MissionState.Landed) {
                 confirm.require({
@@ -150,11 +150,11 @@ export default defineComponent({
             missionState,
             missionStates: Object.values(MissionState),
             MissionState,
-            startMissionButtonClick,
-            returnToBaseButtonClick,
+            onStartMissionButtonClick,
+            onReturnToBaseButtonClick,
             endMissionButtonLabel,
             endMissionButtonColor,
-            endMissionButtonClick,
+            onEndMissionButtonClick,
         };
     },
 });

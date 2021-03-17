@@ -71,6 +71,9 @@ void CCrazyflieController::ControlStep() {
     case MissionState::Emergency:
         EmergencyLand();
         break;
+    case MissionState::Landed:
+        m_droneStatus = DroneStatus::Landed;
+        break;
     }
 
     m_previousPosition = m_pcPos->GetReading().Position;

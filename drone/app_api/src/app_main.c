@@ -152,6 +152,9 @@ void appMain(void) {
         case MISSION_EMERGENCY:
             emergencyLand();
             break;
+        case MISSION_LANDED:
+            droneStatus = STATUS_LANDED;
+            break;
         }
 
         static const uint8_t TASK_PRIORITY = 3;

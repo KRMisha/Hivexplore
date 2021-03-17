@@ -22,6 +22,7 @@ enum class MissionState {
     Exploring,
     Returning,
     Emergency,
+    Landed,
 };
 
 enum class ExploringState {

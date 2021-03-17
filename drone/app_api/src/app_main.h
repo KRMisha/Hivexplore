@@ -1,8 +1,8 @@
 #ifndef APP_MAIN_H
 #define APP_MAIN_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 // Enums
 typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING, MISSION_EMERGENCY } mission_state_t;

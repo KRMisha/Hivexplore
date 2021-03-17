@@ -9,8 +9,11 @@ def main():
         print('Incorrect program usage. Example usage: python3 -m server.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7E7E7E701')
         sys.exit(1)
 
-    if sys.argv[1] not in load_crazyflie_uris_from_file():
-        print('Warning: URI of drone not in config file')
+    try:
+        if sys.argv[1] not in load_crazyflie_uris_from_file():
+            print('Warning: URI of drone not in config file')
+    except ValueError:
+        sys.exit(1)
 
     cflib.crtp.init_drivers(enable_debug_driver=False)
 

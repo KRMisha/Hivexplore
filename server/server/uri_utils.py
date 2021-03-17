@@ -8,21 +8,16 @@ from cflib.utils.power_switch import PowerSwitch
 CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
 
 
+
 def load_crazyflie_uris_from_file() -> List[str]:
     with open(CRAZYFLIE_URIS_FILENAME, 'r+') as uris_file:
         try:
             data = json.load(uris_file)
             uris = data['crazyflie_uris']
-            if len(uris) > 0:
-                return uris
+            return uris
         except ValueError:
-            pass
-
-        FALLBACK_URIS = ['radio://0/80/2M/E7E7E7E701', 'radio://0/80/2M/E7E7E7E702']
-        print('load_crazyflie_uris_from_file warning: Using fallback uris:', FALLBACK_URIS)
-        json.dump({'crazyflie_uris': FALLBACK_URIS}, uris_file)
-        uris_file.write('\n')
-        return FALLBACK_URIS
+            print('load_crazyflie_uris_from_file error: Can\'t load uris from file')
+            raise
 
 
 def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
@@ -55,7 +50,10 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
 
     PowerSwitch(crazyflie.link_uri).stm_power_cycle()
 
-    uris = load_crazyflie_uris_from_file()
+    try:
+        uris = load_crazyflie_uris_from_file()
+    except ValueError:
+        uris = []
 
     # Remove old drone URI
     try:

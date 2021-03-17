@@ -22,7 +22,11 @@ class CrazyflieManager(DroneManager):
         self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     def _connect_crazyflies(self):
-        crazyflie_uris = load_crazyflie_uris_from_file()
+        try:
+            crazyflie_uris = load_crazyflie_uris_from_file()
+        except ValueError:
+            return
+
         for uri in crazyflie_uris:
             if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
                 continue

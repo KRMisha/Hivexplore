@@ -100,15 +100,10 @@ class DroneManager(ABC):
         self._drones_statuses[drone_id] = drone_status_value
         self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status_value.name)
 
-        # Check if all drones' status are "Landed"
-        all_drone_ids = self._get_drone_ids()
-        landed_drone_count  = 0
-        for _drone_id in all_drone_ids:
-            if self._drones_statuses[_drone_id] == DroneStatus.Landed:
-                landed_drone_count  += 1
-        if landed_drone_count  == len(all_drone_ids):
-            self._web_socket_server.send_message('mission-state', MissionState.Landed.name)
+        are_all_drones_landed = all(self._drones_statuses[id] is DroneStatus.Landed for id in self._get_drone_ids())
+        if are_all_drones_landed:
             print(f'Set mission state: {MissionState.Landed.name}')
+            self._web_socket_server.send_message('mission-state', MissionState.Landed.name)
 
 
     def _log_console_callback(self, drone_id: str, data: str):
@@ -127,10 +122,10 @@ class DroneManager(ABC):
             print('ArgosManager error: Unknown mission state received:', mission_state_str)
             return
 
+        print('Set mission state:', mission_state)
         for drone_id in self._get_drone_ids():
             self._set_drone_param('hivexplore.missionState', drone_id, mission_state)
         self._web_socket_server.send_message('mission-state', mission_state_str)
-        print('Set mission state:', mission_state)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):

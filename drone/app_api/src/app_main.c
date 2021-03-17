@@ -240,7 +240,7 @@ void returnToBase(void) {
         returningState = RETURNING_LAND;
     } break;
     case RETURNING_LAND: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_LANDING;
 
         if (land()) {
             returningState = RETURNING_IDLE;
@@ -257,7 +257,7 @@ void returnToBase(void) {
 void emergencyLand(void) {
     switch (emergencyState) {
     case EMERGENCY_LAND:
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_LANDING;
 
         if (land()) {
             emergencyState = EMERGENCY_IDLE;

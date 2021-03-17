@@ -92,9 +92,7 @@ export default defineComponent({
                         setMissionState(MissionState.Exploring);
                         wasEmergencyLandingCalled = false; // Reset
                     },
-                    reject: () => {
-                        toast.add({severity:'warn', summary:'Rejected', detail:'Start mission rejected', life: 3000});
-                    }
+                    reject: () => {}
                 });
             // If last mission ended normally
             } else {
@@ -129,9 +127,7 @@ export default defineComponent({
                         setMissionState(MissionState.Emergency);
                         wasEmergencyLandingCalled = true;
                     },
-                    reject: () => {
-                        toast.add({severity:'warn', summary:'Rejected', detail:'Emergency landing rejected', life: 3000});
-                    }
+                    reject: () => {}
                 });
             // End mission
             } else {

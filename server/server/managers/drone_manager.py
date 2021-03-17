@@ -101,10 +101,7 @@ class DroneManager(ABC):
 
         are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
         if are_all_drones_landed:
-            print(f'Set mission state: {MissionState.Landed.name}')
-            self._web_socket_server.send_message('mission-state', MissionState.Landed.name)
-            self._set_drone_param('hivexplore.missionState', drone_id, MissionState.Landed.name)
-
+            self._set_mission_state(MissionState.Landed.name)
 
     def _log_console_callback(self, drone_id: str, data: str):
         print(f'Debug print from drone {drone_id}: {data}')

@@ -91,8 +91,7 @@ export default defineComponent({
                         toast.add({severity:'success', summary:'ALATAK', detail:'ALATAK', life: 3000});
                         setMissionState(MissionState.Exploring);
                         wasEmergencyLandingCalled = false; // Reset
-                    },
-                    reject: () => {}
+                    }
                 });
             // If last mission ended normally
             } else {
@@ -126,8 +125,7 @@ export default defineComponent({
                         toast.add({severity:'success', summary:'Initiated', detail:'Emergency landing initiated', life: 3000});
                         setMissionState(MissionState.Emergency);
                         wasEmergencyLandingCalled = true;
-                    },
-                    reject: () => {}
+                    }
                 });
             // End mission
             } else {

@@ -21,7 +21,7 @@
                 :label="endMissionButtonLabel"
                 class="right-button"
                 :style="{ 'background-color': endMissionButtonColor }"
-                :disabled="droneIds.length === 0 || missionState === MissionState.Standby"
+                :disabled="droneIds.length === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
                 @click="endMissionButtonClick()"
             />
         </div>

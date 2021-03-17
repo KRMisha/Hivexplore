@@ -30,8 +30,6 @@
 
 #include "app.h"
 
-#include "app_main.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -46,6 +44,8 @@
 #include "pm.h"
 #include "app_channel.h"
 #include "commander.h"
+
+#include "app_main.h"
 
 #define DEBUG_MODULE "APPAPI"
 
@@ -159,7 +159,7 @@ void appMain(void) {
     }
 }
 
-static void avoidObstacle(void) {
+void avoidObstacle(void) {
     bool isExploringAvoidanceDisallowed =
         missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF);
     bool isReturningAvoidanceDisallowed =
@@ -181,7 +181,7 @@ static void avoidObstacle(void) {
     }
 }
 
-static void explore(void) {
+void explore(void) {
     switch (exploringState) {
     case EXPLORING_IDLE: {
         droneStatus = STATUS_STANDBY;
@@ -230,7 +230,7 @@ static void explore(void) {
     }
 }
 
-static void returnToBase(void) {
+void returnToBase(void) {
     switch (returningState) {
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
@@ -254,7 +254,7 @@ static void returnToBase(void) {
     }
 }
 
-static void emergencyLand(void) {
+void emergencyLand(void) {
     switch (emergencyState) {
     case EMERGENCY_LAND:
         droneStatus = STATUS_FLYING;
@@ -271,7 +271,7 @@ static void emergencyLand(void) {
     }
 }
 
-static bool land(void) {
+bool land(void) {
     updateWaypoint();
     static const uint16_t LANDED_HEIGHT = 50;
     if (downSensorReading < LANDED_HEIGHT) {
@@ -281,7 +281,7 @@ static bool land(void) {
     return false;
 }
 
-static void updateWaypoint(void) {
+void updateWaypoint(void) {
     setPoint.velocity_body = true;
     setPoint.mode.x = modeVelocity;
     setPoint.mode.y = modeVelocity;
@@ -295,7 +295,7 @@ static void updateWaypoint(void) {
     setPoint.position.z = targetHeight;
 }
 
-static uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
+uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 

@@ -407,7 +407,7 @@ void CCrazyflieController::UpdateDroneStatus() {
 }
 
 void CCrazyflieController::PingOtherDrones() {
-    static constexpr uint8_t pingData = 0;
+    static constexpr std::uint8_t pingData = 0;
     m_pcRABA->SetData(sizeof(pingData), pingData);
 }
 

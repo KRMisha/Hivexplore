@@ -93,12 +93,11 @@ class DroneManager(ABC):
         print(f'RSSI from drone {drone_id}: {rssi}')
 
     def _log_drone_status_callback(self, drone_id: str, data: Dict[str, int]):
-        drone_status = data['hivexplore.droneStatus']
-        print(f'Drone status from drone {drone_id}: {drone_status}')
+        drone_status = DroneStatus(data['hivexplore.droneStatus'])
+        print(f'Drone status from drone {drone_id}: {drone_status.name}')
 
-        drone_status_value = DroneStatus(drone_status)
-        self._drone_statuses[drone_id] = drone_status_value
-        self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status_value.name)
+        self._drone_statuses[drone_id] = drone_status
+        self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status.name)
 
         are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
         if are_all_drones_landed:

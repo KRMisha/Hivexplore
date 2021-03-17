@@ -12,7 +12,7 @@ class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
-        self._drones_status: Dict[str, str] = {}
+        self._drones_statuses: Dict[str, DroneStatus] = {}
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -96,20 +96,19 @@ class DroneManager(ABC):
         drone_status = data['hivexplore.droneStatus']
         print(f'Drone status from drone {drone_id}: {drone_status}')
 
-        drone_status_name = DroneStatus(drone_status).name
-        self._drones_status[drone_id] = drone_status_name
-        self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status_name)
+        drone_status_value = DroneStatus(drone_status)
+        self._drones_statuses[drone_id] = drone_status_value
+        self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status_value.name)
 
-        # Check if all drones status is "Landed"
+        # Check if all drones' status are "Landed"
         all_drone_ids = self._get_drone_ids()
-        drones_landed = 0
+        landed_drone_count  = 0
         for _drone_id in all_drone_ids:
-            if DroneStatus[self._drones_status[_drone_id]] == DroneStatus.Landed:
-                drones_landed += 1
-        if drones_landed == len(all_drone_ids):
-            mission_state_landed = MissionState.Landed.name
-            self._web_socket_server.send_message('mission-state', mission_state_landed)
-            print(f'Mission state: {mission_state_landed}')
+            if self._drones_statuses[_drone_id] == DroneStatus.Landed:
+                landed_drone_count  += 1
+        if landed_drone_count  == len(all_drone_ids):
+            self._web_socket_server.send_message('mission-state', MissionState.Landed.name)
+            print(f'Set mission state: {MissionState.Landed.name}')
 
 
     def _log_console_callback(self, drone_id: str, data: str):

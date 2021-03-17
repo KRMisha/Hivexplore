@@ -6,5 +6,6 @@ from enum import IntEnum
 class DroneStatus(IntEnum):
     Standby = 0
     Flying = 1
-    Landed = 2
-    Crashed = 3
+    Landing = 2
+    Landed = 3
+    Crashed = 4

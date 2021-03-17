@@ -18,7 +18,9 @@ namespace {
     }
 
     template<typename T>
-    constexpr std::int8_t getSign(T value) { return value < 0 ? -1 : 1; }
+    constexpr std::int8_t getSign(T value) {
+        return value < 0 ? -1 : 1;
+    }
 
     constexpr double calculateDroneDistanceCorrection(double threshold, double distance) {
         return getSign(distance) * (threshold - std::abs(distance));

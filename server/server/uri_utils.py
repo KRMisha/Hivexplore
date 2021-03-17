@@ -1,4 +1,5 @@
 import json
+from typing import List
 from cflib.crazyflie.mem import MemoryElement
 from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
@@ -6,7 +7,7 @@ from cflib.utils.power_switch import PowerSwitch
 CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
 
 
-def load_crazyflie_uris_from_file():
+def load_crazyflie_uris_from_file() -> List[str]:
     with open(CRAZYFLIE_URIS_FILENAME, 'r+') as uris_file:
         try:
             data = json.load(uris_file)

@@ -46,6 +46,7 @@ enum class EmergencyState {
 enum class DroneStatus {
     Standby,
     Flying,
+    Landing,
     Landed,
     Crashed,
 };

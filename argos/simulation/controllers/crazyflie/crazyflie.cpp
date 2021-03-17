@@ -362,7 +362,7 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::Land: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Landing;
 
         if (Land()) {
             m_returningState = ReturningState::Idle;
@@ -377,7 +377,7 @@ void CCrazyflieController::ReturnToBase() {
 void CCrazyflieController::EmergencyLand() {
     switch (m_emergencyState) {
     case EmergencyState::Land: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Landing;
 
         if(Land()) {
             m_emergencyState = EmergencyState::Idle;
@@ -393,7 +393,11 @@ bool CCrazyflieController::Land() {
     static constexpr double targetDroneLandHeight = 0.05;
     static constexpr double targetDroneHeightEpsilon = 0.05;
 
+    // TODO: Move this to return
     m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
+
+    const auto targetPoint = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneLandHeight);
+    m_pcPropellers->SetAbsolutePosition(targetPoint);
     if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
         m_droneStatus = DroneStatus::Landed;
         return true;

@@ -13,7 +13,19 @@ namespace {
 
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
-    constexpr double calculateDistanceCorrection(double threshold, double reading) { return threshold - std::min(threshold, reading); }
+    constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
+        return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
+    }
+
+    template<typename T>
+    constexpr std::int8_t getSign(T value) {
+        return value < 0 ? -1 : 1;
+    }
+
+    constexpr double calculateDroneDistanceCorrection(double threshold, double distance) {
+        return getSign(distance) * (threshold - std::abs(distance));
+    }
+
 } // namespace
 
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
@@ -41,6 +53,7 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateRssi();
     UpdateDroneStatus();
+    PingOtherDrones();
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -147,35 +160,52 @@ bool CCrazyflieController::AvoidObstacle() {
         return reading.second <= obstacleDetectedThreshold;
     });
 
+    bool isOtherDroneDetected = std::any_of(m_pcRABS->GetReadings().begin(), m_pcRABS->GetReadings().end(), [](const auto& packet) {
+        return packet.Range * 10 <= obstacleDetectedThreshold; // Convert range from cm to mm
+    });
+
     bool isExploringAvoidanceDisallowed = m_missionState == MissionState::Exploring &&
                                           (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff ||
                                            m_exploringState == ExploringState::Land);
     bool isReturningAvoidanceDisallowed =
         m_missionState == MissionState::Returning && (m_returningState == ReturningState::Idle || m_returningState == ReturningState::Land);
 
-    bool shouldStartAvoidance =
-        !m_isAvoidingObstacle && isObstacleDetected && !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
-
+    bool shouldStartAvoidance = !m_isAvoidingObstacle && (isObstacleDetected || isOtherDroneDetected) && !isExploringAvoidanceDisallowed &&
+                                !isReturningAvoidanceDisallowed;
     // Calculate necessary correction to avoid obstacles
     if (shouldStartAvoidance) {
         static constexpr double maximumVelocity = 1.0;
         static constexpr double avoidanceSensitivity = maximumVelocity / meterToMillimeterFactor;
-        double leftDistanceCorrection =
-            m_sensorReadings["left"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
-        double rightDistanceCorrection =
-            m_sensorReadings["right"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
-        double frontDistanceCorrection =
-            m_sensorReadings["front"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
-        double backDistanceCorrection =
-            m_sensorReadings["back"] == obstacleTooFar
-                ? 0.0
-                : calculateDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
+        double leftDistanceCorrection = 0.0;
+        double rightDistanceCorrection = 0.0;
+        double frontDistanceCorrection = 0.0;
+        double backDistanceCorrection = 0.0;
+
+        // Obstacle collision avoidance
+        if (isObstacleDetected) {
+            leftDistanceCorrection +=
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
+            rightDistanceCorrection +=
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
+            frontDistanceCorrection +=
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
+            backDistanceCorrection +=
+                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
+        }
+
+        // Drone collision avoidance
+        if (isOtherDroneDetected) {
+            for (const auto& packet : m_pcRABS->GetReadings()) {
+                const double horizontalAngle = packet.HorizontalBearing.GetValue();
+                // Convert packet range from cm to mm
+                const auto vectorToDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
+                static const double droneAvoidanceSensitivity = 1.0 / 3000.0;
+                leftDistanceCorrection +=
+                    calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetX()) * droneAvoidanceSensitivity;
+                backDistanceCorrection +=
+                    calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetY()) * droneAvoidanceSensitivity;
+            }
+        }
 
         // Y: Back, -Y: Forward, X: Left, -X: Right
         auto positionCorrection =
@@ -374,6 +404,11 @@ void CCrazyflieController::UpdateDroneStatus() {
     } else {
         m_droneStatus = DroneStatus::Flying;
     }
+}
+
+void CCrazyflieController::PingOtherDrones() {
+    static constexpr std::uint8_t pingData = 0;
+    m_pcRABA->SetData(sizeof(pingData), pingData);
 }
 
 void CCrazyflieController::DebugPrint(const std::string& text) {

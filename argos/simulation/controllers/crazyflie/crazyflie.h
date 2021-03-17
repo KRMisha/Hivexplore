@@ -68,6 +68,7 @@ private:
     void UpdateVelocity();
     void UpdateRssi();
     void UpdateDroneStatus();
+    void PingOtherDrones();
 
     void DebugPrint(const std::string& text);
 

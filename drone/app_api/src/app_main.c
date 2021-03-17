@@ -12,7 +12,8 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, in version 3.
- ** This program is distributed in the hope that it will be useful,
+ *
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -25,11 +26,9 @@
  *             sure they are compiled in CI.
  */
 
-#include "app.h"
-
 #include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
+
+#include "app.h"
 
 #include "app_main.h"
 

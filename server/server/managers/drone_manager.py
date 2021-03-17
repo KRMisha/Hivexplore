@@ -12,7 +12,7 @@ class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server
         self._map_generator = map_generator
-        self._drones_statuses: Dict[str, DroneStatus] = {}
+        self._drone_statuses: Dict[str, DroneStatus] = {}
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -97,10 +97,10 @@ class DroneManager(ABC):
         print(f'Drone status from drone {drone_id}: {drone_status}')
 
         drone_status_value = DroneStatus(drone_status)
-        self._drones_statuses[drone_id] = drone_status_value
+        self._drone_statuses[drone_id] = drone_status_value
         self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status_value.name)
 
-        are_all_drones_landed = all(self._drones_statuses[id] is DroneStatus.Landed for id in self._get_drone_ids())
+        are_all_drones_landed = all(self._drone_statuses[id] is DroneStatus.Landed for id in self._get_drone_ids())
         if are_all_drones_landed:
             print(f'Set mission state: {MissionState.Landed.name}')
             self._web_socket_server.send_message('mission-state', MissionState.Landed.name)

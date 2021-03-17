@@ -22,8 +22,8 @@ import 'primeicons/primeicons.css';
 const app = createApp(App);
 app.use(PrimeVue, { ripple: true });
 
-app.use(ToastService);
 app.use(ConfirmationService);
+app.use(ToastService);
 
 app.component('Button', Button);
 app.component('Card', Card);

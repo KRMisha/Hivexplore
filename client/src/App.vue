@@ -46,12 +46,12 @@
 
 <script lang="ts">
 import { computed, defineComponent, onUnmounted, provide, ref } from 'vue';
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
 import Drone from '@/components/Drone.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
 import { MissionState } from '@/enums/mission-state';
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
 
 export default defineComponent({
     name: 'App',
@@ -64,7 +64,7 @@ export default defineComponent({
         const toast = useToast();
         const socketClient = new SocketClient();
         const droneIds = ref<string[]>([]);
-        let emergencyLandWasCalled = false;
+        let wasEmergencyLandingCalled = false;
 
         socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
@@ -80,23 +80,23 @@ export default defineComponent({
         }
 
         function startMissionButtonClick() {
-            // Emergency land was called use case
-            if (emergencyLandWasCalled) {
+            // If last mission ended with an emergency landing
+            if (wasEmergencyLandingCalled) {
                 confirm.require({
-                    message: 'Are you sure you want to START mission since an EMERGENCY land was called?',
+                    message: 'The last mission was forcefully ended with an EMERGENCY landing. Are you sure you want to start a new mission?',
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
                         toast.add({severity:'success', summary:'Initiated', detail:'Start mission initiated', life: 3000});
                         toast.add({severity:'success', summary:'ALATAK', detail:'ALATAK', life: 3000});
                         setMissionState(MissionState.Exploring);
-                        emergencyLandWasCalled = false; // Reset
+                        wasEmergencyLandingCalled = false; // Reset
                     },
                     reject: () => {
                         toast.add({severity:'warn', summary:'Rejected', detail:'Start mission rejected', life: 3000});
                     }
                 });
-            // Normal use case
+            // If last mission ended normally
             } else {
                 toast.add({severity:'success', summary:'Initiated', detail:'Start mission initiated', life: 3000});
                 toast.add({severity:'success', summary:'ALATAK', detail:'ALATAK', life: 3000});
@@ -121,16 +121,16 @@ export default defineComponent({
             // Emergency land
             if (missionState.value !== MissionState.Landed) {
                 confirm.require({
-                    message: 'Are you sure you want to initiate an EMERGENCY land?',
+                    message: 'Are you sure you want to initiate an EMERGENCY landing?',
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
-                        toast.add({severity:'success', summary:'Initiated', detail:'Emergency land initiated', life: 3000});
+                        toast.add({severity:'success', summary:'Initiated', detail:'Emergency landing initiated', life: 3000});
                         setMissionState(MissionState.Emergency);
-                        emergencyLandWasCalled = true;
+                        wasEmergencyLandingCalled = true;
                     },
                     reject: () => {
-                        toast.add({severity:'warn', summary:'Rejected', detail:'Emergency land rejected', life: 3000});
+                        toast.add({severity:'warn', summary:'Rejected', detail:'Emergency landing rejected', life: 3000});
                     }
                 });
             // End mission

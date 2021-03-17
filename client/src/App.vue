@@ -46,8 +46,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, onUnmounted, provide, ref } from 'vue';
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 import Drone from '@/components/Drone.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
@@ -83,35 +83,36 @@ export default defineComponent({
             // If last mission ended with an emergency landing
             if (wasEmergencyLandingCalled) {
                 confirm.require({
-                    message: 'The last mission was forcefully ended with an EMERGENCY landing. Are you sure you want to start a new mission?',
+                    message:
+                        'The last mission was forcefully ended with an EMERGENCY landing. Are you sure you want to start a new mission?',
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
-                        toast.add({severity:'success', summary:'Initiated', detail:'Start mission initiated', life: 3000});
-                        toast.add({severity:'success', summary:'ALATAK', detail:'ALATAK', life: 3000});
+                        toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
+                        toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK', life: 3000 });
                         setMissionState(MissionState.Exploring);
                         wasEmergencyLandingCalled = false; // Reset
-                    }
+                    },
                 });
-            // If last mission ended normally
+                // If last mission ended normally
             } else {
-                toast.add({severity:'success', summary:'Initiated', detail:'Start mission initiated', life: 3000});
-                toast.add({severity:'success', summary:'ALATAK', detail:'ALATAK', life: 3000});
+                toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
+                toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK', life: 3000 });
                 setMissionState(MissionState.Exploring);
             }
         }
 
         function onReturnToBaseButtonClick() {
-            toast.add({severity:'success', summary:'Initiated', detail:'Return to base initiated', life: 3000});
+            toast.add({ severity: 'success', summary: 'Initiated', detail: 'Return to base initiated', life: 3000 });
             setMissionState(MissionState.Returning);
         }
 
         const endMissionButtonLabel = computed((): string => {
-            return (missionState.value === MissionState.Landed ? 'End mission' : 'Emergency land');
+            return missionState.value === MissionState.Landed ? 'End mission' : 'Emergency land';
         });
 
         const endMissionButtonColor = computed((): string => {
-            return (missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red');
+            return missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red';
         });
 
         function onEndMissionButtonClick() {
@@ -122,12 +123,12 @@ export default defineComponent({
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
-                        toast.add({severity:'success', summary:'Initiated', detail:'Emergency landing initiated', life: 3000});
+                        toast.add({ severity: 'success', summary: 'Initiated', detail: 'Emergency landing initiated', life: 3000 });
                         setMissionState(MissionState.Emergency);
                         wasEmergencyLandingCalled = true;
-                    }
+                    },
                 });
-            // End mission
+                // End mission
             } else {
                 setMissionState(MissionState.Standby);
             }

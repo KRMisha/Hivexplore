@@ -127,11 +127,10 @@ class DroneManager(ABC):
             print('ArgosManager error: Unknown mission state received:', mission_state_str)
             return
 
-        print('Set mission state:', mission_state)
         for drone_id in self._get_drone_ids():
             self._set_drone_param('hivexplore.missionState', drone_id, mission_state)
         self._web_socket_server.send_message('mission-state', mission_state_str)
-        print(f'Mission state: {mission_state_str}')
+        print('Set mission state:', mission_state)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):

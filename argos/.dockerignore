@@ -1,6 +1,8 @@
 # CMake build directory
 **/build/
 
-Dockerfile
-
+# VS Code
+**/.vscode
 argos-devcontainer.json
+
+Dockerfile

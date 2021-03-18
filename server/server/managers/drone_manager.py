@@ -19,6 +19,8 @@ class DroneManager(ABC):
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
+        self._web_socket_server.bind('mission-state', self._set_mission_state)
+        self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     @abstractmethod
     async def start(self):

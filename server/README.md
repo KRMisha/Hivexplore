@@ -62,6 +62,16 @@ make run
 
 > Note: the Crazyradio PA must be connected to the computer.
 
+### Assign a Crazyflie's address
+```
+python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/<current address> <new address>
+```
+
+Example:
+```
+python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7E7E7E701
+```
+
 ### Run program to connect with the ARGoS simulation
 ```
 make run-argos

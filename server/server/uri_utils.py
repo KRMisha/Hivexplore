@@ -45,7 +45,7 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
     new_address = format(eeprom.elements['radio_address'], 'X')
     new_uri = crazyflie.link_uri.replace(old_address, new_address)
 
-    print(f'Changed address of drone {crazyflie.link_uri} to {new_uri}')
+    print(f'Changed URI of drone {crazyflie.link_uri} to {new_uri}')
     print('Restarting drone...')
 
     PowerSwitch(crazyflie.link_uri).stm_power_cycle()

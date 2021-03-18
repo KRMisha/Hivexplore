@@ -62,9 +62,9 @@ make run
 
 > Note: the Crazyradio PA must be connected to the computer.
 
-### Assign a drone's address
+### Assign a Crazyflie's address
 ```
-python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/[current address] [new address]
+python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/<current address> <new address>
 ```
 
 Example:

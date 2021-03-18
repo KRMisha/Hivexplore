@@ -199,7 +199,7 @@ void explore(void) {
         }
     } break;
     case EXPLORING_LIFTOFF: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_LIFTOFF;
 
         targetHeight += EXPLORATION_HEIGHT;
         updateWaypoint();

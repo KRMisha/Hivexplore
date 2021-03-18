@@ -51,5 +51,5 @@ class ArgosManager(DroneManager):
 
     @staticmethod
     def _log_console_callback(drone_id: str, data: str):
-        for text in data.split('\n'):
-            DroneManager._send_log_to_client(drone_id, text)
+        for line in data.split('\n'):
+            DroneManager._send_log_to_client(drone_id, line)

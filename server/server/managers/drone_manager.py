@@ -11,7 +11,6 @@ from server.sockets.web_socket_server import WebSocketServer
 # pylint: disable=no-self-use
 
 
-
 class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server

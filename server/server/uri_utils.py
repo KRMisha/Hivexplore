@@ -11,8 +11,7 @@ CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
 def load_crazyflie_uris_from_file() -> List[str]:
     with open(CRAZYFLIE_URIS_FILENAME, 'r+') as uris_file:
         try:
-            data = json.load(uris_file)
-            uris = data['crazyflie_uris']
+            uris = json.load(uris_file)
             return uris
         except ValueError:
             print('load_crazyflie_uris_from_file error: Could not load URIs from file')
@@ -64,5 +63,5 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
     uris.append(new_uri)
 
     with open(CRAZYFLIE_URIS_FILENAME, 'w') as uris_file:
-        json.dump({'crazyflie_uris': uris}, uris_file)
+        json.dump(uris, uris_file)
         uris_file.write('\n')

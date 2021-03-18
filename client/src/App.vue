@@ -1,7 +1,6 @@
 <template>
     <Toast />
-    <ConfirmDialog />
-    <ConfirmDialog group="positionDialog"></ConfirmDialog>
+    <ConfirmPopup />
 
     <div class="container">
         <Map class="map-container" />
@@ -10,7 +9,7 @@
                 label="Start mission"
                 class="left-button"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Standby"
-                @click="onStartMissionButtonClick()"
+                @click="onStartMissionButtonClick($event)"
             />
             <Button
                 label="Return to base"
@@ -22,7 +21,7 @@
                 class="right-button"
                 :style="{ 'background-color': endMissionButtonColor }"
                 :disabled="droneIds.length === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
-                @click="onEndMissionButtonClick()"
+                @click="onEndMissionButtonClick($event)"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
@@ -79,12 +78,12 @@ export default defineComponent({
             socketClient.sendMessage('mission-state', missionState);
         }
 
-        function onStartMissionButtonClick() {
+        function onStartMissionButtonClick(event: Event) {
             // If last mission ended with an emergency landing
             if (wasEmergencyLandingCalled) {
                 confirm.require({
-                    message:
-                        'The last mission was forcefully ended with an EMERGENCY landing. Are you sure you want to start a new mission?',
+                    target: event!.currentTarget!,
+                    message: 'The last mission was forcefully ended. Are you sure you want to start a new mission?',
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
@@ -115,13 +114,15 @@ export default defineComponent({
             return missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red';
         });
 
-        function onEndMissionButtonClick() {
+        function onEndMissionButtonClick(event: Event) {
             // Emergency land
             if (missionState.value !== MissionState.Landed) {
                 confirm.require({
+                    target: event!.currentTarget!,
                     message: 'Are you sure you want to initiate an EMERGENCY landing?',
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
+                    acceptClass: 'p-button-danger',
                     accept: () => {
                         toast.add({ severity: 'success', summary: 'Initiated', detail: 'Emergency landing initiated', life: 3000 });
                         setMissionState(MissionState.Emergency);

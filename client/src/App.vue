@@ -119,7 +119,7 @@ export default defineComponent({
             if (missionState.value !== MissionState.Landed) {
                 confirm.require({
                     target: event!.currentTarget!,
-                    message: 'Are you sure you want to initiate an EMERGENCY landing?',
+                    message: 'Are you sure you want to initiate an *emergency* landing?',
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     acceptClass: 'p-button-danger',

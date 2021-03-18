@@ -145,7 +145,6 @@ class CrazyflieManager(DroneManager):
     def _disconnected(self, link_uri: str):
         print(f'Disconnected from {link_uri}')
         self._connected_crazyflies.pop(link_uri, None)
-        self._pending_crazyflies.pop(link_uri, None)
         self._send_drone_ids()
 
     def _connection_failed(self, link_uri: str, msg: str):

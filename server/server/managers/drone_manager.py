@@ -7,7 +7,10 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator, Orientation, Point, Range
 from server.sockets.web_socket_server import WebSocketServer
 
-#pylint: disable=no-self-use
+# TODO: Remove once logging to client is added
+# pylint: disable=no-self-use
+
+
 
 class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):

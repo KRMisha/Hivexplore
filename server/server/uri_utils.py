@@ -8,7 +8,6 @@ from cflib.utils.power_switch import PowerSwitch
 CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
 
 
-
 def load_crazyflie_uris_from_file() -> List[str]:
     with open(CRAZYFLIE_URIS_FILENAME, 'r+') as uris_file:
         try:
@@ -16,7 +15,7 @@ def load_crazyflie_uris_from_file() -> List[str]:
             uris = data['crazyflie_uris']
             return uris
         except ValueError:
-            print('load_crazyflie_uris_from_file error: Can\'t load uris from file')
+            print('load_crazyflie_uris_from_file error: Can\'t load URIs from file')
             raise
 
 

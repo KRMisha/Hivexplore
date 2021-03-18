@@ -4,9 +4,9 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
-from server.uri_utils import load_crazyflie_uris_from_file
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
+from server.uri_utils import load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):

@@ -108,7 +108,7 @@ export default defineComponent({
             for (const point of points) {
                 // Change point coordinates to match three.js coordinate system
                 // X: Right, Y: Up, Z: Out (towards user)
-                addPoint([point[0], point[2], point[1]]);
+                addPoint([point[1], point[2], point[0]]);
             }
         });
 

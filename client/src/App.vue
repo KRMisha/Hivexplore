@@ -79,7 +79,8 @@ export default defineComponent({
         }
 
         function onStartMissionButtonClick(event: Event) {
-            if (wasEmergencyLandingCalled) { // If last mission ended with an emergency landing
+            if (wasEmergencyLandingCalled) {
+                // If last mission ended with an emergency landing
                 confirm.require({
                     target: event!.currentTarget!,
                     message: 'The last mission was forcefully ended. Are you sure you want to start a new mission?',
@@ -92,7 +93,8 @@ export default defineComponent({
                         wasEmergencyLandingCalled = false; // Reset
                     },
                 });
-            } else { // If last mission ended normally
+            } else {
+                // If last mission ended normally
                 toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
                 toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK', life: 3000 });
                 setMissionState(MissionState.Exploring);
@@ -113,7 +115,8 @@ export default defineComponent({
         });
 
         function onEndMissionButtonClick(event: Event) {
-            if (missionState.value !== MissionState.Landed) { // Emergency land
+            if (missionState.value !== MissionState.Landed) {
+                // Emergency land
                 confirm.require({
                     target: event!.currentTarget!,
                     message: 'Are you sure you want to initiate an *emergency* landing?',
@@ -126,7 +129,8 @@ export default defineComponent({
                         wasEmergencyLandingCalled = true;
                     },
                 });
-            } else { // End mission
+            } else {
+                // End mission
                 setMissionState(MissionState.Standby);
             }
         }

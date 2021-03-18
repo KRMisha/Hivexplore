@@ -79,8 +79,7 @@ export default defineComponent({
         }
 
         function onStartMissionButtonClick(event: Event) {
-            // If last mission ended with an emergency landing
-            if (wasEmergencyLandingCalled) {
+            if (wasEmergencyLandingCalled) { // If last mission ended with an emergency landing
                 confirm.require({
                     target: event!.currentTarget!,
                     message: 'The last mission was forcefully ended. Are you sure you want to start a new mission?',
@@ -88,13 +87,12 @@ export default defineComponent({
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
                         toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
-                        toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK', life: 3000 });
+                        toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK🚀🚀', life: 3000 });
                         setMissionState(MissionState.Exploring);
                         wasEmergencyLandingCalled = false; // Reset
                     },
                 });
-                // If last mission ended normally
-            } else {
+            } else { // If last mission ended normally
                 toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
                 toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK', life: 3000 });
                 setMissionState(MissionState.Exploring);
@@ -115,8 +113,7 @@ export default defineComponent({
         });
 
         function onEndMissionButtonClick(event: Event) {
-            // Emergency land
-            if (missionState.value !== MissionState.Landed) {
+            if (missionState.value !== MissionState.Landed) { // Emergency land
                 confirm.require({
                     target: event!.currentTarget!,
                     message: 'Are you sure you want to initiate an *emergency* landing?',
@@ -129,8 +126,7 @@ export default defineComponent({
                         wasEmergencyLandingCalled = true;
                     },
                 });
-                // End mission
-            } else {
+            } else { // End mission
                 setMissionState(MissionState.Standby);
             }
         }

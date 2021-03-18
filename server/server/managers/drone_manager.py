@@ -7,6 +7,9 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator, Orientation, Point, Range
 from server.sockets.web_socket_server import WebSocketServer
 
+# TODO: Remove once logging to client is added
+# pylint: disable=no-self-use
+
 
 class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
@@ -17,6 +20,8 @@ class DroneManager(ABC):
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
+        self._web_socket_server.bind('mission-state', self._set_mission_state)
+        self._web_socket_server.bind('set-led', self._set_led_enabled)
 
     @abstractmethod
     async def start(self):
@@ -117,7 +122,7 @@ class DroneManager(ABC):
         try:
             self._mission_state = MissionState[mission_state_str]
         except KeyError:
-            print('ArgosManager error: Unknown mission state received:', mission_state_str)
+            print('DroneManager error: Unknown mission state received:', mission_state_str)
             return
 
         print('Set mission state:', self._mission_state)
@@ -131,4 +136,4 @@ class DroneManager(ABC):
             self._set_drone_param('hivexplore.isM1LedOn', drone_id, is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
         else:
-            print('CrazyflieManager error: Unknown drone ID received:', drone_id)
+            print('DroneManager error: Unknown drone ID received:', drone_id)

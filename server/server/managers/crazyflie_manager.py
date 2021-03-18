@@ -1,62 +1,53 @@
-import asyncio
 from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.managers.drone_manager import DroneManager
+from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
-from server import config
+from server.uri_utils import load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
         super().__init__(web_socket_server, map_generator)
-        self._crazyflies: Dict[str, Crazyflie] = {}
+        self._connected_crazyflies: Dict[str, Crazyflie] = {}
+        self._pending_crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
-        await self._find_crazyflies()
-        self._web_socket_server.bind('mission-state', self._set_mission_state)
-        self._web_socket_server.bind('set-led', self._set_led_enabled)
+        self._connect_crazyflies()
 
-    async def _find_crazyflies(self):
-        timeout_s = config.BASE_CONNECTION_TIMEOUT_S
-        while len(self._crazyflies) == 0:
-            available_interfaces = await asyncio.get_event_loop().run_in_executor(None, cflib.crtp.scan_interfaces)
+    def _connect_crazyflies(self):
+        try:
+            crazyflie_uris = load_crazyflie_uris_from_file()
+        except ValueError:
+            return
 
-            if len(available_interfaces) > 0:
-                print('Crazyflies found:')
-                for available_interface in available_interfaces:
-                    print(f'- {available_interface[0]}')
+        for uri in crazyflie_uris:
+            if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
+                continue
 
-                for available_interface in available_interfaces:
-                    crazyflie = Crazyflie(rw_cache='./cache')
+            print(f'Trying to connect to: {uri}')
+            crazyflie = Crazyflie(rw_cache='./cache')
 
-                    crazyflie.connected.add_callback(self._connected)
-                    crazyflie.disconnected.add_callback(self._disconnected)
-                    crazyflie.connection_failed.add_callback(self._connection_failed)
-                    crazyflie.connection_lost.add_callback(self._connection_lost)
+            crazyflie.connected.add_callback(self._connected)
+            crazyflie.disconnected.add_callback(self._disconnected)
+            crazyflie.connection_failed.add_callback(self._connection_failed)
+            crazyflie.connection_lost.add_callback(self._connection_lost)
 
-                    link_uri = available_interface[0]
-                    print(f'Connecting to {link_uri}')
-                    crazyflie.open_link(link_uri)
-
-                    self._crazyflies[link_uri] = crazyflie
-                timeout_s = config.BASE_CONNECTION_TIMEOUT_S
-            else:
-                print(f'No Crazyflies found, retrying after {timeout_s} seconds')
-                await asyncio.sleep(timeout_s)
-                timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
+            crazyflie.open_link(uri)
+            self._pending_crazyflies[uri] = crazyflie
 
     def _get_drone_ids(self) -> List[str]:
-        return list(self._crazyflies.keys())
+        return list(self._connected_crazyflies.keys())
 
     def _is_drone_id_valid(self, drone_id: str) -> bool:
-        return drone_id in self._crazyflies
+        return drone_id in self._connected_crazyflies
 
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
-        self._crazyflies[drone_id].param.set_value(param, value)
+        self._connected_crazyflies[drone_id].param.set_value(param, value)
 
     # Setup
 
@@ -130,28 +121,37 @@ class CrazyflieManager(DroneManager):
 
     # Connection callbacks
 
-    def _connected(self, link_uri):
+    def _connected(self, link_uri: str):
         print(f'Connected to {link_uri}')
-        self._setup_log(self._crazyflies[link_uri])
-        self._setup_param(self._crazyflies[link_uri])
+
+        if self._mission_state != MissionState.Standby:
+            print('CrazyflieManager warning: Ignoring drone connection during mission:', link_uri)
+            self._pending_crazyflies[link_uri].close_link()
+            return
+
+        self._connected_crazyflies[link_uri] = self._pending_crazyflies[link_uri]
+        del self._pending_crazyflies[link_uri]
+
+        self._setup_log(self._connected_crazyflies[link_uri])
+        self._setup_param(self._connected_crazyflies[link_uri])
 
         # Setup console logging
-        self._crazyflies[link_uri].console.receivedChar.add_callback(lambda data: self._log_console_callback(link_uri, data))
+        self._connected_crazyflies[link_uri].console.receivedChar.add_callback(lambda data: self._log_console_callback(link_uri, data))
 
         self._send_drone_ids()
 
-    def _disconnected(self, link_uri):
+    def _disconnected(self, link_uri: str):
         print(f'Disconnected from {link_uri}')
-        del self._crazyflies[link_uri]
+        self._connected_crazyflies.pop(link_uri, None)
         self._send_drone_ids()
 
-    def _connection_failed(self, link_uri, msg):
+    def _connection_failed(self, link_uri: str, msg: str):
         print(f'Connection to {link_uri} failed: {msg}')
-        del self._crazyflies[link_uri]
+        del self._pending_crazyflies[link_uri]
 
-    def _connection_lost(self, link_uri, msg):
+    def _connection_lost(self, link_uri: str, msg: str):
         print(f'Connection to {link_uri} lost: {msg}')
-        self._crazyflies.pop(link_uri, None) # Avoid double delete when Crazyflie disconnects
+        self._connected_crazyflies.pop(link_uri, None) # Avoid double delete when Crazyflie disconnects
 
     # Log callbacks
 

@@ -24,10 +24,6 @@ class ArgosManager(DroneManager):
         self._unix_socket_client.bind('DroneStatus', self._log_drone_status_callback)
         self._unix_socket_client.bind('Console', self._log_console_callback)
 
-        # Client bindings
-        self._web_socket_server.bind('mission-state', self._set_mission_state)
-        self._web_socket_server.bind('set-led', self._set_led_enabled)
-
         await self._unix_socket_client.serve()
 
     def _get_drone_ids(self) -> List[str]:
@@ -50,5 +46,5 @@ class ArgosManager(DroneManager):
         print('Received drone IDs:', self._drone_ids)
 
     def _log_console_callback(self, drone_id: str, data: str):
-        for text in data.split('\n'):
-            super()._log_console_callback(drone_id, text)
+        for line in data.split('\n'):
+            super()._log_console_callback(drone_id, line)

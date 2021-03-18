@@ -355,8 +355,8 @@ void CCrazyflieController::ReturnToBase() {
 
         static constexpr double distanceToReturnEpsilon = 0.05;
 
-        m_pcPropellers->SetAbsolutePosition(
-            CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ()));
+        const auto targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
+        m_pcPropellers->SetAbsolutePosition(targetPosition);
 
         if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
             std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
@@ -393,11 +393,8 @@ void CCrazyflieController::EmergencyLand() {
 }
 
 bool CCrazyflieController::Land() {
-    static constexpr double targetDroneLandHeight = 0.05;
+    static constexpr double targetDroneLandHeight = 0.07;
     static constexpr double targetDroneHeightEpsilon = 0.05;
-
-    // TODO: Move this to return
-    m_pcPropellers->SetAbsolutePosition(m_initialPosition + CVector3(0.0, 0.0, targetDroneLandHeight));
 
     const auto targetPoint = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneLandHeight);
     m_pcPropellers->SetAbsolutePosition(targetPoint);
@@ -406,25 +403,6 @@ bool CCrazyflieController::Land() {
         return true;
     }
     return false;
-
-    // TODO: Move emergency landing to MissionState switch
-    // case ExploringState::Land: {
-    //     if (m_isEmergencyLandingFinished) {
-    //         m_emergencyLandingPosition = m_pcPos->GetReading().Position;
-    //         m_isEmergencyLandingFinished = false;
-    //     }
-
-    //     static constexpr double landingAltitude = 0.015;
-    //     static constexpr double landingAltitudeEpsilon = 0.0001;
-
-    //     // Wait for landing to finish
-    //     if (m_pcPos->GetReading().Position.GetZ() >= landingAltitude - landingAltitudeEpsilon) {
-    //         m_pcPropellers->SetAbsolutePosition(
-    //             CVector3(m_emergencyLandingPosition.GetX(), m_emergencyLandingPosition.GetY(), landingAltitude));
-    //         m_exploringState = ExploringState::Idle;
-    //         m_isEmergencyLandingFinished = true;
-    //     }
-    // } break;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 import json
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 import uuid
 import websockets
 
@@ -22,7 +22,7 @@ class WebSocketServer:
         print('WebSocketServer started')
         await server.wait_closed()
 
-    def bind(self, event: str, callback: Callable[[Any], None]):
+    def bind(self, event: str, callback: Union[Callable[[Any], None], Callable[[str, Any], None]]):
         self._callbacks.setdefault(event, []).append(callback)
 
     def send_message(self, event: str, data: Any):

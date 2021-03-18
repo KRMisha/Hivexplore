@@ -47,7 +47,8 @@ WORKDIR /hivexplore
 # Format stage
 FROM base AS format
 RUN apt-get update && apt-get install -y clang-format
-# TODO: RUN to check if clang-format spots differences
+COPY simulation .
+RUN clang-format --dry-run -Werror $(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
 
 # Simulation build dependencies stage
 FROM base AS simulation-build-dependencies
@@ -74,7 +75,5 @@ CMD [ "argos3", "-c", "experiments/hivexplore.argos" ]
 # TODO: Remove the useless simulation/ subdir
 
 # TODO: Check if more lightweight distro than Ubuntu works
-# TODO: --no-install-recommends
-# TODO: Check if clang is necessary for clang-format
 
 # TODO: Rename Makefile targets for Docker (no -prod, rather -dev and no suffix for "prod")

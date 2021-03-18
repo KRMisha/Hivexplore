@@ -7,6 +7,7 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator, Orientation, Point, Range
 from server.sockets.web_socket_server import WebSocketServer
 
+#pylint: disable=no-self-use
 
 class DroneManager(ABC):
     def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
@@ -97,8 +98,7 @@ class DroneManager(ABC):
         print(f'Drone status from drone {drone_id}: {drone_status}')
         self._web_socket_server.send_drone_message('drone-status', drone_id, DroneStatus(drone_status).name)
 
-    @staticmethod
-    def _send_log_to_client(drone_id: str, data: str):
+    def _log_console_callback(self, drone_id: str, data: str):
         print(f'Debug print from drone {drone_id}: {data}')
         # TODO: send console log to client through self._web_socket_server.send_drone_message
 

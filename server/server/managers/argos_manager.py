@@ -49,7 +49,6 @@ class ArgosManager(DroneManager):
 
         print('Received drone IDs:', self._drone_ids)
 
-    @staticmethod
-    def _log_console_callback(drone_id: str, data: str):
+    def _log_console_callback(self, drone_id: str, data: str):
         for text in data.split('\n'):
-            DroneManager._send_log_to_client(drone_id, text)
+            super()._log_console_callback(drone_id, text)

@@ -5,7 +5,7 @@ HIVEXPLORE_SOCKET_DIR := /tmp/hivexplore
 LOCAL_ARGOS_VSCODE_CONFIG_DIR := $$HOME/.config/Code/User/globalStorage/ms-vscode-remote.remote-containers/imageConfigs
 LOCAL_ARGOS_VSCODE_CONFIG := $(LOCAL_ARGOS_VSCODE_CONFIG_DIR)/hivexplore%2fargos%3adev.json
 
-.PHONY: all copy-config clean-config image image-prod start start-prod cmake build run clean format help
+.PHONY: all copy-config clean-config image-dev image start-dev start cmake build run clean format help
 
 # Default target for building
 all: build
@@ -18,17 +18,17 @@ copy-config:
 clean-config:
 	rm -f $(LOCAL_ARGOS_VSCODE_CONFIG)
 
-image:
+image-dev:
 	docker build -t hivexplore/argos:dev --target simulation-build-dependencies .
 
-image-prod:
+image:
 	docker build -t hivexplore/argos .
 
-start:
+start-dev:
 	mkdir -p $(HIVEXPLORE_SOCKET_DIR)
 	x11docker --hostdisplay --name hivexplore -- "-v \"$$(pwd)/..\":/hivexplore -v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos:dev
 
-start-prod:
+start:
 	mkdir -p $(HIVEXPLORE_SOCKET_DIR)
 	x11docker --hostdisplay --name hivexplore -i -- "-v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos
 
@@ -60,10 +60,10 @@ help:
 	  Commands for use outside the container dev environment:\n\
 	    copy-config     Enable ARGoS VS Code attached container configuration by copying it to ~/.config\n\
 	    clean-config    Remove ARGoS VS Code attached container configuration from ~/.config\n\
-	    image           Build the ARGoS docker image (for development)\n\
-	    image-prod      Build the ARGoS docker image with a built simulation (for production)\n\
-	    start           Start the ARGoS docker container non-interactively with x11docker (for development)\n\
-	    start-prod      Run the ARGoS docker container interactively with x11docker (for production)\n\
+	    image-dev       Build the ARGoS docker image (for development)\n\
+	    image           Build the ARGoS docker image with a built simulation\n\
+	    start-dev       Start the ARGoS docker container non-interactively with x11docker (for development)\n\
+	    start           Run the ARGoS docker container interactively with x11docker\n\
 	\n\
 	  Commands for use inside the container dev environment:\n\
 	    cmake           Generate a Makefile with CMake\n\

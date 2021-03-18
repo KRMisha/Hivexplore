@@ -71,5 +71,3 @@ RUN mkdir build && cd build && \
 FROM base AS prod
 COPY --from=build-simulation /hivexplore .
 CMD [ "argos3", "-c", "experiments/hivexplore.argos" ]
-
-# TODO: Rename Makefile targets for Docker (no -prod, rather -dev and no suffix for "prod")

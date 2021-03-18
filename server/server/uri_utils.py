@@ -15,7 +15,7 @@ def load_crazyflie_uris_from_file() -> List[str]:
             uris = data['crazyflie_uris']
             return uris
         except ValueError:
-            print('load_crazyflie_uris_from_file error: Can\'t load URIs from file')
+            print('load_crazyflie_uris_from_file error: Could not load URIs from file')
             raise
 
 

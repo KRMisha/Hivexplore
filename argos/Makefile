@@ -1,5 +1,4 @@
-SIM_DIR := simulation
-CMAKE_BUILD_DIR := $(SIM_DIR)/build
+CMAKE_BUILD_DIR := build
 
 HIVEXPLORE_SOCKET_DIR := /tmp/hivexplore
 
@@ -44,13 +43,13 @@ build: cmake
 	cd $(CMAKE_BUILD_DIR) && make -j$$(nproc)
 
 run: build
-	cd $(SIM_DIR) && argos3 -c experiments/hivexplore.argos
+	argos3 -c experiments/hivexplore.argos
 
 clean:
 	rm -rf $(CMAKE_BUILD_DIR)
 
 format:
-	@clang-format -i $$(find $(SIM_DIR) -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
+	@clang-format -i $$(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
 
 # Help
 help:
@@ -62,7 +61,7 @@ help:
 	    copy-config     Enable ARGoS VS Code attached container configuration by copying it to ~/.config\n\
 	    clean-config    Remove ARGoS VS Code attached container configuration from ~/.config\n\
 	    image           Build the ARGoS docker image (for development)\n\
-	    image-prod      Build the ARGoS docker image with a copy of the simulation directory (for production)\n\
+	    image-prod      Build the ARGoS docker image with a built simulation (for production)\n\
 	    start           Start the ARGoS docker container non-interactively with x11docker (for development)\n\
 	    start-prod      Run the ARGoS docker container interactively with x11docker (for production)\n\
 	\n\

@@ -1,1 +1,6 @@
+# CMake build directory
 **/build/
+
+Dockerfile
+
+argos-devcontainer.json

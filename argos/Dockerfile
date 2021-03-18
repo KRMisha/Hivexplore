@@ -47,7 +47,7 @@ WORKDIR /hivexplore
 # Format stage
 FROM base AS format
 RUN apt-get update && apt-get install -y clang-format
-COPY simulation .
+COPY . .
 RUN clang-format --dry-run -Werror $(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
 
 # Simulation build dependencies stage
@@ -62,7 +62,7 @@ RUN apt-get update && apt-get install -y \
 
 # Simulation build stage
 FROM simulation-build-dependencies AS build-simulation
-COPY simulation .
+COPY . .
 RUN mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
     make -j$(nproc)
@@ -71,9 +71,5 @@ RUN mkdir build && cd build && \
 FROM base AS prod
 COPY --from=build-simulation /hivexplore .
 CMD [ "argos3", "-c", "experiments/hivexplore.argos" ]
-
-# TODO: Remove the useless simulation/ subdir
-
-# TODO: Check if more lightweight distro than Ubuntu works
 
 # TODO: Rename Makefile targets for Docker (no -prod, rather -dev and no suffix for "prod")

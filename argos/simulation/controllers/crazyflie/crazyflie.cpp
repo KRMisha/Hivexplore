@@ -98,7 +98,8 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     LogVariableMap orientationLog;
     orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
-    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
+    // Rotate the drone 90 degrees clockwise to make a yaw of 0 face forward
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ() - 90.0));
     logDataMap.emplace_back("Orientation", orientationLog);
 
     // Position group

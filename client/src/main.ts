@@ -8,6 +8,8 @@ import InputSwitch from 'primevue/inputswitch';
 import Knob from 'primevue/knob';
 import Panel from 'primevue/panel';
 import PrimeVue from 'primevue/config';
+import TabPanel from 'primevue/tabpanel';
+import TabView from 'primevue/tabview';
 import Timeline from 'primevue/timeline';
 
 import 'primevue/resources/themes/md-light-indigo/theme.css';
@@ -24,6 +26,8 @@ app.component('Divider', Divider);
 app.component('InputSwitch', InputSwitch);
 app.component('Knob', Knob);
 app.component('Panel', Panel);
+app.component('TabPanel', TabPanel);
+app.component('TabView', TabView);
 app.component('Timeline', Timeline);
 
 app.mount('#app');

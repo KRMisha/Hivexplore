@@ -1,4 +1,4 @@
-# Common build/runtime dependencies stage
+# Common ARGoS build/runtime dependencies stage
 FROM ubuntu:20.04 AS dependencies
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     libxmu6 \
     qt5-default
 
-# Build stage
-FROM dependencies AS build
+# ARGoS build stage
+FROM dependencies AS build-argos
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
@@ -40,7 +40,7 @@ RUN cd argos3/build && \
 
 # Base stage
 FROM dependencies AS base
-COPY --from=build /usr/local /usr/local
+COPY --from=build-argos /usr/local /usr/local
 RUN echo /usr/local/lib/argos3 > /etc/ld.so.conf.d/argos3.conf && ldconfig
 WORKDIR /hivexplore
 
@@ -49,8 +49,8 @@ FROM base AS format
 RUN apt-get update && apt-get install -y clang-format
 # TODO: RUN to check if clang-format spots differences
 
-# Dev container stage
-FROM base AS devcontainer
+# Simulation build dependencies stage
+FROM base AS simulation-build-dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     clang-format \
@@ -59,15 +59,8 @@ RUN apt-get update && apt-get install -y \
     git \
     liblua5.3-dev
 
-# Production simulation build stage
-FROM base as build-prod
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    freeglut3-dev \
-    liblua5.3-dev
-
-# Build simulation
+# Simulation build stage
+FROM simulation-build-dependencies AS build-simulation
 COPY simulation .
 RUN mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
@@ -75,11 +68,10 @@ RUN mkdir build && cd build && \
 
 # Production stage
 FROM base AS prod
-COPY --from=build-prod /hivexplore .
+COPY --from=build-simulation /hivexplore .
 CMD [ "argos3", "-c", "experiments/hivexplore.argos" ]
 
 # TODO: Remove the useless simulation/ subdir
-# TODO: Multi-stage production stage to build simulation
 
 # TODO: Check if more lightweight distro than Ubuntu works
 # TODO: --no-install-recommends

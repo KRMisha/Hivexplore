@@ -20,14 +20,14 @@ clean-config:
 	rm -f $(LOCAL_ARGOS_VSCODE_CONFIG)
 
 image:
-	docker build -t hivexplore/argos:devcontainer --target devcontainer .
+	docker build -t hivexplore/argos:dev --target simulation-build-dependencies .
 
 image-prod:
 	docker build -t hivexplore/argos .
 
 start:
 	mkdir -p $(HIVEXPLORE_SOCKET_DIR)
-	x11docker --hostdisplay --name hivexplore -- "-v \"$$(pwd)/..\":/hivexplore -v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos:devcontainer
+	x11docker --hostdisplay --name hivexplore -- "-v \"$$(pwd)/..\":/hivexplore -v $(HIVEXPLORE_SOCKET_DIR):$(HIVEXPLORE_SOCKET_DIR)" hivexplore/argos:dev
 
 start-prod:
 	mkdir -p $(HIVEXPLORE_SOCKET_DIR)

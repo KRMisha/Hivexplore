@@ -73,6 +73,7 @@ private:
     void Explore();
     void ReturnToBase();
     void EmergencyLand();
+    bool Liftoff();
     bool Land();
 
     void UpdateSensorReadings();
@@ -118,9 +119,6 @@ private:
     // To avoid having multiple states to simulate drone control, we use bools within the
     // states to wait for movement commands to finish before executing a new command
 
-    // Liftoff variables
-    bool m_isLiftoffCommandFinished = true;
-
     // Exploration variables
     bool m_isForwardCommandFinished = true;
     CVector3 m_forwardCommandReferencePosition;
@@ -132,10 +130,6 @@ private:
     // Rotation variables
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
-
-    // Emergency landing variables
-    bool m_isEmergencyLandingFinished = true;
-    CVector3 m_emergencyLandingPosition;
 };
 
 #endif

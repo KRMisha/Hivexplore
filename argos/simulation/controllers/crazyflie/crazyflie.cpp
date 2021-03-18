@@ -235,11 +235,9 @@ bool CCrazyflieController::AvoidObstacle() {
             m_isAvoidingObstacle = false;
 
             // Reset all states to avoid problems when going back to a state
-            m_isLiftoffCommandFinished = true;
             m_isForwardCommandFinished = true;
             m_isBrakeCommandFinished = true;
             m_isRotateCommandFinished = true;
-            m_isEmergencyLandingFinished = true;
             m_exploringState = m_exploringStateOnHold;
             m_returningState = m_returningStateOnHold;
         }
@@ -261,20 +259,8 @@ void CCrazyflieController::Explore() {
     case ExploringState::Liftoff: {
         m_droneStatus = DroneStatus::Liftoff;
 
-        static constexpr double targetDroneHeight = 0.5;
-        static constexpr double targetDroneHeightEpsilon = 0.005;
-
-        // Order liftoff
-        if (m_isLiftoffCommandFinished) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, targetDroneHeight));
-            m_isLiftoffCommandFinished = false;
-        }
-
-        // Wait for liftoff to finish
-        if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        if (Liftoff()) {
             m_exploringState = ExploringState::Explore;
-            m_isLiftoffCommandFinished = true;
         }
     } break;
     case ExploringState::Explore: {
@@ -392,12 +378,29 @@ void CCrazyflieController::EmergencyLand() {
     }
 }
 
+bool CCrazyflieController::Liftoff() {
+    static constexpr double targetDroneHeight = 0.5;
+    static constexpr double targetDroneHeightEpsilon = 0.005;
+
+    CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneHeight);
+    m_pcPropellers->SetAbsolutePosition(targetPosition);
+
+    // Wait for liftoff to finish
+    if (m_pcPos->GetReading().Position.GetZ() >= targetDroneHeight - targetDroneHeightEpsilon) {
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        return true;
+    }
+    return false;
+}
+
 bool CCrazyflieController::Land() {
-    static constexpr double targetDroneLandHeight = 0.07;
+    static constexpr double targetDroneLandHeight = 0.09;
     static constexpr double targetDroneHeightEpsilon = 0.05;
 
     CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneLandHeight);
     m_pcPropellers->SetAbsolutePosition(targetPosition);
+
+    // Wait for land to finish
     if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
         m_droneStatus = DroneStatus::Landed;
         return true;

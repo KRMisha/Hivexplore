@@ -15,6 +15,7 @@ void avoidObstacle(void);
 void explore(void);
 void returnToBase(void);
 void emergencyLand(void);
+bool liftoff(void);
 bool land(void);
 
 void updateWaypoint(void);

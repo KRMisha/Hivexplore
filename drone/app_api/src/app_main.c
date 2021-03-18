@@ -201,10 +201,7 @@ void explore(void) {
     case EXPLORING_LIFTOFF: {
         droneStatus = STATUS_LIFTOFF;
 
-        targetHeight += EXPLORATION_HEIGHT;
-        updateWaypoint();
-        if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
-            DEBUG_PRINT("Liftoff finished\n");
+        if (liftoff()) {
             exploringState = EXPLORING_EXPLORE;
         }
     } break;
@@ -272,6 +269,16 @@ void emergencyLand(void) {
         memset(&setPoint, 0, sizeof(setpoint_t));
         break;
     }
+}
+
+bool liftoff(void) {
+    targetHeight += EXPLORATION_HEIGHT;
+    updateWaypoint();
+    if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
+        DEBUG_PRINT("Liftoff finished\n");
+        return true;
+    }
+    return false;
 }
 
 bool land(void) {

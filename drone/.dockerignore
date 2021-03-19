@@ -1,0 +1,8 @@
+# Unneeded firmware directories
+docs
+examples
+
+# VS Code
+**/.vscode
+
+Dockerfile

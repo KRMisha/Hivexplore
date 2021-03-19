@@ -10,17 +10,17 @@ RUN apt-get update && apt-get install -y \
     python3-pip
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
-
-# Build stage
-FROM base AS build
 COPY . .
 RUN git init
 WORKDIR /hivexplore/app_api
-RUN make -j$(nproc)
 
 # Format stage
-FROM build AS format
+FROM base AS format
 RUN clang-format --dry-run -Werror $(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
+
+# Build stage
+FROM base AS build
+RUN make -j$(nproc)
 
 # Flash stage
 FROM build AS flash

@@ -61,15 +61,6 @@ static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 1.0f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
-// Sensors
-static const logVarId_t frontSensorId = logGetVarId("range", "front");
-static const logVarId_t leftSensorId = logGetVarId("range", "left");
-static const logVarId_t backSensorId = logGetVarId("range", "back");
-static const logVarId_t rightSensorId = logGetVarId("range", "right");
-static const logVarId_t upSensorId = logGetVarId("range", "up");
-static const logVarId_t downSensorId = logGetVarId("range", "zrange");
-static const logVarId_t rssiId = logGetVarId("radio", "rssi");
-
 // States
 static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
@@ -98,6 +89,14 @@ static float targetYawRate;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
+
+    const logVarId_t frontSensorId = logGetVarId("range", "front");
+    const logVarId_t leftSensorId = logGetVarId("range", "left");
+    const logVarId_t backSensorId = logGetVarId("range", "back");
+    const logVarId_t rightSensorId = logGetVarId("range", "right");
+    const logVarId_t upSensorId = logGetVarId("range", "up");
+    const logVarId_t downSensorId = logGetVarId("range", "zrange");
+    const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");

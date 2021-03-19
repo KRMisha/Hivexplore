@@ -13,6 +13,8 @@ namespace {
 
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
+    static constexpr std::uint16_t edgeDetectedThreshold = 1200;
+
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
     }
@@ -247,8 +249,6 @@ bool CCrazyflieController::AvoidObstacle() {
 }
 
 void CCrazyflieController::Explore() {
-    static constexpr std::uint16_t edgeDetectedThreshold = 1200;
-
     switch (m_exploringState) {
     case ExploringState::Idle: {
         m_droneStatus = DroneStatus::Standby;
@@ -290,45 +290,15 @@ void CCrazyflieController::Explore() {
     case ExploringState::Brake: {
         m_droneStatus = DroneStatus::Flying;
 
-        // Order brake
-        if (m_isBrakeCommandFinished) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-            m_brakingReferencePosition = m_pcPos->GetReading().Position;
-            m_isBrakeCommandFinished = false;
-        }
-
-        // If position variation is negligible, end the brake command
-        static constexpr double brakingAcuracyEpsilon = 0.002;
-        if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        if (Brake()) {
             m_exploringState = ExploringState::Rotate;
-            m_isBrakeCommandFinished = true;
         }
-        m_brakingReferencePosition = m_pcPos->GetReading().Position;
     } break;
     case ExploringState::Rotate: {
         m_droneStatus = DroneStatus::Flying;
 
-        // Get current yaw
-        CRadians currentYaw;
-        CVector3 rotationAxis;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
-
-        static const CRadians rotationAngle = CRadians::PI / 8;
-
-        // Order rotation
-        if (m_isRotateCommandFinished) {
-            m_lastReferenceYaw = currentYaw;
-            m_pcPropellers->SetRelativeYaw(rotationAngle);
-            m_isRotateCommandFinished = false;
-        }
-
-        // Wait for rotation to finish
-        if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
-            if (m_sensorReadings["front"] > edgeDetectedThreshold) {
-                m_exploringState = ExploringState::Explore;
-            }
-            m_isRotateCommandFinished = true;
+        if (Rotate()) {
+            m_exploringState = ExploringState::Explore;
         }
     } break;
     }
@@ -404,6 +374,50 @@ bool CCrazyflieController::Land() {
     if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
         m_droneStatus = DroneStatus::Landed;
         return true;
+    }
+    return false;
+}
+
+bool CCrazyflieController::Brake() {
+    // Order brake
+    if (m_isBrakeCommandFinished) {
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        m_brakingReferencePosition = m_pcPos->GetReading().Position;
+        m_isBrakeCommandFinished = false;
+    }
+
+    // If position variation is negligible, end the brake command
+    static constexpr double brakingAcuracyEpsilon = 0.002;
+    if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        m_isBrakeCommandFinished = true;
+        return true;
+    }
+    m_brakingReferencePosition = m_pcPos->GetReading().Position;
+    return false;
+}
+
+bool CCrazyflieController::Rotate() {
+    // Get current yaw
+    CRadians currentYaw;
+    CVector3 rotationAxis;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
+
+    static const CRadians rotationAngle = CRadians::PI / 8;
+
+    // Order rotation
+    if (m_isRotateCommandFinished) {
+        m_lastReferenceYaw = currentYaw;
+        m_pcPropellers->SetRelativeYaw(rotationAngle);
+        m_isRotateCommandFinished = false;
+    }
+
+    // Wait for rotation to finish
+    if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
+        if (m_sensorReadings["front"] > edgeDetectedThreshold) {
+            return true;
+        }
+        m_isRotateCommandFinished = true;
     }
     return false;
 }

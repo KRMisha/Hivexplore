@@ -75,6 +75,8 @@ private:
     void EmergencyLand();
     bool Liftoff();
     bool Land();
+    bool Brake();
+    bool Rotate();
 
     void UpdateSensorReadings();
     void UpdateVelocity();

@@ -21,6 +21,8 @@ enum class MissionState {
     Standby,
     Exploring,
     Returning,
+    Emergency,
+    Landed,
 };
 
 enum class ExploringState {
@@ -29,7 +31,6 @@ enum class ExploringState {
     Explore,
     Brake,
     Rotate,
-    Land,
 };
 
 enum class ReturningState {
@@ -38,9 +39,17 @@ enum class ReturningState {
     Idle,
 };
 
+enum class EmergencyState {
+    Land,
+    Idle,
+};
+
 enum class DroneStatus {
     Standby,
+    Liftoff,
     Flying,
+    Landing,
+    Landed,
     Crashed,
 };
 
@@ -62,12 +71,14 @@ public:
 private:
     bool AvoidObstacle();
     void Explore();
-    void Return();
+    void ReturnToBase();
+    void EmergencyLand();
+    bool Liftoff();
+    bool Land();
 
     void UpdateSensorReadings();
     void UpdateVelocity();
     void UpdateRssi();
-    void UpdateDroneStatus();
     void PingOtherDrones();
 
     void DebugPrint(const std::string& text);
@@ -87,6 +98,7 @@ private:
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
     ReturningState m_returningState = ReturningState::Return;
+    EmergencyState m_emergencyState = EmergencyState::Land;
 
     // Data
     CVector3 m_initialPosition;
@@ -107,9 +119,6 @@ private:
     // To avoid having multiple states to simulate drone control, we use bools within the
     // states to wait for movement commands to finish before executing a new command
 
-    // Liftoff variables
-    bool m_isLiftoffCommandFinished = true;
-
     // Exploration variables
     bool m_isForwardCommandFinished = true;
     CVector3 m_forwardCommandReferencePosition;
@@ -121,10 +130,6 @@ private:
     // Rotation variables
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
-
-    // Emergency landing variables
-    bool m_isEmergencyLandingFinished = true;
-    CVector3 m_emergencyLandingPosition;
 };
 
 #endif

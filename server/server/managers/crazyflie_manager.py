@@ -124,7 +124,7 @@ class CrazyflieManager(DroneManager):
     def _connected(self, link_uri: str):
         print(f'Connected to {link_uri}')
 
-        if self._mission_state != MissionState.STANDBY:
+        if self._mission_state != MissionState.Standby:
             print('CrazyflieManager warning: Ignoring drone connection during mission:', link_uri)
             self._pending_crazyflies[link_uri].close_link()
             return

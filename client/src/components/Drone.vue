@@ -66,6 +66,7 @@ export default defineComponent({
         }
 
         const droneStatusColor = computed((): string | undefined => {
+            // TODO: Handle color for DroneStatus.Landing, DroneStatus.Landed, DroneStatus.Liftoff
             switch (droneStatus.value) {
                 case DroneStatus.Standby:
                     return undefined; // Default background color

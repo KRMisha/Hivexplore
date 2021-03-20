@@ -11,6 +11,13 @@ typedef enum { RETURNING_RETURN, RETURNING_LAND, RETURNING_IDLE } returning_stat
 typedef enum { EMERGENCY_LAND, EMERGENCY_IDLE } emergency_state_t;
 typedef enum { STATUS_STANDBY, STATUS_LIFTOFF, STATUS_FLYING, STATUS_LANDING, STATUS_LANDED, STATUS_CRASHED } drone_status_t;
 
+// Structs
+typedef struct {
+    int16_t x;
+    int16_t y;
+    int16_t z;
+} position_t;
+
 void avoidObstacle(void);
 void explore(void);
 void returnToBase(void);

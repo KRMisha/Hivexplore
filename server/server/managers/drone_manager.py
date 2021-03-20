@@ -59,7 +59,7 @@ class DroneManager(ABC):
             yaw=data['stateEstimate.yaw'],
         )
         print(f'Orientation from drone {drone_id}: {orientation}')
-        if self._mission_state is not MissionState.STANDBY:
+        if self._mission_state != MissionState.Standby:
             self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
@@ -69,7 +69,7 @@ class DroneManager(ABC):
             z=data['stateEstimate.z'],
         )
         print(f'Position from drone {drone_id}: {point}')
-        if self._mission_state is not MissionState.STANDBY:
+        if self._mission_state != MissionState.Standby:
             self._map_generator.set_position(drone_id, point)
 
     def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
@@ -93,7 +93,7 @@ class DroneManager(ABC):
             down=data['range.zrange'],
         )
         print(f'Range from drone {drone_id}: {range_reading}')
-        if self._mission_state is not MissionState.STANDBY:
+        if self._mission_state != MissionState.Standby:
             self._map_generator.add_range_reading(drone_id, range_reading)
 
     @staticmethod

@@ -79,6 +79,10 @@ static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
+static float positionXReading;
+static float positionYReading;
+static float positionZReading;
+static float positionYawReading;
 static uint8_t rssiReading;
 
 // Targets
@@ -96,6 +100,10 @@ void appMain(void) {
     const logVarId_t rightSensorId = logGetVarId("range", "right");
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
+    const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
+    const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
+    const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
+    const logVarId_t positionYawId = logGetVarId("stateEstimate", "yaw");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");

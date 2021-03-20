@@ -52,6 +52,7 @@
 // Min max helper macros
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
+#define ABS(a) ((a < 0) ? -a : a)
 
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
@@ -79,11 +80,11 @@ static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
-static float positionXReading;
-static float positionYReading;
-static float positionZReading;
+static point_t positionReading;
 static float positionYawReading;
 static uint8_t rssiReading;
+
+static point_t initialPosition;
 
 // Targets
 static float targetForwardVelocity;
@@ -135,6 +136,11 @@ void appMain(void) {
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
+        positionReading.x = logGetUint(positionXId);
+        positionReading.y = logGetUint(positionYId);
+        positionReading.z = logGetUint(positionZId);
+        positionYawReading = logGetUint(positionYawId);
+
 
         rssiReading = logGetUint(rssiId);
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
@@ -209,6 +215,7 @@ void explore(void) {
         droneStatus = STATUS_LIFTOFF;
 
         if (liftoff()) {
+            initialPosition = positionReading;
             exploringState = EXPLORING_EXPLORE;
         }
     } break;
@@ -238,13 +245,21 @@ void explore(void) {
 }
 
 void returnToBase(void) {
+    static const float espilon = 0.01;
     switch (returningState) {
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
 
         // TODO: Add return logic
-        vTaskDelay(M2T(5000));
-        returningState = RETURNING_LAND;
+        setPoint.mode.x = modeAbs;
+        setPoint.mode.y = modeAbs;
+
+        setPoint.position.x = initialPosition.x;
+        setPoint.position.y = initialPosition.y;
+
+        if (ABS(setPoint.position.y) < espilon && ABS(setPoint.position.x) < espilon) {
+            returningState = RETURNING_LAND;
+        }
     } break;
     case RETURNING_LAND: {
         droneStatus = STATUS_LANDING;

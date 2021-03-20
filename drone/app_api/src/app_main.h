@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "radiolink.h"
+
 // Enums
 typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING, MISSION_EMERGENCY, MISSION_LANDED } mission_state_t;
 typedef enum { EXPLORING_IDLE, EXPLORING_LIFTOFF, EXPLORING_EXPLORE, EXPLORING_ROTATE } exploring_state_t;
@@ -24,6 +26,7 @@ void returnToBase(void);
 void emergencyLand(void);
 bool liftoff(void);
 bool land(void);
+void p2pCallbackHandler(P2PPacket* packet);
 
 void updateWaypoint(void);
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);

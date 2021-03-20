@@ -44,6 +44,7 @@
 #include "pm.h"
 #include "app_channel.h"
 #include "commander.h"
+#include "configblock.h"
 
 #include "app_main.h"
 
@@ -114,6 +115,8 @@ void appMain(void) {
     if (!isMultirangerInitialized) {
         DEBUG_PRINT("Multiranger is not connected\n");
     }
+
+    p2pRegisterCB(p2pCallbackHandler);
 
     while (true) {
         vTaskDelay(M2T(10));
@@ -313,6 +316,17 @@ void updateWaypoint(void) {
 
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
+}
+
+void p2pCallbackHandler(P2PPacket* packet) {
+    // Get source Id
+    uint8_t other_id = packet->data[0];
+
+    position_t sourcePosition;
+    memcpy(&sourcePosition, &packet->data[1], sizeof(sourcePosition));
+
+    uint8_t rssi = packet->rssi;
+    DEBUG_PRINT("[RSSI: -%d dBm] %d Position: X(%d), Y(%d), Z(%d) \n", rssi, other_id, sourcePosition.x, sourcePosition.y, sourcePosition.z);
 }
 
 LOG_GROUP_START(hivexplore)

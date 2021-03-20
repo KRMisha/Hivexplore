@@ -122,6 +122,7 @@ void appMain(void) {
         vTaskDelay(M2T(10));
 
         ledSet(LED_GREEN_R, isM1LedOn);
+        broadcastPosition();
 
         if (isOutOfService) {
             ledSet(LED_RED_R, true);
@@ -316,6 +317,16 @@ void updateWaypoint(void) {
 
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
+}
+
+void broadcastPosition() {
+    uint64_t radioAddress = configblockGetRadioAddress();
+    uint8_t myId = (uint8_t)((radioAddress)&0x00000000ff);
+    P2PPacket packet;
+    packet.port = 0x00;
+    packet.data[0] = myId;
+    memcpy(&packet.data[1], &currentPosition, sizeof(currentPosition));
+    radiolinkSendP2PPacketBroadcast(&packet);
 }
 
 void p2pCallbackHandler(P2PPacket* packet) {

@@ -26,6 +26,7 @@ void returnToBase(void);
 void emergencyLand(void);
 bool liftoff(void);
 bool land(void);
+void broadcastPosition();
 void p2pCallbackHandler(P2PPacket* packet);
 
 void updateWaypoint(void);

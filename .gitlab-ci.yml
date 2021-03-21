@@ -7,7 +7,7 @@ stages:
     - build
 
 services:
-    - docker:dind
+    - docker:20-dind
 
 variables:
     IMAGE_NAME: $CI_REGISTRY/polytechnique-montr-al/inf3995/20211/equipe-102/hivexplore

@@ -1,4 +1,4 @@
-image: dind
+image: alpine
 
 stages:
     - format
@@ -6,20 +6,26 @@ stages:
     - test
     - build
 
+before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
 # Server jobs
 
 format_server:
+    image: dind
     stage: format
     script:
         - echo allo
 
 lint_server:
+    image: dind
     stage: lint
     needs: [format_server]
     script:
         - echo allo
 
 test_server:
+    image: dind
     stage: test
     needs: [lint_server]
     script:
@@ -28,17 +34,20 @@ test_server:
 # Client jobs
 
 lint_client:
+    image: dind
     stage: lint
     script:
         - echo allo
 
 test_client:
+    image: dind
     stage: test
     needs: [lint_client]
     script:
         - echo allo
 
 build_client:
+    image: dind
     stage: build
     needs: [test_client]
     script:
@@ -47,11 +56,13 @@ build_client:
 # Drone jobs
 
 format_drone:
+    image: dind
     stage: format
     script:
         - echo allo
 
 build_drone:
+    image: dind
     stage: build
     needs: [format_drone]
     script:
@@ -60,11 +71,13 @@ build_drone:
 # ARGoS jobs
 
 format_argos:
+    image: dind
     stage: format
     script:
         - echo allo
 
 build_argos:
+    image: dind
     stage: build
     needs: [format_argos]
     script:

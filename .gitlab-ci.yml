@@ -31,7 +31,7 @@ lint-client:
 
 test-client:
     stage: test
-    needs: [lint_client]
+    needs: [lint-client]
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
@@ -40,7 +40,7 @@ test-client:
 
 build-client:
     stage: build
-    needs: [test_client]
+    needs: [test-client]
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
@@ -61,14 +61,14 @@ build-client:
 
 # lint-server:
 #     stage: lint
-#     needs: [format_server]
+#     needs: [format-server]
 #     script:
 #         - cd server
 #         - docker build --target lint .
 
 # test-server:
 #     stage: test
-#     needs: [lint_server]
+#     needs: [lint-server]
 #     script:
 #         - cd server
 #         - docker build --target test .
@@ -87,7 +87,7 @@ build-client:
 
 # build-drone:
 #     stage: build
-#     needs: [format_drone]
+#     needs: [format-drone]
 #     script:
 #         - cd drone
 #         - docker build -t hivexplore/drone .
@@ -106,7 +106,7 @@ build-client:
 
 # build-argos:
 #     stage: build
-#     needs: [format_argos]
+#     needs: [format-argos]
 #     script:
 #         - cd argos
 #         - docker build .

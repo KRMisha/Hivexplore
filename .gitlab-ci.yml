@@ -1,0 +1,71 @@
+image: alpine
+
+stages:
+    - format
+    - lint
+    - test
+    - build
+
+# Server jobs
+
+format_server:
+    stage: format
+    script:
+        - echo allo
+
+lint_server:
+    stage: lint
+    needs: [format_server]
+    script:
+        - echo allo
+
+test_server:
+    stage: test
+    needs: [lint_server]
+    script:
+        - echo allo
+
+# Client jobs
+
+lint_client:
+    stage: lint
+    script:
+        - echo allo
+
+test_client:
+    stage: test
+    needs: [lint_client]
+    script:
+        - echo allo
+
+build_client:
+    stage: build
+    needs: [test_client]
+    script:
+        - echo allo
+
+# Drone jobs
+
+format_drone:
+    stage: format
+    script:
+        - echo allo
+
+build_drone:
+    stage: build
+    needs: [format_drone]
+    script:
+        - echo allo
+
+# ARGoS jobs
+
+format_argos:
+    stage: format
+    script:
+        - echo allo
+
+build_argos:
+    stage: build
+    needs: [format_argos]
+    script:
+        - echo allo

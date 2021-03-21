@@ -15,27 +15,27 @@ before_script:
 
 # Client jobs
 
-lint_client:
+lint-client:
     stage: lint
     script:
         - cd client
         - docker build --target lint -t hivexplore/client .
 
-test_client:
+test-client:
     stage: test
     needs: [lint_client]
     script:
         - cd client
         - docker build --target test -t hivexplore/client .
 
-build_client:
+build-client:
     stage: build
     needs: [test_client]
     script:
         - cd client
         # - docker build -t hivexplore/client .
 
-push_client:
+push-client:
     stage: push
     needs: [build_client]
     script:
@@ -44,27 +44,27 @@ push_client:
 
 # Server jobs
 
-format_server:
+format-server:
     stage: format
     script:
         - cd server
         # - docker build --target format -t hivexplore/server .
 
-lint_server:
+lint-server:
     stage: lint
     needs: [format_server]
     script:
         - cd server
         # - docker build --target lint -t hivexplore/server .
 
-test_server:
+test-server:
     stage: test
     needs: [lint_server]
     script:
         - cd server
         # - docker build --target test -t hivexplore/server .
 
-push_server:
+push-server:
     stage: push
     needs: [test_server]
     script:
@@ -73,20 +73,20 @@ push_server:
 
 # Drone jobs
 
-format_drone:
+format-drone:
     stage: format
     script:
         - cd drone
         # - docker build --target format -t hivexplore/drone .
 
-build_drone:
+build-drone:
     stage: build
     needs: [format_drone]
     script:
         - cd drone
         # - docker build -t hivexplore/drone .
 
-push_drone:
+push-drone:
     stage: push
     needs: [build_drone]
     script:
@@ -95,20 +95,20 @@ push_drone:
 
 # ARGoS jobs
 
-format_argos:
+format-argos:
     stage: format
     script:
         - cd argos
         # - docker build --target format -t hivexplore/argos .
 
-build_argos:
+build-argos:
     stage: build
     needs: [format_argos]
     script:
         - cd argos
         # - docker build -t hivexplore/argos .
 
-push_argos:
+push-argos:
     stage: push
     needs: [build_argos]
     script:

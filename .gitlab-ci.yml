@@ -16,7 +16,7 @@ format_server:
     services:
         - docker:dind
     script:
-        - echo allo
+        - docker build --target format -t hivexplore/server .
 
 lint_server:
     stage: lint
@@ -41,7 +41,7 @@ lint_client:
     services:
         - docker:dind
     script:
-        - echo allo
+        - docker build --target lint -t hivexplore/client .
 
 test_client:
     stage: test
@@ -66,7 +66,7 @@ format_drone:
     services:
         - docker:dind
     script:
-        - echo allo
+        - docker build --target format -t hivexplore/drone .
 
 build_drone:
     stage: build
@@ -83,7 +83,7 @@ format_argos:
     services:
         - docker:dind
     script:
-        - echo allo
+        - docker build --target format -t hivexplore/argos .
 
 build_argos:
     stage: build

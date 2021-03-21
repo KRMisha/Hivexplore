@@ -11,6 +11,7 @@ services:
 
 variables:
     IMAGE_NAME: $CI_REGISTRY/polytechnique-montr-al/inf3995/20211/equipe-102/hivexplore
+    DOCKER_BUILDKIT: 1
 
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -23,7 +24,7 @@ lint-client:
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        - docker build --cache-from $IMAGE_NAME/client:ci --target lint --tag $IMAGE_NAME/client:ci .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --target lint --tag $IMAGE_NAME/client:ci .
         - docker push $IMAGE_NAME/client:ci
     only:
         - gitlab-ci # TODO: remove me
@@ -36,7 +37,7 @@ test-client:
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        - docker build --cache-from $IMAGE_NAME/client:ci --target test --tag $IMAGE_NAME/client:ci .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --target test --tag $IMAGE_NAME/client:ci .
         - docker push $IMAGE_NAME/client:ci
 
 build-client:
@@ -45,7 +46,7 @@ build-client:
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        - docker build --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
         - docker push $IMAGE_NAME/client:ci
         - docker push $IMAGE_NAME/client:latest
 
@@ -56,7 +57,7 @@ format-server:
     script:
         - docker pull $IMAGE_NAME/server:ci || true
         - cd server
-        - docker build --cache-from $IMAGE_NAME/server:ci --target format --tag $IMAGE_NAME/server:ci .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target format --tag $IMAGE_NAME/server:ci .
         - docker push $IMAGE_NAME/server:ci
     only:
         - gitlab-ci # TODO: remove me
@@ -69,7 +70,7 @@ lint-server:
     script:
         - docker pull $IMAGE_NAME/server:ci || true
         - cd server
-        - docker build --cache-from $IMAGE_NAME/server:ci --target lint --tag $IMAGE_NAME/server:ci .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target lint --tag $IMAGE_NAME/server:ci .
         - docker push $IMAGE_NAME/server:ci
 
 test-server:
@@ -78,7 +79,7 @@ test-server:
     script:
         - docker pull $IMAGE_NAME/server:ci || true
         - cd server
-        - docker build --cache-from $IMAGE_NAME/server:ci --target test --tag $IMAGE_NAME/server:ci .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target test --tag $IMAGE_NAME/server:ci .
         - docker push $IMAGE_NAME/server:ci
 
 build-server:
@@ -87,7 +88,7 @@ build-server:
     script:
         - docker pull $IMAGE_NAME/server:ci || true
         - cd server
-        - docker build --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
         - docker push $IMAGE_NAME/server:ci
         - docker push $IMAGE_NAME/server:latest
 
@@ -98,7 +99,7 @@ format-drone:
     script:
         - docker pull $IMAGE_NAME/drone:ci || true
         - cd drone
-        - docker build --cache-from $IMAGE_NAME/drone:ci --target format --tag $IMAGE_NAME/drone:ci .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --target format --tag $IMAGE_NAME/drone:ci .
         - docker push $IMAGE_NAME/drone:ci
     only:
         - gitlab-ci # TODO: remove me
@@ -111,7 +112,7 @@ build-drone:
     script:
         - docker pull $IMAGE_NAME/drone:ci || true
         - cd drone
-        - docker build --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
         - docker push $IMAGE_NAME/drone:ci
         - docker push $IMAGE_NAME/drone:latest
 
@@ -122,7 +123,7 @@ format-argos:
     script:
         - docker pull $IMAGE_NAME/argos:ci || true
         - cd argos
-        - docker build --cache-from $IMAGE_NAME/argos:ci --target format --tag $IMAGE_NAME/argos:ci .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --target format --tag $IMAGE_NAME/argos:ci .
         - docker push $IMAGE_NAME/argos:ci
     only:
         - gitlab-ci # TODO: remove me
@@ -135,6 +136,6 @@ build-argos:
     script:
         - docker pull $IMAGE_NAME/argos:ci || true
         - cd argos
-        - docker build --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
         - docker push $IMAGE_NAME/argos:ci
         - docker push $IMAGE_NAME/argos:latest

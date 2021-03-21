@@ -19,6 +19,7 @@ before_script:
 
 lint-client:
     stage: lint
+    needs: [] # Workaround to start job even though we don't have a format job
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
@@ -86,7 +87,7 @@ build-server:
     script:
         - docker pull $IMAGE_NAME/server:ci || true
         - cd server
-        - docker build --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/client:latest .
+        - docker build --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
         - docker push $IMAGE_NAME/server:ci
         - docker push $IMAGE_NAME/server:latest
 

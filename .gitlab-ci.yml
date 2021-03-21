@@ -5,10 +5,12 @@ stages:
     - lint
     - test
     - build
-    - push
 
 services:
     - docker:dind
+
+variables:
+    IMAGE_NAME: $CI_REGISTRY/polytechnique-montr-al/inf3995/20211/equipe-102/hivexplore
 
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -18,99 +20,93 @@ before_script:
 lint-client:
     stage: lint
     script:
+        - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        - docker build --target lint -t hivexplore/client .
+        - docker build --cache-from $IMAGE_NAME/client:ci --target lint --tag $IMAGE_NAME/client:ci .
+        - docker push $IMAGE_NAME/client:ci
+    only:
+        - gitlab-ci # TODO: remove me
+        - master
+        - merge_requests
 
 test-client:
     stage: test
     needs: [lint_client]
     script:
+        - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        - docker build --target test -t hivexplore/client .
+        - docker build --cache-from $IMAGE_NAME/client:ci --target test --tag $IMAGE_NAME/client:ci .
+        - docker push $IMAGE_NAME/client:ci
 
 build-client:
     stage: build
     needs: [test_client]
     script:
+        - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        # - docker build -t hivexplore/client .
-
-push-client:
-    stage: push
-    needs: [build_client]
-    script:
-        - cd client
-        - echo allo
+        - docker build --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci .
+        - docker push $IMAGE_NAME/client:ci
 
 # Server jobs
 
-format-server:
-    stage: format
-    script:
-        - cd server
-        # - docker build --target format -t hivexplore/server .
+# format-server:
+#     stage: format
+#     script:
+#         - cd server
+#         - docker build --target format .
+    # only:
+    #     - gitlab-ci # TODO: remove me
+    #     - master
+    #     - merge_requests
 
-lint-server:
-    stage: lint
-    needs: [format_server]
-    script:
-        - cd server
-        # - docker build --target lint -t hivexplore/server .
+# lint-server:
+#     stage: lint
+#     needs: [format_server]
+#     script:
+#         - cd server
+#         - docker build --target lint .
 
-test-server:
-    stage: test
-    needs: [lint_server]
-    script:
-        - cd server
-        # - docker build --target test -t hivexplore/server .
+# test-server:
+#     stage: test
+#     needs: [lint_server]
+#     script:
+#         - cd server
+#         - docker build --target test .
 
-push-server:
-    stage: push
-    needs: [test_server]
-    script:
-        - cd server
-        - echo allo
+# # Drone jobs
 
-# Drone jobs
+# format-drone:
+#     stage: format
+#     script:
+#         - cd drone
+#         - docker build --target format .
+    # only:
+    #     - gitlab-ci # TODO: remove me
+    #     - master
+    #     - merge_requests
 
-format-drone:
-    stage: format
-    script:
-        - cd drone
-        # - docker build --target format -t hivexplore/drone .
+# build-drone:
+#     stage: build
+#     needs: [format_drone]
+#     script:
+#         - cd drone
+#         - docker build -t hivexplore/drone .
 
-build-drone:
-    stage: build
-    needs: [format_drone]
-    script:
-        - cd drone
-        # - docker build -t hivexplore/drone .
+# # ARGoS jobs
 
-push-drone:
-    stage: push
-    needs: [build_drone]
-    script:
-        - cd drone
-        - echo allo
+# format-argos:
+#     stage: format
+#     script:
+#         - cd argos
+#         - docker build --target format .
+    # only:
+    #     - gitlab-ci # TODO: remove me
+    #     - master
+    #     - merge_requests
 
-# ARGoS jobs
-
-format-argos:
-    stage: format
-    script:
-        - cd argos
-        # - docker build --target format -t hivexplore/argos .
-
-build-argos:
-    stage: build
-    needs: [format_argos]
-    script:
-        - cd argos
-        # - docker build -t hivexplore/argos .
-
-push-argos:
-    stage: push
-    needs: [build_argos]
-    script:
-        - cd argos
-        - echo allo
+# build-argos:
+#     stage: build
+#     needs: [format_argos]
+#     script:
+#         - cd argos
+#         - docker build .

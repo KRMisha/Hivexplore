@@ -1,4 +1,4 @@
-image: alpine
+image: docker
 
 stages:
     - format
@@ -12,21 +12,24 @@ before_script:
 # Server jobs
 
 format_server:
-    image: dind
     stage: format
+    services:
+        - docker:dind
     script:
         - echo allo
 
 lint_server:
-    image: dind
     stage: lint
+    services:
+        - docker:dind
     needs: [format_server]
     script:
         - echo allo
 
 test_server:
-    image: dind
     stage: test
+    services:
+        - docker:dind
     needs: [lint_server]
     script:
         - echo allo
@@ -34,21 +37,24 @@ test_server:
 # Client jobs
 
 lint_client:
-    image: dind
     stage: lint
+    services:
+        - docker:dind
     script:
         - echo allo
 
 test_client:
-    image: dind
     stage: test
+    services:
+        - docker:dind
     needs: [lint_client]
     script:
         - echo allo
 
 build_client:
-    image: dind
     stage: build
+    services:
+        - docker:dind
     needs: [test_client]
     script:
         - echo allo
@@ -56,14 +62,16 @@ build_client:
 # Drone jobs
 
 format_drone:
-    image: dind
     stage: format
+    services:
+        - docker:dind
     script:
         - echo allo
 
 build_drone:
-    image: dind
     stage: build
+    services:
+        - docker:dind
     needs: [format_drone]
     script:
         - echo allo
@@ -71,14 +79,16 @@ build_drone:
 # ARGoS jobs
 
 format_argos:
-    image: dind
     stage: format
+    services:
+        - docker:dind
     script:
         - echo allo
 
 build_argos:
-    image: dind
     stage: build
+    services:
+        - docker:dind
     needs: [format_argos]
     script:
         - echo allo

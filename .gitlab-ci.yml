@@ -1,98 +1,116 @@
-image: docker
+image: docker:20
 
 stages:
     - format
     - lint
     - test
     - build
+    - push
+
+services:
+    - docker:dind
 
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-
-# Server jobs
-
-format_server:
-    stage: format
-    services:
-        - docker:dind
-    script:
-        - cd server
-        - docker build --target format -t hivexplore/server .
-
-lint_server:
-    stage: lint
-    services:
-        - docker:dind
-    needs: [format_server]
-    script:
-        - echo allo
-
-test_server:
-    stage: test
-    services:
-        - docker:dind
-    needs: [lint_server]
-    script:
-        - echo allo
 
 # Client jobs
 
 lint_client:
     stage: lint
-    services:
-        - docker:dind
     script:
         - cd client
         - docker build --target lint -t hivexplore/client .
 
 test_client:
     stage: test
-    services:
-        - docker:dind
     needs: [lint_client]
     script:
-        - echo allo
+        - cd client
+        - docker build --target test -t hivexplore/client .
 
 build_client:
     stage: build
-    services:
-        - docker:dind
     needs: [test_client]
     script:
+        - cd client
+        # - docker build -t hivexplore/client .
+
+push_client:
+    stage: push
+    needs: [build_client]
+    script:
+        - cd client
+        - echo allo
+
+# Server jobs
+
+format_server:
+    stage: format
+    script:
+        - cd server
+        # - docker build --target format -t hivexplore/server .
+
+lint_server:
+    stage: lint
+    needs: [format_server]
+    script:
+        - cd server
+        # - docker build --target lint -t hivexplore/server .
+
+test_server:
+    stage: test
+    needs: [lint_server]
+    script:
+        - cd server
+        # - docker build --target test -t hivexplore/server .
+
+push_server:
+    stage: push
+    needs: [test_server]
+    script:
+        - cd server
         - echo allo
 
 # Drone jobs
 
 format_drone:
     stage: format
-    services:
-        - docker:dind
     script:
         - cd drone
-        - docker build --target format -t hivexplore/drone .
+        # - docker build --target format -t hivexplore/drone .
 
 build_drone:
     stage: build
-    services:
-        - docker:dind
     needs: [format_drone]
     script:
+        - cd drone
+        # - docker build -t hivexplore/drone .
+
+push_drone:
+    stage: push
+    needs: [build_drone]
+    script:
+        - cd drone
         - echo allo
 
 # ARGoS jobs
 
 format_argos:
     stage: format
-    services:
-        - docker:dind
     script:
         - cd argos
-        - docker build --target format -t hivexplore/argos .
+        # - docker build --target format -t hivexplore/argos .
 
 build_argos:
     stage: build
-    services:
-        - docker:dind
     needs: [format_argos]
     script:
+        - cd argos
+        # - docker build -t hivexplore/argos .
+
+push_argos:
+    stage: push
+    needs: [build_argos]
+    script:
+        - cd argos
         - echo allo

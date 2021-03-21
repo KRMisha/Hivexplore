@@ -44,8 +44,9 @@ build-client:
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        - docker build --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci .
+        - docker build --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
         - docker push $IMAGE_NAME/client:ci
+        - docker push $IMAGE_NAME/client:latest
 
 # Server jobs
 

@@ -50,64 +50,90 @@ build-client:
 
 # Server jobs
 
-# format-server:
-#     stage: format
-#     script:
-#         - cd server
-#         - docker build --target format .
-    # only:
-    #     - gitlab-ci # TODO: remove me
-    #     - master
-    #     - merge_requests
+format-server:
+    stage: format
+    script:
+        - docker pull $IMAGE_NAME/server:ci || true
+        - cd server
+        - docker build --cache-from $IMAGE_NAME/server:ci --target format --tag $IMAGE_NAME/server:ci .
+        - docker push $IMAGE_NAME/server:ci
+    only:
+        - gitlab-ci # TODO: remove me
+        - master
+        - merge_requests
 
-# lint-server:
-#     stage: lint
-#     needs: [format-server]
-#     script:
-#         - cd server
-#         - docker build --target lint .
+lint-server:
+    stage: lint
+    needs: [format-server]
+    script:
+        - docker pull $IMAGE_NAME/server:ci || true
+        - cd server
+        - docker build --cache-from $IMAGE_NAME/server:ci --target lint --tag $IMAGE_NAME/server:ci .
+        - docker push $IMAGE_NAME/server:ci
 
-# test-server:
-#     stage: test
-#     needs: [lint-server]
-#     script:
-#         - cd server
-#         - docker build --target test .
+test-server:
+    stage: test
+    needs: [lint-server]
+    script:
+        - docker pull $IMAGE_NAME/server:ci || true
+        - cd server
+        - docker build --cache-from $IMAGE_NAME/server:ci --target test --tag $IMAGE_NAME/server:ci .
+        - docker push $IMAGE_NAME/server:ci
 
-# # Drone jobs
+build-server:
+    stage: build
+    needs: [test-server]
+    script:
+        - docker pull $IMAGE_NAME/server:ci || true
+        - cd server
+        - docker build --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/client:latest .
+        - docker push $IMAGE_NAME/server:ci
+        - docker push $IMAGE_NAME/server:latest
 
-# format-drone:
-#     stage: format
-#     script:
-#         - cd drone
-#         - docker build --target format .
-    # only:
-    #     - gitlab-ci # TODO: remove me
-    #     - master
-    #     - merge_requests
+# Drone jobs
 
-# build-drone:
-#     stage: build
-#     needs: [format-drone]
-#     script:
-#         - cd drone
-#         - docker build -t hivexplore/drone .
+format-drone:
+    stage: format
+    script:
+        - docker pull $IMAGE_NAME/drone:ci || true
+        - cd drone
+        - docker build --cache-from $IMAGE_NAME/drone:ci --target format --tag $IMAGE_NAME/drone:ci .
+        - docker push $IMAGE_NAME/drone:ci
+    only:
+        - gitlab-ci # TODO: remove me
+        - master
+        - merge_requests
 
-# # ARGoS jobs
+build-drone:
+    stage: build
+    needs: [format-drone]
+    script:
+        - docker pull $IMAGE_NAME/drone:ci || true
+        - cd drone
+        - docker build --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
+        - docker push $IMAGE_NAME/drone:ci
+        - docker push $IMAGE_NAME/drone:latest
 
-# format-argos:
-#     stage: format
-#     script:
-#         - cd argos
-#         - docker build --target format .
-    # only:
-    #     - gitlab-ci # TODO: remove me
-    #     - master
-    #     - merge_requests
+# ARGoS jobs
 
-# build-argos:
-#     stage: build
-#     needs: [format-argos]
-#     script:
-#         - cd argos
-#         - docker build .
+format-argos:
+    stage: format
+    script:
+        - docker pull $IMAGE_NAME/argos:ci || true
+        - cd argos
+        - docker build --cache-from $IMAGE_NAME/argos:ci --target format --tag $IMAGE_NAME/argos:ci .
+        - docker push $IMAGE_NAME/argos:ci
+    only:
+        - gitlab-ci # TODO: remove me
+        - master
+        - merge_requests
+
+build-argos:
+    stage: build
+    needs: [format-argos]
+    script:
+        - docker pull $IMAGE_NAME/argos:ci || true
+        - cd argos
+        - docker build --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
+        - docker push $IMAGE_NAME/argos:ci
+        - docker push $IMAGE_NAME/argos:latest

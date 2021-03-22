@@ -31,12 +31,14 @@
         <div v-else>
             ✂ No drones connected ✂
         </div>
+        <Log />
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onUnmounted, provide, ref } from 'vue';
 import Drone from '@/components/Drone.vue';
+import Log from '@/components/Log.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
 import { MissionState } from '@/enums/mission-state';
@@ -45,6 +47,7 @@ export default defineComponent({
     name: 'App',
     components: {
         Drone,
+        Log,
         Map,
     },
     setup() {

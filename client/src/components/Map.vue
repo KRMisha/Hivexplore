@@ -48,7 +48,7 @@ export default defineComponent({
             // Camera
             const fov = 70;
             camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
-            camera.position.set(0, 10, 6);
+            camera.position.set(0, 10, -6);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Geometry - buffer to hold all point positions

@@ -5,5 +5,8 @@ from enum import IntEnum
 # pylint: disable=invalid-name
 class DroneStatus(IntEnum):
     Standby = 0
-    Flying = 1
-    Crashed = 2
+    Liftoff = 1
+    Flying = 2
+    Landing = 3
+    Landed = 4
+    Crashed = 5

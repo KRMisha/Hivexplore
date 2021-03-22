@@ -1,4 +1,7 @@
 <template>
+    <Toast />
+    <ConfirmPopup />
+
     <div class="container">
         <Map class="map-container" />
         <div class="button-container">
@@ -6,13 +9,19 @@
                 label="Start mission"
                 class="left-button"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Standby"
-                @click="setMissionState(MissionState.Exploring)"
+                @click="onStartMissionButtonClick($event)"
             />
             <Button
                 label="Return to base"
-                class="p-button-info"
                 :disabled="droneIds.length === 0 || missionState !== MissionState.Exploring"
-                @click="setMissionState(MissionState.Returning)"
+                @click="onReturnToBaseButtonClick()"
+            />
+            <Button
+                :label="endMissionButtonLabel"
+                class="right-button"
+                :style="{ 'background-color': endMissionButtonColor }"
+                :disabled="droneIds.length === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
+                @click="onEndMissionButtonClick($event)"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
@@ -36,7 +45,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, provide, ref } from 'vue';
+import { computed, defineComponent, onUnmounted, provide, ref } from 'vue';
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 import Drone from '@/components/Drone.vue';
 import Log from '@/components/Log.vue';
 import Map from '@/components/Map.vue';
@@ -51,8 +62,11 @@ export default defineComponent({
         Map,
     },
     setup() {
+        const confirm = useConfirm();
+        const toast = useToast();
         const socketClient = new SocketClient();
         const droneIds = ref<string[]>([]);
+        let wasEmergencyLandingCalled = false;
 
         socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
@@ -67,6 +81,63 @@ export default defineComponent({
             socketClient.sendMessage('mission-state', missionState);
         }
 
+        function onStartMissionButtonClick(event: Event) {
+            if (wasEmergencyLandingCalled) {
+                // If last mission ended with an emergency landing
+                confirm.require({
+                    target: event.currentTarget!,
+                    message: 'The last mission was forcefully ended. Are you sure you want to start a new mission?',
+                    header: 'Confirmation',
+                    icon: 'pi pi-exclamation-triangle',
+                    accept: () => {
+                        toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
+                        toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK🚀🚀', life: 3000 });
+                        setMissionState(MissionState.Exploring);
+                        wasEmergencyLandingCalled = false; // Reset
+                    },
+                });
+            } else {
+                // If last mission ended normally
+                toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
+                toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK', life: 3000 });
+                setMissionState(MissionState.Exploring);
+            }
+        }
+
+        function onReturnToBaseButtonClick() {
+            toast.add({ severity: 'success', summary: 'Initiated', detail: 'Return to base initiated', life: 3000 });
+            setMissionState(MissionState.Returning);
+        }
+
+        const endMissionButtonLabel = computed((): string => {
+            return missionState.value === MissionState.Landed ? 'End mission' : 'Emergency land';
+        });
+
+        const endMissionButtonColor = computed((): string => {
+            return missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red';
+        });
+
+        function onEndMissionButtonClick(event: Event) {
+            if (missionState.value !== MissionState.Landed) {
+                // Emergency land
+                confirm.require({
+                    target: event.currentTarget!,
+                    message: 'Are you sure you want to initiate an *emergency* landing?',
+                    header: 'Confirmation',
+                    icon: 'pi pi-exclamation-triangle',
+                    acceptClass: 'p-button-danger',
+                    accept: () => {
+                        toast.add({ severity: 'success', summary: 'Initiated', detail: 'Emergency landing initiated', life: 3000 });
+                        setMissionState(MissionState.Emergency);
+                        wasEmergencyLandingCalled = true;
+                    },
+                });
+            } else {
+                // End mission
+                setMissionState(MissionState.Standby);
+            }
+        }
+
         provide('socketClient', socketClient);
 
         onUnmounted(() => {
@@ -78,7 +149,11 @@ export default defineComponent({
             missionState,
             missionStates: Object.values(MissionState),
             MissionState,
-            setMissionState,
+            onStartMissionButtonClick,
+            onReturnToBaseButtonClick,
+            endMissionButtonLabel,
+            endMissionButtonColor,
+            onEndMissionButtonClick,
         };
     },
 });
@@ -106,6 +181,10 @@ export default defineComponent({
 
 .left-button {
     margin-right: 16px;
+}
+
+.right-button {
+    margin-left: 16px;
 }
 
 .timeline {

@@ -6,8 +6,6 @@
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"
 
-// TODO: Remove me D: ALATAK
-
 namespace {
     // Sensor reading constants
     static constexpr std::uint8_t obstacleTooClose = 0;

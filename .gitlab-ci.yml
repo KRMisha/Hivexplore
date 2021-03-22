@@ -5,6 +5,7 @@ stages:
     - lint
     - test
     - build
+    - deploy
 
 services:
     - docker:20-dind
@@ -48,12 +49,23 @@ build-client:
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci .
+        - docker push $IMAGE_NAME/client:ci
+    only:
+        - master
+        - merge_requests
+
+deploy-client:
+    stage: deploy
+    needs: [build-client]
+    script:
+        - docker pull $IMAGE_NAME/client:ci || true
+        - cd client
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
         - docker push $IMAGE_NAME/client:ci
         - docker push $IMAGE_NAME/client:latest
     only:
         - master
-        - merge_requests
 
 # Server jobs
 
@@ -98,12 +110,23 @@ build-server:
     script:
         - docker pull $IMAGE_NAME/server:ci || true
         - cd server
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci .
+        - docker push $IMAGE_NAME/server:ci
+    only:
+        - master
+        - merge_requests
+
+deploy-server:
+    stage: deploy
+    needs: [build-server]
+    script:
+        - docker pull $IMAGE_NAME/server:ci || true
+        - cd server
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
         - docker push $IMAGE_NAME/server:ci
         - docker push $IMAGE_NAME/server:latest
     only:
         - master
-        - merge_requests
 
 # Drone jobs
 
@@ -128,12 +151,25 @@ build-drone:
     script:
         - docker pull $IMAGE_NAME/drone:ci || true
         - cd drone
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci .
+        - docker push $IMAGE_NAME/drone:ci
+    only:
+        - master
+        - merge_requests
+
+deploy-drone:
+    stage: deploy
+    variables:
+        GIT_SUBMODULE_STRATEGY: recursive
+    needs: [build-drone]
+    script:
+        - docker pull $IMAGE_NAME/drone:ci || true
+        - cd drone
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
         - docker push $IMAGE_NAME/drone:ci
         - docker push $IMAGE_NAME/drone:latest
     only:
         - master
-        - merge_requests
 
 # ARGoS jobs
 
@@ -154,9 +190,20 @@ build-argos:
     script:
         - docker pull $IMAGE_NAME/argos:ci || true
         - cd argos
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci .
+        - docker push $IMAGE_NAME/argos:ci
+    only:
+        - master
+        - merge_requests
+
+deploy-argos:
+    stage: deploy
+    needs: [format-argos]
+    script:
+        - docker pull $IMAGE_NAME/argos:ci || true
+        - cd argos
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
         - docker push $IMAGE_NAME/argos:ci
         - docker push $IMAGE_NAME/argos:latest
     only:
         - master
-        - merge_requests

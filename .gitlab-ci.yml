@@ -27,7 +27,6 @@ lint-client:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --target lint --tag $IMAGE_NAME/client:ci .
         - docker push $IMAGE_NAME/client:ci
     only:
-        - gitlab-ci # TODO: remove me
         - master
         - merge_requests
 
@@ -39,6 +38,9 @@ test-client:
         - cd client
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --target test --tag $IMAGE_NAME/client:ci .
         - docker push $IMAGE_NAME/client:ci
+    only:
+        - master
+        - merge_requests
 
 build-client:
     stage: build
@@ -49,6 +51,9 @@ build-client:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
         - docker push $IMAGE_NAME/client:ci
         - docker push $IMAGE_NAME/client:latest
+    only:
+        - master
+        - merge_requests
 
 # Server jobs
 
@@ -60,7 +65,6 @@ format-server:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target format --tag $IMAGE_NAME/server:ci .
         - docker push $IMAGE_NAME/server:ci
     only:
-        - gitlab-ci # TODO: remove me
         - master
         - merge_requests
 
@@ -72,6 +76,9 @@ lint-server:
         - cd server
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target lint --tag $IMAGE_NAME/server:ci .
         - docker push $IMAGE_NAME/server:ci
+    only:
+        - master
+        - merge_requests
 
 test-server:
     stage: test
@@ -81,6 +88,9 @@ test-server:
         - cd server
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target test --tag $IMAGE_NAME/server:ci .
         - docker push $IMAGE_NAME/server:ci
+    only:
+        - master
+        - merge_requests
 
 build-server:
     stage: build
@@ -91,6 +101,9 @@ build-server:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
         - docker push $IMAGE_NAME/server:ci
         - docker push $IMAGE_NAME/server:latest
+    only:
+        - master
+        - merge_requests
 
 # Drone jobs
 
@@ -102,7 +115,6 @@ format-drone:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --target format --tag $IMAGE_NAME/drone:ci .
         - docker push $IMAGE_NAME/drone:ci
     only:
-        - gitlab-ci # TODO: remove me
         - master
         - merge_requests
 
@@ -115,6 +127,9 @@ build-drone:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
         - docker push $IMAGE_NAME/drone:ci
         - docker push $IMAGE_NAME/drone:latest
+    only:
+        - master
+        - merge_requests
 
 # ARGoS jobs
 
@@ -126,7 +141,6 @@ format-argos:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --target format --tag $IMAGE_NAME/argos:ci .
         - docker push $IMAGE_NAME/argos:ci
     only:
-        - gitlab-ci # TODO: remove me
         - master
         - merge_requests
 
@@ -139,3 +153,6 @@ build-argos:
         - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
         - docker push $IMAGE_NAME/argos:ci
         - docker push $IMAGE_NAME/argos:latest
+    only:
+        - master
+        - merge_requests

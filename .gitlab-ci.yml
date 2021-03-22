@@ -10,9 +10,8 @@ services:
     - docker:20-dind
 
 variables:
-    IMAGE_NAME: $CI_REGISTRY/polytechnique-montr-al/inf3995/20211/equipe-102/hivexplore
     DOCKER_BUILDKIT: 1
-    GIT_SUBMODULE_STRATEGY: recursive
+    IMAGE_NAME: $CI_REGISTRY/polytechnique-montr-al/inf3995/20211/equipe-102/hivexplore
 
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -21,7 +20,7 @@ before_script:
 
 lint-client:
     stage: lint
-    needs: [] # Workaround to start job even though we don't have a format job
+    needs: [] # Workaround to start job even though we don't have a format job (lint-client takes care of checking formatting)
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
@@ -110,6 +109,8 @@ build-server:
 
 format-drone:
     stage: format
+    # variables:
+    #     GIT_SUBMODULE_STRATEGY: recursive
     script:
         - docker pull $IMAGE_NAME/drone:ci || true
         - cd drone
@@ -121,6 +122,8 @@ format-drone:
 
 build-drone:
     stage: build
+    variables:
+        GIT_SUBMODULE_STRATEGY: recursive
     needs: [format-drone]
     script:
         - docker pull $IMAGE_NAME/drone:ci || true

@@ -109,8 +109,8 @@ build-server:
 
 format-drone:
     stage: format
-    # variables:
-    #     GIT_SUBMODULE_STRATEGY: recursive
+    variables:
+        GIT_SUBMODULE_STRATEGY: recursive
     script:
         - docker pull $IMAGE_NAME/drone:ci || true
         - cd drone

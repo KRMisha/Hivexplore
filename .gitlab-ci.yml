@@ -17,189 +17,140 @@ variables:
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
+# Template jobs
+
+.dev-template:
+    script:
+        - docker pull $IMAGE_NAME/$SUBPROJECT:ci || true
+        - cd $SUBPROJECT
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/$SUBPROJECT:ci --target $CI_JOB_STAGE --tag $IMAGE_NAME/$SUBPROJECT:ci .
+        - docker push $IMAGE_NAME/$SUBPROJECT:ci
+    only:
+        - master
+        - merge_requests
+
+.build-template:
+    stage: build
+    script:
+        - docker pull $IMAGE_NAME/$SUBPROJECT:ci || true
+        - cd $SUBPROJECT
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/$SUBPROJECT:ci --tag $IMAGE_NAME/$SUBPROJECT:ci .
+        - docker push $IMAGE_NAME/$SUBPROJECT:ci
+    only:
+        - master
+        - merge_requests
+
+.deploy-template:
+    stage: deploy
+    script:
+        - docker pull $IMAGE_NAME/$SUBPROJECT:ci || true
+        - cd $SUBPROJECT
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/$SUBPROJECT:ci --tag $IMAGE_NAME/$SUBPROJECT:latest .
+        - docker push $IMAGE_NAME/$SUBPROJECT:latest
+    only:
+        - master
+
 # Client jobs
 
 lint-client:
+    extends: .dev-template
     stage: lint
     needs: [] # Workaround to start job even though we don't have a format job (lint-client takes care of checking formatting)
-    script:
-        - docker pull $IMAGE_NAME/client:ci || true
-        - cd client
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --target lint --tag $IMAGE_NAME/client:ci .
-        - docker push $IMAGE_NAME/client:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: client
 
 test-client:
+    extends: .dev-template
     stage: test
     needs: [lint-client]
-    script:
-        - docker pull $IMAGE_NAME/client:ci || true
-        - cd client
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --target test --tag $IMAGE_NAME/client:ci .
-        - docker push $IMAGE_NAME/client:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: client
 
 build-client:
-    stage: build
+    extends: .build-template
     needs: [test-client]
-    script:
-        - docker pull $IMAGE_NAME/client:ci || true
-        - cd client
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci .
-        - docker push $IMAGE_NAME/client:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: client
 
 deploy-client:
-    stage: deploy
+    extends: .deploy-template
     needs: [build-client]
-    script:
-        - docker pull $IMAGE_NAME/client:ci || true
-        - cd client
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
-        - docker push $IMAGE_NAME/client:latest
-    only:
-        - master
+    variables:
+        SUBPROJECT: client
 
 # Server jobs
 
 format-server:
+    extends: .dev-template
     stage: format
-    script:
-        - docker pull $IMAGE_NAME/server:ci || true
-        - cd server
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target format --tag $IMAGE_NAME/server:ci .
-        - docker push $IMAGE_NAME/server:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: server
 
 lint-server:
+    extends: .dev-template
     stage: lint
     needs: [format-server]
-    script:
-        - docker pull $IMAGE_NAME/server:ci || true
-        - cd server
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target lint --tag $IMAGE_NAME/server:ci .
-        - docker push $IMAGE_NAME/server:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: server
 
 test-server:
+    extends: .dev-template
     stage: test
     needs: [lint-server]
-    script:
-        - docker pull $IMAGE_NAME/server:ci || true
-        - cd server
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --target test --tag $IMAGE_NAME/server:ci .
-        - docker push $IMAGE_NAME/server:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: server
 
 build-server:
-    stage: build
+    extends: .build-template
     needs: [test-server]
-    script:
-        - docker pull $IMAGE_NAME/server:ci || true
-        - cd server
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci .
-        - docker push $IMAGE_NAME/server:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: server
 
 deploy-server:
-    stage: deploy
+    extends: .deploy-template
     needs: [build-server]
-    script:
-        - docker pull $IMAGE_NAME/server:ci || true
-        - cd server
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
-        - docker push $IMAGE_NAME/server:latest
-    only:
-        - master
+    variables:
+        SUBPROJECT: server
 
 # Drone jobs
 
 format-drone:
+    extends: .dev-template
     stage: format
     variables:
         GIT_SUBMODULE_STRATEGY: recursive
-    script:
-        - docker pull $IMAGE_NAME/drone:ci || true
-        - cd drone
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --target format --tag $IMAGE_NAME/drone:ci .
-        - docker push $IMAGE_NAME/drone:ci
-    only:
-        - master
-        - merge_requests
+        SUBPROJECT: drone
 
 build-drone:
-    stage: build
+    extends: .build-template
+    needs: [format-drone]
     variables:
         GIT_SUBMODULE_STRATEGY: recursive
-    needs: [format-drone]
-    script:
-        - docker pull $IMAGE_NAME/drone:ci || true
-        - cd drone
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci .
-        - docker push $IMAGE_NAME/drone:ci
-    only:
-        - master
-        - merge_requests
+        SUBPROJECT: drone
 
 deploy-drone:
-    stage: deploy
+    extends: .deploy-template
+    needs: [build-drone]
     variables:
         GIT_SUBMODULE_STRATEGY: recursive
-    needs: [build-drone]
-    script:
-        - docker pull $IMAGE_NAME/drone:ci || true
-        - cd drone
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
-        - docker push $IMAGE_NAME/drone:latest
-    only:
-        - master
+        SUBPROJECT: drone
 
 # ARGoS jobs
 
 format-argos:
+    extends: .dev-template
     stage: format
-    script:
-        - docker pull $IMAGE_NAME/argos:ci || true
-        - cd argos
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --target format --tag $IMAGE_NAME/argos:ci .
-        - docker push $IMAGE_NAME/argos:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: argos
 
 build-argos:
-    stage: build
+    extends: .build-template
     needs: [format-argos]
-    script:
-        - docker pull $IMAGE_NAME/argos:ci || true
-        - cd argos
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci .
-        - docker push $IMAGE_NAME/argos:ci
-    only:
-        - master
-        - merge_requests
+    variables:
+        SUBPROJECT: argos
 
 deploy-argos:
-    stage: deploy
+    extends: .deploy-template
     needs: [format-argos]
-    script:
-        - docker pull $IMAGE_NAME/argos:ci || true
-        - cd argos
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
-        - docker push $IMAGE_NAME/argos:latest
-    only:
-        - master
+    variables:
+        SUBPROJECT: argos

@@ -12,7 +12,6 @@ services:
 
 variables:
     DOCKER_BUILDKIT: 1
-    IMAGE_NAME: $CI_REGISTRY/polytechnique-montr-al/inf3995/20211/equipe-102/hivexplore
 
 before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -21,10 +20,10 @@ before_script:
 
 .dev-template:
     script:
-        - docker pull $IMAGE_NAME/$SUBPROJECT:ci || true
+        - docker pull $CI_REGISTRY_IMAGE/$SUBPROJECT:ci || true
         - cd $SUBPROJECT
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/$SUBPROJECT:ci --target $CI_JOB_STAGE --tag $IMAGE_NAME/$SUBPROJECT:ci .
-        - docker push $IMAGE_NAME/$SUBPROJECT:ci
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $CI_REGISTRY_IMAGE/$SUBPROJECT:ci --target $CI_JOB_STAGE --tag $CI_REGISTRY_IMAGE/$SUBPROJECT:ci .
+        - docker push $CI_REGISTRY_IMAGE/$SUBPROJECT:ci
     only:
         - master
         - merge_requests
@@ -32,10 +31,10 @@ before_script:
 .build-template:
     stage: build
     script:
-        - docker pull $IMAGE_NAME/$SUBPROJECT:ci || true
+        - docker pull $CI_REGISTRY_IMAGE/$SUBPROJECT:ci || true
         - cd $SUBPROJECT
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/$SUBPROJECT:ci --tag $IMAGE_NAME/$SUBPROJECT:ci .
-        - docker push $IMAGE_NAME/$SUBPROJECT:ci
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $CI_REGISTRY_IMAGE/$SUBPROJECT:ci --tag $CI_REGISTRY_IMAGE/$SUBPROJECT:ci .
+        - docker push $CI_REGISTRY_IMAGE/$SUBPROJECT:ci
     only:
         - master
         - merge_requests
@@ -43,10 +42,10 @@ before_script:
 .deploy-template:
     stage: deploy
     script:
-        - docker pull $IMAGE_NAME/$SUBPROJECT:ci || true
+        - docker pull $CI_REGISTRY_IMAGE/$SUBPROJECT:ci || true
         - cd $SUBPROJECT
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/$SUBPROJECT:ci --tag $IMAGE_NAME/$SUBPROJECT:latest .
-        - docker push $IMAGE_NAME/$SUBPROJECT:latest
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $CI_REGISTRY_IMAGE/$SUBPROJECT:ci --tag $CI_REGISTRY_IMAGE/$SUBPROJECT:latest .
+        - docker push $CI_REGISTRY_IMAGE/$SUBPROJECT:latest
     only:
         - master
 
@@ -151,6 +150,6 @@ build-argos:
 
 deploy-argos:
     extends: .deploy-template
-    needs: [format-argos]
+    needs: [build-argos]
     variables:
         SUBPROJECT: argos

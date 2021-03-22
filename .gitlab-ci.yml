@@ -61,8 +61,7 @@ deploy-client:
     script:
         - docker pull $IMAGE_NAME/client:ci || true
         - cd client
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
-        - docker push $IMAGE_NAME/client:ci
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/client:ci --tag $IMAGE_NAME/client:latest .
         - docker push $IMAGE_NAME/client:latest
     only:
         - master
@@ -122,8 +121,7 @@ deploy-server:
     script:
         - docker pull $IMAGE_NAME/server:ci || true
         - cd server
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
-        - docker push $IMAGE_NAME/server:ci
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/server:ci --tag $IMAGE_NAME/server:latest .
         - docker push $IMAGE_NAME/server:latest
     only:
         - master
@@ -165,8 +163,7 @@ deploy-drone:
     script:
         - docker pull $IMAGE_NAME/drone:ci || true
         - cd drone
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
-        - docker push $IMAGE_NAME/drone:ci
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/drone:ci --tag $IMAGE_NAME/drone:latest .
         - docker push $IMAGE_NAME/drone:latest
     only:
         - master
@@ -202,8 +199,7 @@ deploy-argos:
     script:
         - docker pull $IMAGE_NAME/argos:ci || true
         - cd argos
-        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
-        - docker push $IMAGE_NAME/argos:ci
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $IMAGE_NAME/argos:ci --tag $IMAGE_NAME/argos:latest .
         - docker push $IMAGE_NAME/argos:latest
     only:
         - master

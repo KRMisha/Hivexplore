@@ -115,27 +115,22 @@ export default defineComponent({
 
         // from https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image
         function saveAsImage() {
-            try {
-                // Convert date to local timezone by stripping the timezone offset
-                const timestampUtc = new Date();
-                const timestampUnfiltered = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
-                const timestamp = timestampUnfiltered.toISOString().replace('Z', '').replaceAll(':', ''); // Remove the trailing Z since the timestamp is not in UTC
-                const filename = `hivexplore_map_${timestamp}.jpg`;
+            // Convert date to local timezone by stripping the timezone offset
+            const timestampUtc = new Date();
+            const timestampUnfiltered = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
+            const timestamp = timestampUnfiltered.toISOString().replace('Z', '').replaceAll(':', ''); // Remove the trailing Z since the timestamp is not in UTC
+            const filename = `hivexplore_map_${timestamp}.jpg`;
 
-                const imageJpeg = 'image/jpeg';
-                let imgData = renderer.domElement.toDataURL(imageJpeg);
-                const data = imgData.replace(imageJpeg, 'image/octet-stream');
-                let link = document.createElement('a');
+            const imageJpeg = 'image/jpeg';
+            let imgData = renderer.domElement.toDataURL(imageJpeg);
+            const data = imgData.replace(imageJpeg, 'image/octet-stream');
+            let link = document.createElement('a');
 
-                document.body.appendChild(link); // Firefox requires it
-                link.download = filename;
-                link.href = data;
-                link.click();
-                document.body.removeChild(link); // Remove the link when done
-            } catch (e) {
-                console.error(e);
-                return;
-            }
+            document.body.appendChild(link); // Firefox requires it
+            link.download = filename;
+            link.href = data;
+            link.click();
+            document.body.removeChild(link); // Remove the link when done
         }
 
         onMounted(() => {

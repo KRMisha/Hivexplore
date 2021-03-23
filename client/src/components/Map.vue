@@ -113,22 +113,27 @@ export default defineComponent({
             }
         });
 
+        // from
         function saveAsImage() {
             try {
-                const strDownloadMime = "image/octet-stream";
-                let strMime = "image/jpeg";
-                let imgData = renderer.domElement.toDataURL(strMime);
-                const filename = "test.jpg"
-                const strData = imgData.replace(strMime, strDownloadMime);
+                // Convert date to local timezone by stripping the timezone offset
+                const timestampUtc = new Date();
+                const timestampUnfiltered = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
+                const timestamp = timestampUnfiltered.toISOString().replace('Z', '').replaceAll(':', ''); // Remove the trailing Z since the timestamp is not in UTC
+                const filename = `hivexplore_map_${timestamp}.jpg`;
+
+                const imageJpeg = "image/jpeg";
+                let imgData = renderer.domElement.toDataURL(imageJpeg);
+                const data = imgData.replace(imageJpeg, "image/octet-stream");
                 let link = document.createElement('a');
 
-                document.body.appendChild(link); // Firefox requires the link to be in the body
+                document.body.appendChild(link); // Firefox requires it
                 link.download = filename;
-                link.href = strData;
+                link.href = data;
                 link.click();
                 document.body.removeChild(link); // Remove the link when done
             } catch (e) {
-                console.log(e);
+                console.error(e);
                 return;
             }
         }

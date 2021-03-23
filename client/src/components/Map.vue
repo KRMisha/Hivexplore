@@ -119,11 +119,10 @@ export default defineComponent({
             const timestampUtc = new Date();
             const timestampUnfiltered = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
             const timestamp = timestampUnfiltered.toISOString().replace('Z', '').replaceAll(':', ''); // Remove the trailing Z since the timestamp is not in UTC
-            const filename = `hivexplore_map_${timestamp}.jpg`;
+            const filename = `hivexplore_map_${timestamp}.png`;
 
-            const imageJpeg = 'image/jpeg';
-            let imgData = renderer.domElement.toDataURL(imageJpeg);
-            const data = imgData.replace(imageJpeg, 'image/octet-stream');
+            let imgData = renderer.domElement.toDataURL('image/png');
+            const data = imgData.replace('image/png', 'image/octet-stream');
             let link = document.createElement('a');
 
             document.body.appendChild(link); // Firefox requires it

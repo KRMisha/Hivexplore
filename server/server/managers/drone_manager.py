@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 from typing import Any, Dict, List
 import numpy as np
+from server.logger import Logger
 from server.managers.drone_status import DroneStatus
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator, Orientation, Point, Range
@@ -9,8 +10,9 @@ from server.sockets.web_socket_server import WebSocketServer
 
 
 class DroneManager(ABC):
-    def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
+    def __init__(self, web_socket_server: WebSocketServer, logger: Logger, map_generator: MapGenerator):
         self._web_socket_server = web_socket_server
+        self._logger = logger
         self._map_generator = map_generator
         self._mission_state = MissionState.Standby
         self._drone_statuses: Dict[str, DroneStatus] = {}

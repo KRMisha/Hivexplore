@@ -1,4 +1,5 @@
 from typing import Any, Optional, Set, List
+from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.map_generator import MapGenerator
 from server.sockets.unix_socket_client import UnixSocketClient
@@ -6,8 +7,8 @@ from server.sockets.web_socket_server import WebSocketServer
 
 
 class ArgosManager(DroneManager):
-    def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator):
-        super().__init__(web_socket_server, map_generator)
+    def __init__(self, web_socket_server: WebSocketServer, logger: Logger, map_generator: MapGenerator):
+        super().__init__(web_socket_server, logger, map_generator)
         self._unix_socket_client = UnixSocketClient()
         self._drone_ids: Set[str] = set()
 

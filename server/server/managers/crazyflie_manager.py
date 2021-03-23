@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
+from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
@@ -10,8 +11,8 @@ from server.uri_utils import load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):
-    def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
-        super().__init__(web_socket_server, map_generator)
+    def __init__(self, web_socket_server: WebSocketServer, logger: Logger, map_generator: MapGenerator, enable_debug_driver: bool):
+        super().__init__(web_socket_server, logger, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)

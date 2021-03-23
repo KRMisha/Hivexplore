@@ -4,10 +4,12 @@ examples
 
 # Build output
 **/bin
-cf2.*
-tag.*
 **/current_platform.mk
 **/version.c
+cf2.*
+tag.*
+app_api/**/cf2.*
+app_api/**/tag.*
 
 # VS Code
 **/.vscode

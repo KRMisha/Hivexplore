@@ -1,7 +1,8 @@
 <template>
-    <Panel header="Map">
+    <Panel header="Map" class="map-width">
         <div id="map-container"></div>
     </Panel>
+    <Button class="button-container" label="Download map" @click="saveAsImage()" />
 </template>
 
 <script lang="ts">
@@ -65,7 +66,7 @@ export default defineComponent({
             scene.add(points);
 
             // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.append(renderer.domElement);
 
@@ -112,6 +113,26 @@ export default defineComponent({
             }
         });
 
+        function saveAsImage() {
+            try {
+                const strDownloadMime = "image/octet-stream";
+                let strMime = "image/jpeg";
+                let imgData = renderer.domElement.toDataURL(strMime);
+                const filename = "test.jpg"
+                const strData = imgData.replace(strMime, strDownloadMime);
+                let link = document.createElement('a');
+
+                document.body.appendChild(link); // Firefox requires the link to be in the body
+                link.download = filename;
+                link.href = strData;
+                link.click();
+                document.body.removeChild(link); // Remove the link when done
+            } catch (e) {
+                console.log(e);
+                return;
+            }
+        }
+
         onMounted(() => {
             init();
             animate();
@@ -120,13 +141,25 @@ export default defineComponent({
         onUnmounted(() => {
             window.removeEventListener('resize', onWindowResize);
         });
+
+        return {
+            saveAsImage,
+        };
     },
 });
 </script>
 
 <style scoped lang="scss">
+.map-width {
+    width: 100%;
+}
+
 #map-container {
     height: 300px;
     position: relative;
+}
+
+.button-container {
+    margin-top: 16px;
 }
 </style>

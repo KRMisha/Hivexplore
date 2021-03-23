@@ -141,7 +141,6 @@ void appMain(void) {
         positionReading.z = logGetUint(positionZId);
         positionYawReading = logGetUint(positionYawId);
 
-
         rssiReading = logGetUint(rssiId);
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
 
@@ -208,6 +207,7 @@ void explore(void) {
         // Check if any obstacle is in the way before taking off
         if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
             DEBUG_PRINT("Liftoff\n");
+            initialPosition = positionReading;
             exploringState = EXPLORING_LIFTOFF;
         }
     } break;
@@ -215,7 +215,6 @@ void explore(void) {
         droneStatus = STATUS_LIFTOFF;
 
         if (liftoff()) {
-            initialPosition = positionReading;
             exploringState = EXPLORING_EXPLORE;
         }
     } break;
@@ -257,7 +256,7 @@ void returnToBase(void) {
         setPoint.position.x = initialPosition.x;
         setPoint.position.y = initialPosition.y;
 
-        if (ABS(setPoint.position.y) < espilon && ABS(setPoint.position.x) < espilon) {
+        if (ABS(setPoint.position.y - initialPosition.y) < espilon && ABS(setPoint.position.x - initialPosition.x) < espilon) {
             returningState = RETURNING_LAND;
         }
     } break;

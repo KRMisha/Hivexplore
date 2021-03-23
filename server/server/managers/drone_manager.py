@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from collections import namedtuple
 from typing import Any, Dict, List
 import numpy as np
 from server.logger import Logger
 from server.managers.drone_status import DroneStatus
 from server.managers.mission_state import MissionState
-from server.map_generator import MapGenerator, Orientation, Point, Range
+from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
+from server.tuples import Orientation, Point, Range, Velocity
 
 
 class DroneManager(ABC):
@@ -70,7 +70,7 @@ class DroneManager(ABC):
         self._map_generator.set_position(drone_id, point)
 
     def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
-        Velocity = namedtuple('Velocity', ['vx', 'vy', 'vz'])
+
         velocity = Velocity(
             vx=data['stateEstimate.vx'],
             vy=data['stateEstimate.vy'],

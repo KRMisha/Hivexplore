@@ -1,13 +1,9 @@
 import math
-from collections import namedtuple
 from typing import Dict, List
 import numpy as np
 from server.logger import Logger
 from server.sockets.web_socket_server import WebSocketServer
-
-Orientation = namedtuple('Orientation', ['roll', 'pitch', 'yaw'])
-Point = namedtuple('Point', ['x', 'y', 'z'])
-Range = namedtuple('Range', ['front', 'left', 'back', 'right', 'up', 'down'])
+from server.tuples import Orientation, Point, Range
 
 
 class MapGenerator:

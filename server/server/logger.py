@@ -1,6 +1,6 @@
 from typing import List
 from server.sockets.web_socket_server import WebSocketServer
-from server.map_generator import Point
+from server.tuples import Point
 
 
 class Logger:

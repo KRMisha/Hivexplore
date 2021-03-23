@@ -67,7 +67,7 @@ export default defineComponent({
             }
 
             logs.value.get(log.name)!.push(log.message);
-            const maxLogCount = 128;
+            const maxLogCount = 1024;
             if (logs.value.get(log.name)!.length > maxLogCount) {
                 logs.value.get(log.name)!.shift();
             }

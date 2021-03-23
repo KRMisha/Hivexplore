@@ -34,6 +34,7 @@ export default defineComponent({
         const logs = ref<Map<string, Array<string>>>(new Map());
         const activeTabIndex = ref(0);
         const isAutoScrollEnabled = ref(true);
+        const scrollPanels = document.getElementsByClassName("p-scrollpanel-content");
 
         onMounted(() => {
             interface Log {
@@ -61,7 +62,7 @@ export default defineComponent({
 
         function scrollToBottom() {
             if (isAutoScrollEnabled.value) {
-                const scrollPanel= document.getElementsByClassName("p-scrollpanel-content")[activeTabIndex.value];
+                const scrollPanel= scrollPanels[activeTabIndex.value];
                 if (scrollPanel !== undefined) {
                     scrollPanel.scrollTop = scrollPanel.scrollHeight;
                 }

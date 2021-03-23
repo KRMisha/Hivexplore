@@ -44,7 +44,7 @@ class ArgosManager(DroneManager):
         self._drone_ids = data
         self._send_drone_ids()
 
-        print('Received drone IDs:', self._drone_ids)
+        self._logger.log_server_data(f'Received drone IDs: {self._drone_ids}')
 
     def _log_console_callback(self, drone_id: str, data: str):
         for line in data.split('\n'):

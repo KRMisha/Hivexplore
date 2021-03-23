@@ -48,7 +48,7 @@ class DroneManager(ABC):
 
     def _log_battery_callback(self, drone_id: str, data: Dict[str, int]):
         battery_level = data['pm.batteryLevel']
-        print(f'BatteryLevel from drone {drone_id}: {battery_level}')
+        self._logger.log_drone_data(drone_id, f'Battery level: {battery_level}')
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
@@ -57,7 +57,7 @@ class DroneManager(ABC):
             pitch=data['stateEstimate.pitch'],
             yaw=data['stateEstimate.yaw'],
         )
-        print(f'Orientation from drone {drone_id}: {orientation}')
+        self._logger.log_drone_data(drone_id, f'Orientation: {orientation}')
         self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
@@ -66,7 +66,7 @@ class DroneManager(ABC):
             y=data['stateEstimate.y'],
             z=data['stateEstimate.z'],
         )
-        print(f'Position from drone {drone_id}: {point}')
+        self._logger.log_drone_data(drone_id, f'Position: {point}')
         self._map_generator.set_position(drone_id, point)
 
     def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
@@ -77,7 +77,7 @@ class DroneManager(ABC):
             vz=data['stateEstimate.vz'],
         )
         velocity_magnitude = np.linalg.norm(list(velocity))
-        print(f'Velocity from drone {drone_id}: {velocity} | Magnitude: {velocity_magnitude}')
+        self._logger.log_drone_data(drone_id, f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
         self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 4))
 
     def _log_range_callback(self, drone_id: str, data: Dict[str, float]):
@@ -89,17 +89,16 @@ class DroneManager(ABC):
             up=data['range.up'],
             down=data['range.zrange'],
         )
-        print(f'Range from drone {drone_id}: {range_reading}')
+        self._logger.log_drone_data(drone_id, f'Range reading: {range_reading}')
         self._map_generator.add_range_reading(drone_id, range_reading)
 
-    @staticmethod
-    def _log_rssi_callback(drone_id: str, data: Dict[str, float]):
+    def _log_rssi_callback(self, drone_id: str, data: Dict[str, float]):
         rssi = data['radio.rssi']
-        print(f'RSSI from drone {drone_id}: {rssi}')
+        self._logger.log_drone_data(drone_id, f'RSSI: {rssi}')
 
     def _log_drone_status_callback(self, drone_id: str, data: Dict[str, int]):
         drone_status = DroneStatus(data['hivexplore.droneStatus'])
-        print(f'Drone status from drone {drone_id}: {drone_status.name}')
+        self._logger.log_drone_data(drone_id, f'Status: {drone_status.name}')
 
         self._drone_statuses[drone_id] = drone_status
         self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status.name)
@@ -109,8 +108,7 @@ class DroneManager(ABC):
             self._set_mission_state(MissionState.Landed.name)
 
     def _log_console_callback(self, drone_id: str, data: str):
-        print(f'Debug print from drone {drone_id}: {data}')
-        self._web_socket_server.send_message('log', {'name': drone_id, 'message': data})
+        self._logger.log_drone_data(drone_id, f'Debug print: {data}')
 
     # Client callbacks
 
@@ -121,18 +119,18 @@ class DroneManager(ABC):
         try:
             self._mission_state = MissionState[mission_state_str]
         except KeyError:
-            print('DroneManager error: Unknown mission state received:', mission_state_str)
+            self._logger.log_server_data(f'DroneManager error: Unknown mission state received: {mission_state_str}')
             return
 
-        print('Set mission state:', self._mission_state)
+        self._logger.log_server_data(f'Set mission state: {self._mission_state}')
         for drone_id in self._get_drone_ids():
             self._set_drone_param('hivexplore.missionState', drone_id, self._mission_state)
         self._web_socket_server.send_message('mission-state', mission_state_str)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):
-            print(f'Set LED state for drone {drone_id}: {is_enabled}')
+            self._logger.log_drone_data(drone_id, f'LED: {is_enabled}')
             self._set_drone_param('hivexplore.isM1LedOn', drone_id, is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
         else:
-            print('DroneManager error: Unknown drone ID received:', drone_id)
+            self._logger.log_server_data(f'DroneManager error: Unknown drone ID received: {drone_id}')

@@ -9,7 +9,7 @@ from server.sockets.web_socket_server import WebSocketServer
 class ArgosManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, logger: Logger, map_generator: MapGenerator):
         super().__init__(web_socket_server, logger, map_generator)
-        self._unix_socket_client = UnixSocketClient()
+        self._unix_socket_client = UnixSocketClient(logger)
         self._drone_ids: Set[str] = set()
 
     async def start(self):

@@ -122,9 +122,9 @@ export default defineComponent({
                 const timestamp = timestampUnfiltered.toISOString().replace('Z', '').replaceAll(':', ''); // Remove the trailing Z since the timestamp is not in UTC
                 const filename = `hivexplore_map_${timestamp}.jpg`;
 
-                const imageJpeg = "image/jpeg";
+                const imageJpeg = 'image/jpeg';
                 let imgData = renderer.domElement.toDataURL(imageJpeg);
-                const data = imgData.replace(imageJpeg, "image/octet-stream");
+                const data = imgData.replace(imageJpeg, 'image/octet-stream');
                 let link = document.createElement('a');
 
                 document.body.appendChild(link); // Firefox requires it

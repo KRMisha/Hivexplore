@@ -1,8 +1,8 @@
 <template>
-    <Panel header="Map" class="map-width">
+    <Panel header="Map" class="map">
         <div id="map-container"></div>
     </Panel>
-    <Button class="button-container" label="Download map" @click="saveAsImage()" />
+    <Button class="button" label="Download map" @click="saveAsImage()" />
 </template>
 
 <script lang="ts">
@@ -150,7 +150,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.map-width {
+.map {
     width: 100%;
 }
 
@@ -159,7 +159,7 @@ export default defineComponent({
     position: relative;
 }
 
-.button-container {
+.button {
     margin-top: 16px;
 }
 </style>

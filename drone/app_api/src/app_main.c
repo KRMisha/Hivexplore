@@ -52,6 +52,7 @@
 // Min max helper macros
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
+#define ABS(a) ((a < 0) ? -a : a)
 
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
@@ -79,7 +80,11 @@ static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
+static point_t positionReading;
+static float positionYawReading;
 static uint8_t rssiReading;
+
+static point_t initialPosition;
 
 // Targets
 static float targetForwardVelocity;
@@ -96,6 +101,10 @@ void appMain(void) {
     const logVarId_t rightSensorId = logGetVarId("range", "right");
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
+    const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
+    const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
+    const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
+    const logVarId_t positionYawId = logGetVarId("stateEstimate", "yaw");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
@@ -127,6 +136,10 @@ void appMain(void) {
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
+        positionReading.x = logGetUint(positionXId);
+        positionReading.y = logGetUint(positionYId);
+        positionReading.z = logGetUint(positionZId);
+        positionYawReading = logGetUint(positionYawId);
 
         rssiReading = logGetUint(rssiId);
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
@@ -194,6 +207,7 @@ void explore(void) {
         // Check if any obstacle is in the way before taking off
         if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
             DEBUG_PRINT("Liftoff\n");
+            initialPosition = positionReading;
             exploringState = EXPLORING_LIFTOFF;
         }
     } break;
@@ -230,13 +244,21 @@ void explore(void) {
 }
 
 void returnToBase(void) {
+    static const float espilon = 0.01;
     switch (returningState) {
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
 
         // TODO: Add return logic
-        vTaskDelay(M2T(5000));
-        returningState = RETURNING_LAND;
+        setPoint.mode.x = modeAbs;
+        setPoint.mode.y = modeAbs;
+
+        setPoint.position.x = initialPosition.x;
+        setPoint.position.y = initialPosition.y;
+
+        if (ABS(setPoint.position.y - initialPosition.y) < espilon && ABS(setPoint.position.x - initialPosition.x) < espilon) {
+            returningState = RETURNING_LAND;
+        }
     } break;
     case RETURNING_LAND: {
         droneStatus = STATUS_LANDING;

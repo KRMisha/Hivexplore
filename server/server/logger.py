@@ -12,10 +12,12 @@ class Logger:
         self._web_socket_server.send_message('log', {'name': 'Server', 'message': data})
 
     def log_drone_data(self, drone_id: str, data: str):
-        print(f'{drone_id}: data')
+        print(f'{drone_id}: {data}')
         self._web_socket_server.send_message('log', {'name': drone_id, 'message': data})
 
     def log_map_data(self, drone_id: str, data: List[Point]):
+        if len(data) == 0:
+            return
         message = f'Points detected by drone {drone_id}: {data}'
         print(message)
         self._web_socket_server.send_message('log', {'name': 'Map', 'message': message})

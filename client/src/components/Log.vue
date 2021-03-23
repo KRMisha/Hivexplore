@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, ref } from 'vue'
+import { defineComponent, inject, ref } from 'vue'
 import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
@@ -36,28 +36,26 @@ export default defineComponent({
         const isAutoScrollEnabled = ref(true);
         const scrollPanels = document.getElementsByClassName("p-scrollpanel-content");
 
-        onMounted(() => {
-            interface Log {
-                name: string;
-                message: string;
+        interface Log {
+            name: string;
+            message: string;
+        }
+        socketClient!.bindMessage('log', (log: Log) => {
+            if (!logs.value.has(log.name)) {
+                logs.value.set(log.name, []);
             }
-            socketClient!.bindMessage('log', (log: Log) => {
-                if (!logs.value.has(log.name)) {
-                    logs.value.set(log.name, []);
-                }
 
-                logs.value.get(log.name)!.push(log.message);
-                const maxLogCount = 128;
-                if (logs.value.get(log.name)!.length > maxLogCount) {
-                    logs.value.get(log.name)!.shift();
-                }
+            logs.value.get(log.name)!.push(log.message);
+            const maxLogCount = 128;
+            if (logs.value.get(log.name)!.length > maxLogCount) {
+                logs.value.get(log.name)!.shift();
+            }
 
-                // If the newly added log is in the current tab
-                if (activeTabIndex.value == Array.from(logs.value.keys()).indexOf(log.name)) {
-                    // Wait for the DOM to update and scroll to the bottom
-                    setTimeout(scrollToBottom, 0);
-                }
-            });
+            // If the newly added log is in the current tab
+            if (activeTabIndex.value == Array.from(logs.value.keys()).indexOf(log.name)) {
+                // Wait for the DOM to update and scroll to the bottom
+                setTimeout(scrollToBottom, 0);
+            }
         });
 
         function scrollToBottom() {

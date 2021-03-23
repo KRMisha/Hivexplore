@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     clang-format \
     gcc-arm-none-eabi \
     git \
+    libusb-1.0-0 \
     make \
     python3 \
     python3-pip

@@ -10,7 +10,7 @@
     </div>
 
     <TabView class="tab-view" v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
-        <TabPanel v-for="logName in Array.from(logs.keys())" :key="logName" :header="logName">
+        <TabPanel v-for="logName in logsOrdered" :key="logName" :header="logName">
             <ScrollPanel class="scroll-panel">
                 <div class="log-text">
                     <div v-for="(logLine, index) in logs.get(logName)" :key="logLine + index">
@@ -32,6 +32,7 @@ export default defineComponent({
     setup() {
         const socketClient: SocketClient | undefined = inject('socketClient');
         const logs = ref<Map<string, Array<string>>>(new Map());
+        const logsOrdered = ref<Array<string>>([]);
         const activeTabIndex = ref(0);
         const isAutoScrollEnabled = ref(true);
         const scrollPanels = document.getElementsByClassName("p-scrollpanel-content");
@@ -43,6 +44,26 @@ export default defineComponent({
         socketClient!.bindMessage('log', (log: Log) => {
             if (!logs.value.has(log.name)) {
                 logs.value.set(log.name, []);
+                logsOrdered.value.push(log.name);
+
+                logsOrdered.value.sort((first: string, second: string): number => {
+                    const logsOrder = ['Server', 'Map'];
+
+                    const indexOfFirst = logsOrder.indexOf(first);
+                    const indexOfSecond = logsOrder.indexOf(second);
+
+                    // If the index is the same (-1), sort alphabetically
+                    if (indexOfFirst === indexOfSecond) {
+                        return first.localeCompare(second);
+                    }
+
+                    // If log names aren't in logsOrder, they should go to the end
+                    const orderOfFirst = (indexOfFirst === -1 ? Infinity : indexOfFirst);
+                    const orderOfSecond = (indexOfSecond === -1 ? Infinity : indexOfSecond);
+
+                    return orderOfFirst > orderOfSecond ? 1 : -1;
+                });
+
             }
 
             logs.value.get(log.name)!.push(log.message);
@@ -69,6 +90,7 @@ export default defineComponent({
 
         return {
             logs,
+            logsOrdered,
             activeTabIndex,
             scrollToBottom,
             isAutoScrollEnabled,
@@ -84,7 +106,7 @@ export default defineComponent({
 
 .tab-view {
     width: 50%;
-    height: 275px;
+    height: 280px;
 }
 
 .scroll-panel {

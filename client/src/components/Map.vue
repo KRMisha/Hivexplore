@@ -113,7 +113,7 @@ export default defineComponent({
             }
         });
 
-        // from
+        // from https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image
         function saveAsImage() {
             try {
                 // Convert date to local timezone by stripping the timezone offset

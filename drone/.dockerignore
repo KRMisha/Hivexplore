@@ -3,11 +3,11 @@ docs
 examples
 
 # Build output
-bin
+**/bin
 cf2.*
 tag.*
-current_platform.mk
-version.c
+**/current_platform.mk
+**/version.c
 
 # VS Code
 **/.vscode

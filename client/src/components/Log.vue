@@ -6,7 +6,7 @@
         <div class="p-text p-ml-auto">
             Autoscroll
         </div>
-        <InputSwitch v-model="isAutoScrollEnabled" @change="scrollToBottom" class="p-ml-2"/>
+        <InputSwitch v-model="isAutoScrollEnabled" @change="scrollToBottom" class="p-ml-2" />
     </div>
 
     <TabView class="tab-view" v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
@@ -14,8 +14,8 @@
             <ScrollPanel class="scroll-panel">
                 <div class="log-text">
                     <div v-for="(logLine, index) in logs.get(logName)" :key="logLine + index">
-                        > {{logLine}}
-                        <br>
+                        > {{ logLine }}
+                        <br />
                     </div>
                 </div>
             </ScrollPanel>
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref } from 'vue'
+import { defineComponent, inject, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
@@ -35,7 +35,16 @@ export default defineComponent({
         const logsOrdered = ref<Array<string>>([]);
         const activeTabIndex = ref(0);
         const isAutoScrollEnabled = ref(true);
-        const scrollPanels = document.getElementsByClassName("p-scrollpanel-content");
+        const scrollPanels = document.getElementsByClassName('p-scrollpanel-content');
+
+        function scrollToBottom() {
+            if (isAutoScrollEnabled.value) {
+                const scrollPanel = scrollPanels[activeTabIndex.value];
+                if (scrollPanel !== undefined) {
+                    scrollPanel.scrollTop = scrollPanel.scrollHeight;
+                }
+            }
+        }
 
         interface Log {
             name: string;
@@ -58,12 +67,11 @@ export default defineComponent({
                     }
 
                     // If log names aren't in logsOrder, they should go to the end
-                    const orderOfFirst = (indexOfFirst === -1 ? Infinity : indexOfFirst);
-                    const orderOfSecond = (indexOfSecond === -1 ? Infinity : indexOfSecond);
+                    const orderOfFirst = indexOfFirst === -1 ? Infinity : indexOfFirst;
+                    const orderOfSecond = indexOfSecond === -1 ? Infinity : indexOfSecond;
 
                     return orderOfFirst > orderOfSecond ? 1 : -1;
                 });
-
             }
 
             logs.value.get(log.name)!.push(log.message);
@@ -79,22 +87,13 @@ export default defineComponent({
             }
         });
 
-        function scrollToBottom() {
-            if (isAutoScrollEnabled.value) {
-                const scrollPanel= scrollPanels[activeTabIndex.value];
-                if (scrollPanel !== undefined) {
-                    scrollPanel.scrollTop = scrollPanel.scrollHeight;
-                }
-            }
-        }
-
         return {
             logs,
             logsOrdered,
             activeTabIndex,
             scrollToBottom,
             isAutoScrollEnabled,
-        }
+        };
     },
 });
 </script>
@@ -120,5 +119,4 @@ export default defineComponent({
 .log-text {
     font-family: 'Courier New', monospace;
 }
-
 </style>

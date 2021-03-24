@@ -57,9 +57,7 @@ void CCrazyflieController::ControlStep() {
     switch (m_missionState) {
     case MissionState::Standby:
         m_droneStatus = DroneStatus::Standby;
-        m_exploringState = ExploringState::Idle;
-        m_returningState = ReturningState::Return;
-        m_emergencyState = EmergencyState::Land;
+        resetInternalStates();
         break;
     case MissionState::Exploring:
         if (!AvoidObstacle()) {
@@ -433,6 +431,20 @@ void CCrazyflieController::UpdateRssi() {
 void CCrazyflieController::PingOtherDrones() {
     static constexpr std::uint8_t pingData = 0;
     m_pcRABA->SetData(sizeof(pingData), pingData);
+}
+
+void CCrazyflieController::resetInternalStates() {
+    m_exploringState = ExploringState::Idle;
+    m_returningState = ReturningState::Return;
+    m_emergencyState = EmergencyState::Land;
+
+    m_isForwardCommandFinished = true;
+    m_isBrakeCommandFinished = true;
+    m_isRotateCommandFinished = true;
+
+    m_isAvoidingObstacle = false;
+    m_exploringStateOnHold = ExploringState::Idle;
+    m_returningStateOnHold = ReturningState::Return;
 }
 
 void CCrazyflieController::DebugPrint(const std::string& text) {

@@ -81,6 +81,7 @@ private:
     void UpdateRssi();
     void PingOtherDrones();
 
+    void resetInternalStates();
     void DebugPrint(const std::string& text);
 
     template<typename T, typename U = T>

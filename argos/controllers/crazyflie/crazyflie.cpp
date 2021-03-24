@@ -57,6 +57,7 @@ void CCrazyflieController::ControlStep() {
     switch (m_missionState) {
     case MissionState::Standby:
         m_droneStatus = DroneStatus::Standby;
+        ResetInternalStates();
         break;
     case MissionState::Exploring:
         if (!AvoidObstacle()) {
@@ -104,7 +105,8 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     LogVariableMap orientationLog;
     orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
-    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
+    // Rotate the drone 90 degrees clockwise to make a yaw of 0 face forward
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ() - 90.0));
     logDataMap.emplace_back("Orientation", orientationLog);
 
     // Position group
@@ -406,6 +408,20 @@ bool CCrazyflieController::Land() {
         return true;
     }
     return false;
+}
+
+void CCrazyflieController::ResetInternalStates() {
+    m_exploringState = ExploringState::Idle;
+    m_returningState = ReturningState::Return;
+    m_emergencyState = EmergencyState::Land;
+
+    m_isAvoidingObstacle = false;
+    m_exploringStateOnHold = ExploringState::Idle;
+    m_returningStateOnHold = ReturningState::Return;
+
+    m_isForwardCommandFinished = true;
+    m_isBrakeCommandFinished = true;
+    m_isRotateCommandFinished = true;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

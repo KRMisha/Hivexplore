@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import App from './App.vue';
+import App from '@/App.vue';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Chip from 'primevue/chip';

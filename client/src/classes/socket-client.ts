@@ -1,3 +1,5 @@
+import { getLocalTimestamp } from '@/utils/local-timestamp';
+
 const serverUrl = 'ws:localhost:5678';
 
 export class SocketClient {
@@ -83,15 +85,11 @@ export class SocketClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private send(event: string, droneId: string | undefined, data: any) {
-        // Convert date to local timezone by stripping the timezone offset
-        const timestampUtc = new Date();
-        const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
-
         const payload = JSON.stringify({
             event: event,
             droneId: droneId ?? null,
             data: data,
-            timestamp: timestamp.toJSON().replace('Z', ''), // Remove the trailing Z since the timestamp is not in UTC
+            timestamp: getLocalTimestamp(),
         });
 
         this.socket.send(payload);

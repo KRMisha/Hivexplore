@@ -57,8 +57,10 @@ class DroneManager(ABC):
             pitch=data['stateEstimate.pitch'],
             yaw=data['stateEstimate.yaw'],
         )
+
         self._logger.log_drone_data(drone_id, f'Orientation: {orientation}')
-        self._map_generator.set_orientation(drone_id, orientation)
+        if self._mission_state != MissionState.Standby:
+            self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
         point = Point(
@@ -66,8 +68,10 @@ class DroneManager(ABC):
             y=data['stateEstimate.y'],
             z=data['stateEstimate.z'],
         )
+
         self._logger.log_drone_data(drone_id, f'Position: {point}')
-        self._map_generator.set_position(drone_id, point)
+        if self._mission_state != MissionState.Standby:
+            self._map_generator.set_position(drone_id, point)
 
     def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
         velocity = Velocity(
@@ -88,8 +92,10 @@ class DroneManager(ABC):
             up=data['range.up'],
             down=data['range.zrange'],
         )
+
         self._logger.log_drone_data(drone_id, f'Range reading: {range_reading}')
-        self._map_generator.add_range_reading(drone_id, range_reading)
+        if self._mission_state != MissionState.Standby:
+            self._map_generator.add_range_reading(drone_id, range_reading)
 
     def _log_rssi_callback(self, drone_id: str, data: Dict[str, float]):
         rssi = data['radio.rssi']

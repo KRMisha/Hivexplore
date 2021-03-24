@@ -1,0 +1,15 @@
+# Unneeded firmware directories
+docs
+examples
+
+# Build output
+**/bin
+**/current_platform.mk
+**/version.c
+cf2.*
+tag.*
+app_api/**/cf2.*
+app_api/**/tag.*
+
+# VS Code
+**/.vscode

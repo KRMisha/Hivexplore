@@ -4,6 +4,7 @@ import json
 from typing import Any, Callable, Dict, List, Optional, Union
 import uuid
 import websockets
+from server.utils.ip import get_local_ip
 
 IP_ADDRESS = ''
 PORT = 5678
@@ -19,7 +20,7 @@ class WebSocketServer:
     async def serve(self):
         self._loop = asyncio.get_running_loop()
         server = await websockets.serve(self._socket_handler, IP_ADDRESS, PORT)
-        print('WebSocketServer started')
+        print(f'WebSocketServer started on {get_local_ip()}:{PORT}')
         await server.wait_closed()
 
     def bind(self, event: str, callback: Union[Callable[[Any], None], Callable[[str, Any], None]]):

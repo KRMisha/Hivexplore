@@ -6,7 +6,7 @@
         <div class="p-text p-ml-auto">
             Autoscroll
         </div>
-        <InputSwitch v-model="isAutoScrollEnabled" @change="scrollToBottom" class="p-ml-2" />
+        <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" class="p-ml-2" />
     </div>
 
     <TabView class="tab-view" v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
@@ -34,11 +34,11 @@ export default defineComponent({
         const logs = ref<Map<string, Array<string>>>(new Map());
         const logsOrdered = ref<Array<string>>([]);
         const activeTabIndex = ref(0);
-        const isAutoScrollEnabled = ref(true);
+        const isAutoscrollEnabled = ref(true);
         const scrollPanels = document.getElementsByClassName('p-scrollpanel-content');
 
         function scrollToBottom() {
-            if (isAutoScrollEnabled.value) {
+            if (isAutoscrollEnabled.value) {
                 const scrollPanel = scrollPanels[activeTabIndex.value];
                 if (scrollPanel !== undefined) {
                     scrollPanel.scrollTop = scrollPanel.scrollHeight;
@@ -92,7 +92,7 @@ export default defineComponent({
             logsOrdered,
             activeTabIndex,
             scrollToBottom,
-            isAutoScrollEnabled,
+            isAutoscrollEnabled,
         };
     },
 });

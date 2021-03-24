@@ -1,7 +1,7 @@
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 const serverPort = 5678;
-const serverUrl = `ws:${window.location.hostname}:${serverPort}`;
+const serverUrl = `ws://${window.location.hostname}:${serverPort}`;
 
 export class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);

@@ -61,7 +61,7 @@ export default defineComponent({
                     const indexOfFirst = logsOrder.indexOf(first);
                     const indexOfSecond = logsOrder.indexOf(second);
 
-                    // If the index is the same (-1), sort alphabetically
+                    // If the indices are the same (-1), sort alphabetically
                     if (indexOfFirst === indexOfSecond) {
                         return first.localeCompare(second);
                     }

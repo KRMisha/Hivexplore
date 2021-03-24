@@ -16,7 +16,7 @@ class UnixSocketClient:
     def __init__(self, logger: Logger):
         self._logger = logger
         self._callbacks: Dict[str, List[Callable]] = {}
-        self._message_queue = None
+        self._message_queue: asyncio.Queue
         self._create_socket()
 
     async def serve(self):

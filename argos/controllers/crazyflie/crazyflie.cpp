@@ -57,6 +57,9 @@ void CCrazyflieController::ControlStep() {
     switch (m_missionState) {
     case MissionState::Standby:
         m_droneStatus = DroneStatus::Standby;
+        m_exploringState = ExploringState::Idle;
+        m_returningState = ReturningState::Return;
+        m_emergencyState = EmergencyState::Land;
         break;
     case MissionState::Exploring:
         if (!AvoidObstacle()) {

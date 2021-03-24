@@ -1,5 +1,3 @@
-build_info.json
-
 ^bin/dep/all
 bin/*
 .cproject

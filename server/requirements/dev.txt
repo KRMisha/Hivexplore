@@ -1,0 +1,6 @@
+-r common.txt
+mypy==0.812
+pylint==2.7.2
+pytest==6.2.2
+rope==0.18.0
+yapf==0.30.0

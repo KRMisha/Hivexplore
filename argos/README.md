@@ -21,7 +21,7 @@
 2. Build the Docker image for development:
 
     ```
-    make image
+    make image-dev
     ```
 
 ### Usage
@@ -31,7 +31,7 @@
 1. Start the container non-interactively with x11docker:
 
     ```
-    make start
+    make start-dev
     ```
 
 2. [Attach VS Code to the running container](https://code.visualstudio.com/docs/remote/attach-container). A new VS Code window should now appear with the project already mounted in the container.
@@ -82,10 +82,10 @@ make help
 
 Build the Docker image for production:
 ```
-make image-prod
+make image
 ```
 
 ### Usage
 ```
-make start-prod
+make start
 ```

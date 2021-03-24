@@ -1,0 +1,155 @@
+image: docker:20
+
+stages:
+    - format
+    - lint
+    - test
+    - build
+    - deploy
+
+services:
+    - docker:20-dind
+
+variables:
+    DOCKER_BUILDKIT: 1
+
+before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+# Template jobs
+
+.dev-template:
+    script:
+        - docker pull $CI_REGISTRY_IMAGE/$SUBPROJECT:ci || true
+        - cd $SUBPROJECT
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $CI_REGISTRY_IMAGE/$SUBPROJECT:ci --target $CI_JOB_STAGE --tag $CI_REGISTRY_IMAGE/$SUBPROJECT:ci .
+        - docker push $CI_REGISTRY_IMAGE/$SUBPROJECT:ci
+    only:
+        - master
+        - merge_requests
+
+.build-template:
+    stage: build
+    script:
+        - docker pull $CI_REGISTRY_IMAGE/$SUBPROJECT:ci || true
+        - cd $SUBPROJECT
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $CI_REGISTRY_IMAGE/$SUBPROJECT:ci --tag $CI_REGISTRY_IMAGE/$SUBPROJECT:ci .
+        - docker push $CI_REGISTRY_IMAGE/$SUBPROJECT:ci
+    only:
+        - master
+        - merge_requests
+
+.deploy-template:
+    stage: deploy
+    script:
+        - docker pull $CI_REGISTRY_IMAGE/$SUBPROJECT:ci || true
+        - cd $SUBPROJECT
+        - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $CI_REGISTRY_IMAGE/$SUBPROJECT:ci --tag $CI_REGISTRY_IMAGE/$SUBPROJECT:latest .
+        - docker push $CI_REGISTRY_IMAGE/$SUBPROJECT:latest
+    only:
+        - master
+
+# Client jobs
+
+lint-client:
+    extends: .dev-template
+    stage: lint
+    needs: [] # Workaround to start job even though we don't have a format job (lint-client takes care of checking formatting)
+    variables:
+        SUBPROJECT: client
+
+test-client:
+    extends: .dev-template
+    stage: test
+    needs: [lint-client]
+    variables:
+        SUBPROJECT: client
+
+build-client:
+    extends: .build-template
+    needs: [test-client]
+    variables:
+        SUBPROJECT: client
+
+deploy-client:
+    extends: .deploy-template
+    needs: [build-client]
+    variables:
+        SUBPROJECT: client
+
+# Server jobs
+
+format-server:
+    extends: .dev-template
+    stage: format
+    variables:
+        SUBPROJECT: server
+
+lint-server:
+    extends: .dev-template
+    stage: lint
+    needs: [format-server]
+    variables:
+        SUBPROJECT: server
+
+test-server:
+    extends: .dev-template
+    stage: test
+    needs: [lint-server]
+    variables:
+        SUBPROJECT: server
+
+build-server:
+    extends: .build-template
+    needs: [test-server]
+    variables:
+        SUBPROJECT: server
+
+deploy-server:
+    extends: .deploy-template
+    needs: [build-server]
+    variables:
+        SUBPROJECT: server
+
+# Drone jobs
+
+format-drone:
+    extends: .dev-template
+    stage: format
+    variables:
+        GIT_SUBMODULE_STRATEGY: recursive
+        SUBPROJECT: drone
+
+build-drone:
+    extends: .build-template
+    needs: [format-drone]
+    variables:
+        GIT_SUBMODULE_STRATEGY: recursive
+        SUBPROJECT: drone
+
+deploy-drone:
+    extends: .deploy-template
+    needs: [build-drone]
+    variables:
+        GIT_SUBMODULE_STRATEGY: recursive
+        SUBPROJECT: drone
+
+# ARGoS jobs
+
+format-argos:
+    extends: .dev-template
+    stage: format
+    variables:
+        SUBPROJECT: argos
+
+build-argos:
+    extends: .build-template
+    needs: [format-argos]
+    variables:
+        SUBPROJECT: argos
+
+deploy-argos:
+    extends: .deploy-template
+    needs: [build-argos]
+    variables:
+        SUBPROJECT: argos

@@ -70,7 +70,6 @@ class DroneManager(ABC):
         self._map_generator.set_position(drone_id, point)
 
     def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
-
         velocity = Velocity(
             vx=data['stateEstimate.vx'],
             vy=data['stateEstimate.vy'],

@@ -76,12 +76,13 @@ private:
     bool Liftoff();
     bool Land();
 
+    void ResetInternalStates();
+
     void UpdateSensorReadings();
     void UpdateVelocity();
     void UpdateRssi();
     void PingOtherDrones();
 
-    void resetInternalStates();
     void DebugPrint(const std::string& text);
 
     template<typename T, typename U = T>

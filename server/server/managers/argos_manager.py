@@ -15,14 +15,14 @@ class ArgosManager(DroneManager):
         # ARGoS bindings
         self._unix_socket_client.bind('disconnect', self._unix_socket_disconnect_callback)
         self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
-        self._unix_socket_client.bind('BatteryLevel', self._log_battery_callback)
-        self._unix_socket_client.bind('Orientation', self._log_orientation_callback)
-        self._unix_socket_client.bind('Position', self._log_position_callback)
-        self._unix_socket_client.bind('Velocity', self._log_velocity_callback)
-        self._unix_socket_client.bind('Range', self._log_range_callback)
-        self._unix_socket_client.bind('Rssi', self._log_rssi_callback)
-        self._unix_socket_client.bind('DroneStatus', self._log_drone_status_callback)
-        self._unix_socket_client.bind('Console', self._log_console_callback)
+        self._unix_socket_client.bind('battery-level', self._log_battery_callback)
+        self._unix_socket_client.bind('orientation', self._log_orientation_callback)
+        self._unix_socket_client.bind('position', self._log_position_callback)
+        self._unix_socket_client.bind('velocity', self._log_velocity_callback)
+        self._unix_socket_client.bind('range', self._log_range_callback)
+        self._unix_socket_client.bind('rssi', self._log_rssi_callback)
+        self._unix_socket_client.bind('drone-status', self._log_drone_status_callback)
+        self._unix_socket_client.bind('console', self._log_console_callback)
 
         await self._unix_socket_client.serve()
 

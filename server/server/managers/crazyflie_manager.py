@@ -57,43 +57,43 @@ class CrazyflieManager(DroneManager):
 
         log_configs = [
             {
-                'log_config': LogConfig(name='BatteryLevel', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name='battery-level', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['pm.batteryLevel'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_battery_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Orientation', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name='orientation', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.roll', 'stateEstimate.pitch', 'stateEstimate.yaw'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_orientation_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Position', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name='position', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_position_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Velocity', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name='velocity', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.vx', 'stateEstimate.vy', 'stateEstimate.vz'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_velocity_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Range', period_in_ms=POLLING_PERIOD_MS), # Must be added after orientation and position
+                'log_config': LogConfig(name='range', period_in_ms=POLLING_PERIOD_MS), # Must be added after orientation and position
                 'variables': ['range.front', 'range.left', 'range.back', 'range.right', 'range.up', 'range.zrange'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_range_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Rssi', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name='rssi', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['radio.rssi'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_rssi_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='DroneStatus', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name='drone-status', period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['hivexplore.droneStatus'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_drone_status_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,

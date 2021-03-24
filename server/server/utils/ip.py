@@ -7,7 +7,7 @@ def get_local_ip() -> str:
         DUMMY_PORT = 1
         sock.connect((DUMMY_IP, DUMMY_PORT))
         ip_address = sock.getsockname()[0]
-    except OSError:
+    except Exception: # pylint: disable=broad-except
         ip_address = '127.0.0.1'
     finally:
         sock.close()

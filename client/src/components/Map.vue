@@ -10,8 +10,8 @@ import { defineComponent, inject, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { getCurrentTimestamp } from '@/utils/format-date';
 import { SocketClient } from '@/classes/socket-client';
+import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
@@ -115,14 +115,9 @@ export default defineComponent({
         });
 
         function saveAsImage() {
-            // Convert date to local timezone by stripping the timezone offset
-            const timestampUnfiltered = getCurrentTimestamp();
-            const timestamp = timestampUnfiltered.toISOString().replace('Z', '').replaceAll(':', ''); // Remove the trailing Z since the timestamp is not in UTC
-            const filename = `hivexplore_map_${timestamp}.png`;
-
+            const filename = `hivexplore_map_${getLocalTimestamp().replaceAll(':', '')}.png`;
             const url = renderer.domElement.toDataURL('image/png;base64');
-            let link = document.createElement('a');
-
+            const link = document.createElement('a');
             link.download = filename;
             link.href = url;
             link.click();

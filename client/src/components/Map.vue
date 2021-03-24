@@ -1,7 +1,8 @@
 <template>
-    <Panel header="Map">
+    <Panel header="Map" class="map">
         <div id="map-container"></div>
     </Panel>
+    <Button class="button" label="Download map" @click="saveAsImage()" />
 </template>
 
 <script lang="ts">
@@ -10,6 +11,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { SocketClient } from '@/classes/socket-client';
+import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
@@ -65,7 +67,7 @@ export default defineComponent({
             scene.add(points);
 
             // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.append(renderer.domElement);
 
@@ -112,6 +114,16 @@ export default defineComponent({
             }
         });
 
+        function saveAsImage() {
+            const filename = `hivexplore_map_${getLocalTimestamp().replaceAll(':', '')}.png`;
+            const url = renderer.domElement.toDataURL('image/png;base64');
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            link.click();
+            window.URL.revokeObjectURL(url);
+        }
+
         onMounted(() => {
             init();
             animate();
@@ -120,13 +132,25 @@ export default defineComponent({
         onUnmounted(() => {
             window.removeEventListener('resize', onWindowResize);
         });
+
+        return {
+            saveAsImage,
+        };
     },
 });
 </script>
 
 <style scoped lang="scss">
+.map {
+    width: 100%;
+}
+
 #map-container {
     height: 300px;
     position: relative;
+}
+
+.button {
+    margin-top: 16px;
 }
 </style>

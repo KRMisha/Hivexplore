@@ -89,7 +89,7 @@ export class SocketClient {
             event: event,
             droneId: droneId ?? null,
             data: data,
-            timestamp: getLocalTimestamp(), // Remove the trailing Z since the timestamp is not in UTC
+            timestamp: getLocalTimestamp(),
         });
 
         this.socket.send(payload);

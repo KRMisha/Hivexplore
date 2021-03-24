@@ -1,12 +1,14 @@
+import asyncio
 from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
+from server import config
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
-from server.uri_utils import load_crazyflie_uris_from_file
+from server.uri_utils import load_crazyflie_uris_from_file, bind_uris_change
 
 
 class CrazyflieManager(DroneManager):
@@ -14,18 +16,25 @@ class CrazyflieManager(DroneManager):
         super().__init__(web_socket_server, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
+        self._crazyflie_uris: List[str] = []
+
+        try:
+            self._crazyflie_uris = load_crazyflie_uris_from_file()
+        except ValueError:
+            pass
+
+        bind_uris_change(self._uris_change_callback)
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
-        self._connect_crazyflies()
+        while True:
+            if self._mission_state != MissionState.Standby:
+                self._connect_crazyflies()
+
+            await asyncio.sleep(config.BASE_CONNECTION_TIMEOUT_S)
 
     def _connect_crazyflies(self):
-        try:
-            crazyflie_uris = load_crazyflie_uris_from_file()
-        except ValueError:
-            return
-
-        for uri in crazyflie_uris:
+        for uri in self._crazyflie_uris:
             if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
                 continue
 
@@ -118,6 +127,11 @@ class CrazyflieManager(DroneManager):
     def _setup_param(crazyflie: Crazyflie):
         crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=CrazyflieManager._param_update_callback)
         crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=CrazyflieManager._param_update_callback)
+
+    # URIs callbacks
+
+    def _uris_change_callback(self, uris: List[str]):
+        self._crazyflie_uris = uris
 
     # Connection callbacks
 

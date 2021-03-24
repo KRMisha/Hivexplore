@@ -415,13 +415,13 @@ void CCrazyflieController::ResetInternalStates() {
     m_returningState = ReturningState::Return;
     m_emergencyState = EmergencyState::Land;
 
-    m_isForwardCommandFinished = true;
-    m_isBrakeCommandFinished = true;
-    m_isRotateCommandFinished = true;
-
     m_isAvoidingObstacle = false;
     m_exploringStateOnHold = ExploringState::Idle;
     m_returningStateOnHold = ReturningState::Return;
+
+    m_isForwardCommandFinished = true;
+    m_isBrakeCommandFinished = true;
+    m_isRotateCommandFinished = true;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

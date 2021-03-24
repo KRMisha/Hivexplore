@@ -57,6 +57,7 @@ void CCrazyflieController::ControlStep() {
     switch (m_missionState) {
     case MissionState::Standby:
         m_droneStatus = DroneStatus::Standby;
+        ResetInternalStates();
         break;
     case MissionState::Exploring:
         if (!AvoidObstacle()) {
@@ -407,6 +408,20 @@ bool CCrazyflieController::Land() {
         return true;
     }
     return false;
+}
+
+void CCrazyflieController::ResetInternalStates() {
+    m_exploringState = ExploringState::Idle;
+    m_returningState = ReturningState::Return;
+    m_emergencyState = EmergencyState::Land;
+
+    m_isAvoidingObstacle = false;
+    m_exploringStateOnHold = ExploringState::Idle;
+    m_returningStateOnHold = ReturningState::Return;
+
+    m_isForwardCommandFinished = true;
+    m_isBrakeCommandFinished = true;
+    m_isRotateCommandFinished = true;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

@@ -113,7 +113,6 @@ export default defineComponent({
             }
         });
 
-        // from https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image
         function saveAsImage() {
             // Convert date to local timezone by stripping the timezone offset
             const timestampUtc = new Date();
@@ -121,15 +120,13 @@ export default defineComponent({
             const timestamp = timestampUnfiltered.toISOString().replace('Z', '').replaceAll(':', ''); // Remove the trailing Z since the timestamp is not in UTC
             const filename = `hivexplore_map_${timestamp}.png`;
 
-            let imgData = renderer.domElement.toDataURL('image/png');
-            const data = imgData.replace('image/png', 'image/octet-stream');
+            const url = renderer.domElement.toDataURL('image/png;base64');
             let link = document.createElement('a');
 
-            document.body.appendChild(link); // Firefox requires it
             link.download = filename;
-            link.href = data;
+            link.href = url;
             link.click();
-            document.body.removeChild(link); // Remove the link when done
+            window.URL.revokeObjectURL(url);
         }
 
         onMounted(() => {

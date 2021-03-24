@@ -2,7 +2,6 @@ import asyncio
 import json
 import socket
 from typing import Any, Callable, Dict, List, Optional
-from server import config
 
 EVENT_DENYLIST = {'disconnect'}
 
@@ -21,7 +20,10 @@ class UnixSocketClient:
         # Initialize message queue here since it must be created in the same event loop as asyncio.run()
         self._message_queue = asyncio.Queue()
 
-        timeout_s = config.BASE_CONNECTION_TIMEOUT_S
+        BASE_CONNECTION_TIMEOUT_S = 2
+        MAX_CONNECTION_TIMEOUT_S = 8
+
+        timeout_s = BASE_CONNECTION_TIMEOUT_S
         try:
             # Main loop
             while True:
@@ -30,13 +32,13 @@ class UnixSocketClient:
                     try:
                         await asyncio.get_event_loop().sock_connect(self._socket, '/tmp/hivexplore/socket.sock')
                         print('Connected to ARGoS')
-                        timeout_s = config.BASE_CONNECTION_TIMEOUT_S
+                        timeout_s = BASE_CONNECTION_TIMEOUT_S
                         break
                     except (FileNotFoundError, ConnectionRefusedError, socket.timeout) as exc:
                         print('UnixSocketClient connection error:', exc)
                         print(f'Connection to ARGoS failed, retrying after {timeout_s} seconds')
                         await asyncio.sleep(timeout_s)
-                        timeout_s = min(timeout_s * 2, config.MAX_CONNECTION_TIMEOUT_S)
+                        timeout_s = min(timeout_s * 2, MAX_CONNECTION_TIMEOUT_S)
 
                 # Start send and receive handler tasks
                 tasks = [asyncio.create_task(task) for task in [self._receive_handler(), self._send_handler()]]

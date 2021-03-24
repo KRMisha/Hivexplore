@@ -26,4 +26,4 @@ FROM base AS prod
 RUN pip3 install -r requirements/prod.txt
 COPY server server
 EXPOSE 5678
-ENTRYPOINT [ "python3", "-m", "server.main" ]
+ENTRYPOINT [ "python3", "-u", "-m", "server.main" ]

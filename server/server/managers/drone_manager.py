@@ -49,7 +49,7 @@ class DroneManager(ABC):
 
     def _log_battery_callback(self, drone_id: str, data: Dict[str, int]):
         battery_level = data['pm.batteryLevel']
-        print(f'BatteryLevel from drone {drone_id}: {battery_level}')
+        # print(f'BatteryLevel from drone {drone_id}: {battery_level}')
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
@@ -58,7 +58,7 @@ class DroneManager(ABC):
             pitch=data['stateEstimate.pitch'],
             yaw=data['stateEstimate.yaw'],
         )
-        print(f'Orientation from drone {drone_id}: {orientation}')
+        # print(f'Orientation from drone {drone_id}: {orientation}')
         self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
@@ -78,7 +78,7 @@ class DroneManager(ABC):
             vz=data['stateEstimate.vz'],
         )
         velocity_magnitude = np.linalg.norm(list(velocity))
-        print(f'Velocity from drone {drone_id}: {velocity} | Magnitude: {velocity_magnitude}')
+        # print(f'Velocity from drone {drone_id}: {velocity} | Magnitude: {velocity_magnitude}')
         self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 4))
 
     def _log_range_callback(self, drone_id: str, data: Dict[str, float]):
@@ -90,17 +90,17 @@ class DroneManager(ABC):
             up=data['range.up'],
             down=data['range.zrange'],
         )
-        print(f'Range from drone {drone_id}: {range_reading}')
+        # print(f'Range from drone {drone_id}: {range_reading}')
         self._map_generator.add_range_reading(drone_id, range_reading)
 
     @staticmethod
     def _log_rssi_callback(drone_id: str, data: Dict[str, float]):
         rssi = data['radio.rssi']
-        print(f'RSSI from drone {drone_id}: {rssi}')
+        # print(f'RSSI from drone {drone_id}: {rssi}')
 
     def _log_drone_status_callback(self, drone_id: str, data: Dict[str, int]):
         drone_status = DroneStatus(data['hivexplore.droneStatus'])
-        print(f'Drone status from drone {drone_id}: {drone_status.name}')
+        # print(f'Drone status from drone {drone_id}: {drone_status.name}')
 
         self._drone_statuses[drone_id] = drone_status
         self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status.name)

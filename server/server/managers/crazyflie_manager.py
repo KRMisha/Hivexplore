@@ -69,7 +69,7 @@ class CrazyflieManager(DroneManager):
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='Position', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name='Position', period_in_ms=500),
                 'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_position_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,

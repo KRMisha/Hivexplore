@@ -24,7 +24,7 @@ class MapGenerator:
 
     def add_range_reading(self, drone_id: str, range_reading: Range):
         points = self._calculate_points_from_readings(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
-        print(f'Points detected by drone {drone_id}: {points}')
+        # print(f'Points detected by drone {drone_id}: {points}')
         self._web_socket_server.send_message('map-points', points)
 
     def _calculate_points_from_readings(self, last_orientation: Orientation, last_position: Point, range_reading: Range) -> List[Point]:

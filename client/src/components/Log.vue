@@ -38,37 +38,6 @@ export default defineComponent({
         const isAutoscrollEnabled = ref(true);
         const scrollPanels = document.getElementsByClassName('p-scrollpanel-content');
 
-        addLogTab('Server');
-        addLogTab('Map');
-
-        const renderIntervalMs = 250;
-        window.setInterval(renderNewLogs, renderIntervalMs);
-
-        function scrollToBottom() {
-            if (isAutoscrollEnabled.value) {
-                const scrollPanel = scrollPanels[activeTabIndex.value];
-                if (scrollPanel !== undefined) {
-                    scrollPanel.scrollTop = scrollPanel.scrollHeight;
-                }
-            }
-        }
-
-        interface Log {
-            name: string;
-            message: string;
-        }
-        socketClient!.bindMessage('log', (log: Log) => {
-            addLogTab(log.name);
-
-            logsBuffer.get(log.name)!.push(log.message);
-
-            // If the newly added log is in the current tab
-            if (activeTabIndex.value == Array.from(logsBuffer.keys()).indexOf(log.name)) {
-                // Wait for the DOM to update and scroll to the bottom
-                setTimeout(scrollToBottom, 0);
-            }
-        });
-
         function addLogTab(tabName: string) {
             if (!logs.value.has(tabName) && !logsBuffer.has(tabName)) {
                 logs.value.set(tabName, []);
@@ -95,6 +64,18 @@ export default defineComponent({
             }
         }
 
+        addLogTab('Server');
+        addLogTab('Map');
+
+        function scrollToBottom() {
+            if (isAutoscrollEnabled.value) {
+                const scrollPanel = scrollPanels[activeTabIndex.value];
+                if (scrollPanel !== undefined) {
+                    scrollPanel.scrollTop = scrollPanel.scrollHeight;
+                }
+            }
+        }
+
         function renderNewLogs() {
             let mustRender = false;
             for (const [logName, logsArray] of logsBuffer) {
@@ -105,7 +86,7 @@ export default defineComponent({
                 logs.value.get(logName)!.push(...logsArray);
 
                 const maxLogCount = 512;
-                logs.value.get(logName)!.splice(0, Math.max(0, logs.value.get(logName)!.length - maxLogCount))
+                logs.value.get(logName)!.splice(0, Math.max(0, logs.value.get(logName)!.length - maxLogCount));
 
                 mustRender = mustRender || activeTabIndex.value == Array.from(logs.value.keys()).indexOf(logName);
 
@@ -116,6 +97,25 @@ export default defineComponent({
                 setTimeout(scrollToBottom, 0);
             }
         }
+
+        const renderIntervalMs = 250;
+        window.setInterval(renderNewLogs, renderIntervalMs);
+
+        interface Log {
+            name: string;
+            message: string;
+        }
+        socketClient!.bindMessage('log', (log: Log) => {
+            addLogTab(log.name);
+
+            logsBuffer.get(log.name)!.push(log.message);
+
+            // If the newly added log is in the current tab
+            if (activeTabIndex.value == Array.from(logsBuffer.keys()).indexOf(log.name)) {
+                // Wait for the DOM to update and scroll to the bottom
+                setTimeout(scrollToBottom, 0);
+            }
+        });
 
         return {
             logs,

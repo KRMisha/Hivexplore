@@ -1,13 +1,12 @@
 from typing import List
-from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Point
 
 
 class Logger:
     def __init__(self):
-        self._web_socket_server: WebSocketServer
+        self._web_socket_server = None
 
-    def set_web_socket_server(self, web_socket_server: WebSocketServer):
+    def set_web_socket_server(self, web_socket_server):
         self._web_socket_server = web_socket_server
 
     @staticmethod

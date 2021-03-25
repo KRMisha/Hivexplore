@@ -34,6 +34,7 @@ class ArgosManager(DroneManager):
         return drone_id in self._drone_ids
 
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
+        super()._set_drone_param(param, drone_id, value)
         self._unix_socket_client.send(param, drone_id, value)
 
     def _unix_socket_disconnect_callback(self):

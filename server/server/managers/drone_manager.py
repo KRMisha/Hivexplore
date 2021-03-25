@@ -36,7 +36,7 @@ class DroneManager(ABC):
 
     @abstractmethod
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
-        pass
+        self._logger.log_drone_data(drone_id, f'Set {param}: {value}')
 
     def _send_drone_ids(self, client_id=None):
         if client_id is None:
@@ -134,7 +134,7 @@ class DroneManager(ABC):
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):
-            self._logger.log_drone_data(drone_id, f'LED: {is_enabled}')
+            self._logger.log_server_data(f'Set LED of {drone_id}: {is_enabled}')
             self._set_drone_param('hivexplore.isM1LedOn', drone_id, is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
         else:

@@ -48,6 +48,7 @@ class CrazyflieManager(DroneManager):
         return drone_id in self._connected_crazyflies
 
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
+        super()._set_drone_param(param, drone_id, value)
         self._connected_crazyflies[drone_id].param.set_value(param, value)
 
     # Setup

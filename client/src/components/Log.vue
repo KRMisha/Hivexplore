@@ -32,6 +32,8 @@ import { SocketClient } from '@/classes/socket-client';
 export default defineComponent({
     name: 'Log',
     setup() {
+        // Variables
+
         const socketClient: SocketClient | undefined = inject('socketClient');
         const logs = ref<Map<string, Array<string>>>(new Map());
         const logsBuffer = new Map<string, Array<string>>();
@@ -40,6 +42,8 @@ export default defineComponent({
         const isAutoscrollEnabled = ref(true);
         const logRef = ref<HTMLElement | undefined>(undefined)
         let scrollPanels: HTMLCollectionOf<Element>;
+
+        // Functions
 
         function addLogTab(tabName: string) {
             if (!logs.value.has(tabName) && !logsBuffer.has(tabName)) {
@@ -98,15 +102,11 @@ export default defineComponent({
             }
         }
 
-        onMounted(() => {
-            scrollPanels = logRef.value!.getElementsByClassName('p-scrollpanel-content');
-        });
-
         interface Log {
             name: string;
             message: string;
         }
-        socketClient!.bindMessage('log', (log: Log) => {
+        function onLogReception(log: Log) {
             addLogTab(log.name);
 
             logsBuffer.get(log.name)!.push(log.message);
@@ -114,9 +114,17 @@ export default defineComponent({
             // If the newly added log is in the current tab
             if (activeTabIndex.value == Array.from(logsBuffer.keys()).indexOf(log.name)) {
                 // Wait for the DOM to update and scroll to the bottom
-                setTimeout(scrollToBottom, 0);
+                window.setTimeout(scrollToBottom, 0);
             }
+        }
+
+        // Actions
+
+        onMounted(() => {
+            scrollPanels = logRef.value!.getElementsByClassName('p-scrollpanel-content');
         });
+
+        socketClient!.bindMessage('log', onLogReception);
 
         addLogTab('Server');
         addLogTab('Map');

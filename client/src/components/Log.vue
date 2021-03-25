@@ -10,10 +10,10 @@
     </div>
 
     <TabView class="tab-view" v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
-        <TabPanel v-for="logName in orderedLogNames" :key="logName" :header="logName">
+        <TabPanel v-for="(logName, index) in orderedLogNames" :key="logName" :header="logName">
             <ScrollPanel class="scroll-panel">
-                <div class="log-text">
-                    <div v-for="(logLine, index) in logs.get(logName)" :key="logLine + index">
+                <div v-if="index === activeTabIndex" class="log-text">
+                    <div v-for="(logLine, index) in logs.get(logName)" :key="index">
                         > {{ logLine }}
                         <br />
                     </div>
@@ -75,7 +75,7 @@ export default defineComponent({
             }
 
             logs.value.get(log.name)!.push(log.message);
-            const maxLogCount = 1024;
+            const maxLogCount = 512;
             if (logs.value.get(log.name)!.length > maxLogCount) {
                 logs.value.get(log.name)!.shift();
             }

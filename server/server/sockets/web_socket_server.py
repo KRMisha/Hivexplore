@@ -66,7 +66,7 @@ class WebSocketServer:
         # Generate a unique ID for each client
         client_id = uuid.uuid4().hex
 
-        self._logger.log_server_local_data('New client connected: {client_id}')
+        self._logger.log_server_local_data(f'New client connected: {client_id}')
 
         self._message_queues[client_id] = asyncio.Queue()
 
@@ -80,7 +80,7 @@ class WebSocketServer:
         for task in pending:
             task.cancel()
 
-        self._logger.log_server_local_data('Client disconnected: {client_id}')
+        self._logger.log_server_local_data(f'Client disconnected: {client_id}')
 
         del self._message_queues[client_id]
 
@@ -96,7 +96,7 @@ class WebSocketServer:
                 try:
                     callbacks = self._callbacks[message['event']]
                 except KeyError:
-                    self._logger.log_server_local_data('WebSocketServer warning: No callbacks bound for event: {message["event"]}')
+                    self._logger.log_server_local_data(f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
                     continue
 
                 for callback in callbacks:

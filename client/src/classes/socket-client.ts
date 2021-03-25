@@ -5,7 +5,7 @@ const baseConnectionTimeout = 2000; // Milliseconds
 const maxConnectionTimeout = 8000; // Milliseconds
 
 export class SocketClient {
-    private socket: WebSocket = new WebSocket(serverUrl);
+    private socket!: WebSocket;
 
     private timeout = baseConnectionTimeout;
 
@@ -78,11 +78,11 @@ export class SocketClient {
                 this.connect();
             }, this.timeout);
             this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
-            console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds.`);
+            console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds`);
         };
 
-        this.socket.onerror = err => {
-            console.error(`WebSocket encountered an error: ${err}, closing socket.`);
+        this.socket.onerror = (err: Event) => {
+            console.error(`WebSocket encountered an error: ${err}, closing socket`);
             this.socket.close();
         };
     }

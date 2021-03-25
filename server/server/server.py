@@ -13,12 +13,14 @@ logging.basicConfig(level=logging.ERROR)
 class Server:
     def __init__(self, is_argos_simulation, enable_debug_driver=False):
         self._is_argos_simulation = is_argos_simulation
-        self._web_socket_server = WebSocketServer()
-        self._logger = Logger(self._web_socket_server)
+        self._logger = Logger()
+        self._web_socket_server = WebSocketServer(self._logger)
         self._map_generator = MapGenerator(self._web_socket_server, self._logger)
         self._drone_manager = CrazyflieManager(self._web_socket_server, self._logger, self._map_generator,
                                                enable_debug_driver) if not is_argos_simulation else ArgosManager(
                                                    self._web_socket_server, self._logger, self._map_generator)
+
+        self._logger.set_web_socket_server(self._web_socket_server)
 
     def start(self):
         asyncio.run(self._start_tasks())

@@ -4,8 +4,15 @@ from server.tuples import Point
 
 
 class Logger:
-    def __init__(self, web_socket_server: WebSocketServer):
+    def __init__(self):
+        self._web_socket_server: WebSocketServer
+
+    def set_web_socket_server(self, web_socket_server: WebSocketServer):
         self._web_socket_server = web_socket_server
+
+    @staticmethod
+    def log_server_local_data(data: str):
+        print(data)
 
     def log_server_data(self, data: str):
         print(data)

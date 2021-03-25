@@ -37,6 +37,9 @@ export default defineComponent({
         const isAutoscrollEnabled = ref(true);
         const scrollPanels = document.getElementsByClassName('p-scrollpanel-content');
 
+        addLogTab('Server');
+        addLogTab('Map');
+
         function scrollToBottom() {
             if (isAutoscrollEnabled.value) {
                 const scrollPanel = scrollPanels[activeTabIndex.value];
@@ -51,9 +54,25 @@ export default defineComponent({
             message: string;
         }
         socketClient!.bindMessage('log', (log: Log) => {
-            if (!logs.value.has(log.name)) {
-                logs.value.set(log.name, []);
-                orderedLogNames.value.push(log.name);
+            addLogTab(log.name);
+
+            logs.value.get(log.name)!.push(log.message);
+            const maxLogCount = 512;
+            if (logs.value.get(log.name)!.length > maxLogCount) {
+                logs.value.get(log.name)!.shift();
+            }
+
+            // If the newly added log is in the current tab
+            if (activeTabIndex.value == Array.from(logs.value.keys()).indexOf(log.name)) {
+                // Wait for the DOM to update and scroll to the bottom
+                setTimeout(scrollToBottom, 0);
+            }
+        });
+
+        function addLogTab(tabName: string) {
+            if (!logs.value.has(tabName)) {
+                logs.value.set(tabName, []);
+                orderedLogNames.value.push(tabName);
 
                 orderedLogNames.value.sort((first: string, second: string): number => {
                     const firstLogNames = ['Server', 'Map'];
@@ -73,19 +92,7 @@ export default defineComponent({
                     return orderOfFirst > orderOfSecond ? 1 : -1;
                 });
             }
-
-            logs.value.get(log.name)!.push(log.message);
-            const maxLogCount = 512;
-            if (logs.value.get(log.name)!.length > maxLogCount) {
-                logs.value.get(log.name)!.shift();
-            }
-
-            // If the newly added log is in the current tab
-            if (activeTabIndex.value == Array.from(logs.value.keys()).indexOf(log.name)) {
-                // Wait for the DOM to update and scroll to the bottom
-                setTimeout(scrollToBottom, 0);
-            }
-        });
+        }
 
         return {
             logs,

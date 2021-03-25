@@ -82,8 +82,8 @@ export class SocketClient {
             console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds`);
         };
 
-        this.socket.onerror = (err: Event) => {
-            console.error(`WebSocket encountered an error: ${err}, closing socket`);
+        this.socket.onerror = (event: Event) => {
+            console.error(`WebSocket encountered an error: ${event}, closing socket`);
             this.socket.close();
         };
     }

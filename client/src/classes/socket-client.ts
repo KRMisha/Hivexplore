@@ -74,9 +74,9 @@ export class SocketClient {
         };
 
         this.socket.onclose = () => {
+            setTimeout(() => { this.connect(); }, this.timeout);
             this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
             console.log(`Connection to ${serverUrl} closed, reconnect will be attempted in ${this.timeout / 1000} seconds.`);
-            setTimeout(() => { this.connect(); }, this.timeout);
         };
 
         this.socket.onerror = (err) => {

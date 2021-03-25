@@ -40,7 +40,7 @@ export default defineComponent({
         const orderedLogNames = ref<Array<string>>([]);
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
-        const logRef = ref<HTMLElement | undefined>(undefined)
+        const logRef = ref<HTMLElement | undefined>(undefined);
         let scrollPanels: HTMLCollectionOf<Element>;
 
         // Functions

@@ -1,8 +1,8 @@
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 const serverUrl = 'ws:localhost:5678';
-const baseConnectionTimeout = 2000; // milliseconds
-const maxConnectionTimeout = 8000; // milliseconds
+const baseConnectionTimeout = 2000; // Milliseconds
+const maxConnectionTimeout = 8000; // Milliseconds
 
 export class SocketClient {
     private socket: WebSocket = new WebSocket(serverUrl);
@@ -78,7 +78,7 @@ export class SocketClient {
                 this.connect();
             }, this.timeout);
             this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
-            console.log(`Connection to ${serverUrl} failed, retrying after ${this.timeout / 1000} seconds.`);
+            console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds.`);
         };
 
         this.socket.onerror = err => {

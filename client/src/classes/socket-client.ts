@@ -76,11 +76,11 @@ export class SocketClient {
         this.socket.onclose = () => {
             setTimeout(() => { this.connect(); }, this.timeout);
             this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
-            console.log(`Connection to ${serverUrl} closed, reconnect will be attempted in ${this.timeout / 1000} seconds.`);
+            console.log(`Connection to ${serverUrl} failed, retrying after ${this.timeout / 1000} seconds.`);
         };
 
         this.socket.onerror = (err) => {
-            console.error(`Socket encountered error: ${err}, closing socket.`);
+            console.error(`WebSocket encountered an error: ${err}, closing socket.`);
             this.socket.close();
         };
     }

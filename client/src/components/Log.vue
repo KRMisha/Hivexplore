@@ -9,22 +9,24 @@
         <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" class="p-ml-2" />
     </div>
 
-    <TabView class="tab-view" v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
-        <TabPanel v-for="(logName, index) in orderedLogNames" :key="logName" :header="logName">
-            <ScrollPanel class="scroll-panel">
-                <div v-if="index === activeTabIndex" class="log-text">
-                    <div v-for="(logLine, index) in logs.get(logName)" :key="index">
-                        > {{ logLine }}
-                        <br />
+    <div ref="logRef" class="tab-view-container">
+        <TabView v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
+            <TabPanel v-for="(logName, index) in orderedLogNames" :key="logName" :header="logName">
+                <ScrollPanel class="scroll-panel">
+                    <div v-if="index === activeTabIndex" class="log-text">
+                        <div v-for="(logLine, index) in logs.get(logName)" :key="index">
+                            > {{ logLine }}
+                            <br />
+                        </div>
                     </div>
-                </div>
-            </ScrollPanel>
-        </TabPanel>
-    </TabView>
+                </ScrollPanel>
+            </TabPanel>
+        </TabView>
+    </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref } from 'vue';
+import { defineComponent, inject, onMounted, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
@@ -36,7 +38,8 @@ export default defineComponent({
         const orderedLogNames = ref<Array<string>>([]);
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
-        const scrollPanels = document.getElementsByClassName('p-scrollpanel-content');
+        const logRef = ref<HTMLElement | undefined>(undefined)
+        let scrollPanels: HTMLCollectionOf<Element>;
 
         function addLogTab(tabName: string) {
             if (!logs.value.has(tabName) && !logsBuffer.has(tabName)) {
@@ -63,9 +66,6 @@ export default defineComponent({
                 });
             }
         }
-
-        addLogTab('Server');
-        addLogTab('Map');
 
         function scrollToBottom() {
             if (isAutoscrollEnabled.value) {
@@ -98,8 +98,9 @@ export default defineComponent({
             }
         }
 
-        const renderIntervalMs = 250;
-        window.setInterval(renderNewLogs, renderIntervalMs);
+        onMounted(() => {
+            scrollPanels = logRef.value!.getElementsByClassName('p-scrollpanel-content');
+        });
 
         interface Log {
             name: string;
@@ -117,12 +118,19 @@ export default defineComponent({
             }
         });
 
+        addLogTab('Server');
+        addLogTab('Map');
+
+        const renderIntervalMs = 250;
+        window.setInterval(renderNewLogs, renderIntervalMs);
+
         return {
             logs,
             orderedLogNames,
             activeTabIndex,
             scrollToBottom,
             isAutoscrollEnabled,
+            logRef,
         };
     },
 });
@@ -133,7 +141,7 @@ export default defineComponent({
     width: 50%;
 }
 
-.tab-view {
+.tab-view-container {
     width: 50%;
     height: 280px;
 }

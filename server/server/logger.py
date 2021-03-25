@@ -1,12 +1,16 @@
-from typing import List
+from __future__ import annotations
+
+from typing import List, TYPE_CHECKING
 from server.tuples import Point
+if TYPE_CHECKING:
+    from server.sockets.web_socket_server import WebSocketServer
 
 
 class Logger:
     def __init__(self):
-        self._web_socket_server = None
+        self._web_socket_server: WebSocketServer
 
-    def set_web_socket_server(self, web_socket_server):
+    def set_web_socket_server(self, web_socket_server: WebSocketServer):
         self._web_socket_server = web_socket_server
 
     @staticmethod

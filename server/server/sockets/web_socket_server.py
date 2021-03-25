@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import asyncio
 from datetime import datetime
 import json
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 import uuid
 import websockets
-from server.logger import Logger
+if TYPE_CHECKING:
+    from server.logger import Logger
 
 IP_ADDRESS = ''
 PORT = 5678

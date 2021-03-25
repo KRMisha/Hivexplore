@@ -32,6 +32,7 @@ export default defineComponent({
     setup() {
         const socketClient: SocketClient | undefined = inject('socketClient');
         const logs = ref<Map<string, Array<string>>>(new Map());
+        const logsBuffer = new Map<string, Array<string>>();
         const orderedLogNames = ref<Array<string>>([]);
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
@@ -39,6 +40,9 @@ export default defineComponent({
 
         addLogTab('Server');
         addLogTab('Map');
+
+        const renderIntervalMs = 250;
+        window.setInterval(renderNewLogs, renderIntervalMs);
 
         function scrollToBottom() {
             if (isAutoscrollEnabled.value) {
@@ -56,22 +60,19 @@ export default defineComponent({
         socketClient!.bindMessage('log', (log: Log) => {
             addLogTab(log.name);
 
-            logs.value.get(log.name)!.push(log.message);
-            const maxLogCount = 512;
-            if (logs.value.get(log.name)!.length > maxLogCount) {
-                logs.value.get(log.name)!.shift();
-            }
+            logsBuffer.get(log.name)!.push(log.message);
 
             // If the newly added log is in the current tab
-            if (activeTabIndex.value == Array.from(logs.value.keys()).indexOf(log.name)) {
+            if (activeTabIndex.value == Array.from(logsBuffer.keys()).indexOf(log.name)) {
                 // Wait for the DOM to update and scroll to the bottom
                 setTimeout(scrollToBottom, 0);
             }
         });
 
         function addLogTab(tabName: string) {
-            if (!logs.value.has(tabName)) {
+            if (!logs.value.has(tabName) && !logsBuffer.has(tabName)) {
                 logs.value.set(tabName, []);
+                logsBuffer.set(tabName, []);
                 orderedLogNames.value.push(tabName);
 
                 orderedLogNames.value.sort((first: string, second: string): number => {
@@ -91,6 +92,28 @@ export default defineComponent({
 
                     return orderOfFirst > orderOfSecond ? 1 : -1;
                 });
+            }
+        }
+
+        function renderNewLogs() {
+            let mustRender = false;
+            for (const [logName, logsArray] of logsBuffer) {
+                if (logsArray.length === 0) {
+                    continue;
+                }
+
+                logs.value.get(logName)!.push(...logsArray);
+
+                const maxLogCount = 512;
+                logs.value.get(logName)!.splice(0, Math.max(0, logs.value.get(logName)!.length - maxLogCount))
+
+                mustRender = mustRender || activeTabIndex.value == Array.from(logs.value.keys()).indexOf(logName);
+
+                logsBuffer.set(logName, []);
+            }
+
+            if (mustRender) {
+                setTimeout(scrollToBottom, 0);
             }
         }
 

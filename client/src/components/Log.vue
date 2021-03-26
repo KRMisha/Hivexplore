@@ -92,7 +92,7 @@ export default defineComponent({
                 const maxLogCount = 512;
                 logs.value.get(logName)!.splice(0, Math.max(0, logs.value.get(logName)!.length - maxLogCount));
 
-                const activeTabName = orderedLogNames[activeTabIndex.value];
+                const activeTabName = orderedLogNames.value[activeTabIndex.value];
                 mustRender = mustRender || activeTabName == logName;
 
                 logsBuffer.set(logName, []);
@@ -118,15 +118,14 @@ export default defineComponent({
 
         onMounted(() => {
             scrollPanels = logRef.value!.getElementsByClassName('p-scrollpanel-content');
+            const renderIntervalMs = 250;
+            window.setInterval(renderNewLogs, renderIntervalMs);
         });
 
         socketClient!.bindMessage('log', onLogReception);
 
         addLogTab('Server');
         addLogTab('Map');
-
-        const renderIntervalMs = 250;
-        window.setInterval(renderNewLogs, renderIntervalMs);
 
         return {
             logs,

@@ -35,8 +35,15 @@ class CrazyflieManager(DroneManager):
 
     def _connect_crazyflies(self):
         for uri in self._crazyflie_uris:
-            if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
+            if uri in self._connected_crazyflies:
                 continue
+
+            # If a crazyflie is still pending, force close it's connection
+            if uri in self._pending_crazyflies:
+                # TODO: Replace with log
+                print('CrazyflieManager warning: Force disconnecting pending drone:', uri)
+                self._pending_crazyflies[uri].close_link()
+                del self._pending_crazyflies[uri]
 
             print(f'Trying to connect to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
@@ -157,6 +164,7 @@ class CrazyflieManager(DroneManager):
     def _disconnected(self, link_uri: str):
         print(f'Disconnected from {link_uri}')
         self._connected_crazyflies.pop(link_uri, None)
+        self._pending_crazyflies.pop(link_uri, None) # Pop in case drone gets a forced disconnect while attempting to connect
         self._send_drone_ids()
 
     def _connection_failed(self, link_uri: str, msg: str):

@@ -30,7 +30,8 @@ class CrazyflieManager(DroneManager):
             if self._mission_state != MissionState.Standby:
                 self._connect_crazyflies()
 
-            await asyncio.sleep(config.BASE_CONNECTION_TIMEOUT_S)
+            CRAZYFLIE_RECONNECTION_PERIOD = 5
+            await asyncio.sleep(CRAZYFLIE_RECONNECTION_PERIOD)
 
     def _connect_crazyflies(self):
         for uri in self._crazyflie_uris:

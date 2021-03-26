@@ -35,9 +35,9 @@ export default defineComponent({
         // Variables
 
         const socketClient: SocketClient | undefined = inject('socketClient');
-        const logs = ref<Map<string, Array<string>>>(new Map());
-        const logsBuffer = new Map<string, Array<string>>();
-        const orderedLogNames = ref<Array<string>>([]);
+        const logs = ref<Map<string, string[]>>(new Map());
+        const logsBuffer = new Map<string, string[]>();
+        const orderedLogNames = ref<string[]>([]);
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
         const logRef = ref<HTMLElement | undefined>(undefined);

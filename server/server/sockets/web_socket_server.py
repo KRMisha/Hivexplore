@@ -16,10 +16,10 @@ EVENT_DENYLIST = {'connect'}
 
 class WebSocketServer:
     def __init__(self, logger: Logger):
+        self._logger = logger
         self._callbacks: Dict[str, List[Callable]] = {}
         self._message_queues: Dict[str, asyncio.Queue] = {}
         self._loop: asyncio.AbstractEventLoop
-        self._logger = logger
 
     async def serve(self):
         self._loop = asyncio.get_running_loop()

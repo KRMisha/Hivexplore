@@ -98,6 +98,7 @@ export default defineComponent({
             }
 
             if (mustRender) {
+                // Wait for the DOM to update and scroll to the bottom
                 setTimeout(scrollToBottom, 0);
             }
         }
@@ -110,12 +111,6 @@ export default defineComponent({
             addLogTab(log.name);
 
             logsBuffer.get(log.name)!.push(log.message);
-
-            // If the newly added log is in the current tab
-            if (activeTabIndex.value === Array.from(logsBuffer.keys()).indexOf(log.name)) {
-                // Wait for the DOM to update and scroll to the bottom
-                window.setTimeout(scrollToBottom, 0);
-            }
         }
 
         // Actions

@@ -21,7 +21,6 @@ class Server:
                                                enable_debug_driver) if not is_argos_simulation else ArgosManager(
                                                    self._web_socket_server, self._logger, self._map_generator)
 
-
     def start(self):
         asyncio.run(self._start_tasks())
 

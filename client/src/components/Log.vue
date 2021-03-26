@@ -92,7 +92,7 @@ export default defineComponent({
                 const maxLogCount = 512;
                 logs.value.get(logName)!.splice(0, Math.max(0, logs.value.get(logName)!.length - maxLogCount));
 
-                mustRender = mustRender || activeTabIndex.value == Array.from(logs.value.keys()).indexOf(logName);
+                mustRender = mustRender || activeTabIndex.value === Array.from(logs.value.keys()).indexOf(logName);
 
                 logsBuffer.set(logName, []);
             }
@@ -112,7 +112,7 @@ export default defineComponent({
             logsBuffer.get(log.name)!.push(log.message);
 
             // If the newly added log is in the current tab
-            if (activeTabIndex.value == Array.from(logsBuffer.keys()).indexOf(log.name)) {
+            if (activeTabIndex.value === Array.from(logsBuffer.keys()).indexOf(log.name)) {
                 // Wait for the DOM to update and scroll to the bottom
                 window.setTimeout(scrollToBottom, 0);
             }

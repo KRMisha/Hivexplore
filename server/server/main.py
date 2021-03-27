@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+# TODO: Remove me, but bug from https://stackoverflow.com/questions/64951836/python-logging-attributeerror-module-logging-has-no-attribute-handlers
 from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
 from pathlib import Path

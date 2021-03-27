@@ -13,6 +13,7 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_battery_sensor.h>
 #include "libs/json.hpp"
+#include "experiments/socket_event.h"
 
 using namespace argos;
 using json = nlohmann::json;
@@ -57,7 +58,7 @@ class CCrazyflieController : public CCI_Controller {
 public:
     // Use vector of pairs to preserve insertion order (required to receive orientation and position data before range data for mapping)
     using LogVariableMap = std::unordered_map<std::string, std::variant<std::uint8_t, std::uint16_t, float>>;
-    using LogConfigs = std::vector<std::pair<std::string, LogVariableMap>>;
+    using LogConfigs = std::vector<std::pair<SocketEvent, LogVariableMap>>;
 
     virtual void Init(TConfigurationNode& t_node) override;
     virtual void ControlStep() override;

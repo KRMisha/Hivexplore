@@ -98,7 +98,7 @@ void CHivexploreLoopFunctions::PreStep() {
             // Send console log data if it has been flushed (with '\n') in the previous step
             std::string debugPrint = controller.get().GetDebugPrint();
             if (debugPrint.find('\n') != std::string::npos) {
-                if (!Send("Console", controller.get().GetId(), debugPrint)) {
+                if (!Send(SocketEvent::Console, controller.get().GetId(), debugPrint)) {
                     return;
                 }
             }
@@ -169,9 +169,9 @@ void CHivexploreLoopFunctions::StartSocket() {
     std::cout << "Unix socket connection accepted\n";
 }
 
-bool CHivexploreLoopFunctions::Send(const std::string& logName, const json& droneId, const json& variables) {
+bool CHivexploreLoopFunctions::Send(const SocketEvent& logName, const json& droneId, const json& variables) {
     json packet = {
-        {"logName", logName},
+        {"logName", eventToString(logName)},
         {"droneId", droneId},
         {"variables", variables},
     };
@@ -207,7 +207,7 @@ void CHivexploreLoopFunctions::SendDroneIdsToServer() {
         return controller.get().GetId();
     });
 
-    if (!Send("drone-ids", nullptr, droneIds)) {
+    if (!Send(SocketEvent::DroneIds, nullptr, droneIds)) {
         return;
     }
 }

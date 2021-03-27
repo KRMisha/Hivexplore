@@ -43,7 +43,6 @@ class CrazyflieManager(DroneManager):
             if uri in self._pending_crazyflies:
                 # TODO: Replace with log
                 self._logger.log_server_data(f'CrazyflieManager warning: Force disconnecting pending drone: {uri}')
-                print('CrazyflieManager warning: Force disconnecting pending drone:', uri)
                 self._pending_crazyflies[uri].close_link()
                 del self._pending_crazyflies[uri]
 

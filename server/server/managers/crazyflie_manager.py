@@ -27,7 +27,7 @@ class CrazyflieManager(DroneManager):
 
     async def start(self):
         while True:
-            if self._mission_state != MissionState.Standby:
+            if self._mission_state == MissionState.Standby:
                 self._connect_crazyflies()
 
             CRAZYFLIE_CONNECTION_PERIOD_S = 5

@@ -309,23 +309,23 @@ bool isCrashed(void) {
 
     if (sitAwTuDetected()) {
         isCrashed = true;
-        DEBUG_PRINT("Firmware tumble detected.\n");
+        DEBUG_PRINT("Drone crash detected. Reason: firmware tumble detected\n");
     }
 
     if (sitAwFFDetected()) {
         isCrashed = true;
-        DEBUG_PRINT("Firmware free fall detected.\n");
+        DEBUG_PRINT("Drone crash detected. Reason: firmware free fall detected\n");
     }
 
     static const uint8_t maxAngle = 55;
     if (fabs(rollReading) > maxAngle) {
         isCrashed = true;
-        DEBUG_PRINT("High roll angle detected.\n");
+        DEBUG_PRINT("Drone crash detected. Reason: high roll angle detected\n");
     }
 
     if (fabs(pitchReading) > maxAngle) {
         isCrashed = true;
-        DEBUG_PRINT("High pitch angle detected.\n");
+        DEBUG_PRINT("Drone crash detected. Reason: high pitch angle detected\n");
     }
 
     return isCrashed;

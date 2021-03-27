@@ -59,7 +59,7 @@
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
 static const float EXPLORATION_HEIGHT = 0.5f;
-static const float CRUISE_VELOCITY = 0.1f;
+static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.7f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
@@ -137,12 +137,12 @@ void appMain(void) {
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
-        positionReading.x = logGetUint(positionXId) * 1.0f;
-        positionReading.y = logGetUint(positionYId) * 1.0f;
-        positionReading.z = logGetUint(positionZId) * 1.0f;
-        positionYawReading = logGetUint(positionYawId);
+        positionReading.x = logGetFloat(positionXId);
+        positionReading.y = logGetFloat(positionYId);
+        positionReading.z = logGetFloat(positionZId);
+        positionYawReading = logGetFloat(positionYawId);
 
-        rssiReading = logGetUint(rssiId);
+        rssiReading = logGetUint(rssiId); // TODO: should this be float?
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
 
         targetForwardVelocity = 0.0;
@@ -208,9 +208,7 @@ void explore(void) {
         // Check if any obstacle is in the way before taking off
         if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
             DEBUG_PRINT("Liftoff\n");
-            // initialPosition = positionReading;
-            // double initialPositionDoubleX = initialPosition.x;
-            // double initialPositionDoubleY = initialPosition.y;
+            initialPosition = positionReading;
             DEBUG_PRINT("initial position: (%2.4f, %2.4f)\n", (double)positionReading.x, (double)positionReading.x);
             exploringState = EXPLORING_LIFTOFF;
         }
@@ -248,14 +246,12 @@ void explore(void) {
 }
 
 void returnToBase(void) {
-    static const float epsilon = 0.00000005;
+    static const double epsilon = 0.005;
     switch (returningState) {
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
 
-        // DEBUG_PRINT("Returning\n");
-        // double positionReadingDoubleX = positionReading.x;
-        // double positionReadingDoubleY = positionReading.y;
+        DEBUG_PRINT("Returning\n");
         DEBUG_PRINT("Current position: (%2.4f, %2.4f)", (double)positionReading.x, (double)positionReading.y);
 
         // TODO: Add return logic
@@ -265,12 +261,12 @@ void returnToBase(void) {
         setPoint.position.x = initialPosition.x;
         setPoint.position.y = initialPosition.y;
 
-        // double initialPositionDoubleX = initialPosition.x;
-        // double initialPositionDoubleY = initialPosition.y;
+        // if ((() < epsilon) && ((positionReading.x - initialPosition.x) > -epsilon) &&
+        //     ((positionReading.y - initialPosition.y) < epsilon) && ((positionReading.y - initialPosition.y) > -epsilon)) {
+        //     returningState = RETURNING_LAND;
+        // }
 
-        // double difference = (positionReadingDoubleX - initialPositionDoubleX) * 10000;
-        if (((positionReading.x - initialPosition.x) < epsilon) && ((positionReading.x - initialPosition.x) > -epsilon) &&
-            ((positionReading.y - initialPosition.y) < epsilon) && ((positionReading.y - initialPosition.y) > -epsilon)) {
+        if (fabs((double)positionReading.x - (double)initialPosition.x) < epsilon && fabs((double)positionReading.y - (double)initialPosition.y) < epsilon) {
             returningState = RETURNING_LAND;
         }
 

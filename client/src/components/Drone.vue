@@ -1,7 +1,7 @@
 <template>
     <Card class="card">
         <template #title>
-            <div class="center-title">Drone {{ droneId }}</div>
+            <div class="center-title">{{ droneName }}</div>
         </template>
         <template #content>
             <div class="card-container">
@@ -37,6 +37,7 @@ export default defineComponent({
     name: 'Drone',
     props: {
         droneId: String,
+        droneName: String,
     },
     setup(props) {
         const socketClient: SocketClient | undefined = inject('socketClient');

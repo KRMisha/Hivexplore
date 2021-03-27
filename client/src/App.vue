@@ -33,8 +33,8 @@
             </template>
         </Timeline>
         <ul v-if="droneIds.length > 0">
-            <li v-for="droneId in droneIds" :key="droneId">
-                <Drone :droneId="droneId" />
+            <li v-for="(droneId, index) in droneIds" :key="droneId">
+                <Drone :droneId="droneId" :droneName="index < droneNames.length ? droneNames[index] : droneId"/>
             </li>
         </ul>
         <div v-else>
@@ -66,13 +66,18 @@ export default defineComponent({
         const toast = useToast();
         const socketClient = new SocketClient();
         const droneIds = ref<string[]>([]);
+        const droneNames = ref<string[]>([]);
+        const missionState = ref(MissionState.Standby);
         let wasEmergencyLandingCalled = false;
 
         socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 
-        const missionState = ref(MissionState.Standby);
+        socketClient.bindMessage('drone-names', (newDroneNames: string[]) => {
+            droneNames.value = newDroneNames;
+        });
+
         socketClient.bindMessage('mission-state', (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
@@ -146,6 +151,7 @@ export default defineComponent({
 
         return {
             droneIds,
+            droneNames,
             missionState,
             missionStates: Object.values(MissionState),
             MissionState,

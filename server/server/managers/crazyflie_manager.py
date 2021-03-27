@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
+from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
@@ -11,8 +12,8 @@ from server.utils.uri import load_crazyflie_uris_from_file, bind_uris_change
 
 
 class CrazyflieManager(DroneManager):
-    def __init__(self, web_socket_server: WebSocketServer, map_generator: MapGenerator, enable_debug_driver: bool):
-        super().__init__(web_socket_server, map_generator)
+    def __init__(self, web_socket_server: WebSocketServer, logger: Logger, map_generator: MapGenerator, enable_debug_driver: bool):
+        super().__init__(web_socket_server, logger, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
         self._crazyflie_uris: List[str] = []
@@ -41,11 +42,12 @@ class CrazyflieManager(DroneManager):
             # If a crazyflie is still pending, force close it's connection
             if uri in self._pending_crazyflies:
                 # TODO: Replace with log
+                self._logger.log_server_data(f'CrazyflieManager warning: Force disconnecting pending drone: {uri}')
                 print('CrazyflieManager warning: Force disconnecting pending drone:', uri)
                 self._pending_crazyflies[uri].close_link()
                 del self._pending_crazyflies[uri]
 
-            print(f'Trying to connect to: {uri}')
+            self._logger.log_server_data(f'Trying to connect to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
 
             crazyflie.connected.add_callback(self._connected)
@@ -63,6 +65,7 @@ class CrazyflieManager(DroneManager):
         return drone_id in self._connected_crazyflies
 
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
+        super()._set_drone_param(param, drone_id, value)
         self._connected_crazyflies[drone_id].param.set_value(param, value)
 
     # Setup
@@ -126,14 +129,13 @@ class CrazyflieManager(DroneManager):
                 log_config['log_config'].error_cb.add_callback(log_config['error_callback'])
                 log_config['log_config'].start()
             except KeyError as exc:
-                print(f'Could not start logging data, {exc} was not found in the Crazyflie TOC')
+                self._logger.log_server_data(f'Could not start logging data, {exc} was not found in the Crazyflie TOC')
             except AttributeError as exc:
-                print(f'Could not add log configuration, error: {exc}')
+                self._logger.log_server_data(f'Could not add log configuration, error: {exc}')
 
-    @staticmethod
-    def _setup_param(crazyflie: Crazyflie):
-        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=CrazyflieManager._param_update_callback)
-        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=CrazyflieManager._param_update_callback)
+    def _setup_param(self, crazyflie: Crazyflie):
+        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=self._param_update_callback)
+        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
 
     # URIs callbacks
 
@@ -143,10 +145,11 @@ class CrazyflieManager(DroneManager):
     # Connection callbacks
 
     def _connected(self, link_uri: str):
-        print(f'Connected to {link_uri}')
+        self._logger.log_server_data(f'Connected to {link_uri}')
+        self._logger.log_drone_data(link_uri, 'Connected')
 
         if self._mission_state != MissionState.Standby:
-            print('CrazyflieManager warning: Ignoring drone connection during mission:', link_uri)
+            self._logger.log_server_data(f'CrazyflieManager warning: Ignoring drone connection during mission: {link_uri}')
             self._pending_crazyflies[link_uri].close_link()
             return
 
@@ -162,27 +165,28 @@ class CrazyflieManager(DroneManager):
         self._send_drone_ids()
 
     def _disconnected(self, link_uri: str):
-        print(f'Disconnected from {link_uri}')
+        self._logger.log_server_data(f'Disconnected from {link_uri}')
+        self._logger.log_drone_data(link_uri, 'Disconnected')
         self._connected_crazyflies.pop(link_uri, None)
-        self._pending_crazyflies.pop(link_uri, None) # Pop in case drone gets a forced disconnect while attempting to connect
+        self._pending_crazyflies.pop(link_uri, None) # Pop in case a drone gets disconnected while attempting to connect
         self._send_drone_ids()
 
     def _connection_failed(self, link_uri: str, msg: str):
-        print(f'Connection to {link_uri} failed: {msg}')
+        self._logger.log_server_data(f'Connection to {link_uri} failed: {msg}')
+        self._logger.log_drone_data(link_uri, 'Connection failed')
         del self._pending_crazyflies[link_uri]
 
     def _connection_lost(self, link_uri: str, msg: str):
-        print(f'Connection to {link_uri} lost: {msg}')
+        self._logger.log_server_data(f'Connection to {link_uri} lost: {msg}')
+        self._logger.log_drone_data(link_uri, 'Connection lost')
         self._connected_crazyflies.pop(link_uri, None) # Avoid double delete when Crazyflie disconnects
 
     # Log callbacks
 
-    @staticmethod
-    def _log_error_callback(logconf, msg):
-        print(f'Error when logging {logconf.name}: {msg}')
+    def _log_error_callback(self, logconf, msg):
+        self._logger.log_server_data(f'Error when logging {logconf.name}: {msg}')
 
     # Param callbacks
 
-    @staticmethod
-    def _param_update_callback(name, value):
-        print(f'Param readback: {name}={value}')
+    def _param_update_callback(self, name, value):
+        self._logger.log_server_data(f'Param readback: {name}={value}')

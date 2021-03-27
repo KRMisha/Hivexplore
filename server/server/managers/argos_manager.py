@@ -40,6 +40,8 @@ class ArgosManager(DroneManager):
     def _unix_socket_disconnect_callback(self):
         self._drone_ids = []
         self._send_drone_ids()
+        self._drone_statuses.clear()
+        self._drone_leds.clear()
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data

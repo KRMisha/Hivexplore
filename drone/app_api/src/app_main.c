@@ -132,6 +132,7 @@ void appMain(void) {
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
+
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
 
@@ -163,7 +164,7 @@ void appMain(void) {
             break;
         }
 
-        if (isDroneCrashed()) {
+        if (isCrashed()) {
             isOutOfService = true;
             droneStatus = STATUS_CRASHED;
             memset(&setPoint, 0, sizeof(setpoint_t));
@@ -303,31 +304,31 @@ bool land(void) {
     return false;
 }
 
-bool isDroneCrashed(void) {
-    bool isDroneCrashed = false;
+bool isCrashed(void) {
+    bool isCrashed = false;
 
     if (sitAwTuDetected()) {
-        isDroneCrashed = true;
+        isCrashed = true;
         DEBUG_PRINT("Firmware tumble detected.\n");
     }
 
     if (sitAwFFDetected()) {
-        isDroneCrashed = true;
+        isCrashed = true;
         DEBUG_PRINT("Firmware free fall detected.\n");
     }
 
     static const uint8_t maxAngle = 55;
     if (fabs(rollReading) > maxAngle) {
-        isDroneCrashed = true;
+        isCrashed = true;
         DEBUG_PRINT("High roll angle detected.\n");
     }
 
     if (fabs(pitchReading) > maxAngle) {
-        isDroneCrashed = true;
+        isCrashed = true;
         DEBUG_PRINT("High pitch angle detected.\n");
     }
 
-    return isDroneCrashed;
+    return isCrashed;
 }
 
 void updateWaypoint(void) {

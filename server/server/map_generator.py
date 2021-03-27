@@ -14,6 +14,8 @@ class MapGenerator:
         self._last_positions: Dict[str, Point] = {}
         self._points: List[Point] = []
 
+        self._web_socket_server.bind('connect', self._web_socket_connect_callback)
+
     def set_orientation(self, drone_id: str, orientation: Orientation):
         self._last_orientations[drone_id] = orientation
 
@@ -22,6 +24,7 @@ class MapGenerator:
 
     def add_range_reading(self, drone_id: str, range_reading: Range):
         points = self._calculate_points_from_readings(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
+        self._points.extend(points)
         self._logger.log_map_data(drone_id, points)
         self._web_socket_server.send_message('map-points', points)
 
@@ -115,3 +118,8 @@ class MapGenerator:
         rotated_point = (rotation_matrix @ (np.subtract(point, origin))) + origin
 
         return Point(*rotated_point)
+
+    # Client callbacks
+
+    def _web_socket_connect_callback(self, client_id: str):
+        self._web_socket_server.send_message_to_client(client_id, 'map-points', self._points)

@@ -93,7 +93,7 @@ export default defineComponent({
                 logs.value.get(logName)!.splice(0, Math.max(0, logs.value.get(logName)!.length - maxLogCount));
 
                 const activeTabName = orderedLogNames.value[activeTabIndex.value];
-                mustRender = mustRender || activeTabName == logName;
+                mustRender = mustRender || activeTabName === logName;
 
                 logsBuffer.set(logName, []);
             }

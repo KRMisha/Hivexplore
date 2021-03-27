@@ -28,6 +28,10 @@ class MapGenerator:
         self._logger.log_map_data(drone_id, points)
         self._web_socket_server.send_message('map-points', points)
 
+    def clear(self):
+        self._points.clear()
+        self._web_socket_server.send_message('clear-map', None)
+
     def _calculate_points_from_readings(self, last_orientation: Orientation, last_position: Point, range_reading: Range) -> List[Point]:
         IS_DOWN_SENSOR_PLOTTING_ENABLED = False
         SENSOR_THRESHOLD = 2000

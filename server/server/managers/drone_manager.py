@@ -137,6 +137,9 @@ class DroneManager(ABC):
             self._set_drone_param('hivexplore.missionState', drone_id, self._mission_state)
         self._web_socket_server.send_message('mission-state', mission_state_str)
 
+        if self._mission_state == MissionState.Exploring:
+            self._map_generator.clear()
+
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):
             self._logger.log_server_data(f'Set LED for {drone_id}: {is_enabled}')

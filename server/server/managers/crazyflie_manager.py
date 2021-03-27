@@ -39,7 +39,7 @@ class CrazyflieManager(DroneManager):
             if uri in self._connected_crazyflies:
                 continue
 
-            # If a crazyflie is still pending, force close it's connection
+            # If a Crazyflie is still pending, force close its connection
             if uri in self._pending_crazyflies:
                 # TODO: Replace with log
                 self._logger.log_server_data(f'CrazyflieManager warning: Force disconnecting pending drone: {uri}')

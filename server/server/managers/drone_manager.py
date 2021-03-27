@@ -16,6 +16,7 @@ class DroneManager(ABC):
         self._map_generator = map_generator
         self._mission_state = MissionState.Standby
         self._drone_statuses: Dict[str, DroneStatus] = {}
+        self._drone_leds: Dict[str, bool] = {}
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -119,6 +120,10 @@ class DroneManager(ABC):
 
     def _web_socket_connect_callback(self, client_id: str):
         self._send_drone_ids(client_id)
+        self._web_socket_server.send_message_to_client(client_id, 'mission-state', self._mission_state.name)
+
+        for drone_id, is_led_enabled in self._drone_leds.items():
+            self._web_socket_server.send_drone_message_to_client(client_id, 'set-led', drone_id, is_led_enabled)
 
     def _set_mission_state(self, mission_state_str: str):
         try:
@@ -132,10 +137,14 @@ class DroneManager(ABC):
             self._set_drone_param('hivexplore.missionState', drone_id, self._mission_state)
         self._web_socket_server.send_message('mission-state', mission_state_str)
 
+        if self._mission_state == MissionState.Exploring:
+            self._map_generator.clear()
+
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):
             self._logger.log_server_data(f'Set LED for {drone_id}: {is_enabled}')
             self._set_drone_param('hivexplore.isM1LedOn', drone_id, is_enabled)
             self._web_socket_server.send_drone_message('set-led', drone_id, is_enabled)
+            self._drone_leds[drone_id] = is_enabled
         else:
             self._logger.log_server_data(f'DroneManager error: Unknown drone ID received: {drone_id}')

@@ -34,7 +34,7 @@
         </Timeline>
         <ul v-if="droneIds.length > 0">
             <li v-for="(droneId, index) in droneIds" :key="droneId">
-                <Drone :droneId="droneId" :droneName="index < droneNames.length ? droneNames[index] : droneId"/>
+                <Drone :droneId="droneId" :droneName="index < droneNames.length ? droneNames[index] : droneId" />
             </li>
         </ul>
         <div v-else>

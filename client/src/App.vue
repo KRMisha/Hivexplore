@@ -40,6 +40,7 @@
         <div v-else>
             ✂ No drones connected ✂
         </div>
+        <Log />
     </div>
 </template>
 
@@ -48,6 +49,7 @@ import { computed, defineComponent, onUnmounted, provide, ref } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import Drone from '@/components/Drone.vue';
+import Log from '@/components/Log.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
 import { MissionState } from '@/enums/mission-state';
@@ -56,6 +58,7 @@ export default defineComponent({
     name: 'App',
     components: {
         Drone,
+        Log,
         Map,
     },
     setup() {

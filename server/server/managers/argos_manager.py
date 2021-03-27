@@ -1,6 +1,7 @@
 from typing import Any, Optional, Set, List
 from server.logger import Logger
 from server.managers.drone_manager import DroneManager
+from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.unix_socket_client import UnixSocketClient
 from server.sockets.web_socket_server import WebSocketServer
@@ -42,6 +43,7 @@ class ArgosManager(DroneManager):
         self._send_drone_ids()
         self._drone_statuses.clear()
         self._drone_leds.clear()
+        self._set_mission_state(MissionState.Standby.name)
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data

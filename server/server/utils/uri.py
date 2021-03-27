@@ -1,13 +1,11 @@
 import json
-from typing import Callable, List
+from typing import List
 from cflib.crazyflie.mem import MemoryElement
 from cflib.crazyflie.mem.i2c_element import I2CElement
 from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
 
 CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
-
-_callbacks: List[Callable[[List[str]], None]] = []
 
 
 def load_crazyflie_uris_from_file() -> List[str]:
@@ -34,10 +32,6 @@ def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
     eeprom.elements['radio_address'] = radio_address
 
     eeprom.write_data(lambda eeprom, addr: _data_written(crazyflie, eeprom, addr))
-
-
-def bind_uris_change(callback: Callable[[List[str]], None]):
-    _callbacks.append(callback)
 
 
 def _data_written(crazyflie: Crazyflie, eeprom: I2CElement, _addr: int):
@@ -71,6 +65,3 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
     with open(CRAZYFLIE_URIS_FILENAME, 'w') as uris_file:
         json.dump(uris, uris_file)
         uris_file.write('\n')
-
-    for callback in _callbacks:
-        callback(uris)

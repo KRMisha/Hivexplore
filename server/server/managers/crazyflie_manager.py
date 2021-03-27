@@ -8,7 +8,7 @@ from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
-from server.utils.uri import load_crazyflie_uris_from_file, bind_uris_change
+from server.utils.uri import load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):
@@ -23,7 +23,6 @@ class CrazyflieManager(DroneManager):
         except ValueError:
             self._logger.log_server_data('CrazyflieManager warning: Cannot read crazyflie URIs from file')
 
-        bind_uris_change(self._uris_change_callback)
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
@@ -31,8 +30,8 @@ class CrazyflieManager(DroneManager):
             if self._mission_state != MissionState.Standby:
                 self._connect_crazyflies()
 
-            CRAZYFLIE_RECONNECTION_PERIOD_S = 5
-            await asyncio.sleep(CRAZYFLIE_RECONNECTION_PERIOD_S)
+            CRAZYFLIE_CONNECTION_PERIOD_S = 5
+            await asyncio.sleep(CRAZYFLIE_CONNECTION_PERIOD_S)
 
     def _connect_crazyflies(self):
         for uri in self._crazyflie_uris:
@@ -41,10 +40,8 @@ class CrazyflieManager(DroneManager):
 
             # If a Crazyflie is still pending, force close its connection
             if uri in self._pending_crazyflies:
-                # TODO: Replace with log
                 self._logger.log_server_data(f'CrazyflieManager warning: Force disconnecting pending drone: {uri}')
                 self._pending_crazyflies[uri].close_link()
-                del self._pending_crazyflies[uri]
 
             self._logger.log_server_data(f'Trying to connect to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
@@ -135,11 +132,6 @@ class CrazyflieManager(DroneManager):
     def _setup_param(self, crazyflie: Crazyflie):
         crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=self._param_update_callback)
         crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
-
-    # URIs callbacks
-
-    def _uris_change_callback(self, uris: List[str]):
-        self._crazyflie_uris = uris
 
     # Connection callbacks
 

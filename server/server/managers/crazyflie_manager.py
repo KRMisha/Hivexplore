@@ -24,6 +24,7 @@ class CrazyflieManager(DroneManager):
         try:
             crazyflie_uris = load_crazyflie_uris_from_file()
         except ValueError:
+            self._logger.log_server_data('CrazyflieManager Warning: Can\'t read crazyflie URIs from file')
             return
 
         for uri in crazyflie_uris:

@@ -1,42 +1,20 @@
-const serverUrl = 'ws:localhost:5678';
+import { getLocalTimestamp } from '@/utils/local-timestamp';
+
+const serverPort = 5678;
+const serverUrl = `ws://${window.location.hostname}:${serverPort}`;
+const baseConnectionTimeout = 2000; // Milliseconds
+const maxConnectionTimeout = 8000; // Milliseconds
 
 export class SocketClient {
-    private socket: WebSocket = new WebSocket(serverUrl);
+    private socket!: WebSocket;
+
+    private timeout = baseConnectionTimeout;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private callbacks: Map<string, Map<string | undefined, Array<(data: any) => void>>> = new Map();
 
     constructor() {
-        this.socket.onmessage = (messageEvent: MessageEvent) => {
-            const message = JSON.parse(messageEvent.data);
-
-            const eventCallbacks = this.callbacks.get(message.event);
-
-            if (eventCallbacks === undefined) {
-                console.warn(`Unknown socket event received: ${message.event}`);
-                return;
-            }
-
-            const droneId = message.droneId ?? undefined;
-            const droneCallbacks = eventCallbacks.get(droneId);
-
-            if (droneCallbacks === undefined) {
-                console.warn(`Unregistered drone ID ${droneId} for socket event ${message.event}`);
-                return;
-            }
-
-            for (const callback of droneCallbacks) {
-                callback(message.data);
-            }
-        };
-
-        this.socket.onopen = () => {
-            console.log(`Connection to ${serverUrl} successful`);
-        };
-
-        this.socket.onclose = () => {
-            console.log(`Connection to ${serverUrl} closed`);
-        };
+        this.connect();
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,6 +43,51 @@ export class SocketClient {
         this.socket.close();
     }
 
+    private connect() {
+        this.socket = new WebSocket(serverUrl);
+
+        this.socket.onmessage = (messageEvent: MessageEvent) => {
+            const message = JSON.parse(messageEvent.data);
+
+            const eventCallbacks = this.callbacks.get(message.event);
+
+            if (eventCallbacks === undefined) {
+                console.warn(`Unknown socket event received: ${message.event}`);
+                return;
+            }
+
+            const droneId = message.droneId ?? undefined;
+            const droneCallbacks = eventCallbacks.get(droneId);
+
+            if (droneCallbacks === undefined) {
+                console.warn(`Unregistered drone ID ${droneId} for socket event ${message.event}`);
+                return;
+            }
+
+            for (const callback of droneCallbacks) {
+                callback(message.data);
+            }
+        };
+
+        this.socket.onopen = () => {
+            console.log(`Connection to ${serverUrl} successful`);
+            this.timeout = baseConnectionTimeout;
+        };
+
+        this.socket.onclose = () => {
+            setTimeout(() => {
+                this.connect();
+            }, this.timeout);
+            this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
+            console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds`);
+        };
+
+        this.socket.onerror = (event: Event) => {
+            console.error(`WebSocket encountered an error: ${event}, closing socket`);
+            this.socket.close();
+        };
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private bind(event: string, droneId: string | undefined, callback: (data: any) => void) {
         if (!this.callbacks.has(event)) {
@@ -83,15 +106,11 @@ export class SocketClient {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private send(event: string, droneId: string | undefined, data: any) {
-        // Convert date to local timezone by stripping the timezone offset
-        const timestampUtc = new Date();
-        const timestamp = new Date(timestampUtc.getTime() - timestampUtc.getTimezoneOffset() * 60 * 1000);
-
         const payload = JSON.stringify({
             event: event,
             droneId: droneId ?? null,
             data: data,
-            timestamp: timestamp.toJSON().replace('Z', ''), // Remove the trailing Z since the timestamp is not in UTC
+            timestamp: getLocalTimestamp(),
         });
 
         this.socket.send(payload);

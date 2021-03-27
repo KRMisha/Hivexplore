@@ -78,6 +78,8 @@ private:
     bool Brake();
     bool Rotate();
 
+    void ResetInternalStates();
+
     void UpdateSensorReadings();
     void UpdateVelocity();
     void UpdateRssi();

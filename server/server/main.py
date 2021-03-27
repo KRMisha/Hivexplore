@@ -12,7 +12,7 @@ def main():
         file_handler = RotatingFileHandler(filename=f'logs/hivexplore_logs_{timestamp}.log', maxBytes=512*1024, backupCount=10)
         stream_handler = StreamHandler()
         logging.basicConfig(
-            level=logging.DEBUG,
+            level=logging.INFO,
             format='%(asctime)s [%(levelname)s]\t%(message)s',
             handlers=[
                 file_handler,

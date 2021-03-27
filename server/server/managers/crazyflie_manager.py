@@ -24,6 +24,7 @@ class CrazyflieManager(DroneManager):
         try:
             crazyflie_uris = load_crazyflie_uris_from_file()
         except ValueError:
+            self._logger.log_server_data('CrazyflieManager Warning: Can\'t read crazyflie URIs from file')
             return
 
         for uri in crazyflie_uris:
@@ -147,6 +148,9 @@ class CrazyflieManager(DroneManager):
         self._logger.log_drone_data(link_uri, 'Disconnected')
         self._connected_crazyflies.pop(link_uri, None)
         self._send_drone_ids()
+
+        self._drone_statuses.pop(link_uri, None)
+        self._drone_leds.pop(link_uri, None)
 
     def _connection_failed(self, link_uri: str, msg: str):
         self._logger.log_server_data(f'Connection to {link_uri} failed: {msg}')

@@ -304,8 +304,30 @@ bool land(void) {
 }
 
 bool isDroneCrashed(void) {
+    bool isDroneCrashed = false;
+
+    if (sitAwTuDetected()) {
+        isDroneCrashed = true;
+        DEBUG_PRINT("Firmware tumble detected.\n");
+    }
+
+    if (sitAwFFDetected()) {
+        isDroneCrashed = true;
+        DEBUG_PRINT("Firmware free fall detected.\n");
+    }
+
     static const uint8_t maxAngle = 55;
-    return sitAwTuDetected() || sitAwFFDetected() || (fabs(rollReading) > maxAngle) || (fabs(pitchReading) > maxAngle);
+    if (fabs(rollReading) > maxAngle) {
+        isDroneCrashed = true;
+        DEBUG_PRINT("High roll angle detected.\n");
+    }
+
+    if (fabs(pitchReading) > maxAngle) {
+        isDroneCrashed = true;
+        DEBUG_PRINT("High pitch angle detected.\n");
+    }
+
+    return isDroneCrashed;
 }
 
 void updateWaypoint(void) {

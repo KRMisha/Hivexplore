@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 import numpy as np
+from server.drone_names import DRONE_NAMES
 from server.logger import Logger
 from server.managers.drone_status import DroneStatus
 from server.managers.mission_state import MissionState
@@ -16,6 +17,7 @@ class DroneManager(ABC):
         self._map_generator = map_generator
         self._mission_state = MissionState.Standby
         self._drone_statuses: Dict[str, DroneStatus] = {}
+        self._drone_names: Dict[str, str] = {}
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -31,12 +33,16 @@ class DroneManager(ABC):
         pass
 
     @abstractmethod
+    def _get_all_possible_drone_ids(self) -> List[str]:
+        pass
+
+    @abstractmethod
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         pass
 
     @abstractmethod
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
-        self._logger.log_drone_data(drone_id, f'Set {param}: {value}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Set {param}: {value}')
 
     def _send_drone_ids(self, client_id=None):
         if client_id is None:
@@ -44,11 +50,30 @@ class DroneManager(ABC):
         else:
             self._web_socket_server.send_message_to_client(client_id, 'drone-ids', self._get_drone_ids())
 
+    def _send_drone_names(self, client_id=None):
+        drone_names_ordered = [self._drone_names[drone_id] for drone_id in self._get_drone_ids()]
+
+        if client_id is None:
+            self._web_socket_server.send_message('drone-names', drone_names_ordered)
+        else:
+            self._web_socket_server.send_message_to_client(client_id, 'drone-names', drone_names_ordered)
+
+    def _assign_drone_name(self, drone_id: str):
+        try:
+            index_of_drone = self._get_all_possible_drone_ids().index(drone_id)
+            if index_of_drone < len(DRONE_NAMES):
+                self._drone_names[drone_id] = DRONE_NAMES[index_of_drone]
+                return
+        except ValueError:
+            pass
+
+        self._drone_names[drone_id] = drone_id
+
     # Drone callbacks
 
     def _log_battery_callback(self, drone_id: str, data: Dict[str, int]):
         battery_level = data['pm.batteryLevel']
-        self._logger.log_drone_data(drone_id, f'Battery level: {battery_level}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Battery level: {battery_level}')
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
@@ -58,7 +83,7 @@ class DroneManager(ABC):
             yaw=data['stateEstimate.yaw'],
         )
 
-        self._logger.log_drone_data(drone_id, f'Orientation: {orientation}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Orientation: {orientation}')
         if self._mission_state != MissionState.Standby:
             self._map_generator.set_orientation(drone_id, orientation)
 
@@ -69,7 +94,7 @@ class DroneManager(ABC):
             z=data['stateEstimate.z'],
         )
 
-        self._logger.log_drone_data(drone_id, f'Position: {point}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Position: {point}')
         if self._mission_state != MissionState.Standby:
             self._map_generator.set_position(drone_id, point)
 
@@ -80,7 +105,7 @@ class DroneManager(ABC):
             vz=data['stateEstimate.vz'],
         )
         velocity_magnitude = np.linalg.norm(list(velocity))
-        self._logger.log_drone_data(drone_id, f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
         self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 4))
 
     def _log_range_callback(self, drone_id: str, data: Dict[str, float]):
@@ -93,17 +118,17 @@ class DroneManager(ABC):
             down=data['range.zrange'],
         )
 
-        self._logger.log_drone_data(drone_id, f'Range reading: {range_reading}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Range reading: {range_reading}')
         if self._mission_state != MissionState.Standby:
             self._map_generator.add_range_reading(drone_id, range_reading)
 
     def _log_rssi_callback(self, drone_id: str, data: Dict[str, float]):
         rssi = data['radio.rssi']
-        self._logger.log_drone_data(drone_id, f'RSSI: {rssi}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'RSSI: {rssi}')
 
     def _log_drone_status_callback(self, drone_id: str, data: Dict[str, int]):
         drone_status = DroneStatus(data['hivexplore.droneStatus'])
-        self._logger.log_drone_data(drone_id, f'Status: {drone_status.name}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Status: {drone_status.name}')
 
         self._drone_statuses[drone_id] = drone_status
         self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status.name)
@@ -113,12 +138,13 @@ class DroneManager(ABC):
             self._set_mission_state(MissionState.Landed.name)
 
     def _log_console_callback(self, drone_id: str, data: str):
-        self._logger.log_drone_data(drone_id, f'Debug print: {data}')
+        self._logger.log_drone_data(self._drone_names[drone_id], f'Debug print: {data}')
 
     # Client callbacks
 
     def _web_socket_connect_callback(self, client_id: str):
         self._send_drone_ids(client_id)
+        self._send_drone_names(client_id)
 
     def _set_mission_state(self, mission_state_str: str):
         try:

@@ -44,6 +44,9 @@ class CrazyflieManager(DroneManager):
     def _get_drone_ids(self) -> List[str]:
         return list(self._connected_crazyflies.keys())
 
+    def _get_all_possible_drone_ids(self) -> List[str]:
+        return load_crazyflie_uris_from_file()
+
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         return drone_id in self._connected_crazyflies
 
@@ -124,7 +127,7 @@ class CrazyflieManager(DroneManager):
 
     def _connected(self, link_uri: str):
         self._logger.log_server_data(f'Connected to {link_uri}')
-        self._logger.log_drone_data(link_uri, 'Connected')
+        self._logger.log_drone_data(self._drone_names[link_uri], 'Connected')
 
         if self._mission_state != MissionState.Standby:
             self._logger.log_server_data(f'CrazyflieManager warning: Ignoring drone connection during mission: {link_uri}')
@@ -140,22 +143,26 @@ class CrazyflieManager(DroneManager):
         # Setup console logging
         self._connected_crazyflies[link_uri].console.receivedChar.add_callback(lambda data: self._log_console_callback(link_uri, data))
 
+        self._assign_drone_name(link_uri)
         self._send_drone_ids()
+        self._send_drone_names()
 
     def _disconnected(self, link_uri: str):
         self._logger.log_server_data(f'Disconnected from {link_uri}')
-        self._logger.log_drone_data(link_uri, 'Disconnected')
+        self._logger.log_drone_data(self._drone_names[link_uri], 'Disconnected')
         self._connected_crazyflies.pop(link_uri, None)
+        self._drone_names.pop(link_uri, None)
         self._send_drone_ids()
+        self._send_drone_names()
 
     def _connection_failed(self, link_uri: str, msg: str):
         self._logger.log_server_data(f'Connection to {link_uri} failed: {msg}')
-        self._logger.log_drone_data(link_uri, 'Connection failed')
+        self._logger.log_drone_data(self._drone_names[link_uri], 'Connection failed')
         del self._pending_crazyflies[link_uri]
 
     def _connection_lost(self, link_uri: str, msg: str):
         self._logger.log_server_data(f'Connection to {link_uri} lost: {msg}')
-        self._logger.log_drone_data(link_uri, 'Connection lost')
+        self._logger.log_drone_data(self._drone_names[link_uri], 'Connection lost')
         self._connected_crazyflies.pop(link_uri, None) # Avoid double delete when Crazyflie disconnects
 
     # Log callbacks

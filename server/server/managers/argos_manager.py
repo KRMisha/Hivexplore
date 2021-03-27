@@ -30,6 +30,9 @@ class ArgosManager(DroneManager):
     def _get_drone_ids(self) -> List[str]:
         return list(self._drone_ids)
 
+    def _get_all_possible_drone_ids(self) -> List[str]:
+        return ['s' + str(x) for x in range(0, 20)]
+
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         return drone_id in self._drone_ids
 
@@ -38,12 +41,19 @@ class ArgosManager(DroneManager):
         self._unix_socket_client.send(param, drone_id, value)
 
     def _unix_socket_disconnect_callback(self):
+        self._drone_names.clear()
         self._drone_ids = []
         self._send_drone_ids()
+        self._send_drone_names()
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data
+
+        for drone_id in self._drone_ids:
+            self._assign_drone_name(drone_id)
+
         self._send_drone_ids()
+        self._send_drone_names()
 
         self._logger.log_server_data(f'Received drone IDs: {self._drone_ids}')
 

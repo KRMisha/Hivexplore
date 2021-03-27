@@ -21,7 +21,7 @@ class CrazyflieManager(DroneManager):
         try:
             self._crazyflie_uris = load_crazyflie_uris_from_file()
         except ValueError:
-            pass
+            self._logger.log_server_data('CrazyflieManager warning: Cannot read crazyflie URIs from file')
 
         bind_uris_change(self._uris_change_callback)
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)

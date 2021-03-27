@@ -51,6 +51,7 @@ import Drone from '@/components/Drone.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
 import { MissionState } from '@/enums/mission-state';
+import { SocketEvent } from '@/enums/socket-event';
 
 export default defineComponent({
     name: 'App',
@@ -65,17 +66,17 @@ export default defineComponent({
         const droneIds = ref<string[]>([]);
         let wasEmergencyLandingCalled = false;
 
-        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        socketClient.bindMessage(SocketEvent.DroneIds, (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 
         const missionState = ref(MissionState.Standby);
-        socketClient.bindMessage('mission-state', (newMissionState: MissionState) => {
+        socketClient.bindMessage(SocketEvent.MissionState, (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
 
         function setMissionState(missionState: MissionState) {
-            socketClient.sendMessage('mission-state', missionState);
+            socketClient.sendMessage(SocketEvent.MissionState, missionState);
         }
 
         function onStartMissionButtonClick(event: Event) {

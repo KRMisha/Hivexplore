@@ -1,4 +1,5 @@
 import { getLocalTimestamp } from '@/utils/local-timestamp';
+import { SocketEvent } from '@/enums/socket-event';
 
 const serverPort = 5678;
 const serverUrl = `ws://${window.location.hostname}:${serverPort}`;
@@ -18,24 +19,24 @@ export class SocketClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bindMessage(event: string, callback: (data: any) => void) {
+    bindMessage(event: SocketEvent, callback: (data: any) => void) {
         // undefined represents an event not related to a specific drone
         this.bind(event, undefined, callback);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bindDroneMessage(event: string, droneId: string, callback: (data: any) => void) {
+    bindDroneMessage(event: SocketEvent, droneId: string, callback: (data: any) => void) {
         this.bind(event, droneId, callback);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sendMessage(event: string, data: any) {
+    sendMessage(event: SocketEvent, data: any) {
         // undefined represents an event not related to a specific drone
         this.send(event, undefined, data);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sendDroneMessage(event: string, droneId: string, data: any) {
+    sendDroneMessage(event: SocketEvent, droneId: string, data: any) {
         this.send(event, droneId, data);
     }
 
@@ -89,7 +90,7 @@ export class SocketClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private bind(event: string, droneId: string | undefined, callback: (data: any) => void) {
+    private bind(event: SocketEvent, droneId: string | undefined, callback: (data: any) => void) {
         if (!this.callbacks.has(event)) {
             this.callbacks.set(event, new Map());
         }
@@ -105,7 +106,7 @@ export class SocketClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private send(event: string, droneId: string | undefined, data: any) {
+    private send(event: SocketEvent, droneId: string | undefined, data: any) {
         const payload = JSON.stringify({
             event: event,
             droneId: droneId ?? null,

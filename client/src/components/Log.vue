@@ -29,6 +29,8 @@
 import { defineComponent, inject, onMounted, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
+// TODO: Use reactive for Map
+
 export default defineComponent({
     name: 'Log',
     setup() {
@@ -139,7 +141,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .header {
     width: 50%;
 }

@@ -53,6 +53,7 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateRssi();
     PingOtherDrones();
+    DetectCrash();
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -63,13 +64,12 @@ void CCrazyflieController::ControlStep() {
         if (!AvoidObstacle()) {
             Explore();
         }
-        DetectCrash();
+
         break;
     case MissionState::Returning:
         if (!AvoidObstacle()) {
             ReturnToBase();
         }
-        DetectCrash();
         break;
     case MissionState::Emergency:
         EmergencyLand();
@@ -413,6 +413,10 @@ bool CCrazyflieController::Land() {
 }
 
 void CCrazyflieController::DetectCrash() {
+    if (m_droneStatus != DroneStatus::Crashed && (m_droneStatus == DroneStatus::Standby || m_droneStatus == DroneStatus::Landed)) {
+        return;
+    }
+
     static constexpr double positionEpsilon = 0.005;
     if ((m_lastActivePosition - m_pcPos->GetReading().Position).Length() <= positionEpsilon) {
         m_watchdogCounter++;

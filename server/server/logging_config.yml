@@ -1,4 +1,4 @@
-version: 1 # TODO: Remove, inspired by https://gist.github.com/kingspp/9451566a5555fb022215ca2b7b802f19
+version: 1
 disable_existing_loggers: true
 
 formatters:

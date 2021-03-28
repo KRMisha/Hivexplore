@@ -21,6 +21,12 @@ class DebugInfoFilter(logging.Filter):
 class Logger:
     def __init__(self):
         self._web_socket_server: WebSocketServer
+        self.setup_logger()
+
+    def setup_logger(self, name=None):
+        global log_filename
+        if name is not None:
+            log_filename = name
         with open('server/logging_config.yml', 'r') as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
             logging.config.dictConfig(config)

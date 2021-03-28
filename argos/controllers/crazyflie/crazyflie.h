@@ -76,6 +76,7 @@ private:
     bool Liftoff();
     bool Land();
 
+    void DetectCrash();
     void ResetInternalStates();
 
     void UpdateSensorReadings();
@@ -132,6 +133,10 @@ private:
     // Rotation variables
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
+
+    // Crash detection variables
+    CVector3 m_lastActivePosition;
+    unsigned int m_watchdogCounter = 0;
 };
 
 #endif

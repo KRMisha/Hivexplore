@@ -53,7 +53,6 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateRssi();
     PingOtherDrones();
-    DetectCrash();
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -78,6 +77,8 @@ void CCrazyflieController::ControlStep() {
         m_droneStatus = DroneStatus::Landed;
         break;
     }
+
+    DetectCrash();
 
     m_previousPosition = m_pcPos->GetReading().Position;
 }

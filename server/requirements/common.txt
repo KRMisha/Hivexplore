@@ -1,4 +1,4 @@
 cflib==0.1.13.1
 numpy==1.19.5
-websockets==8.1
 pyyaml==5.4.1
+websockets==8.1

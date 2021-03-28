@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import logging
-from logging import config
+import logging.config
 from typing import List, TYPE_CHECKING
 import yaml
 from server.tuples import Point
@@ -22,8 +22,8 @@ class Logger:
     def __init__(self):
         self._web_socket_server: WebSocketServer
         with open('server/logging_config.yml', 'r') as file:
-            config_dict = yaml.load(file, Loader=yaml.FullLoader)
-            config.dictConfig(config_dict)
+            config = yaml.load(file, Loader=yaml.FullLoader)
+            logging.config.dictConfig(config)
         self._logger = logging.getLogger('hivexplore')
 
     def set_web_socket_server(self, web_socket_server: WebSocketServer):

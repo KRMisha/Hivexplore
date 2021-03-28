@@ -34,7 +34,12 @@ enum class ExploringState {
 };
 
 enum class ReturningState {
+    BrakeTowardsBase,
+    RotateTowardsBase,
     Return,
+    Brake,
+    Rotate,
+    Forward,
     Land,
     Idle,
 };
@@ -102,7 +107,7 @@ private:
     // States
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
-    ReturningState m_returningState = ReturningState::Return;
+    ReturningState m_returningState = ReturningState::BrakeTowardsBase;
     EmergencyState m_emergencyState = EmergencyState::Land;
 
     // Data
@@ -117,7 +122,7 @@ private:
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;
     ExploringState m_exploringStateOnHold = ExploringState::Idle;
-    ReturningState m_returningStateOnHold = ReturningState::Return;
+    ReturningState m_returningStateOnHold = ReturningState::BrakeTowardsBase;
     CVector3 m_obstacleDetectedPosition;
     double m_correctionDistance = 0.0;
 
@@ -135,6 +140,14 @@ private:
     // Rotation variables
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
+
+    // Return to base variables
+    bool m_isRotateToBaseFinished = true;
+    CRadians m_orientationToBase;
+    std::uint16_t m_stabilizeRotationCounter;
+    std::uint16_t m_passedObstacleCounter;
+    std::uint16_t m_returnAbsoluteCounter;
+    std::uint16_t m_exploreCounter;
 };
 
 #endif

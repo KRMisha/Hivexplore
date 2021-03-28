@@ -2,20 +2,31 @@ version: 1
 disable_existing_loggers: true
 
 formatters:
-    hive_formatter:
+    hivexplore_formatter:
         format: '%(asctime)s - %(name)s [%(levelname)s] - %(message)s'
 
+filters:
+    debug_info_filter:
+        (): ext://server.logger.DebugInfoFilter
+
 handlers:
-    console:
+    console_stdout:
         class: logging.StreamHandler
         level: INFO
-        formatter: hive_formatter
+        formatter: hivexplore_formatter
+        filters: [debug_info_filter]
         stream: ext://sys.stdout
+
+    console_stderr:
+        class: logging.StreamHandler
+        level: WARN
+        formatter: hivexplore_formatter
+        stream: ext://sys.stderr
 
     file:
         class: logging.handlers.RotatingFileHandler
         level: INFO
-        formatter: hive_formatter
+        formatter: hivexplore_formatter
         filename: ext://server.logger.log_filename
         maxBytes: 1048576 # 1 MB
         backupCount: 10
@@ -34,5 +45,5 @@ loggers:
 
 root:
     level: NOTSET
-    handlers: [console]
+    handlers: [console_stdout, console_stderr]
     propagate: yes

@@ -1,0 +1,38 @@
+version: 1 # TODO: Remove, inspired by https://gist.github.com/kingspp/9451566a5555fb022215ca2b7b802f19
+disable_existing_loggers: true
+
+formatters:
+    hive_formatter:
+        format: '%(asctime)s - %(name)s [%(levelname)s] - %(message)s'
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: INFO
+        formatter: hive_formatter
+        stream: ext://sys.stdout
+
+    file:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: hive_formatter
+        filename: ext://server.logger.log_filename
+        maxBytes: 1048576 # 1 MB
+        backupCount: 10
+        encoding: utf8
+
+loggers:
+    cflib:
+        level: ERROR
+        handlers: [file]
+        propagate: yes
+
+    hivexplore:
+        level: INFO
+        handlers: [file]
+        propagate: yes
+
+root:
+    level: NOTSET
+    handlers: [console]
+    propagate: yes

@@ -314,7 +314,7 @@ bool isCrashed(void) {
 
     if (sitAwFFDetected()) {
         isCrashed = true;
-        DEBUG_PRINT("Drone crash detected. Reason: firmware free fall detected\n");
+        DEBUG_PRINT("Drone crash detected. Reason: firmware freefall detected\n");
     }
 
     static const uint8_t maxAngle = 55;

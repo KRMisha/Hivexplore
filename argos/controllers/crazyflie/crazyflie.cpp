@@ -63,7 +63,6 @@ void CCrazyflieController::ControlStep() {
         if (!AvoidObstacle()) {
             Explore();
         }
-
         break;
     case MissionState::Returning:
         if (!AvoidObstacle()) {

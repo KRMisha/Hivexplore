@@ -74,9 +74,10 @@ private:
     void ReturnToBase();
     void EmergencyLand();
     bool Liftoff();
-    bool Land();
+    bool Forward();
     bool Brake();
     bool Rotate();
+    bool Land();
 
     void ResetInternalStates();
 

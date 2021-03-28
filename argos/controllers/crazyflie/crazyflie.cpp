@@ -268,26 +268,10 @@ void CCrazyflieController::Explore() {
     case ExploringState::Explore: {
         m_droneStatus = DroneStatus::Flying;
 
-        static constexpr double distanceToTravel = 0.07;
-
-        // Order exploration movement
-        if (m_isForwardCommandFinished) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
-            m_forwardCommandReferencePosition = m_pcPos->GetReading().Position;
-            m_isForwardCommandFinished = false;
-        }
-
-        // Change state when a wall is detected in front of the drone
-        static constexpr double distanceToTravelEpsilon = 0.005;
-        if (m_sensorReadings["front"] <= edgeDetectedThreshold) {
+        if (!Forward()) {
             m_exploringState = ExploringState::Brake;
-            m_isForwardCommandFinished = true;
         }
-        // If we finished traveling the exploration step
-        else if ((m_pcPos->GetReading().Position - m_forwardCommandReferencePosition).Length() >=
-                 distanceToTravel - distanceToTravelEpsilon) {
-            m_isForwardCommandFinished = true;
-        }
+
     } break;
     case ExploringState::Brake: {
         m_droneStatus = DroneStatus::Flying;
@@ -365,19 +349,30 @@ bool CCrazyflieController::Liftoff() {
     return false;
 }
 
-bool CCrazyflieController::Land() {
-    static constexpr double targetDroneLandHeight = 0.09;
-    static constexpr double targetDroneHeightEpsilon = 0.05;
 
-    CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneLandHeight);
-    m_pcPropellers->SetAbsolutePosition(targetPosition);
+bool CCrazyflieController::Forward() {
 
-    // Wait for land to finish
-    if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
-        m_droneStatus = DroneStatus::Landed;
-        return true;
+    // Order exploration movement
+    static constexpr double distanceToTravel = 0.07;
+    if (m_isForwardCommandFinished) {
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
+        m_forwardCommandReferencePosition = m_pcPos->GetReading().Position;
+        m_isForwardCommandFinished = false;
     }
-    return false;
+
+    // Change state when a wall is detected in front of the drone
+    static constexpr double distanceToTravelEpsilon = 0.005;
+    if (m_sensorReadings["front"] <= edgeDetectedThreshold) {
+        m_isForwardCommandFinished = true;
+        return false;
+    }
+    // If we finished traveling the exploration step
+    else if ((m_pcPos->GetReading().Position - m_forwardCommandReferencePosition).Length() >=
+                distanceToTravel - distanceToTravelEpsilon) {
+        m_isForwardCommandFinished = true;
+    }
+
+    return true;
 }
 
 bool CCrazyflieController::Brake() {
@@ -393,6 +388,7 @@ bool CCrazyflieController::Brake() {
     if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
         m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
         m_isBrakeCommandFinished = true;
+        m_brakingReferencePosition = m_pcPos->GetReading().Position;
         return true;
     }
     m_brakingReferencePosition = m_pcPos->GetReading().Position;
@@ -417,9 +413,25 @@ bool CCrazyflieController::Rotate() {
     // Wait for rotation to finish
     if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
         if (m_sensorReadings["front"] > edgeDetectedThreshold) {
+            m_isRotateCommandFinished = true;
             return true;
         }
         m_isRotateCommandFinished = true;
+    }
+    return false;
+}
+
+bool CCrazyflieController::Land() {
+    static constexpr double targetDroneLandHeight = 0.09;
+    static constexpr double targetDroneHeightEpsilon = 0.05;
+
+    CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneLandHeight);
+    m_pcPropellers->SetAbsolutePosition(targetPosition);
+
+    // Wait for land to finish
+    if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
+        m_droneStatus = DroneStatus::Landed;
+        return true;
     }
     return false;
 }

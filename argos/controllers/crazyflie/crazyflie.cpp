@@ -53,7 +53,6 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateRssi();
     PingOtherDrones();
-    DetectCrash();
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -64,11 +63,13 @@ void CCrazyflieController::ControlStep() {
         if (!AvoidObstacle()) {
             Explore();
         }
+        DetectCrash();
         break;
     case MissionState::Returning:
         if (!AvoidObstacle()) {
             ReturnToBase();
         }
+        DetectCrash();
         break;
     case MissionState::Emergency:
         EmergencyLand();

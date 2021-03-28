@@ -26,7 +26,7 @@
  *             sure they are compiled in CI.
  */
 
-#include <math.h> // TODO Remove
+#include <math.h>
 #include <string.h>
 
 #include "app.h"
@@ -59,8 +59,8 @@
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
 static const float EXPLORATION_HEIGHT = 0.5f;
-static const float CRUISE_VELOCITY = 0.2f;
-static const float MAXIMUM_VELOCITY = 0.7f;
+static const float CRUISE_VELOCITY = 0.1f; // 0.2f
+static const float MAXIMUM_VELOCITY = 0.5f; // 0.7f
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 
 // States
@@ -82,7 +82,7 @@ static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static point_t positionReading;
-static float positionYawReading;
+static float yawReading;
 static uint8_t rssiReading;
 
 static point_t initialPosition;
@@ -92,6 +92,7 @@ static float targetForwardVelocity;
 static float targetLeftVelocity;
 static float targetHeight;
 static float targetYawRate;
+static float targetYaw;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -105,7 +106,7 @@ void appMain(void) {
     const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
     const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
     const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
-    const logVarId_t positionYawId = logGetVarId("stateEstimate", "yaw");
+    const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
@@ -140,7 +141,7 @@ void appMain(void) {
         positionReading.x = logGetFloat(positionXId);
         positionReading.y = logGetFloat(positionYId);
         positionReading.z = logGetFloat(positionZId);
-        positionYawReading = logGetFloat(positionYawId);
+        yawReading = logGetFloat(yawId);
 
         rssiReading = logGetUint(rssiId); // TODO: should this be float?
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
@@ -149,6 +150,7 @@ void appMain(void) {
         targetLeftVelocity = 0.0;
         targetHeight = 0.0;
         targetYawRate = 0.0;
+        targetYaw = 0.0;
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -202,14 +204,11 @@ void explore(void) {
     case EXPLORING_IDLE: {
         droneStatus = STATUS_STANDBY;
 
-        DEBUG_PRINT("Idle\n");
         memset(&setPoint, 0, sizeof(setpoint_t));
 
         // Check if any obstacle is in the way before taking off
         if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
-            DEBUG_PRINT("Liftoff\n");
             initialPosition = positionReading;
-            DEBUG_PRINT("initial position: (%2.4f, %2.4f)\n", (double)positionReading.x, (double)positionReading.x);
             exploringState = EXPLORING_LIFTOFF;
         }
     } break;
@@ -223,6 +222,7 @@ void explore(void) {
     case EXPLORING_EXPLORE: {
         droneStatus = STATUS_FLYING;
 
+        // TODO: Move logic to function forward()?
         targetHeight += EXPLORATION_HEIGHT;
         targetForwardVelocity += CRUISE_VELOCITY;
         updateWaypoint();
@@ -234,49 +234,76 @@ void explore(void) {
     case EXPLORING_ROTATE: {
         droneStatus = STATUS_FLYING;
 
-        static const uint16_t OPEN_SPACE_THRESHOLD = 300;
-        if (frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
+        if (rotate()) {
             exploringState = EXPLORING_EXPLORE;
         }
-        targetHeight += EXPLORATION_HEIGHT;
-        targetYawRate = 50;
-        updateWaypoint();
     } break;
     }
 }
 
 void returnToBase(void) {
-    static const double epsilon = 0.005;
+    static const double positionEpsilon = 0.005;
+    static const double yawEpsilon = 10;
     switch (returningState) {
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
 
-        DEBUG_PRINT("Returning\n");
-        DEBUG_PRINT("Current position: (%2.4f, %2.4f)", (double)positionReading.x, (double)positionReading.y);
-
-        // TODO: Add return logic
-        setPoint.mode.x = modeAbs;
-        setPoint.mode.y = modeAbs;
-
-        setPoint.position.x = initialPosition.x;
-        setPoint.position.y = initialPosition.y;
-
-        // if ((() < epsilon) && ((positionReading.x - initialPosition.x) > -epsilon) &&
-        //     ((positionReading.y - initialPosition.y) < epsilon) && ((positionReading.y - initialPosition.y) > -epsilon)) {
-        //     returningState = RETURNING_LAND;
-        // }
-
-        if (fabs((double)positionReading.x - (double)initialPosition.x) < epsilon && fabs((double)positionReading.y - (double)initialPosition.y) < epsilon) {
+        // Are we there yet?
+        if (fabs((double)initialPosition.x - (double)positionReading.x) < positionEpsilon && fabs((double)initialPosition.y - (double)positionReading.y) < positionEpsilon) {
             returningState = RETURNING_LAND;
+        } else {
+            // Calculate angle
+            targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+            DEBUG_PRINT("Target Yaw: %f\n", (double)targetYaw);
+            DEBUG_PRINT("Current yaw: %f\n", (double)yawReading);
+            DEBUG_PRINT("Difference: (%f, %f)\n", (double)(initialPosition.x - positionReading.x), (double)(initialPosition.y - positionReading.y));
+
+            if (fabs(targetYaw - yawReading) < yawEpsilon) {
+                DEBUG_PRINT("I'm done turning!\n");
+                // Order return movement
+                setPoint.mode.x = modeAbs;
+                setPoint.mode.y = modeAbs;
+
+                setPoint.position.x = initialPosition.x;
+                setPoint.position.y = initialPosition.y;
+
+                // Change state when a wall is detected in front of the drone
+                // if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
+                //     returningState - RETURNING_ROTATE;
+                // }
+            } else {
+                DEBUG_PRINT("I need to rotate\n");
+                setPoint.mode.yaw = modeAbs;
+                setPoint.attitude.yaw = targetYaw;
+            }
+        }
+    } break;
+    case RETURNING_FORWARD: {
+        droneStatus = STATUS_FLYING;
+
+        // TODO: Move logic to function forward()?
+        targetHeight += EXPLORATION_HEIGHT;
+        targetForwardVelocity += CRUISE_VELOCITY;
+        updateWaypoint();
+
+        if (rightSensorReading < EDGE_DETECTED_THRESHOLD) {
+            returningState = RETURNING_RETURN;
         }
 
+        // if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
+        //     returningState = RETURNING_ROTATE;
+        // }
+    } break;
+    case RETURNING_ROTATE: {
+        droneStatus = STATUS_FLYING;
+
+        if(rotate()) {
+            returningState = RETURNING_FORWARD;
+        }
     } break;
     case RETURNING_LAND: {
         droneStatus = STATUS_LANDING;
 
-        // DEBUG_PRINT("Landing (return)\n");
-
-        // vTaskDelay(M2T(1000));
         if (land()) {
             returningState = RETURNING_IDLE;
         }
@@ -314,6 +341,14 @@ bool liftoff(void) {
         return true;
     }
     return false;
+}
+
+bool rotate(void) {
+    static const uint16_t OPEN_SPACE_THRESHOLD = 300;
+    targetHeight += EXPLORATION_HEIGHT;
+    targetYawRate = 50;
+    updateWaypoint();
+    return frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD;
 }
 
 bool land(void) {

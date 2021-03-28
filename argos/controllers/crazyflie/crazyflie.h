@@ -136,7 +136,7 @@ private:
 
     // Crash detection variables
     CVector3 m_lastActivePosition;
-    unsigned int m_watchdogCounter = 0;
+    std::uint32_t m_watchdogCounter = 0;
 };
 
 #endif

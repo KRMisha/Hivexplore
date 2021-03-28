@@ -425,7 +425,7 @@ void CCrazyflieController::DetectCrash() {
         m_lastActivePosition = m_pcPos->GetReading().Position;
     }
 
-    static constexpr unsigned int watchdogTimeout = 250;
+    static constexpr std::uint8_t watchdogTimeout = 250;
     if (m_watchdogCounter == watchdogTimeout) {
         m_droneStatus = DroneStatus::Crashed;
     }

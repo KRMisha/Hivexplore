@@ -100,7 +100,8 @@ class WebSocketServer:
                 try:
                     callbacks = self._callbacks[message['event']]
                 except KeyError:
-                    self._logger.log_server_local_data(logging.WARNING, f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
+                    self._logger.log_server_local_data(logging.WARNING,
+                                                       f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
                     continue
 
                 for callback in callbacks:

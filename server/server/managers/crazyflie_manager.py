@@ -1,8 +1,8 @@
+import logging
 from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
-import logging
 from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
@@ -113,7 +113,8 @@ class CrazyflieManager(DroneManager):
                 log_config['log_config'].error_cb.add_callback(log_config['error_callback'])
                 log_config['log_config'].start()
             except KeyError as exc:
-                self._logger.log_server_data(logging.ERROR, f'CrazyflieManager error: Could not start logging data, {exc} was not found in the Crazyflie TOC')
+                self._logger.log_server_data(
+                    logging.ERROR, f'CrazyflieManager error: Could not start logging data, {exc} was not found in the Crazyflie TOC')
             except AttributeError as exc:
                 self._logger.log_server_data(logging.ERROR, f'CrazyflieManager error: Could not add log configuration: {exc}')
 

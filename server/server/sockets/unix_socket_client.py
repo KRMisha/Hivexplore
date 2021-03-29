@@ -92,7 +92,8 @@ class UnixSocketClient:
                 try:
                     callbacks = self._callbacks[message['logName']]
                 except KeyError:
-                    self._logger.log_server_data(logging.WARN, f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
+                    self._logger.log_server_data(logging.WARN,
+                                                 f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
                     continue
 
                 for callback in callbacks:

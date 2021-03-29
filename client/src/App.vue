@@ -58,14 +58,13 @@ export default defineComponent({
 // TODO: Semantic grouping inside all setup() functions
 // TODO: Nicer UI when no drones are connected
 // TODO: Improve map background color
-// TODO: Dark theme with orange primary color
 </script>
 
-<style lang="scss" scoped>
-.topbar {
+<style lang="scss">
+.p-component.topbar {
     height: 64px;
+    color: var(--primary-color-text);
     background-color: var(--primary-color);
-    color: #ffffff;
     font-size: 1.5rem;
     font-weight: 500;
 }

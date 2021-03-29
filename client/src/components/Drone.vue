@@ -89,6 +89,7 @@ export default defineComponent({
         };
     },
 });
+// TODO: Fix status colors and set the text color dynamically when needed
 </script>
 
 <style lang="scss" scoped>

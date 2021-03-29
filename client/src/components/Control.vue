@@ -153,7 +153,7 @@ div::v-deep(.p-panel) {
 }
 
 .colored-chip {
-    color: #ffffff;
+    color: var(--primary-color-text);
     background-color: var(--primary-color);
 }
 

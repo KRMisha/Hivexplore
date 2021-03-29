@@ -25,7 +25,7 @@
                     />
                 </div>
                 <div class="p-col">
-                    <Timeline :value="missionStates">
+                    <Timeline :value="missionStates" class="timeline">
                         <template #marker="stateProps">
                             <div class="p-timeline-event-marker" :class="{ 'selected-marker': stateProps.item === missionState }"></div>
                         </template>
@@ -145,6 +145,10 @@ div::v-deep(.p-panel) {
             height: 100%;
         }
     }
+}
+
+.timeline {
+    margin-left: -48px;
 }
 
 .p-timeline-event-marker.selected-marker {

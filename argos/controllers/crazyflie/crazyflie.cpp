@@ -15,6 +15,12 @@ namespace {
 
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
 
+    static constexpr std::uint16_t returnObstacleThreshold = 700;
+    static constexpr std::uint16_t stabilizationRotationTicks = 40;
+    static constexpr std::uint16_t stabilizeReadingTicks = 70;
+    static constexpr std::uint16_t tresholdTicksExplore = 200;
+    static constexpr std::uint16_t tresholdTicksReturn = 400;
+
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
     }
@@ -62,9 +68,11 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (!AvoidObstacle()) {
+        //if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
+            //m_missionState = MissionState::Returning;
+        //} else if (!AvoidObstacle()) {
             Explore();
-        }
+        //}
         break;
     case MissionState::Returning:
         if (!AvoidObstacle()) {
@@ -75,7 +83,11 @@ void CCrazyflieController::ControlStep() {
         EmergencyLand();
         break;
     case MissionState::Landed:
-        m_droneStatus = DroneStatus::Landed;
+        if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
+            m_droneStatus = DroneStatus::Drained;
+        } else {
+            m_droneStatus = DroneStatus::Landed;
+        }
         break;
     }
 
@@ -268,26 +280,10 @@ void CCrazyflieController::Explore() {
     case ExploringState::Explore: {
         m_droneStatus = DroneStatus::Flying;
 
-        static constexpr double distanceToTravel = 0.07;
-
-        // Order exploration movement
-        if (m_isForwardCommandFinished) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
-            m_forwardCommandReferencePosition = m_pcPos->GetReading().Position;
-            m_isForwardCommandFinished = false;
-        }
-
-        // Change state when a wall is detected in front of the drone
-        static constexpr double distanceToTravelEpsilon = 0.005;
-        if (m_sensorReadings["front"] <= edgeDetectedThreshold) {
+        if (!Forward()) {
             m_exploringState = ExploringState::Brake;
-            m_isForwardCommandFinished = true;
         }
-        // If we finished traveling the exploration step
-        else if ((m_pcPos->GetReading().Position - m_forwardCommandReferencePosition).Length() >=
-                 distanceToTravel - distanceToTravelEpsilon) {
-            m_isForwardCommandFinished = true;
-        }
+
     } break;
     case ExploringState::Brake: {
         m_droneStatus = DroneStatus::Flying;
@@ -306,20 +302,157 @@ void CCrazyflieController::Explore() {
     }
 }
 
+// void CCrazyflieController::ReturnToBase() {
+//     switch (m_returningState) {
+//     case ReturningState::Return: {
+//         m_droneStatus = DroneStatus::Flying;
+
+//         static constexpr double distanceToReturnEpsilon = 0.05;
+
+//         CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
+//         m_pcPropellers->SetAbsolutePosition(targetPosition);
+
+//         if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
+//             std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
+//             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+//             m_returningState = ReturningState::Land;
+//         }
+//     } break;
+//     case ReturningState::Land: {
+//         m_droneStatus = DroneStatus::Landing;
+
+//         if (Land()) {
+//             m_returningState = ReturningState::Idle;
+//         }
+//     } break;
+//     case ReturningState::Idle:
+//         m_droneStatus = DroneStatus::Landed;
+//         break;
+//     }
+// }
+
 void CCrazyflieController::ReturnToBase() {
+    // If returned to base, land
+    static constexpr double distanceToReturnEpsilon = 0.05;
+    static constexpr uint8_t maxRssiReturned = 10;
+    if (m_rssiReading <= maxRssiReturned &&
+        std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
+        std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        m_returningState = ReturningState::Land;
+    }
+
     switch (m_returningState) {
+    case ReturningState::BrakeTowardsBase: {
+        m_droneStatus = DroneStatus::Flying;
+
+        // Brake before rotation towards base
+        DebugPrint("BrakeTowardsBase \n");
+        if (Brake()) {
+            m_returningState = ReturningState::RotateTowardsBase;
+        }
+    } break;
+    case ReturningState::RotateTowardsBase: {
+        m_droneStatus = DroneStatus::Flying;
+
+        // Turn drone towards its base
+        if (m_isRotateToBaseFinished) {
+            DebugPrint("RotateTowardsBase \n");
+
+            // Calculate rotation angle to turn towards base
+            m_orientationToBase = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
+                                                      m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
+                                  CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
+
+            m_pcPropellers->SetAbsoluteYaw(m_orientationToBase);
+            m_isRotateToBaseFinished = false;
+        }
+        // Get current absolute yaw
+        CRadians angleRadians;
+        CVector3 vector;
+        m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
+        CRadians currentAbsoluteYaw = angleRadians * vector.GetZ();
+
+        // If the drone is towards its base, decrease stabilize rotation counter
+        static const CRadians angleEpsilon = CRadians::PI / 64;
+        CRadians yawDifference = currentAbsoluteYaw - m_orientationToBase;
+
+        bool isYawTowardsBase =
+            (((yawDifference <= angleEpsilon) && (yawDifference >= -angleEpsilon)) ||
+             ((yawDifference <= (CRadians::PI * 2 + angleEpsilon)) && (yawDifference >= (CRadians::PI * 2 - angleEpsilon))));
+
+        if (!m_isRotateToBaseFinished && m_stabilizeRotationCounter != 0 && isYawTowardsBase) {
+            m_stabilizeRotationCounter--;
+        }
+
+        // If the drone rotation is stable and towards its base
+        if (m_stabilizeRotationCounter == 0) {
+            m_isRotateToBaseFinished = true;
+            // Reset counter
+            m_stabilizeRotationCounter = stabilizationRotationTicks;
+
+            DebugPrint("RotateTowardsBase done, return begins \n");
+            if (m_sensorReadings["front"] <= returnObstacleThreshold) {
+                m_returningState = ReturningState::Brake;
+            } else {
+                m_returningState = ReturningState::Return;
+            }
+        }
+    } break;
     case ReturningState::Return: {
         m_droneStatus = DroneStatus::Flying;
 
-        static constexpr double distanceToReturnEpsilon = 0.05;
-
+        // Go to base using absolute positions
         CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
         m_pcPropellers->SetAbsolutePosition(targetPosition);
+        m_returnAbsoluteCounter--;
 
-        if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
-            std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
-            m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-            m_returningState = ReturningState::Land;
+        // While going to base with absolute positions if front obstacle detected go to explore algorithm to avoid it
+        if (m_sensorReadings["front"] <= returnObstacleThreshold || m_returnAbsoluteCounter == 0) {
+            // Reset counter
+            m_returnAbsoluteCounter = tresholdTicksReturn;
+            DebugPrint("Front obstacle detected, explore algo begins \n");
+            m_returningState = ReturningState::Brake;
+        }
+
+    } break;
+    // Explore algorithm
+    case ReturningState::Brake: {
+        m_droneStatus = DroneStatus::Flying;
+
+        if (Brake()) {
+            DebugPrint("Rotate left\n");
+            m_returningState = ReturningState::Rotate;
+        }
+    } break;
+    case ReturningState::Rotate: {
+        m_droneStatus = DroneStatus::Flying;
+
+        if (Rotate()) {
+            DebugPrint("Forward\n");
+            m_returningState = ReturningState::Forward;
+        }
+    } break;
+    case ReturningState::Forward: {
+        m_droneStatus = DroneStatus::Flying;
+
+        if (!Forward()) {
+            m_returningState = ReturningState::Brake;
+        }
+        // Obstacle has been passed go back to returning with absolute positions
+        if (m_sensorReadings["right"] > edgeDetectedThreshold && m_passedObstacleCounter == 0 || m_exploreCounter == 0) {
+            DebugPrint("Obstacle has been passed \n");
+            // Reset counters
+            m_exploreCounter = tresholdTicksExplore;
+            m_passedObstacleCounter = stabilizeReadingTicks;
+
+            m_returningState = ReturningState::BrakeTowardsBase;
+        }
+        if (m_exploreCounter != 0) {
+            m_exploreCounter--;
+        }
+        if (m_sensorReadings["right"] > edgeDetectedThreshold) {
+            m_passedObstacleCounter--;
         }
     } break;
     case ReturningState::Land: {
@@ -365,19 +498,27 @@ bool CCrazyflieController::Liftoff() {
     return false;
 }
 
-bool CCrazyflieController::Land() {
-    static constexpr double targetDroneLandHeight = 0.09;
-    static constexpr double targetDroneHeightEpsilon = 0.05;
-
-    CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneLandHeight);
-    m_pcPropellers->SetAbsolutePosition(targetPosition);
-
-    // Wait for land to finish
-    if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
-        m_droneStatus = DroneStatus::Landed;
-        return true;
+bool CCrazyflieController::Forward() {
+    // Order exploration movement
+    static constexpr double distanceToTravel = 0.07;
+    if (m_isForwardCommandFinished) {
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, -distanceToTravel, 0.0));
+        m_forwardCommandReferencePosition = m_pcPos->GetReading().Position;
+        m_isForwardCommandFinished = false;
     }
-    return false;
+
+    // Change state when a wall is detected in front of the drone
+    static constexpr double distanceToTravelEpsilon = 0.005;
+    if (m_sensorReadings["front"] <= edgeDetectedThreshold) {
+        m_isForwardCommandFinished = true;
+        return false;
+    }
+    // If we finished traveling the exploration step
+    else if ((m_pcPos->GetReading().Position - m_forwardCommandReferencePosition).Length() >= distanceToTravel - distanceToTravelEpsilon) {
+        m_isForwardCommandFinished = true;
+    }
+
+    return true;
 }
 
 bool CCrazyflieController::Brake() {
@@ -393,6 +534,7 @@ bool CCrazyflieController::Brake() {
     if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
         m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
         m_isBrakeCommandFinished = true;
+        m_brakingReferencePosition = m_pcPos->GetReading().Position;
         return true;
     }
     m_brakingReferencePosition = m_pcPos->GetReading().Position;
@@ -417,6 +559,7 @@ bool CCrazyflieController::Rotate() {
     // Wait for rotation to finish
     if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
         if (m_sensorReadings["front"] > edgeDetectedThreshold) {
+            m_isRotateCommandFinished = true;
             return true;
         }
         m_isRotateCommandFinished = true;
@@ -424,9 +567,24 @@ bool CCrazyflieController::Rotate() {
     return false;
 }
 
+bool CCrazyflieController::Land() {
+    static constexpr double targetDroneLandHeight = 0.09;
+    static constexpr double targetDroneHeightEpsilon = 0.05;
+
+    CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneLandHeight);
+    m_pcPropellers->SetAbsolutePosition(targetPosition);
+
+    // Wait for land to finish
+    if (m_pcPos->GetReading().Position.GetZ() <= targetDroneLandHeight + targetDroneHeightEpsilon) {
+        m_droneStatus = DroneStatus::Landed;
+        return true;
+    }
+    return false;
+}
+
 void CCrazyflieController::ResetInternalStates() {
     m_exploringState = ExploringState::Idle;
-    m_returningState = ReturningState::Return;
+    m_returningState = ReturningState::BrakeTowardsBase;
     m_emergencyState = EmergencyState::Land;
 
     m_isAvoidingObstacle = false;
@@ -436,6 +594,11 @@ void CCrazyflieController::ResetInternalStates() {
     m_isForwardCommandFinished = true;
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
+
+    m_stabilizeRotationCounter = stabilizationRotationTicks;
+    m_passedObstacleCounter = stabilizeReadingTicks;
+    m_returnAbsoluteCounter = tresholdTicksReturn;
+    m_exploreCounter = tresholdTicksExplore;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

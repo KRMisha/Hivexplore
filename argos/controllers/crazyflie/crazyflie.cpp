@@ -16,7 +16,7 @@ namespace {
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
 
     static constexpr std::uint16_t returnObstacleThreshold = 700;
-    static constexpr std::uint16_t stabilizationRotationTicks = 30;
+    static constexpr std::uint16_t stabilizationRotationTicks = 40;
     static constexpr std::uint16_t stabilizeReadingTicks = 70;
     static constexpr std::uint16_t tresholdTicksExplore = 200;
     static constexpr std::uint16_t tresholdTicksReturn = 400;
@@ -68,11 +68,11 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
-            m_missionState = MissionState::Returning;
-        } else if (!AvoidObstacle()) {
+        //if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
+            //m_missionState = MissionState::Returning;
+        //} else if (!AvoidObstacle()) {
             Explore();
-        }
+        //}
         break;
     case MissionState::Returning:
         if (!AvoidObstacle()) {
@@ -392,7 +392,11 @@ void CCrazyflieController::ReturnToBase() {
             m_stabilizeRotationCounter = stabilizationRotationTicks;
 
             DebugPrint("RotateTowardsBase done, return begins \n");
-            m_returningState = ReturningState::Return;
+            if (m_sensorReadings["front"] <= returnObstacleThreshold) {
+                m_returningState = ReturningState::Brake;
+            } else {
+                m_returningState = ReturningState::Return;
+            }
         }
     } break;
     case ReturningState::Return: {

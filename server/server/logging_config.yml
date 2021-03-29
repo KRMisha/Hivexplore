@@ -27,7 +27,7 @@ handlers:
         class: logging.FileHandler
         level: INFO
         formatter: hivexplore_formatter
-        filename: ext://server.logger.LOG_FILENAME
+        filename: ext://server.logger.log_filename
         encoding: utf8
 
 loggers:

@@ -43,7 +43,7 @@ class Logger:
         self._web_socket_server.send_message('log', {'name': 'Server', 'message': data})
 
     def log_drone_data(self, drone_id: str, data: str):
-        self._logger.info(drone_id + ': ' + data)
+        self._logger.info(f'{drone_id}: {data}') # pylint: disable=logging-fstring-interpolation
         self._web_socket_server.send_message('log', {'name': drone_id, 'message': data})
 
     def log_map_data(self, drone_id: str, data: List[Point]):

@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import socket
 from typing import Any, Callable, Dict, List, Optional
 from server.logger import Logger
@@ -33,12 +34,12 @@ class UnixSocketClient:
                 while True:
                     try:
                         await asyncio.get_event_loop().sock_connect(self._socket, '/tmp/hivexplore/socket.sock')
-                        self._logger.log_server_data('Connected to ARGoS')
+                        self._logger.log_server_data(logging.INFO, 'Connected to ARGoS')
                         timeout_s = BASE_CONNECTION_TIMEOUT_S
                         break
                     except (FileNotFoundError, ConnectionRefusedError, socket.timeout) as exc:
-                        self._logger.log_server_data(f'UnixSocketClient connection error: {exc}')
-                        self._logger.log_server_data(f'Connection to ARGoS failed, retrying after {timeout_s} seconds')
+                        self._logger.log_server_data(logging.ERROR, f'UnixSocketClient connection error: {exc}')
+                        self._logger.log_server_data(logging.WARN, f'Connection to ARGoS failed, retrying after {timeout_s} seconds')
                         await asyncio.sleep(timeout_s)
                         timeout_s = min(timeout_s * 2, MAX_CONNECTION_TIMEOUT_S)
 
@@ -48,7 +49,7 @@ class UnixSocketClient:
                 try:
                     await asyncio.gather(*tasks)
                 except (UnixSocketError, ConnectionResetError) as exc:
-                    self._logger.log_server_data(f'UnixSocketClient communication error: {exc}')
+                    self._logger.log_server_data(logging.ERROR, f'UnixSocketClient communication error: {exc}')
 
                     for callback in self._callbacks.get('disconnect', []):
                         callback()
@@ -85,19 +86,20 @@ class UnixSocketClient:
                 message = json.loads(message_bytes.decode('utf-8'))
 
                 if message['logName'] in EVENT_DENYLIST:
-                    self._logger.log_server_data(f'UnixSocketClient error: Invalid event received: {message["logName"]}')
+                    self._logger.log_server_data(logging.ERROR, f'UnixSocketClient error: Invalid event received: {message["logName"]}')
                     continue
 
                 try:
                     callbacks = self._callbacks[message['logName']]
                 except KeyError:
-                    self._logger.log_server_data(f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
+                    self._logger.log_server_data(logging.WARN,
+                                                 f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
                     continue
 
                 for callback in callbacks:
                     callback(message['droneId'], message['variables'])
             except (json.JSONDecodeError, KeyError) as exc:
-                self._logger.log_server_data(f'UnixSocketClient error: Invalid message received: {exc}')
+                self._logger.log_server_data(logging.ERROR, f'UnixSocketClient error: Invalid message received: {exc}')
 
     async def _send_handler(self):
         while True:

@@ -21,9 +21,9 @@ class DebugInfoFilter(logging.Filter):
 class Logger:
     def __init__(self):
         self._web_socket_server: WebSocketServer
-        self.setup() # Sets the logger for the first mission
+        self.setup_logging() # Sets the logger for the first mission
 
-    def setup(self, filename=None):
+    def setup_logging(self, filename=None):
         global log_filename # pylint: disable=global-statement,invalid-name
         if filename is not None:
             log_filename = filename

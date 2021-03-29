@@ -77,7 +77,9 @@ void CCrazyflieController::ControlStep() {
         break;
     }
 
-    DetectCrash();
+    if (isCrashed()) {
+        m_droneStatus = DroneStatus::Crashed;
+    }
 
     m_previousPosition = m_pcPos->GetReading().Position;
 }
@@ -412,9 +414,9 @@ bool CCrazyflieController::Land() {
     return false;
 }
 
-void CCrazyflieController::DetectCrash() {
+bool CCrazyflieController::isCrashed() {
     if (m_droneStatus != DroneStatus::Crashed && (m_droneStatus == DroneStatus::Standby || m_droneStatus == DroneStatus::Landed)) {
-        return;
+        return false;
     }
 
     static constexpr double positionEpsilon = 0.005;
@@ -427,8 +429,10 @@ void CCrazyflieController::DetectCrash() {
 
     static constexpr std::uint8_t watchdogTimeout = 250;
     if (m_watchdogCounter == watchdogTimeout) {
-        m_droneStatus = DroneStatus::Crashed;
+        return true;
     }
+
+    return false;
 }
 
 void CCrazyflieController::ResetInternalStates() {

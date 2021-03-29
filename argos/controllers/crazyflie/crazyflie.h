@@ -76,7 +76,7 @@ private:
     bool Liftoff();
     bool Land();
 
-    void DetectCrash();
+    bool isCrashed();
     void ResetInternalStates();
 
     void UpdateSensorReadings();

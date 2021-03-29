@@ -13,6 +13,7 @@ import ScrollPanel from 'primevue/scrollpanel';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import Timeline from 'primevue/timeline';
+import Tooltip from 'primevue/tooltip';
 
 import ConfirmationService from 'primevue/confirmationservice';
 
@@ -22,9 +23,6 @@ import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 
 const app = createApp(App);
-
-app.use(PrimeVue, { ripple: true });
-app.use(ConfirmationService);
 
 app.component('Button', Button);
 app.component('Card', Card);
@@ -38,5 +36,10 @@ app.component('ScrollPanel', ScrollPanel);
 app.component('TabPanel', TabPanel);
 app.component('TabView', TabView);
 app.component('Timeline', Timeline);
+
+app.directive('tooltip', Tooltip);
+
+app.use(PrimeVue, { ripple: true });
+app.use(ConfirmationService);
 
 app.mount('#app');

@@ -1,8 +1,10 @@
 <template>
-    <Panel header="Map" class="map">
+    <Panel header="Map">
+        <template #icons>
+            <Button class="p-panel-header-icon" icon="pi pi-download" v-tooltip.left="'Download map'" @click="saveAsImage" />
+        </template>
         <div id="map-container"></div>
     </Panel>
-    <Button class="button" label="Download map" @click="saveAsImage()" />
 </template>
 
 <script lang="ts">
@@ -138,21 +140,12 @@ export default defineComponent({
         };
     },
 });
-// TODO: Move download map button to panel
 // TODO: Responsive map container height
 </script>
 
 <style lang="scss" scoped>
-.map {
-    width: 100%;
-}
-
 #map-container {
     height: 300px;
     position: relative;
-}
-
-.button {
-    margin-top: 16px;
 }
 </style>

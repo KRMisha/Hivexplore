@@ -2,8 +2,8 @@
     <div class="stretched">
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
-            <div class="p-grid p-ai-center stretched">
-                <div class="p-col p-d-flex p-flex-column p-jc-around stretched">
+            <div class="p-grid p-ai-stretch">
+                <div class="p-col p-d-flex p-flex-column p-jc-around">
                     <div class="p-d-flex p-flex-column">
                         <Button
                             label="Start mission"
@@ -27,7 +27,7 @@
                     </div>
                     <div class="p-d-flex p-jc-between p-ai-center">
                         <span class="label">Drone count</span>
-                         <Chip :label="droneCount.toString()" :class="{ 'colored-chip': droneCount > 0 }" />
+                        <Chip :label="droneCount.toString()" :class="{ 'colored-chip': droneCount > 0 }" />
                     </div>
                 </div>
                 <div class="p-col">
@@ -145,9 +145,6 @@ div::v-deep(.p-panel) {
 
     .p-toggleable-content {
         height: 100%;
-        .p-panel-content {
-            height: 100%;
-        }
     }
 }
 

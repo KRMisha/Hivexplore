@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -15,20 +16,32 @@ class CrazyflieManager(DroneManager):
         super().__init__(web_socket_server, logger, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
+        self._crazyflie_uris: List[str] = []
+
+        try:
+            self._crazyflie_uris = load_crazyflie_uris_from_file()
+        except ValueError:
+            self._logger.log_server_data('CrazyflieManager warning: Could not load URIs from file')
+
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
-        self._connect_crazyflies()
+        while True:
+            if self._mission_state == MissionState.Standby:
+                self._connect_crazyflies()
+
+            CRAZYFLIE_CONNECTION_PERIOD_S = 5
+            await asyncio.sleep(CRAZYFLIE_CONNECTION_PERIOD_S)
 
     def _connect_crazyflies(self):
-        try:
-            crazyflie_uris = load_crazyflie_uris_from_file()
-        except ValueError:
-            return
-
-        for uri in crazyflie_uris:
-            if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
+        for uri in self._crazyflie_uris:
+            if uri in self._connected_crazyflies:
                 continue
+
+            # If a Crazyflie is still pending, force close its connection
+            if uri in self._pending_crazyflies:
+                self._logger.log_server_data(f'CrazyflieManager warning: Force disconnecting pending drone: {uri}')
+                self._pending_crazyflies[uri].close_link()
 
             self._logger.log_server_data(f'Trying to connect to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
@@ -146,6 +159,7 @@ class CrazyflieManager(DroneManager):
         self._logger.log_server_data(f'Disconnected from {link_uri}')
         self._logger.log_drone_data(link_uri, 'Disconnected')
         self._connected_crazyflies.pop(link_uri, None)
+        self._pending_crazyflies.pop(link_uri, None) # Pop in case a drone gets disconnected while attempting to connect
         self._send_drone_ids()
 
         self._drone_statuses.pop(link_uri, None)

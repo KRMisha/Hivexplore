@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Any, Dict, List
 import numpy as np
 from server.logger import Logger
@@ -17,6 +18,7 @@ class DroneManager(ABC):
         self._mission_state = MissionState.Standby
         self._drone_statuses: Dict[str, DroneStatus] = {}
         self._drone_leds: Dict[str, bool] = {}
+        self._mission_count = 0
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -139,6 +141,11 @@ class DroneManager(ABC):
 
         if self._mission_state == MissionState.Exploring:
             self._map_generator.clear()
+
+        if self._mission_state == MissionState.Standby:
+            self._mission_count += 1
+            log_filename = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}_mission{self._mission_count}.log'
+            self._logger.setup_logger(log_filename)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):

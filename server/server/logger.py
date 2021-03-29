@@ -9,7 +9,7 @@ from server.tuples import Point
 if TYPE_CHECKING:
     from server.sockets.web_socket_server import WebSocketServer
 
-log_filename = f'logs/hivexplore_logs_{datetime.now().isoformat().replace(":", "")}.log'
+LOG_FILENAME = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}_mission0.log'
 
 
 class DebugInfoFilter(logging.Filter):
@@ -21,12 +21,12 @@ class DebugInfoFilter(logging.Filter):
 class Logger:
     def __init__(self):
         self._web_socket_server: WebSocketServer
-        self.setup_logger()
+        self.setup_logger() # Sets the logger for the first mission
 
-    def setup_logger(self, name=None):
-        global log_filename
-        if name is not None:
-            log_filename = name
+    def setup_logger(self, filename=None):
+        global LOG_FILENAME # pylint: disable=global-statement
+        if filename is not None:
+            LOG_FILENAME = filename
         with open('server/logging_config.yml', 'r') as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
             logging.config.dictConfig(config)

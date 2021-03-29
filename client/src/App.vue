@@ -5,7 +5,7 @@
             <Map />
         </div>
         <div class="p-col-12 p-lg-6 p-xl-5">
-            <Control :hasDrones="droneIds.length > 0" />
+            <Control :droneCount="droneIds.length" />
         </div>
     </div>
     <div class="p-grid">
@@ -58,6 +58,7 @@ export default defineComponent({
 // TODO: Semantic grouping inside all setup() functions
 // TODO: Nicer UI when no drones are connected
 // TODO: Improve map background color
+// TODO: Dark theme with orange primary color
 </script>
 
 <style lang="scss" scoped>

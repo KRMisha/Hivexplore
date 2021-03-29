@@ -3,26 +3,32 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-ai-center stretched">
-                <div class="p-col p-d-flex p-flex-column">
-                    <Button
-                        label="Start mission"
-                        class="p-my-1"
-                        :disabled="!hasDrones || missionState !== MissionState.Standby"
-                        @click="onStartMissionButtonClick($event)"
-                    />
-                    <Button
-                        label="Return to base"
-                        class="p-my-1"
-                        :disabled="!hasDrones || missionState !== MissionState.Exploring"
-                        @click="setMissionState(MissionState.Returning)"
-                    />
-                    <Button
-                        :label="endMissionButtonLabel"
-                        class="p-my-1"
-                        :style="{ 'background-color': endMissionButtonColor }"
-                        :disabled="!hasDrones || missionState === MissionState.Standby || missionState === MissionState.Emergency"
-                        @click="onEndMissionButtonClick($event)"
-                    />
+                <div class="p-col p-d-flex p-flex-column p-jc-around stretched">
+                    <div class="p-d-flex p-flex-column">
+                        <Button
+                            label="Start mission"
+                            class="p-my-1"
+                            :disabled="droneCount === 0 || missionState !== MissionState.Standby"
+                            @click="onStartMissionButtonClick($event)"
+                        />
+                        <Button
+                            label="Return to base"
+                            class="p-my-1"
+                            :disabled="droneCount === 0 || missionState !== MissionState.Exploring"
+                            @click="setMissionState(MissionState.Returning)"
+                        />
+                        <Button
+                            :label="endMissionButtonLabel"
+                            class="p-my-1"
+                            :style="{ 'background-color': endMissionButtonColor }"
+                            :disabled="droneCount === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
+                            @click="onEndMissionButtonClick($event)"
+                        />
+                    </div>
+                    <div class="p-d-flex p-jc-between p-ai-center">
+                        <span class="label">Drone count</span>
+                         <Chip :label="droneCount.toString()" :class="{ 'colored-chip': droneCount > 0 }" />
+                    </div>
                 </div>
                 <div class="p-col">
                     <Timeline :value="missionStates" class="timeline">
@@ -48,7 +54,7 @@ import { MissionState } from '@/enums/mission-state';
 export default defineComponent({
     name: 'Control',
     props: {
-        hasDrones: Boolean,
+        droneCount: Number,
     },
     setup() {
         const confirm = useConfirm();
@@ -124,9 +130,8 @@ export default defineComponent({
         };
     },
 });
-// TODO: Add mission state chip
-// TODO: Add drone count
 // TODO: Simplify logic
+// TODO: Fix colors
 </script>
 
 <style lang="scss" scoped>
@@ -146,6 +151,15 @@ div::v-deep(.p-panel) {
     }
 }
 
+.label {
+    font-weight: 500;
+}
+
+.colored-chip {
+    color: #ffffff;
+    background-color: var(--primary-color);
+}
+
 @media (max-width: 576px), (min-width: 992px) and (max-width: 1280px) {
     .timeline {
         margin-left: -4.5rem;
@@ -159,7 +173,7 @@ div::v-deep(.p-panel) {
 }
 
 @media (max-width: 360px) {
-    .p-button {
+    .p-component {
         font-size: 0.875rem;
     }
 

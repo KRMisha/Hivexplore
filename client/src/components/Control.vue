@@ -14,7 +14,7 @@
                         label="Return to base"
                         class="p-my-1"
                         :disabled="!hasDrones || missionState !== MissionState.Exploring"
-                        @click="onReturnToBaseButtonClick"
+                        @click="setMissionState(MissionState.Returning)"
                     />
                     <Button
                         :label="endMissionButtonLabel"
@@ -42,7 +42,6 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
 import { SocketClient } from '@/classes/socket-client';
 import { MissionState } from '@/enums/mission-state';
 
@@ -53,7 +52,6 @@ export default defineComponent({
     },
     setup() {
         const confirm = useConfirm();
-        const toast = useToast();
         const socketClient: SocketClient | undefined = inject('socketClient');
 
         let wasEmergencyLandingCalled = false;
@@ -76,23 +74,14 @@ export default defineComponent({
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
-                        toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
-                        toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK🚀🚀', life: 3000 });
                         setMissionState(MissionState.Exploring);
                         wasEmergencyLandingCalled = false; // Reset
                     },
                 });
             } else {
                 // If last mission ended normally
-                toast.add({ severity: 'success', summary: 'Initiated', detail: 'Start mission initiated', life: 3000 });
-                toast.add({ severity: 'success', summary: 'ALATAK', detail: 'ALATAK', life: 3000 });
                 setMissionState(MissionState.Exploring);
             }
-        }
-
-        function onReturnToBaseButtonClick() {
-            toast.add({ severity: 'success', summary: 'Initiated', detail: 'Return to base initiated', life: 3000 });
-            setMissionState(MissionState.Returning);
         }
 
         const endMissionButtonLabel = computed((): string => {
@@ -113,7 +102,6 @@ export default defineComponent({
                     icon: 'pi pi-exclamation-triangle',
                     acceptClass: 'p-button-danger',
                     accept: () => {
-                        toast.add({ severity: 'success', summary: 'Initiated', detail: 'Emergency landing initiated', life: 3000 });
                         setMissionState(MissionState.Emergency);
                         wasEmergencyLandingCalled = true;
                     },
@@ -128,8 +116,8 @@ export default defineComponent({
             missionState,
             missionStates: Object.values(MissionState), // TODO: Use computed here to dynamically add/remove emergency
             MissionState,
+            setMissionState,
             onStartMissionButtonClick,
-            onReturnToBaseButtonClick,
             endMissionButtonLabel,
             endMissionButtonColor,
             onEndMissionButtonClick,

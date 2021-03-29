@@ -138,6 +138,8 @@ export default defineComponent({
         };
     },
 });
+// TODO: Move download map button to panel
+// TODO: Responsive map container height
 </script>
 
 <style lang="scss" scoped>

@@ -1,5 +1,4 @@
 <template>
-    <Toast />
     <div class="p-grid p-flex-row-reverse">
         <div class="p-col-12 p-lg-6 p-xl-8">
             <Map />

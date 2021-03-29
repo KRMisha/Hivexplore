@@ -124,7 +124,6 @@ export default defineComponent({
         };
     },
 });
-// TODO: Fix grid sizing to avoid timeline bugs
 // TODO: Add mission state chip
 // TODO: Add drone count
 // TODO: Simplify logic
@@ -147,8 +146,27 @@ div::v-deep(.p-panel) {
     }
 }
 
-.timeline {
-    margin-left: -48px;
+@media (max-width: 576px), (min-width: 992px) and (max-width: 1280px) {
+    .timeline {
+        margin-left: -4.5rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .timeline {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .p-button {
+        font-size: 0.875rem;
+    }
+
+    .timeline {
+        margin-left: -5rem;
+        margin-right: -1rem;
+    }
 }
 
 .p-timeline-event-marker.selected-marker {

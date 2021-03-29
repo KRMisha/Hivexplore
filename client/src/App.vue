@@ -1,10 +1,10 @@
 <template>
     <div class="p-component p-grid p-jc-center p-ai-center p-mb-2 p-shadow-2 topbar">Hivexplore</div>
     <div class="p-grid p-flex-row-reverse">
-        <div class="p-col-12 p-lg-6 p-xl-8">
+        <div class="p-col-12 p-lg-6 p-xl-7">
             <Map />
         </div>
-        <div class="p-col-12 p-lg-6 p-xl-4">
+        <div class="p-col-12 p-lg-6 p-xl-5">
             <Control :hasDrones="droneIds.length > 0" />
         </div>
     </div>

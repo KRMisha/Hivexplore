@@ -68,7 +68,9 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (!AvoidObstacle()) {
+        if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
+            m_missionState = MissionState::Returning;
+        } else if (!AvoidObstacle()) {
             Explore();
         }
         break;
@@ -81,7 +83,11 @@ void CCrazyflieController::ControlStep() {
         EmergencyLand();
         break;
     case MissionState::Landed:
-        m_droneStatus = DroneStatus::Landed;
+        if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
+            m_droneStatus = DroneStatus::Drained;
+        } else {
+            m_droneStatus = DroneStatus::Landed;
+        }
         break;
     }
 
@@ -338,6 +344,8 @@ void CCrazyflieController::ReturnToBase() {
 
     switch (m_returningState) {
     case ReturningState::BrakeTowardsBase: {
+        m_droneStatus = DroneStatus::Flying;
+
         // Brake before rotation towards base
         DebugPrint("BrakeTowardsBase \n");
         if (Brake()) {
@@ -345,6 +353,8 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::RotateTowardsBase: {
+        m_droneStatus = DroneStatus::Flying;
+
         // Turn drone towards its base
         if (m_isRotateToBaseFinished) {
             DebugPrint("RotateTowardsBase \n");
@@ -404,18 +414,24 @@ void CCrazyflieController::ReturnToBase() {
     } break;
     // Explore algorithm
     case ReturningState::Brake: {
+        m_droneStatus = DroneStatus::Flying;
+
         if (Brake()) {
             DebugPrint("Rotate left\n");
             m_returningState = ReturningState::Rotate;
         }
     } break;
     case ReturningState::Rotate: {
+        m_droneStatus = DroneStatus::Flying;
+
         if (Rotate()) {
             DebugPrint("Forward\n");
             m_returningState = ReturningState::Forward;
         }
     } break;
     case ReturningState::Forward: {
+        m_droneStatus = DroneStatus::Flying;
+
         if (!Forward()) {
             m_returningState = ReturningState::Brake;
         }

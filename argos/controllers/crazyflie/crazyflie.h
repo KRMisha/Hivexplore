@@ -56,6 +56,7 @@ enum class DroneStatus {
     Landing,
     Landed,
     Crashed,
+    Drained,
 };
 
 class CCrazyflieController : public CCI_Controller {

@@ -1,3 +1,4 @@
+import logging
 import math
 from typing import Dict, List
 import numpy as np
@@ -25,7 +26,7 @@ class MapGenerator:
     def add_range_reading(self, drone_id: str, range_reading: Range):
         points = self._calculate_points_from_readings(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
         self._points.extend(points)
-        self._logger.log_map_data(drone_id, points)
+        self._logger.log_map_data(logging.INFO, drone_id, points)
         self._web_socket_server.send_message('map-points', points)
 
     def clear(self):

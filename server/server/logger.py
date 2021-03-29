@@ -34,20 +34,20 @@ class Logger:
     def set_web_socket_server(self, web_socket_server: WebSocketServer):
         self._web_socket_server = web_socket_server
 
-    def log_server_local_data(self, data: str):
-        self._logger.info(data)
+    def log_server_local_data(self, level: int, data: str):
+        self._logger.log(level, data)
 
-    def log_server_data(self, data: str):
-        self._logger.info(data)
+    def log_server_data(self, level: int, data: str):
+        self._logger.log(level, data)
         self._web_socket_server.send_message('log', {'name': 'Server', 'message': data})
 
-    def log_drone_data(self, drone_id: str, data: str):
-        self._logger.info(f'{drone_id}: {data}') # pylint: disable=logging-fstring-interpolation
+    def log_drone_data(self, level: int, drone_id: str, data: str):
+        self._logger.log(level, f'{drone_id}: {data}') # pylint: disable=logging-fstring-interpolation
         self._web_socket_server.send_message('log', {'name': drone_id, 'message': data})
 
-    def log_map_data(self, drone_id: str, data: List[Point]):
+    def log_map_data(self, level: int, drone_id: str, data: List[Point]):
         if len(data) == 0:
             return
         message = f'Points detected by drone {drone_id}: {data}'
-        self._logger.info(message)
+        self._logger.log(level, message)
         self._web_socket_server.send_message('log', {'name': 'Map', 'message': message})

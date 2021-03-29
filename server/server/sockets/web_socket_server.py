@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime
 import json
+import logging
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 import uuid
 import websockets
@@ -24,7 +25,7 @@ class WebSocketServer:
     async def serve(self):
         self._loop = asyncio.get_running_loop()
         server = await websockets.serve(self._socket_handler, IP_ADDRESS, PORT)
-        self._logger.log_server_local_data('WebSocketServer started')
+        self._logger.log_server_local_data(logging.INFO, 'WebSocketServer started')
         await server.wait_closed()
 
     def bind(self, event: str, callback: Union[Callable[[Any], None], Callable[[str, Any], None]]):
@@ -55,7 +56,7 @@ class WebSocketServer:
 
     def _send_to_client(self, client_id: str, event: str, drone_id: Optional[str], data: Any):
         if client_id not in self._message_queues:
-            self._logger.log_server_local_data(f'WebSocketServer error: Unknown client ID: {client_id}')
+            self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Unknown client ID: {client_id}')
             return
         asyncio.run_coroutine_threadsafe(
             self._message_queues[client_id].put({
@@ -69,7 +70,7 @@ class WebSocketServer:
         # Generate a unique ID for each client
         client_id = uuid.uuid4().hex
 
-        self._logger.log_server_local_data(f'New client connected: {client_id}')
+        self._logger.log_server_local_data(logging.INFO, f'New client connected: {client_id}')
 
         self._message_queues[client_id] = asyncio.Queue()
 
@@ -83,7 +84,7 @@ class WebSocketServer:
         for task in pending:
             task.cancel()
 
-        self._logger.log_server_local_data(f'Client disconnected: {client_id}')
+        self._logger.log_server_local_data(logging.INFO, f'Client disconnected: {client_id}')
 
         del self._message_queues[client_id]
 
@@ -93,13 +94,13 @@ class WebSocketServer:
                 message = json.loads(message_str)
 
                 if message['event'] in EVENT_DENYLIST:
-                    self._logger.log_server_local_data(f'WebSocketServer error: Invalid event received: {message["event"]}')
+                    self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Invalid event received: {message["event"]}')
                     continue
 
                 try:
                     callbacks = self._callbacks[message['event']]
                 except KeyError:
-                    self._logger.log_server_local_data(f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
+                    self._logger.log_server_local_data(logging.WARNING, f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
                     continue
 
                 for callback in callbacks:
@@ -108,7 +109,7 @@ class WebSocketServer:
                     else:
                         callback(message['droneId'], message['data'])
             except (json.JSONDecodeError, KeyError) as exc:
-                self._logger.log_server_local_data(f'WebSocketServer error: Invalid message received: {exc}')
+                self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Invalid message received: {exc}')
 
     async def _send_handler(self, websocket, _path, message_queue):
         while True:

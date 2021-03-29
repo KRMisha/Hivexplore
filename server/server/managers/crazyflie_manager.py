@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
+import logging
 from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
@@ -30,7 +31,7 @@ class CrazyflieManager(DroneManager):
             if uri in self._connected_crazyflies or uri in self._pending_crazyflies:
                 continue
 
-            self._logger.log_server_data(f'Trying to connect to: {uri}')
+            self._logger.log_server_data(logging.INFO, f'Trying to connect to: {uri}')
             crazyflie = Crazyflie(rw_cache='./cache')
 
             crazyflie.connected.add_callback(self._connected)
@@ -112,9 +113,9 @@ class CrazyflieManager(DroneManager):
                 log_config['log_config'].error_cb.add_callback(log_config['error_callback'])
                 log_config['log_config'].start()
             except KeyError as exc:
-                self._logger.log_server_data(f'Could not start logging data, {exc} was not found in the Crazyflie TOC')
+                self._logger.log_server_data(logging.ERROR, f'CrazyflieManager error: Could not start logging data, {exc} was not found in the Crazyflie TOC')
             except AttributeError as exc:
-                self._logger.log_server_data(f'Could not add log configuration, error: {exc}')
+                self._logger.log_server_data(logging.ERROR, f'CrazyflieManager error: Could not add log configuration: {exc}')
 
     def _setup_param(self, crazyflie: Crazyflie):
         crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=self._param_update_callback)
@@ -123,11 +124,11 @@ class CrazyflieManager(DroneManager):
     # Connection callbacks
 
     def _connected(self, link_uri: str):
-        self._logger.log_server_data(f'Connected to {link_uri}')
-        self._logger.log_drone_data(link_uri, 'Connected')
+        self._logger.log_server_data(logging.INFO, f'Connected to {link_uri}')
+        self._logger.log_drone_data(logging.INFO, link_uri, 'Connected')
 
         if self._mission_state != MissionState.Standby:
-            self._logger.log_server_data(f'CrazyflieManager warning: Ignoring drone connection during mission: {link_uri}')
+            self._logger.log_server_data(logging.WARN, f'CrazyflieManager warning: Ignoring drone connection during mission: {link_uri}')
             self._pending_crazyflies[link_uri].close_link()
             return
 
@@ -143,8 +144,8 @@ class CrazyflieManager(DroneManager):
         self._send_drone_ids()
 
     def _disconnected(self, link_uri: str):
-        self._logger.log_server_data(f'Disconnected from {link_uri}')
-        self._logger.log_drone_data(link_uri, 'Disconnected')
+        self._logger.log_server_data(logging.INFO, f'Disconnected from {link_uri}')
+        self._logger.log_drone_data(logging.INFO, link_uri, 'Disconnected')
         self._connected_crazyflies.pop(link_uri, None)
         self._send_drone_ids()
 
@@ -152,21 +153,21 @@ class CrazyflieManager(DroneManager):
         self._drone_leds.pop(link_uri, None)
 
     def _connection_failed(self, link_uri: str, msg: str):
-        self._logger.log_server_data(f'Connection to {link_uri} failed: {msg}')
-        self._logger.log_drone_data(link_uri, 'Connection failed')
+        self._logger.log_server_data(logging.WARN, f'Connection to {link_uri} failed: {msg}')
+        self._logger.log_drone_data(logging.WARN, link_uri, 'Connection failed')
         del self._pending_crazyflies[link_uri]
 
     def _connection_lost(self, link_uri: str, msg: str):
-        self._logger.log_server_data(f'Connection to {link_uri} lost: {msg}')
-        self._logger.log_drone_data(link_uri, 'Connection lost')
+        self._logger.log_server_data(logging.INFO, f'Connection to {link_uri} lost: {msg}')
+        self._logger.log_drone_data(logging.INFO, link_uri, 'Connection lost')
         self._connected_crazyflies.pop(link_uri, None) # Avoid double delete when Crazyflie disconnects
 
     # Log callbacks
 
     def _log_error_callback(self, logconf, msg):
-        self._logger.log_server_data(f'Error when logging {logconf.name}: {msg}')
+        self._logger.log_server_data(logging.ERROR, f'Error when logging {logconf.name}: {msg}')
 
     # Param callbacks
 
     def _param_update_callback(self, name, value):
-        self._logger.log_server_data(f'Param readback: {name}={value}')
+        self._logger.log_server_data(logging.INFO, f'Param readback: {name}={value}')

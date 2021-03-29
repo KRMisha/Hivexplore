@@ -6,5 +6,6 @@ export enum SocketEvent {
     MissionState = 'mission-state',
     MapPoints = 'map-points',
     SetLed = 'set-led',
-    // TODO: Add console log event
+    ClearMap = 'clear-map',
+    Log = 'log',
 }

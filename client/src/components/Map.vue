@@ -115,7 +115,7 @@ export default defineComponent({
             }
         });
 
-        socketClient!.bindMessage('clear-map', () => {
+        socketClient!.bindMessage(SocketEvent.ClearMap, () => {
             pointCount = 0;
             points.geometry.setDrawRange(0, pointCount);
         });

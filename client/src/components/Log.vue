@@ -28,6 +28,7 @@
 <script lang="ts">
 import { defineComponent, inject, onMounted, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
+import { SocketEvent } from '@/enums/socket-event';
 
 export default defineComponent({
     name: 'Log',
@@ -122,7 +123,7 @@ export default defineComponent({
             window.setInterval(renderNewLogs, renderIntervalMs);
         });
 
-        socketClient!.bindMessage('log', onLogReception);
+        socketClient!.bindMessage(SocketEvent.Log, onLogReception);
 
         addLogTab('Server');
         addLogTab('Map');

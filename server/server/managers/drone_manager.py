@@ -144,7 +144,7 @@ class DroneManager(ABC):
 
         if self._mission_state == MissionState.Standby:
             self._mission_count += 1
-            log_filename = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}_mission{self._mission_count}.log'
+            log_filename = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}_mission_{self._mission_count}.log'
             self._logger.setup(log_filename)
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):

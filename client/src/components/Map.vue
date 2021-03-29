@@ -115,6 +115,11 @@ export default defineComponent({
             }
         });
 
+        socketClient!.bindMessage('clear-map', () => {
+            pointCount = 0;
+            points.geometry.setDrawRange(0, pointCount);
+        });
+
         function saveAsImage() {
             const filename = `hivexplore_map_${getLocalTimestamp().replaceAll(':', '')}.png`;
             const url = renderer.domElement.toDataURL('image/png;base64');

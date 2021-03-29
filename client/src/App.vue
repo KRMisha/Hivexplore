@@ -1,4 +1,5 @@
 <template>
+    <div class="p-component p-grid p-jc-center p-ai-center p-mb-2 p-shadow-2 topbar">Hivexplore</div>
     <div class="p-grid p-flex-row-reverse">
         <div class="p-col-12 p-lg-6 p-xl-8">
             <Map />
@@ -54,13 +55,20 @@ export default defineComponent({
         };
     },
 });
-// TODO: Top bar
 // TODO: Semantic grouping inside all setup() functions
 // TODO: Nicer UI when no drones are connected
 // TODO: Improve map background color
 </script>
 
 <style lang="scss" scoped>
+.topbar {
+    height: 64px;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
 ul {
     width: 100%;
     list-style-type: none;

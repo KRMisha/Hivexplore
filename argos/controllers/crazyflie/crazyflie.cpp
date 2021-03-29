@@ -77,7 +77,7 @@ void CCrazyflieController::ControlStep() {
         break;
     }
 
-    if (isCrashed()) {
+    if (IsCrashed()) {
         m_droneStatus = DroneStatus::Crashed;
     }
 
@@ -414,7 +414,7 @@ bool CCrazyflieController::Land() {
     return false;
 }
 
-bool CCrazyflieController::isCrashed() {
+bool CCrazyflieController::IsCrashed() {
     if (m_droneStatus != DroneStatus::Crashed && (m_droneStatus == DroneStatus::Standby || m_droneStatus == DroneStatus::Landed)) {
         return false;
     }
@@ -428,11 +428,7 @@ bool CCrazyflieController::isCrashed() {
     }
 
     static constexpr std::uint8_t watchdogTimeout = 250;
-    if (m_watchdogCounter == watchdogTimeout) {
-        return true;
-    }
-
-    return false;
+    return m_watchdogCounter == watchdogTimeout;
 }
 
 void CCrazyflieController::ResetInternalStates() {

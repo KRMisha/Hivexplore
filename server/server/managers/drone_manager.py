@@ -142,8 +142,7 @@ class DroneManager(ABC):
             self._map_generator.clear()
 
         if self._mission_state == MissionState.Standby:
-            log_filename = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}.log'
-            self._logger.setup_logging(log_filename)
+            self._logger.setup_logging()
 
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):

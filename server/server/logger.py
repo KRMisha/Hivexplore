@@ -9,7 +9,7 @@ from server.tuples import Point
 if TYPE_CHECKING:
     from server.sockets.web_socket_server import WebSocketServer
 
-log_filename = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}_mission_0.log'
+log_filename = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}.log'
 
 
 class DebugInfoFilter(logging.Filter):

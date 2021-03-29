@@ -1,5 +1,6 @@
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 import { SocketEvent } from '@/enums/socket-event';
+import { Message } from '@/interfaces/message';
 
 const serverPort = 5678;
 const serverUrl = `ws://${window.location.hostname}:${serverPort}`;
@@ -48,7 +49,7 @@ export class SocketClient {
         this.socket = new WebSocket(serverUrl);
 
         this.socket.onmessage = (messageEvent: MessageEvent) => {
-            const message = JSON.parse(messageEvent.data);
+            const message: Message = JSON.parse(messageEvent.data);
 
             const eventCallbacks = this.callbacks.get(message.event);
 

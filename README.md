@@ -18,8 +18,6 @@ Or, if you already cloned the repo but forgot the `--recurse-submodules` option,
 git submodule update --init --recursive
 ```
 
-> Note: make sure the repo is cloned to a path without spaces. Crazyflie's firmware Makefile does not work if the project path contains spaces.
-
 ## Usage
 
 To open the repo in VS Code, use the multi-root workspace:

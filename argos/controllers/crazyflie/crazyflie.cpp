@@ -300,35 +300,6 @@ void CCrazyflieController::Explore() {
     }
 }
 
-// void CCrazyflieController::ReturnToBase() {
-//     switch (m_returningState) {
-//     case ReturningState::Return: {
-//         m_droneStatus = DroneStatus::Flying;
-
-//         static constexpr double distanceToReturnEpsilon = 0.05;
-
-//         CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
-//         m_pcPropellers->SetAbsolutePosition(targetPosition);
-
-//         if (std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
-//             std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
-//             m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
-//             m_returningState = ReturningState::Land;
-//         }
-//     } break;
-//     case ReturningState::Land: {
-//         m_droneStatus = DroneStatus::Landing;
-
-//         if (Land()) {
-//             m_returningState = ReturningState::Idle;
-//         }
-//     } break;
-//     case ReturningState::Idle:
-//         m_droneStatus = DroneStatus::Landed;
-//         break;
-//     }
-// }
-
 void CCrazyflieController::ReturnToBase() {
     // TODO: Add RSSI ?
     // If returned to base, land

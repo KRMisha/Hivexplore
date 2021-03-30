@@ -36,7 +36,14 @@
                             <div class="p-timeline-event-marker" :class="{ 'selected-marker': stateProps.item === missionState }"></div>
                         </template>
                         <template #content="stateProps">
-                            <div :class="{ 'selected-content': stateProps.item === missionState }">{{ stateProps.item }}</div>
+                            <div
+                                :class="{
+                                    'selected-content': stateProps.item === missionState,
+                                    'p-error': stateProps.item === MissionState.Emergency,
+                                }"
+                            >
+                                {{ stateProps.item }}
+                            </div>
                         </template>
                     </Timeline>
                 </div>
@@ -70,6 +77,16 @@ export default defineComponent({
         function setMissionState(missionState: MissionState) {
             socketClient!.sendMessage('mission-state', missionState);
         }
+
+        const missionStates = computed((): MissionState[] => {
+            const states = Object.values(MissionState);
+            const stateToRemove = missionState.value !== MissionState.Emergency ? MissionState.Emergency : MissionState.Returning;
+            const index = states.indexOf(stateToRemove);
+            if (index !== -1) {
+                states.splice(index, 1);
+            }
+            return states;
+        });
 
         function onStartMissionButtonClick(event: Event) {
             if (wasEmergencyLandingCalled) {
@@ -120,7 +137,7 @@ export default defineComponent({
 
         return {
             missionState,
-            missionStates: Object.values(MissionState), // TODO: Use computed here to dynamically add/remove emergency
+            missionStates,
             MissionState,
             setMissionState,
             onStartMissionButtonClick,

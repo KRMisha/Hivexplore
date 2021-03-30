@@ -2,8 +2,8 @@
     <div class="stretched">
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
-            <div class="p-grid p-ai-stretch">
-                <div class="p-col p-d-flex p-flex-column p-jc-around">
+            <div class="p-grid p-m-0 p-ai-stretch stretched">
+                <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-evenly">
                     <div class="p-d-flex p-flex-column">
                         <Button
                             label="Start mission"
@@ -30,7 +30,7 @@
                         <Chip :label="droneCount.toString()" :class="{ 'colored-chip': droneCount > 0 }" />
                     </div>
                 </div>
-                <div class="p-col">
+                <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-center">
                     <Timeline :value="missionStates" class="timeline">
                         <template #marker="stateProps">
                             <div class="p-timeline-event-marker" :class="{ 'selected-marker': stateProps.item === missionState }"></div>
@@ -143,8 +143,15 @@ div::v-deep(.p-panel) {
     display: flex;
     flex-direction: column;
 
+    .p-panel-header {
+        height: 72px;
+    }
+
     .p-toggleable-content {
         height: 100%;
+        .p-panel-content {
+            height: 100%;
+        }
     }
 }
 
@@ -155,6 +162,10 @@ div::v-deep(.p-panel) {
 .colored-chip {
     color: var(--primary-color-text);
     background-color: var(--primary-color);
+}
+
+.timeline {
+    flex-grow: 0;
 }
 
 @media (max-width: 576px), (min-width: 992px) and (max-width: 1280px) {

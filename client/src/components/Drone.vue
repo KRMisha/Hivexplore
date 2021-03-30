@@ -74,8 +74,6 @@ export default defineComponent({
                     return 'var(--primary-color)';
                 case DroneStatus.Crashed:
                     return 'var(--orange-400)';
-                case DroneStatus.Drained:
-                    return 'var(--blue-400)';
                 default:
                     return undefined;
             }

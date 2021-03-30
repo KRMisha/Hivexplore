@@ -68,11 +68,9 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        //if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
-            //m_missionState = MissionState::Returning;
-        //} else if (!AvoidObstacle()) {
+        if (!AvoidObstacle()) {
             Explore();
-        //}
+        }
         break;
     case MissionState::Returning:
         if (!AvoidObstacle()) {
@@ -83,11 +81,7 @@ void CCrazyflieController::ControlStep() {
         EmergencyLand();
         break;
     case MissionState::Landed:
-        if (m_pcBattery->GetReading().AvailableCharge * 100 <= 30) {
-            m_droneStatus = DroneStatus::Drained;
-        } else {
             m_droneStatus = DroneStatus::Landed;
-        }
         break;
     }
 

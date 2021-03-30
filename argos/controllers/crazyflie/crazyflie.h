@@ -144,7 +144,7 @@ private:
 
     // Return to base variables
     bool m_isRotateToBaseFinished = true;
-    CRadians m_orientationToBase;
+    CRadians m_targetYawToBase;
     std::uint16_t m_stabilizeRotationCounter;
     std::uint16_t m_passedObstacleCounter;
     std::uint16_t m_returnAbsoluteCounter;

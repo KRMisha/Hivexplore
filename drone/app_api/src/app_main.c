@@ -45,6 +45,7 @@
 #include "pm.h"
 #include "app_channel.h"
 #include "commander.h"
+#include "sitaw.h"
 
 #include "app_main.h"
 
@@ -85,6 +86,8 @@ static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static point_t positionReading;
 static float yawReading;
+static float rollReading;
+static float pitchReading;
 static uint8_t rssiReading;
 // static uint8_t batteryReading;
 // TODO: Remove
@@ -120,6 +123,8 @@ void appMain(void) {
     const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
     const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
     const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
+    const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
+    const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
     // const logVarId_t batteryId = logGetVarId("pm", "batteryLevel");
 
@@ -136,7 +141,7 @@ void appMain(void) {
 
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
-    const bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
+    bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
     if (!isFlowDeckInitialized) {
         DEBUG_PRINT("FlowDeckV2 is not connected\n");
     }
@@ -166,6 +171,9 @@ void appMain(void) {
         yawReading = logGetFloat(yawId);
 
         rssiReading = logGetUint(rssiId); // TODO: should this be float?
+        rollReading = logGetFloat(rollId);
+        pitchReading = logGetFloat(pitchId);
+
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
 
         // batteryReading = logGetUint(batteryId);
@@ -208,6 +216,12 @@ void appMain(void) {
         case MISSION_LANDED:
             droneStatus = STATUS_LANDED;
             break;
+        }
+
+        if (isCrashed()) {
+            isOutOfService = true;
+            droneStatus = STATUS_CRASHED;
+            memset(&setPoint, 0, sizeof(setpoint_t));
         }
 
         static const uint8_t TASK_PRIORITY = 3;
@@ -429,6 +443,33 @@ bool land(void) {
         return true;
     }
     return false;
+}
+
+bool isCrashed(void) {
+    bool isCrashed = false;
+
+    if (sitAwTuDetected()) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: firmware tumble detected\n");
+    }
+
+    if (sitAwFFDetected()) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: firmware freefall detected\n");
+    }
+
+    static const uint8_t maxAngle = 55;
+    if (fabs(rollReading) > maxAngle) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: high roll angle detected\n");
+    }
+
+    if (fabs(pitchReading) > maxAngle) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: high pitch angle detected\n");
+    }
+
+    return isCrashed;
 }
 
 void updateWaypoint(void) {

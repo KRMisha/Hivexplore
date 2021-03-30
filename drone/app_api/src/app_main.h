@@ -19,6 +19,7 @@ bool liftoff(void);
 bool forward(void);
 bool rotate(void);
 bool land(void);
+bool isCrashed(void);
 
 void updateWaypoint(void);
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);

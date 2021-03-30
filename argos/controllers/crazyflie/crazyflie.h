@@ -84,6 +84,7 @@ private:
     bool Brake();
     bool Rotate();
     bool Land();
+    bool IsCrashed();
 
     void ResetInternalStates();
 
@@ -149,6 +150,10 @@ private:
     std::uint16_t m_passedObstacleCounter;
     std::uint16_t m_returnAbsoluteCounter;
     std::uint16_t m_exploreCounter;
+
+    // Crash detection variables
+    CVector3 m_lastActivePosition;
+    std::uint32_t m_watchdogCounter = 0;
 };
 
 #endif

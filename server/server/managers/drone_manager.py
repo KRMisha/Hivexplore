@@ -148,13 +148,13 @@ class DroneManager(ABC):
             except KeyError:
                 self._logger.log_server_data(
                     logging.WARNING,
-                    'DroneManager warning: One or more drone\'s battery level is unknown, preventing the mission from being started')
+                    'DroneManager warning: One or more drone\'s battery level is unknown, preventing the mission from starting')
                 return
 
             if can_drones_takeoff is False:
                 self._logger.log_server_data(
                     logging.WARNING,
-                    'DroneManager warning: One or more drone under the minimum battery level is preventing the mission from being started')
+                    'DroneManager warning: One or more drone under the minimum battery level is preventing the mission from starting')
                 return
 
         self._mission_state = new_mission_state

@@ -146,6 +146,7 @@ export default defineComponent({
     },
 });
 // TODO: Responsive map container height
+// TODO: Remove FPS counter
 </script>
 
 <style lang="scss" scoped>

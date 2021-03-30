@@ -7,20 +7,23 @@
                     <div class="p-d-flex p-flex-column">
                         <Button
                             label="Start mission"
+                            icon="pi pi-send"
                             class="p-my-1"
                             :disabled="droneCount === 0 || missionState !== MissionState.Standby"
                             @click="onStartMissionButtonClick($event)"
                         />
                         <Button
                             label="Return to base"
+                            icon="pi pi-home"
                             class="p-my-1"
                             :disabled="droneCount === 0 || missionState !== MissionState.Exploring"
                             @click="setMissionState(MissionState.Returning)"
                         />
                         <Button
                             :label="endMissionButtonLabel"
+                            :icon="endMissionButtonIcon"
                             class="p-my-1"
-                            :style="{ 'background-color': endMissionButtonColor }"
+                            :class="endMissionButtonClass"
                             :disabled="droneCount === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
                             @click="onEndMissionButtonClick($event)"
                         />
@@ -107,12 +110,18 @@ export default defineComponent({
             }
         }
 
-        const endMissionButtonLabel = computed((): string => {
+        const endMissionButtonLabel = computed(() => {
             return missionState.value === MissionState.Landed ? 'End mission' : 'Emergency land';
         });
 
-        const endMissionButtonColor = computed((): string => {
-            return missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red';
+        const endMissionButtonIcon = computed(() => {
+            return missionState.value === MissionState.Landed ? 'pi pi-replay' : 'pi pi-exclamation-circle';
+        });
+
+        const endMissionButtonClass = computed(() => {
+            return {
+                'p-button-danger': missionState.value !== MissionState.Landed,
+            };
         });
 
         function onEndMissionButtonClick(event: Event) {
@@ -142,13 +151,15 @@ export default defineComponent({
             setMissionState,
             onStartMissionButtonClick,
             endMissionButtonLabel,
-            endMissionButtonColor,
+            endMissionButtonIcon,
+            endMissionButtonClass,
             onEndMissionButtonClick,
         };
     },
 });
 // TODO: Simplify logic
 // TODO: Fix colors
+// TODO: Remove explicit type annotations for computed()
 </script>
 
 <style lang="scss" scoped>

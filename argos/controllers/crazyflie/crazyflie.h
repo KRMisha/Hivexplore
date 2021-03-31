@@ -56,7 +56,6 @@ enum class DroneStatus {
     Landing,
     Landed,
     Crashed,
-    Drained,
 };
 
 class CCrazyflieController : public CCI_Controller {
@@ -147,9 +146,9 @@ private:
     bool m_isRotateToBaseFinished = true;
     CRadians m_targetYawToBase;
     std::uint16_t m_stabilizeRotationCounter;
-    std::uint16_t m_passedObstacleCounter;
-    std::uint16_t m_returnAbsoluteCounter;
-    std::uint16_t m_exploreCounter;
+    std::uint16_t m_obstacleClearedCounter;
+    std::uint16_t m_returnWatchdog;
+    std::uint16_t m_exploreWatchdog;
 
     // Crash detection variables
     CVector3 m_lastActivePosition;

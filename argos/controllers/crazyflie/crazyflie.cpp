@@ -81,7 +81,7 @@ void CCrazyflieController::ControlStep() {
         EmergencyLand();
         break;
     case MissionState::Landed:
-            m_droneStatus = DroneStatus::Landed;
+        m_droneStatus = DroneStatus::Landed;
         break;
     }
 
@@ -304,10 +304,11 @@ void CCrazyflieController::ReturnToBase() {
     // TODO: Add RSSI ?
     // If returned to base, land
     static constexpr double distanceToReturnEpsilon = 0.05;
-    static constexpr uint8_t maxRssiReturned = 10;
-    if (m_rssiReading <= maxRssiReturned &&
+    static constexpr uint8_t rssiLandingThreshold = 5;
+    // changer pour or ?
+    if (m_rssiReading <= rssiLandingThreshold ||
         std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
-        std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
+            std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
         m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
         m_returningState = ReturningState::Land;
     }
@@ -331,8 +332,8 @@ void CCrazyflieController::ReturnToBase() {
 
             // Calculate rotation angle to turn towards base
             m_targetYawToBase = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
-                                                      m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
-                                  CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
+                                                    m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
+                                CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
 
             m_pcPropellers->SetAbsoluteYaw(m_targetYawToBase);
             m_isRotateToBaseFinished = false;
@@ -355,7 +356,7 @@ void CCrazyflieController::ReturnToBase() {
             m_stabilizeRotationCounter--;
         }
 
-        // If the drone rotation is towards its base is stable
+        // If the drone orientation is towards its base and is stable
         if (m_stabilizeRotationCounter == 0) {
             m_isRotateToBaseFinished = true;
             // Reset counter
@@ -363,6 +364,7 @@ void CCrazyflieController::ReturnToBase() {
 
             DebugPrint("RotateTowardsBase done, return begins \n");
             if (m_sensorReadings["front"] <= returnObstacleThreshold) {
+                // Go to explore algorithm
                 m_returningState = ReturningState::Brake;
             } else {
                 m_returningState = ReturningState::Return;
@@ -373,18 +375,17 @@ void CCrazyflieController::ReturnToBase() {
         m_droneStatus = DroneStatus::Flying;
 
         // Go to explore algorithm when a wall is detected in front of the drone
-        if ((m_sensorReadings["front"] <= returnObstacleThreshold) || m_returnAbsoluteCounter == 0) {
+        if ((m_sensorReadings["front"] <= returnObstacleThreshold) || m_returnWatchdog == 0) {
             // Reset counter
-            m_returnAbsoluteCounter = maximumReturnTicks;
+            m_returnWatchdog = maximumReturnTicks;
             DebugPrint("Front obstacle detected, explore algo begins \n");
             m_returningState = ReturningState::Brake;
         } else {
             // Go to base using absolute positions
             CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
             m_pcPropellers->SetAbsolutePosition(targetPosition);
-            m_returnAbsoluteCounter--;
+            m_returnWatchdog--;
         }
-
     } break;
     // Explore algorithm
     case ReturningState::Brake: {
@@ -407,12 +408,11 @@ void CCrazyflieController::ReturnToBase() {
         m_droneStatus = DroneStatus::Flying;
 
         // Obstacle has been passed go back to returning with absolute positions
-        if (m_sensorReadings["right"] > edgeDetectedThreshold && m_passedObstacleCounter == 0 ||
-            m_exploreCounter == 0) {
+        if (m_sensorReadings["right"] > edgeDetectedThreshold && m_obstacleClearedCounter == 0 || m_exploreWatchdog == 0) {
             DebugPrint("Obstacle has been passed \n");
             // Reset counters
-            m_exploreCounter = maximumExploreTicks;
-            m_passedObstacleCounter = stabilizeReadingTicks;
+            m_exploreWatchdog = maximumExploreTicks;
+            m_obstacleClearedCounter = stabilizeReadingTicks;
 
             m_returningState = ReturningState::BrakeTowardsBase;
             break;
@@ -421,13 +421,13 @@ void CCrazyflieController::ReturnToBase() {
         if (!Forward()) {
             m_returningState = ReturningState::Brake;
         }
-        m_exploreCounter--;
+        m_exploreWatchdog--;
 
         // Reset right sensor reading counter if obstacle on the right is detected
         if (m_sensorReadings["right"] > edgeDetectedThreshold) {
-            m_passedObstacleCounter--;
+            m_obstacleClearedCounter--;
         } else {
-            m_passedObstacleCounter = stabilizeReadingTicks;
+            m_obstacleClearedCounter = stabilizeReadingTicks;
         }
 
     } break;
@@ -589,9 +589,9 @@ void CCrazyflieController::ResetInternalStates() {
     m_isRotateCommandFinished = true;
 
     m_stabilizeRotationCounter = stabilizationRotationTicks;
-    m_passedObstacleCounter = stabilizeReadingTicks;
-    m_returnAbsoluteCounter = maximumReturnTicks;
-    m_exploreCounter = maximumExploreTicks;
+    m_obstacleClearedCounter = stabilizeReadingTicks;
+    m_returnWatchdog = maximumReturnTicks;
+    m_exploreWatchdog = maximumExploreTicks;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

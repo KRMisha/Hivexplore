@@ -59,7 +59,7 @@
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
-static const float EXPLORATION_HEIGHT = 0.2f;
+static const float EXPLORATION_HEIGHT = 0.2f; // 0.5f
 static const float CRUISE_VELOCITY = 0.1f; // 0.2f
 static const float MAXIMUM_VELOCITY = 0.5f; // 0.7f
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
@@ -107,8 +107,8 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYawToBase;
 
-static uint16_t exploreCounter = MAXIMUM_EXPLORE_TICKS;
-static uint16_t passedObstacleCounter = MAXIMUM_READING_TICKS;
+static uint16_t exploreWatchdog = MAXIMUM_EXPLORE_TICKS;
+static uint16_t obstacleClearedCounter = MAXIMUM_READING_TICKS;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -289,10 +289,11 @@ void explore(void) {
 }
 
 void returnToBase(void) {
-    // TODO: Add RSSI ? (maxRssiReturned)
+    // TODO: Add RSSI ? (rssiLandingThreashold)
     // If returned to base, land
     static const double distanceToReturnEpsilon = 0.005;
-    if (fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon && fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
+    if (fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
+        fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
         returningState = RETURNING_LAND;
     }
 
@@ -304,7 +305,9 @@ void returnToBase(void) {
         targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
         DEBUG_PRINT("Target Yaw: %f\n", (double)targetYawToBase);
         DEBUG_PRINT("Current yaw: %f\n", (double)yawReading);
-        DEBUG_PRINT("Difference: (%f, %f)\n", (double)(initialPosition.x - positionReading.x), (double)(initialPosition.y - positionReading.y));
+        DEBUG_PRINT("Difference: (%f, %f)\n",
+                    (double)(initialPosition.x - positionReading.x),
+                    (double)(initialPosition.y - positionReading.y));
 
         // If the drone is towards its base
         static const double yawEpsilon = 10;
@@ -341,7 +344,7 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
         DEBUG_PRINT("Obstacle. Rotating\n");
 
-        if(rotate()) {
+        if (rotate()) {
             returningState = RETURNING_FORWARD;
         }
     } break;
@@ -351,25 +354,25 @@ void returnToBase(void) {
 
         // Obstacle has been passed go back to returning with absolute positions
         static const uint16_t OPEN_SPACE_THRESHOLD = 300;
-        if ((rightSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && passedObstacleCounter == 0) || exploreCounter == 0) {
+        if ((rightSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && obstacleClearedCounter == 0) || exploreWatchdog == 0) {
             // Reset counters
-            exploreCounter = MAXIMUM_EXPLORE_TICKS;
-            passedObstacleCounter = MAXIMUM_READING_TICKS;
+            exploreWatchdog = MAXIMUM_EXPLORE_TICKS;
+            obstacleClearedCounter = MAXIMUM_READING_TICKS;
             returningState = RETURNING_RETURN;
             break;
         }
 
         if (!forward()) {
-            passedObstacleCounter = MAXIMUM_READING_TICKS;
+            obstacleClearedCounter = MAXIMUM_READING_TICKS;
             returningState = RETURNING_ROTATE;
         }
-        exploreCounter--;
+        exploreWatchdog--;
 
         // Reset right sensor reading counter if obstacle on the right is detected
         if (rightSensorReading > EDGE_DETECTED_THRESHOLD) {
-            passedObstacleCounter--;
+            obstacleClearedCounter--;
         } else {
-            passedObstacleCounter = MAXIMUM_READING_TICKS;
+            obstacleClearedCounter = MAXIMUM_READING_TICKS;
         }
 
     } break;

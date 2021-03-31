@@ -150,9 +150,9 @@ void appMain(void) {
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
-        currentPosition.x = logGetUint(positionXId);
-        currentPosition.y = logGetUint(positionYId);
-        currentPosition.z = logGetUint(positionZId);
+        currentPosition.x = logGetFloat(positionXId);
+        currentPosition.y = logGetFloat(positionYId);
+        currentPosition.z = logGetFloat(positionZId);
 
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);

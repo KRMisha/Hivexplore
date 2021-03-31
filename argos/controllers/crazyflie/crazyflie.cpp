@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <stdlib.h>
+#include <time.h>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"
@@ -16,9 +18,9 @@ namespace {
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
 
     static constexpr std::uint16_t returnObstacleThreshold = 700;
-    static constexpr std::uint16_t stabilizationRotationTicks = 40;
+    static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t stabilizeReadingTicks = 70;
-    static constexpr std::uint16_t maximumExploreTicks = 200; // Make it random between 200 and 600
+    static uint16_t maximumExploreTicks;
     static constexpr std::uint16_t maximumReturnTicks = 400;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
@@ -111,14 +113,14 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Orientation group
     CRadians angleRadians;
-    CVector3 vector;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
+    CVector3 unitaryAngleVector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, unitaryAngleVector);
     Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
     LogVariableMap orientationLog;
-    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
-    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
+    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * unitaryAngleVector.GetX()));
+    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * unitaryAngleVector.GetY()));
     // Rotate the drone 90 degrees clockwise to make a yaw of 0 face forward
-    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ() - 90.0));
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * unitaryAngleVector.GetZ() - 90.0));
     logDataMap.emplace_back("orientation", orientationLog);
 
     // Position group
@@ -313,6 +315,7 @@ void CCrazyflieController::ReturnToBase() {
         m_returningState = ReturningState::Land;
     }
 
+    maximumExploreTicks = random() % 400 + 200;
     switch (m_returningState) {
     case ReturningState::BrakeTowardsBase: {
         m_droneStatus = DroneStatus::Flying;
@@ -340,9 +343,9 @@ void CCrazyflieController::ReturnToBase() {
         }
         // Get current absolute yaw
         CRadians angleRadians;
-        CVector3 vector;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, vector);
-        CRadians currentAbsoluteYaw = angleRadians * vector.GetZ();
+        CVector3 unitaryAngleVector;
+        m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, unitaryAngleVector);
+        CRadians currentAbsoluteYaw = angleRadians * unitaryAngleVector.GetZ();
 
         // If the drone is towards its base, decrease stabilize rotation counter
         static const CRadians yawEpsilon = CRadians::PI / 64;
@@ -360,7 +363,7 @@ void CCrazyflieController::ReturnToBase() {
         if (m_stabilizeRotationCounter == 0) {
             m_isRotateToBaseFinished = true;
             // Reset counter
-            m_stabilizeRotationCounter = stabilizationRotationTicks;
+            m_stabilizeRotationCounter = stabilizeRotationTicks;
 
             DebugPrint("RotateTowardsBase done, return begins \n");
             if (m_sensorReadings["front"] <= returnObstacleThreshold) {
@@ -588,7 +591,7 @@ void CCrazyflieController::ResetInternalStates() {
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
 
-    m_stabilizeRotationCounter = stabilizationRotationTicks;
+    m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_obstacleClearedCounter = stabilizeReadingTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_exploreWatchdog = maximumExploreTicks;

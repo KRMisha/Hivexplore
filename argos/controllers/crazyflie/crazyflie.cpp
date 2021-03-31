@@ -57,6 +57,7 @@ void CCrazyflieController::ControlStep() {
     switch (m_missionState) {
     case MissionState::Standby:
         m_droneStatus = DroneStatus::Standby;
+        ResetInternalStates();
         break;
     case MissionState::Exploring:
         if (!AvoidObstacle()) {
@@ -76,6 +77,10 @@ void CCrazyflieController::ControlStep() {
         break;
     }
 
+    if (IsCrashed()) {
+        m_droneStatus = DroneStatus::Crashed;
+    }
+
     m_previousPosition = m_pcPos->GetReading().Position;
 }
 
@@ -91,10 +96,10 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     // Fill map progressively
     LogConfigs logDataMap;
 
-    // BatteryLevel group
+    // Battery level group
     LogVariableMap batteryLevelLog;
     batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
-    logDataMap.emplace_back("BatteryLevel", batteryLevelLog);
+    logDataMap.emplace_back("battery-level", batteryLevelLog);
 
     // Orientation group
     CRadians angleRadians;
@@ -104,8 +109,9 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     LogVariableMap orientationLog;
     orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * vector.GetX()));
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * vector.GetY()));
-    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ()));
-    logDataMap.emplace_back("Orientation", orientationLog);
+    // Rotate the drone 90 degrees clockwise to make a yaw of 0 face forward
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * vector.GetZ() - 90.0));
+    logDataMap.emplace_back("orientation", orientationLog);
 
     // Position group
     CVector3 position = m_pcPos->GetReading().Position;
@@ -113,30 +119,30 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     positionLog.emplace("stateEstimate.x", static_cast<float>(position.GetX()));
     positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
-    logDataMap.emplace_back("Position", positionLog);
+    logDataMap.emplace_back("position", positionLog);
 
     // Velocity group
     LogVariableMap velocityLog;
     velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocity.GetX()));
     velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocity.GetY()));
     velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocity.GetZ()));
-    logDataMap.emplace_back("Velocity", velocityLog);
+    logDataMap.emplace_back("velocity", velocityLog);
 
     // Range group - must be added after orientation and position
     static const std::array<std::string, 6> rangeLogNames =
         {"range.front", "range.left", "range.back", "range.right", "range.up", "range.zrange"};
     LogVariableMap rangeLog = GetSensorReadings<std::uint16_t, LogVariableMap::mapped_type>(rangeLogNames);
-    logDataMap.emplace_back("Range", rangeLog);
+    logDataMap.emplace_back("range", rangeLog);
 
     // RSSI group
     LogVariableMap rssiLog;
     rssiLog.emplace("radio.rssi", m_rssiReading);
-    logDataMap.emplace_back("Rssi", rssiLog);
+    logDataMap.emplace_back("rssi", rssiLog);
 
-    // DroneStatus group
+    // Drone status group
     LogVariableMap droneStatusLog;
     droneStatusLog.emplace("hivexplore.droneStatus", static_cast<std::uint8_t>(m_droneStatus));
-    logDataMap.emplace_back("DroneStatus", droneStatusLog);
+    logDataMap.emplace_back("drone-status", droneStatusLog);
 
     return logDataMap;
 }
@@ -406,6 +412,37 @@ bool CCrazyflieController::Land() {
         return true;
     }
     return false;
+}
+
+bool CCrazyflieController::IsCrashed() {
+    if (m_droneStatus != DroneStatus::Crashed && (m_droneStatus == DroneStatus::Standby || m_droneStatus == DroneStatus::Landed)) {
+        return false;
+    }
+
+    static constexpr double positionEpsilon = 0.005;
+    if ((m_lastActivePosition - m_pcPos->GetReading().Position).Length() <= positionEpsilon) {
+        m_watchdogCounter++;
+    } else {
+        m_watchdogCounter = 0;
+        m_lastActivePosition = m_pcPos->GetReading().Position;
+    }
+
+    static constexpr std::uint8_t watchdogTimeout = 250;
+    return m_watchdogCounter == watchdogTimeout;
+}
+
+void CCrazyflieController::ResetInternalStates() {
+    m_exploringState = ExploringState::Idle;
+    m_returningState = ReturningState::Return;
+    m_emergencyState = EmergencyState::Land;
+
+    m_isAvoidingObstacle = false;
+    m_exploringStateOnHold = ExploringState::Idle;
+    m_returningStateOnHold = ReturningState::Return;
+
+    m_isForwardCommandFinished = true;
+    m_isBrakeCommandFinished = true;
+    m_isRotateCommandFinished = true;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

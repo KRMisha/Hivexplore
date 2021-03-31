@@ -1,0 +1,47 @@
+version: 1
+disable_existing_loggers: true
+
+formatters:
+    hivexplore_formatter:
+        format: '%(asctime)s - %(name)s [%(levelname)s] - %(message)s'
+
+filters:
+    debug_info_filter:
+        (): ext://server.logger.DebugInfoFilter
+
+handlers:
+    console_stdout:
+        class: logging.StreamHandler
+        level: INFO
+        formatter: hivexplore_formatter
+        filters: [debug_info_filter]
+        stream: ext://sys.stdout
+
+    console_stderr:
+        class: logging.StreamHandler
+        level: WARN
+        formatter: hivexplore_formatter
+        stream: ext://sys.stderr
+
+    file:
+        class: logging.FileHandler
+        level: INFO
+        formatter: hivexplore_formatter
+        filename: ext://server.logger.log_filename
+        encoding: utf8
+
+loggers:
+    cflib:
+        level: ERROR
+        handlers: [file]
+        propagate: yes
+
+    hivexplore:
+        level: INFO
+        handlers: [file]
+        propagate: yes
+
+root:
+    level: NOTSET
+    handlers: [console_stdout, console_stderr]
+    propagate: yes

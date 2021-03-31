@@ -388,7 +388,8 @@ bin/vendor:
 	mkdir -p bin/vendor
 
 libarm_math.a:
-	+$(MAKE) -C $(CRAZYFLIE_BASE)/tools/make/cmsis_dsp/ CRAZYFLIE_BASE=$(abspath $(CRAZYFLIE_BASE)) PROJ_ROOT=$(CURDIR) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE)
+	+$(MAKE) -C $(CRAZYFLIE_BASE)/tools/make/cmsis_dsp/ CRAZYFLIE_BASE=$(shell realpath --relative-to $(CRAZYFLIE_BASE)/tools/make/cmsis_dsp/ $(CRAZYFLIE_BASE)) \
+		PROJ_ROOT=$(shell realpath --relative-to $(CRAZYFLIE_BASE)/tools/make/cmsis_dsp/ "$(CURDIR)") V=$(V) CROSS_COMPILE=$(CROSS_COMPILE)
 
 clean_version:
 ifeq ($(SHELL),/bin/sh)
@@ -420,13 +421,13 @@ endif
 #Flash the stm.
 flash:
 	$(OPENOCD) -d2 -f $(OPENOCD_INTERFACE) $(OPENOCD_CMDS) -f $(OPENOCD_TARGET) -c init -c targets -c "reset halt" \
-                 -c "flash write_image erase $(PROG).bin $(LOAD_ADDRESS) bin" \
-                 -c "verify_image $(PROG).bin $(LOAD_ADDRESS) bin" -c "reset run" -c shutdown
+		-c "flash write_image erase $(PROG).bin $(LOAD_ADDRESS) bin" \
+		-c "verify_image $(PROG).bin $(LOAD_ADDRESS) bin" -c "reset run" -c shutdown
 
 #verify only
 flash_verify:
 	$(OPENOCD) -d2 -f $(OPENOCD_INTERFACE) $(OPENOCD_CMDS) -f $(OPENOCD_TARGET) -c init -c targets -c "reset halt" \
-                 -c "verify_image $(PROG).bin $(LOAD_ADDRESS) bin" -c "reset run" -c shutdown
+		-c "verify_image $(PROG).bin $(LOAD_ADDRESS) bin" -c "reset run" -c shutdown
 
 flash_dfu:
 	$(DFU_UTIL) -a 0 -D $(PROG).dfu

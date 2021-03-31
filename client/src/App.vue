@@ -9,22 +9,15 @@
         </div>
     </div>
     <div class="p-grid">
-        <ul v-if="droneIds.length > 0">
-            <li v-for="droneId in droneIds" :key="droneId">
-                <Drone :droneId="droneId" />
-            </li>
-        </ul>
-        <div v-else>
-            ✂ No drones connected ✂
-        </div>
+        <DroneList />
         <Log />
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, provide, ref } from 'vue';
+import { defineComponent, onUnmounted, provide } from 'vue';
 import Control from '@/components/Control.vue';
-import Drone from '@/components/Drone.vue';
+import DroneList from '@/components/DroneList.vue';
 import Log from '@/components/Log.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
@@ -33,7 +26,7 @@ export default defineComponent({
     name: 'App',
     components: {
         Control,
-        Drone,
+        DroneList,
         Log,
         Map,
     },
@@ -41,24 +34,16 @@ export default defineComponent({
         const socketClient = new SocketClient();
         provide('socketClient', socketClient);
 
-        const droneIds = ref<string[]>([]);
-        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
-            droneIds.value = newDroneIds;
-        });
-
         onUnmounted(() => {
             socketClient.close();
         });
-
-        return {
-            droneIds,
-        };
     },
 });
 // TODO: Semantic grouping inside all setup() functions
-// TODO: Nicer UI when no drones are connected
 // TODO: Improve map background color
 // TODO: Check tab order potential issue caused by p-flex-row-reverse
+// TODO: Investigate issue with non-null assertions for injections
+// TODO: Investigate using only one grid for main UI layout
 </script>
 
 <style lang="scss" scoped>
@@ -68,10 +53,5 @@ export default defineComponent({
     background-color: var(--primary-color);
     font-size: 1.5rem;
     font-weight: 500;
-}
-
-ul {
-    width: 100%;
-    list-style-type: none;
 }
 </style>

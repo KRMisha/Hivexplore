@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 // Enums
 typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING, MISSION_EMERGENCY, MISSION_LANDED } mission_state_t;

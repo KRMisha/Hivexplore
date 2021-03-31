@@ -59,12 +59,13 @@
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
-static const float EXPLORATION_HEIGHT = 0.2f; // 0.5f
+static const float EXPLORATION_HEIGHT = 0.5f; // 0.5f
 static const float CRUISE_VELOCITY = 0.1f; // 0.2f
 static const float MAXIMUM_VELOCITY = 0.5f; // 0.7f
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint16_t MAXIMUM_EXPLORE_TICKS = 200;
-static const uint16_t MAXIMUM_READING_TICKS = 200;
+static const uint16_t STABILIZE_READING_TICKS = 400;
+static const uint16_t MAXIMUM_RSSI_READINGS = 10;
 
 // States
 static mission_state_t missionState = MISSION_STANDBY;
@@ -88,7 +89,10 @@ static point_t positionReading;
 static float yawReading;
 static float rollReading;
 static float pitchReading;
+
 static uint8_t rssiReading;
+static uint8_t* rssiReadings;
+static uint8_t rssiIndex = 0;
 
 // TODO: Remove
 // static float kalmanReadingX;
@@ -108,10 +112,12 @@ static float targetYawRate;
 static float targetYawToBase;
 
 static uint16_t exploreWatchdog = MAXIMUM_EXPLORE_TICKS;
-static uint16_t obstacleClearedCounter = MAXIMUM_READING_TICKS;
+static uint16_t obstacleClearedCounter = STABILIZE_READING_TICKS;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
+
+    rssiReadings = calloc(MAXIMUM_RSSI_READINGS, sizeof(uint8_t));
 
     const logVarId_t frontSensorId = logGetVarId("range", "front");
     const logVarId_t leftSensorId = logGetVarId("range", "left");
@@ -173,7 +179,7 @@ void appMain(void) {
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
 
-        (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
+        // (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
 
         // TODO: Remove
         // kalmanReadingX = logGetFloat(kalmanX);
@@ -261,6 +267,7 @@ void explore(void) {
         if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
             DEBUG_PRINT("Liftoff\n");
             initialPosition = positionReading;
+            DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
             exploringState = EXPLORING_LIFTOFF;
         }
     } break;
@@ -289,11 +296,26 @@ void explore(void) {
 }
 
 void returnToBase(void) {
+    rssiReadings[rssiIndex] = rssiReading;
+    rssiIndex = (rssiIndex + 1) % MAXIMUM_RSSI_READINGS;
+
+    uint8_t nRssiValues = 0;
+    uint16_t rssiValuesSum = 0;
+    for (int i = 0; i < MAXIMUM_RSSI_READINGS; i++) {
+        if (rssiReadings[i] != 0) {
+            nRssiValues++;
+            rssiValuesSum += rssiReadings[i];
+        }
+    }
+    uint8_t rssiAverage = rssiValuesSum / nRssiValues;
+    DEBUG_PRINT("Rssi average: %i\n", rssiAverage);
     // TODO: Add RSSI ? (rssiLandingThreashold)
     // If returned to base, land
     static const double distanceToReturnEpsilon = 0.005;
     if (fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
         fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
+        DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
+        DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
         returningState = RETURNING_LAND;
     }
 
@@ -305,12 +327,9 @@ void returnToBase(void) {
         targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
         DEBUG_PRINT("Target Yaw: %f\n", (double)targetYawToBase);
         DEBUG_PRINT("Current yaw: %f\n", (double)yawReading);
-        DEBUG_PRINT("Difference: (%f, %f)\n",
-                    (double)(initialPosition.x - positionReading.x),
-                    (double)(initialPosition.y - positionReading.y));
 
         // If the drone is towards its base
-        static const double yawEpsilon = 10;
+        static const double yawEpsilon = 5;
         double yawDifference = fabs(targetYawToBase - yawReading);
         DEBUG_PRINT("Yaw difference: %f\n", yawDifference);
         if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
@@ -357,13 +376,13 @@ void returnToBase(void) {
         if ((rightSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && obstacleClearedCounter == 0) || exploreWatchdog == 0) {
             // Reset counters
             exploreWatchdog = MAXIMUM_EXPLORE_TICKS;
-            obstacleClearedCounter = MAXIMUM_READING_TICKS;
+            obstacleClearedCounter = STABILIZE_READING_TICKS;
             returningState = RETURNING_RETURN;
             break;
         }
 
         if (!forward()) {
-            obstacleClearedCounter = MAXIMUM_READING_TICKS;
+            obstacleClearedCounter = STABILIZE_READING_TICKS;
             returningState = RETURNING_ROTATE;
         }
         exploreWatchdog--;
@@ -372,7 +391,7 @@ void returnToBase(void) {
         if (rightSensorReading > EDGE_DETECTED_THRESHOLD) {
             obstacleClearedCounter--;
         } else {
-            obstacleClearedCounter = MAXIMUM_READING_TICKS;
+            obstacleClearedCounter = STABILIZE_READING_TICKS;
         }
 
     } break;

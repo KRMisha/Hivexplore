@@ -63,16 +63,12 @@ import { MissionState } from '@/enums/mission-state';
 
 export default defineComponent({
     name: 'Control',
-    props: {
-        droneCount: Number,
-    },
     setup() {
         const confirm = useConfirm();
         const socketClient: SocketClient | undefined = inject('socketClient');
 
-        let wasEmergencyLandingCalled = false;
-
         const missionState = ref(MissionState.Standby);
+
         socketClient!.bindMessage('mission-state', (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
@@ -90,6 +86,13 @@ export default defineComponent({
             }
             return states;
         });
+
+        const droneCount = ref(0);
+        socketClient!.bindMessage('drone-ids', (newDroneIds: string[]) => {
+            droneCount.value = newDroneIds.length;
+        });
+
+        let wasEmergencyLandingCalled = false;
 
         function onStartMissionButtonClick(event: Event) {
             if (wasEmergencyLandingCalled) {
@@ -145,10 +148,11 @@ export default defineComponent({
         }
 
         return {
+            MissionState,
             missionState,
             missionStates,
-            MissionState,
             setMissionState,
+            droneCount,
             onStartMissionButtonClick,
             endMissionButtonLabel,
             endMissionButtonIcon,

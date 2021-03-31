@@ -5,7 +5,7 @@
             <Map />
         </div>
         <div class="p-col-12 p-lg-6 p-xl-5">
-            <Control :droneCount="droneIds.length" />
+            <Control />
         </div>
     </div>
     <div class="p-grid">
@@ -58,9 +58,10 @@ export default defineComponent({
 // TODO: Semantic grouping inside all setup() functions
 // TODO: Nicer UI when no drones are connected
 // TODO: Improve map background color
+// TODO: Check tab order potential issue caused by p-flex-row-reverse
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .p-component.topbar {
     height: 64px;
     color: var(--primary-color-text);

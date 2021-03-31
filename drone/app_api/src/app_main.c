@@ -89,7 +89,7 @@ static float yawReading;
 static float rollReading;
 static float pitchReading;
 static uint8_t rssiReading;
-// static uint8_t batteryReading;
+
 // TODO: Remove
 // static float kalmanReadingX;
 // static float kalmanReadingY;
@@ -126,7 +126,6 @@ void appMain(void) {
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
-    // const logVarId_t batteryId = logGetVarId("pm", "batteryLevel");
 
     // TODO: Remove
     // const logVarId_t kalmanX = logGetVarId("kalman", "stateX");
@@ -176,7 +175,6 @@ void appMain(void) {
 
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
 
-        // batteryReading = logGetUint(batteryId);
         // TODO: Remove
         // kalmanReadingX = logGetFloat(kalmanX);
         // kalmanReadingY = logGetFloat(kalmanY);

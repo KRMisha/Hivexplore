@@ -14,7 +14,6 @@ import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import Timeline from 'primevue/timeline';
 import Toast from 'primevue/toast';
-import vueDebounce from 'vue-debounce';
 
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
@@ -29,7 +28,6 @@ app.use(PrimeVue, { ripple: true });
 
 app.use(ConfirmationService);
 app.use(ToastService);
-app.use(vueDebounce);
 
 app.component('Button', Button);
 app.component('Card', Card);

@@ -21,7 +21,7 @@
                 class="right-button"
                 :style="{ 'background-color': endMissionButtonColor }"
                 :disabled="droneIds.length === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
-                @click="onEndMissionDebouncedButtonClick($event)"
+                @click="onEndMissionButtonClick($event)"
             />
         </div>
         <Timeline :value="missionStates" layout="horizontal" align="bottom" class="timeline">
@@ -53,7 +53,6 @@ import Log from '@/components/Log.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
 import { MissionState } from '@/enums/mission-state';
-import { debounce } from 'vue-debounce';
 
 export default defineComponent({
     name: 'App',
@@ -118,9 +117,6 @@ export default defineComponent({
             return missionState.value === MissionState.Landed ? 'var(--primary-color)' : 'red';
         });
 
-        // See https://stackoverflow.com/questions/42199956/how-to-implement-debounce-in-vue2
-        let onEndMissionDebouncedButtonClick = debounce(onEndMissionButtonClick, 100);
-
         function onEndMissionButtonClick(event: Event) {
             if (missionState.value !== MissionState.Landed) {
                 // Emergency land
@@ -157,7 +153,7 @@ export default defineComponent({
             onReturnToBaseButtonClick,
             endMissionButtonLabel,
             endMissionButtonColor,
-            onEndMissionDebouncedButtonClick,
+            onEndMissionButtonClick,
         };
     },
 });

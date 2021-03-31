@@ -27,6 +27,8 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "app.h"
 
@@ -121,13 +123,21 @@ void appMain(void) {
         DEBUG_PRINT("Multiranger is not connected\n");
     }
 
+    // Initialize random function
+    time_t t;
+    srand((unsigned) time(&t));
+
     p2pRegisterCB(p2pCallbackHandler);
 
     while (true) {
         vTaskDelay(M2T(10));
 
         ledSet(LED_GREEN_R, isM1LedOn);
-        broadcastPosition();
+
+        static const uint8_t broadcastPercentage = 20;
+        if ((rand() % 100) < broadcastPercentage) {
+            broadcastPosition();
+        }
 
         if (isOutOfService) {
             ledSet(LED_RED_R, true);

@@ -70,6 +70,8 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_RETURN;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
+static bool isDroneDroneAvoidanceEnabled = false;
+static position_t initialPosition;
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
@@ -353,6 +355,22 @@ bool isCrashed(void) {
     }
 
     return isCrashed;
+}
+
+void avoidDrone(point_t dronePosition) {
+    if (!isDroneDroneAvoidanceEnabled) {
+        return;
+    }
+
+    vector_t vectorAwayFromDrone;
+    vectorAwayFromDrone.x = (initialPosition.x + currentPosition.x) - dronePosition.x;
+    vectorAwayFromDrone.y = (initialPosition.y + currentPosition.y) - dronePosition.y;
+    vectorAwayFromDrone.z = (initialPosition.z + currentPosition.z) - dronePosition.z;
+
+    const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
+    // forward: X, left:Y
+    targetForwardVelocity += (float)fabs(vectorAwayFromDrone.x) * cosf(vectorAngle - yawReading);
+    targetLeftVelocity += (float)fabs(vectorAwayFromDrone.y) * sinf(vectorAngle - yawReading);
 }
 
 void updateWaypoint(void) {

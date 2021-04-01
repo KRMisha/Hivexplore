@@ -84,6 +84,7 @@ static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static position_t currentPosition;
+static float yawReading;
 static float rollReading;
 static float pitchReading;
 static uint8_t rssiReading;
@@ -105,6 +106,7 @@ void appMain(void) {
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
+    const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
     const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
     const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
@@ -156,6 +158,7 @@ void appMain(void) {
 
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
+        yawReading = logGetFloat(yawId);
 
         rssiReading = logGetUint(rssiId);
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)

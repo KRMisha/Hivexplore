@@ -20,8 +20,8 @@ namespace {
     static constexpr std::uint16_t returnObstacleThreshold = 700;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t stabilizeReadingTicks = 50;
-    static uint16_t maximumExploreTicks;
-    static constexpr std::uint16_t maximumReturnTicks = 400;
+    static constexpr std::uint16_t maximumReturnTicks = 500;
+    static uint16_t maximumExploreTicks = 600;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
@@ -315,7 +315,6 @@ void CCrazyflieController::ReturnToBase() {
         m_returningState = ReturningState::Land;
     }
 
-    maximumExploreTicks = random() % 400 + 200;
     switch (m_returningState) {
     case ReturningState::BrakeTowardsBase: {
         m_droneStatus = DroneStatus::Flying;
@@ -362,6 +361,7 @@ void CCrazyflieController::ReturnToBase() {
         // If the drone orientation is towards its base and is stable
         if (m_stabilizeRotationCounter == 0) {
             m_isRotateToBaseFinished = true;
+
             // Reset counter
             m_stabilizeRotationCounter = stabilizeRotationTicks;
 
@@ -381,6 +381,7 @@ void CCrazyflieController::ReturnToBase() {
         if ((m_sensorReadings["front"] <= returnObstacleThreshold) || m_returnWatchdog == 0) {
             // Reset counter
             m_returnWatchdog = maximumReturnTicks;
+
             DebugPrint("Front obstacle detected, explore algo begins \n");
             m_returningState = ReturningState::Brake;
         } else {
@@ -413,6 +414,11 @@ void CCrazyflieController::ReturnToBase() {
         // Obstacle has been passed go back to returning with absolute positions
         if (m_sensorReadings["right"] > edgeDetectedThreshold && m_obstacleClearedCounter == 0 || m_exploreWatchdog == 0) {
             DebugPrint("Obstacle has been passed \n");
+            // Generation of a random explore watchdog between 200 and 600
+            static const uint16_t scopeExploreWatchdog = 400;
+            static const uint16_t minimumExploreWatchdog = 200;
+            maximumExploreTicks = random() % scopeExploreWatchdog + minimumExploreWatchdog;
+
             // Reset counters
             m_exploreWatchdog = maximumExploreTicks;
             m_obstacleClearedCounter = stabilizeReadingTicks;

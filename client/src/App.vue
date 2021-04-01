@@ -42,7 +42,6 @@ export default defineComponent({
     },
 });
 // TODO: Semantic grouping inside all setup() functions
-// TODO: Improve map background color
 // TODO: Investigate issue with non-null assertions for injections
 </script>
 

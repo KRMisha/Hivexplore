@@ -66,8 +66,9 @@ export default defineComponent({
             scene.add(points);
 
             // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0xffffff, 0);
             container.append(renderer.domElement);
 
             // Controls

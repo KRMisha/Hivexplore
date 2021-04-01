@@ -1,6 +1,6 @@
 <template>
-    <div class="p-component p-grid p-jc-center p-ai-center p-mb-2 p-shadow-2 topbar">Hivexplore</div>
     <div class="p-grid">
+        <div class="p-col-12 p-d-flex p-jc-center p-ai-center p-shadow-2 topbar">Hivexplore</div>
         <div class="p-col-12 p-lg-6 p-xl-5 p-order-2 p-order-lg-1">
             <Control />
         </div>
@@ -46,7 +46,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.p-component.topbar {
+.topbar {
     height: 64px;
     color: var(--primary-color-text);
     background-color: var(--primary-color);

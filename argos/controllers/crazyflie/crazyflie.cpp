@@ -412,7 +412,7 @@ void CCrazyflieController::ReturnToBase() {
         m_droneStatus = DroneStatus::Flying;
 
         // The drone must check its right sensor when it is turning left, and its left sensor when turning right
-        sensorToCheck = shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
+        static float sensorToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
 
         // Obstacle has been passed go back to returning with absolute positions
         if (sensorToCheck > edgeDetectedThreshold && m_obstacleClearedCounter == 0 && m_hasDetectedObstacle || m_exploreWatchdog == 0) {

@@ -81,7 +81,7 @@ private:
     bool Liftoff();
     bool Forward();
     bool Brake();
-    bool Rotate();
+    bool Rotate(const CRadians rotationAngle);
     bool Land();
     bool IsCrashed();
 
@@ -141,6 +141,7 @@ private:
     // Rotation variables
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
+    CRadians m_rotationAngle;
 
     // Return to base variables
     bool m_isRotateToBaseFinished = true;

@@ -19,7 +19,7 @@ namespace {
 
     static constexpr std::uint16_t returnObstacleThreshold = 700;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
-    static constexpr std::uint16_t stabilizeReadingTicks = 70;
+    static constexpr std::uint16_t stabilizeReadingTicks = 50;
     static uint16_t maximumExploreTicks;
     static constexpr std::uint16_t maximumReturnTicks = 400;
 
@@ -295,7 +295,7 @@ void CCrazyflieController::Explore() {
     case ExploringState::Rotate: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (Rotate()) {
+        if (Rotate(CRadians::PI / 8)) {
             m_exploringState = ExploringState::Explore;
         }
     } break;
@@ -402,7 +402,7 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Rotate: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (Rotate()) {
+        if (Rotate(CRadians::PI / 3)) {
             DebugPrint("Forward\n");
             m_returningState = ReturningState::Forward;
         }
@@ -423,15 +423,15 @@ void CCrazyflieController::ReturnToBase() {
 
         if (!Forward()) {
             m_returningState = ReturningState::Brake;
+        } else {
+            // Reset right sensor reading counter if obstacle on the right is detected
+            if (m_sensorReadings["right"] > edgeDetectedThreshold) {
+                m_obstacleClearedCounter--;
+            } else {
+                m_obstacleClearedCounter = stabilizeReadingTicks;
+            }
         }
         m_exploreWatchdog--;
-
-        // Reset right sensor reading counter if obstacle on the right is detected
-        if (m_sensorReadings["right"] > edgeDetectedThreshold) {
-            m_obstacleClearedCounter--;
-        } else {
-            m_obstacleClearedCounter = stabilizeReadingTicks;
-        }
 
     } break;
     case ReturningState::Land: {
@@ -520,23 +520,22 @@ bool CCrazyflieController::Brake() {
     return false;
 }
 
-bool CCrazyflieController::Rotate() {
+bool CCrazyflieController::Rotate(const CRadians rotationAngle) {
     // Get current yaw
     CRadians currentYaw;
     CVector3 rotationAxis;
     m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
 
-    static const CRadians rotationAngle = CRadians::PI / 8;
-
     // Order rotation
     if (m_isRotateCommandFinished) {
+        m_rotationAngle = rotationAngle;
         m_lastReferenceYaw = currentYaw;
         m_pcPropellers->SetRelativeYaw(rotationAngle);
         m_isRotateCommandFinished = false;
     }
 
     // Wait for rotation to finish
-    if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= rotationAngle.GetValue()) {
+    if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= m_rotationAngle.GetValue()) {
         if (m_sensorReadings["front"] > edgeDetectedThreshold) {
             m_isRotateCommandFinished = true;
             return true;

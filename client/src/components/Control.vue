@@ -35,17 +35,17 @@
                 </div>
                 <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-center">
                     <Timeline :value="missionStates" class="timeline">
-                        <template #marker="stateProps">
-                            <div class="p-timeline-event-marker" :class="{ 'selected-marker': stateProps.item === missionState }"></div>
+                        <template #marker="slotProps">
+                            <div class="p-timeline-event-marker" :class="{ 'selected-marker': slotProps.item === missionState }"></div>
                         </template>
-                        <template #content="stateProps">
+                        <template #content="slotProps">
                             <div
                                 :class="{
-                                    'selected-content': stateProps.item === missionState,
-                                    'p-error': stateProps.item === MissionState.Emergency,
+                                    'selected-content': slotProps.item === missionState,
+                                    'p-error': slotProps.item === MissionState.Emergency,
                                 }"
                             >
-                                {{ stateProps.item }}
+                                {{ slotProps.item }}
                             </div>
                         </template>
                     </Timeline>
@@ -165,7 +165,6 @@ export default defineComponent({
 // TODO: Fix colors
 // TODO: Remove explicit type annotations for computed()
 // TODO: Remove explicit return for computed
-// TODO: Rename stateProps to slotProps
 </script>
 
 <style lang="scss" scoped>

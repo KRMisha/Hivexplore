@@ -30,6 +30,7 @@ import { defineComponent, inject, onMounted, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
 // TODO: Use reactive for Map
+// TODO: Fix key
 
 export default defineComponent({
     name: 'Log',

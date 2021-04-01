@@ -90,6 +90,8 @@ export default defineComponent({
     },
 });
 // TODO: Fix status colors and set the text color dynamically when needed
+// TODO: Remove excess CSS (left-align title?)
+// TODO: Make knob size responsive
 </script>
 
 <style lang="scss" scoped>

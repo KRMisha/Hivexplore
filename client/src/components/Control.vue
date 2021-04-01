@@ -164,6 +164,8 @@ export default defineComponent({
 // TODO: Simplify logic
 // TODO: Fix colors
 // TODO: Remove explicit type annotations for computed()
+// TODO: Remove explicit return for computed
+// TODO: Rename stateProps to slotProps
 </script>
 
 <style lang="scss" scoped>

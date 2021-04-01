@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import App from '@/App.vue';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
+import Carousel from 'primevue/carousel';
 import Chip from 'primevue/chip';
 import ConfirmPopup from 'primevue/confirmpopup';
 import Divider from 'primevue/divider';
@@ -26,6 +27,7 @@ const app = createApp(App);
 
 app.component('Button', Button);
 app.component('Card', Card);
+app.component('Carousel', Carousel);
 app.component('Chip', Chip);
 app.component('ConfirmPopup', ConfirmPopup);
 app.component('Divider', Divider);

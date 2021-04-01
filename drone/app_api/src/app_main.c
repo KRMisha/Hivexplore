@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "app.h"
 
@@ -129,7 +130,7 @@ void appMain(void) {
 
     // Initialize random function
     time_t t;
-    srand((unsigned) time(&t));
+    srand((unsigned)time(&t));
 
     p2pRegisterCB(p2pCallbackHandler);
 

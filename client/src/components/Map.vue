@@ -11,7 +11,6 @@
 import { defineComponent, inject, onMounted, onUnmounted } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import Stats from 'three/examples/jsm/libs/stats.module';
 import { SocketClient } from '@/classes/socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
@@ -30,8 +29,6 @@ export default defineComponent({
         let camera: THREE.PerspectiveCamera;
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
-
-        let stats: Stats;
 
         let points: THREE.Points;
         let pointCount = 0;
@@ -83,11 +80,6 @@ export default defineComponent({
             const gridHelper = new THREE.GridHelper(16, 16);
             scene.add(gridHelper);
 
-            // Stats
-            stats = Stats();
-            stats.dom.style.position = 'absolute';
-            container.append(stats.dom);
-
             // Resize canvas on window resize
             window.addEventListener('resize', onWindowResize);
         }
@@ -96,8 +88,6 @@ export default defineComponent({
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
-
-            stats.update();
         }
 
         function addPoint(point: [number, number, number]) {
@@ -145,13 +135,10 @@ export default defineComponent({
         };
     },
 });
-// TODO: Responsive map container height
-// TODO: Remove FPS counter
 </script>
 
 <style lang="scss" scoped>
 #map-container {
     height: 300px;
-    position: relative;
 }
 </style>

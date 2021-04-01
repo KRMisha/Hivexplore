@@ -1,16 +1,18 @@
 <template>
     <div class="p-component p-grid p-jc-center p-ai-center p-mb-2 p-shadow-2 topbar">Hivexplore</div>
-    <div class="p-grid p-flex-row-reverse">
-        <div class="p-col-12 p-lg-6 p-xl-7">
-            <Map />
-        </div>
-        <div class="p-col-12 p-lg-6 p-xl-5">
+    <div class="p-grid">
+        <div class="p-col-12 p-lg-6 p-xl-5 p-order-2 p-order-lg-1">
             <Control />
         </div>
-    </div>
-    <div class="p-grid">
-        <DroneList />
-        <Log />
+        <div class="p-col-12 p-lg-6 p-xl-7 p-order-1 p-order-lg-2">
+            <Map />
+        </div>
+        <div class="p-col-12 p-order-3">
+            <DroneList />
+        </div>
+        <div class="p-col-12 p-order-4">
+            <Log />
+        </div>
     </div>
 </template>
 
@@ -41,9 +43,7 @@ export default defineComponent({
 });
 // TODO: Semantic grouping inside all setup() functions
 // TODO: Improve map background color
-// TODO: Check tab order potential issue caused by p-flex-row-reverse
 // TODO: Investigate issue with non-null assertions for injections
-// TODO: Investigate using only one grid for main UI layout
 </script>
 
 <style lang="scss" scoped>

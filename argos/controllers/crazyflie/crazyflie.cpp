@@ -303,10 +303,10 @@ void CCrazyflieController::Explore() {
 }
 
 void CCrazyflieController::ReturnToBase() {
-    
+
     // If returned to base, land
-    static constexpr double distanceToReturnEpsilon = 0.05;
-    static constexpr uint8_t rssiLandingThreshold = 5;
+    static constexpr double distanceToReturnEpsilon = 0.1;
+    static constexpr uint8_t rssiLandingThreshold = 7;
     if (m_rssiReading <= rssiLandingThreshold &&
         std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
             std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
@@ -314,6 +314,7 @@ void CCrazyflieController::ReturnToBase() {
         m_returningState = ReturningState::Land;
     }
 
+    RLOG << "Rssi during the return" << m_rssiReading << std::endl;
     switch (m_returningState) {
     case ReturningState::BrakeTowardsBase: {
         m_droneStatus = DroneStatus::Flying;

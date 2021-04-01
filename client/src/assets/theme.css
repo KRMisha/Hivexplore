@@ -993,13 +993,13 @@
     background: rgba(255, 255, 255, 0.3);
 }
 .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
-    background: rgba(159, 168, 218, 0.5);
+    background: rgba(251, 192, 45, 0.5);
 }
 .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:before {
     background: #fbc02d;
 }
 .p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider {
-    background: rgba(159, 168, 218, 0.5);
+    background: rgba(251, 192, 45, 0.5);
 }
 .p-inputswitch.p-invalid {
     border-color: #f44435;

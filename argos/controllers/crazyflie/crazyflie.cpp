@@ -411,8 +411,11 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Forward: {
         m_droneStatus = DroneStatus::Flying;
 
+        // The drone must check its right sensor when it is turning left, and its left sensor when turning right
+        sensorToCheck = shouldTurnLeft ? m_sensorReadings["right"] :  m_sensorReadings["left"];
+
         // Obstacle has been passed go back to returning with absolute positions
-        if (m_sensorReadings["right"] > edgeDetectedThreshold && m_obstacleClearedCounter == 0 || m_exploreWatchdog == 0) {
+        if (sensorToCheck > edgeDetectedThreshold && m_obstacleClearedCounter == 0 && m_hasDetectedObstacle || m_exploreWatchdog == 0) {
             DebugPrint("Obstacle has been passed \n");
             // Generation of a random explore watchdog between 200 and 600
             static const uint16_t scopeExploreWatchdog = 400;
@@ -423,6 +426,8 @@ void CCrazyflieController::ReturnToBase() {
             m_exploreWatchdog = maximumExploreTicks;
             m_obstacleClearedCounter = stabilizeReadingTicks;
 
+            m_hasDetectedObstacle = false;
+            m_shouldTurnLeft = !m_shouldTurnLeft;
             m_returningState = ReturningState::BrakeTowardsBase;
             break;
         }
@@ -431,9 +436,11 @@ void CCrazyflieController::ReturnToBase() {
             m_returningState = ReturningState::Brake;
         } else {
             // Reset right sensor reading counter if obstacle on the right is detected
-            if (m_sensorReadings["right"] > edgeDetectedThreshold) {
+            DebugPrint("I have advanced!!!");
+            if (sensorToCheck > edgeDetectedThreshold) {
                 m_obstacleClearedCounter--;
             } else {
+                m_hasDetectedObstacle = true;
                 m_obstacleClearedCounter = stabilizeReadingTicks;
             }
         }

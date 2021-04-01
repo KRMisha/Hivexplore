@@ -23,7 +23,7 @@ export default defineComponent({
 
         const maxPoints = 1_000_000;
 
-        let container: HTMLDivElement;
+        let container: HTMLElement;
 
         let scene: THREE.Scene;
         let camera: THREE.PerspectiveCamera;

@@ -201,7 +201,7 @@ div::v-deep(.p-panel) {
     flex-grow: 0;
 }
 
-@media (max-width: 576px), (min-width: 992px) and (max-width: 1280px) {
+@media (max-width: 575px), (min-width: 992px) and (max-width: 1280px) {
     .timeline {
         margin-left: -4.5rem;
     }

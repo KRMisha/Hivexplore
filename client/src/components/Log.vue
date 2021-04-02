@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, nextTick, onMounted, ref } from 'vue';
+import { computed, defineComponent, inject, nextTick, onMounted, reactive, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
@@ -28,7 +28,7 @@ export default defineComponent({
         // Variables
 
         const socketClient: SocketClient | undefined = inject('socketClient');
-        const logs = ref<Map<string, string[]>>(new Map());
+        const logs = reactive<Map<string, string[]>>(new Map());
         const logsBuffer = new Map<string, string[]>();
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
@@ -36,7 +36,7 @@ export default defineComponent({
         let scrollPanels: HTMLCollectionOf<Element>;
 
         const orderedLogNames = computed(() => {
-            const orderedLogNames = [...logs.value.keys()];
+            const orderedLogNames = [...logs.keys()];
 
             orderedLogNames.sort((first: string, second: string): number => {
                 const firstLogNames = ['Server', 'Map'];
@@ -62,8 +62,8 @@ export default defineComponent({
         // Functions
 
         function addLogTab(tabName: string) {
-            if (!logs.value.has(tabName) && !logsBuffer.has(tabName)) {
-                logs.value.set(tabName, []);
+            if (!logs.has(tabName) && !logsBuffer.has(tabName)) {
+                logs.set(tabName, []);
                 logsBuffer.set(tabName, []);
             }
         }
@@ -86,10 +86,10 @@ export default defineComponent({
                     continue;
                 }
 
-                logs.value.get(logName)!.push(...logsArray);
+                logs.get(logName)!.push(...logsArray);
 
                 const maxLogCount = 512;
-                logs.value.get(logName)!.splice(0, Math.max(0, logs.value.get(logName)!.length - maxLogCount));
+                logs.get(logName)!.splice(0, Math.max(0, logs.get(logName)!.length - maxLogCount));
 
                 const activeTabName = orderedLogNames.value[activeTabIndex.value];
                 mustRender = mustRender || activeTabName === logName;
@@ -137,7 +137,6 @@ export default defineComponent({
     },
 });
 // TODO: Rename Log to Logs
-// TODO: Use reactive for Map
 // TODO: Fix key
 // TODO: Reorder setup logically
 // TODO: Trim URI

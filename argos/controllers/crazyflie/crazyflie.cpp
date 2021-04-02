@@ -303,14 +303,12 @@ void CCrazyflieController::Explore() {
 }
 
 void CCrazyflieController::ReturnToBase() {
-    // TODO: Add RSSI ?
     // If returned to base, land
-    static constexpr double distanceToReturnEpsilon = 0.05;
-    static constexpr uint8_t rssiLandingThreshold = 5;
-    // changer pour or ?
-    if (m_rssiReading <= rssiLandingThreshold ||
+    static constexpr double distanceToReturnEpsilon = 0.1;
+    static constexpr uint8_t rssiLandingThreshold = 7;
+    if (m_rssiReading <= rssiLandingThreshold &&
         std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
-            std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
+        std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
         m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
         m_returningState = ReturningState::Land;
     }
@@ -403,7 +401,7 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Rotate: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (Rotate(CRadians::PI / 3)) {
+        if (Rotate(CRadians::PI / 8)) {
             DebugPrint("Forward\n");
             m_returningState = ReturningState::Forward;
         }
@@ -412,10 +410,10 @@ void CCrazyflieController::ReturnToBase() {
         m_droneStatus = DroneStatus::Flying;
 
         // The drone must check its right sensor when it is turning left, and its left sensor when turning right
-        sensorToCheck = shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
+        static float sensorToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
 
         // Obstacle has been passed go back to returning with absolute positions
-        if (sensorToCheck > edgeDetectedThreshold && m_obstacleClearedCounter == 0 && m_hasDetectedObstacle || m_exploreWatchdog == 0) {
+        if ((sensorToCheck > edgeDetectedThreshold && m_obstacleClearedCounter == 0) || m_exploreWatchdog == 0) {
             DebugPrint("Obstacle has been passed \n");
             // Generation of a random explore watchdog between 200 and 600
             static const uint16_t scopeExploreWatchdog = 400;
@@ -426,7 +424,7 @@ void CCrazyflieController::ReturnToBase() {
             m_exploreWatchdog = maximumExploreTicks;
             m_obstacleClearedCounter = stabilizeReadingTicks;
 
-            m_hasDetectedObstacle = false;
+            // m_hasDetectedObstacle = false; // TODO: Remove?
             m_shouldTurnLeft = !m_shouldTurnLeft;
             m_returningState = ReturningState::BrakeTowardsBase;
             break;

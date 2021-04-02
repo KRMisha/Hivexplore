@@ -10,9 +10,7 @@
             <TabView v-model:activeIndex="activeTabIndex" @tab-change="scrollToBottom">
                 <TabPanel v-for="logName in orderedLogNames" :key="logName" :header="logName">
                     <ScrollPanel class="scroll-panel">
-                        <div v-for="(logLine, index) in logs.get(logName)" :key="index" class="log-line">
-                            > {{ logLine }}
-                        </div>
+                        <div v-for="(logLine, index) in logs.get(logName)" :key="index" class="log-line">> {{ logLine }}</div>
                     </ScrollPanel>
                 </TabPanel>
             </TabView>
@@ -21,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
@@ -32,11 +30,34 @@ export default defineComponent({
         const socketClient: SocketClient | undefined = inject('socketClient');
         const logs = ref<Map<string, string[]>>(new Map());
         const logsBuffer = new Map<string, string[]>();
-        const orderedLogNames = ref<string[]>([]);
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
         const tabViewRef = ref<HTMLElement | undefined>(undefined);
         let scrollPanels: HTMLCollectionOf<Element>;
+
+        const orderedLogNames = computed(() => {
+            const orderedLogNames = [...logs.value.keys()];
+
+            orderedLogNames.sort((first: string, second: string): number => {
+                const firstLogNames = ['Server', 'Map'];
+
+                const indexOfFirst = firstLogNames.indexOf(first);
+                const indexOfSecond = firstLogNames.indexOf(second);
+
+                // If the indices are the same (-1), sort alphabetically
+                if (indexOfFirst === indexOfSecond) {
+                    return first.localeCompare(second);
+                }
+
+                // If log names aren't in firstLogNames, they should go to the end
+                const orderOfFirst = indexOfFirst === -1 ? Infinity : indexOfFirst;
+                const orderOfSecond = indexOfSecond === -1 ? Infinity : indexOfSecond;
+
+                return orderOfFirst > orderOfSecond ? 1 : -1;
+            });
+
+            return orderedLogNames;
+        });
 
         // Functions
 
@@ -44,25 +65,6 @@ export default defineComponent({
             if (!logs.value.has(tabName) && !logsBuffer.has(tabName)) {
                 logs.value.set(tabName, []);
                 logsBuffer.set(tabName, []);
-                orderedLogNames.value.push(tabName);
-
-                orderedLogNames.value.sort((first: string, second: string): number => {
-                    const firstLogNames = ['Server', 'Map'];
-
-                    const indexOfFirst = firstLogNames.indexOf(first);
-                    const indexOfSecond = firstLogNames.indexOf(second);
-
-                    // If the indices are the same (-1), sort alphabetically
-                    if (indexOfFirst === indexOfSecond) {
-                        return first.localeCompare(second);
-                    }
-
-                    // If log names aren't in firstLogNames, they should go to the end
-                    const orderOfFirst = indexOfFirst === -1 ? Infinity : indexOfFirst;
-                    const orderOfSecond = indexOfSecond === -1 ? Infinity : indexOfSecond;
-
-                    return orderOfFirst > orderOfSecond ? 1 : -1;
-                });
             }
         }
 
@@ -138,6 +140,7 @@ export default defineComponent({
 // TODO: Fix key
 // TODO: Reorder setup logically
 // TODO: Trim URI
+// TODO: Rename log name and log tab to log group consistently
 </script>
 
 <style lang="scss" scoped>

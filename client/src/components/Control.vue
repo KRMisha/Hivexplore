@@ -208,19 +208,13 @@ div::v-deep(.p-panel) {
 }
 
 @media (max-width: 400px) {
-    .timeline {
-        font-size: 0.875rem;
-    }
-}
-
-@media (max-width: 360px) {
     .p-component {
         font-size: 0.875rem;
     }
 
     .timeline {
         margin-left: -5rem;
-        margin-right: -1rem;
+        margin-right: -2rem;
     }
 }
 

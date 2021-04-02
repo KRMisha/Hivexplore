@@ -1,36 +1,32 @@
 <template>
-    <div class="p-d-flex p-p-3 header">
-        <div class="p-text p-text-bold">
-            Logs
-        </div>
-        <div class="p-text p-ml-auto">
-            Autoscroll
-        </div>
-        <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" class="p-ml-2" />
-    </div>
-
-    <div ref="logRef" class="tab-view-container">
-        <TabView v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
-            <TabPanel v-for="(logName, index) in orderedLogNames" :key="logName" :header="logName">
-                <ScrollPanel class="scroll-panel">
-                    <div v-if="index === activeTabIndex" class="log-text">
-                        <div v-for="(logLine, index) in logs.get(logName)" :key="index">
-                            > {{ logLine }}
-                            <br />
+    <div ref="root">
+        <Panel header="Logs" :toggleable="true">
+            <template #icons>
+                <div class="p-d-flex p-ai-center p-mr-2">
+                    <span class="p-mr-2">Autoscroll</span>
+                    <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" />
+                </div>
+            </template>
+            <!-- TODO: Improve HTML below -->
+            <TabView v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
+                <TabPanel v-for="(logName, index) in orderedLogNames" :key="logName" :header="logName">
+                    <ScrollPanel class="scroll-panel">
+                        <div v-if="index === activeTabIndex" class="log-text">
+                            <div v-for="(logLine, index) in logs.get(logName)" :key="index">
+                                > {{ logLine }}
+                                <br />
+                            </div>
                         </div>
-                    </div>
-                </ScrollPanel>
-            </TabPanel>
-        </TabView>
+                    </ScrollPanel>
+                </TabPanel>
+            </TabView>
+        </Panel>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
-
-// TODO: Use reactive for Map
-// TODO: Fix key
 
 export default defineComponent({
     name: 'Log',
@@ -43,7 +39,7 @@ export default defineComponent({
         const orderedLogNames = ref<string[]>([]);
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
-        const logRef = ref<HTMLElement | undefined>(undefined);
+        const root = ref<HTMLElement | undefined>(undefined);
         let scrollPanels: HTMLCollectionOf<Element>;
 
         // Functions
@@ -74,6 +70,7 @@ export default defineComponent({
             }
         }
 
+        // TODO: Rename?
         function scrollToBottom() {
             if (isAutoscrollEnabled.value) {
                 const scrollPanel = scrollPanels[activeTabIndex.value];
@@ -120,7 +117,7 @@ export default defineComponent({
         // Actions
 
         onMounted(() => {
-            scrollPanels = logRef.value!.getElementsByClassName('p-scrollpanel-content');
+            scrollPanels = root.value!.getElementsByClassName('p-scrollpanel-content');
             const renderIntervalMs = 250;
             window.setInterval(renderNewLogs, renderIntervalMs);
         });
@@ -136,28 +133,41 @@ export default defineComponent({
             activeTabIndex,
             scrollToBottom,
             isAutoscrollEnabled,
-            logRef,
+            root,
         };
     },
 });
+// TODO: Rename Log to Logs
+// TODO: Use reactive for Map
+// TODO: Fix key
+// TODO: Fix absolute height for logs in CSS?
+// TODO: Reorder setup logically
 </script>
 
 <style lang="scss" scoped>
-.header {
-    width: 50%;
+.p-panel::v-deep(.p-panel-header) .p-panel-icons {
+    display: flex;
+    font-size: 0.75rem;
+
+    .p-inputswitch {
+        width: 1.8rem;
+        height: 0.6rem;
+    }
+
+    .p-inputswitch .p-inputswitch-slider::before {
+        width: 1rem;
+        height: 1rem;
+        margin-top: -0.5rem;
+    }
+
+    .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider::before {
+        transform: translateX(1rem);
+    }
 }
 
-.tab-view-container {
-    width: 50%;
-    height: 280px;
-}
 
 .scroll-panel {
     height: 200px;
-}
-
-.p-text {
-    font-family: Roboto;
 }
 
 .log-text {

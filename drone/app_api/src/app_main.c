@@ -66,7 +66,6 @@ static const float MAXIMUM_VELOCITY = 0.4f; // 0.7f
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
 static const uint16_t STABILIZE_READING_TICKS = 600;
-static const uint16_t MAXIMUM_RSSI_READINGS = 10;
 
 // States
 static mission_state_t missionState = MISSION_STANDBY;
@@ -90,10 +89,7 @@ static point_t positionReading;
 static float yawReading;
 static float rollReading;
 static float pitchReading;
-
 static uint8_t rssiReading;
-static uint8_t* rssiReadings;
-static uint8_t rssiIndex = 0;
 
 static point_t initialPosition;
 
@@ -104,8 +100,9 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYawToBase;
 
+// Watchdogs
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS;
-static uint16_t maximumExploreTicks;
+static uint16_t maximumExploreTicks = 200;
 static uint16_t exploreWatchdog;
 static uint16_t obstacleClearedCounter = STABILIZE_READING_TICKS;
 
@@ -114,8 +111,6 @@ void appMain(void) {
 
     // Use current time as seed for random generator
     srand(time(0));
-
-    rssiReadings = calloc(MAXIMUM_RSSI_READINGS, sizeof(uint8_t));
 
     const logVarId_t frontSensorId = logGetVarId("range", "front");
     const logVarId_t leftSensorId = logGetVarId("range", "left");
@@ -160,16 +155,16 @@ void appMain(void) {
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
+
         positionReading.x = logGetFloat(positionXId);
         positionReading.y = logGetFloat(positionYId);
         positionReading.z = logGetFloat(positionZId);
-        yawReading = logGetFloat(yawId);
 
-        rssiReading = logGetUint(rssiId); // TODO: should this be float?
+        yawReading = logGetFloat(yawId);
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
 
-        // (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
+        rssiReading = logGetUint(rssiId);
 
         targetForwardVelocity = 0.0;
         targetLeftVelocity = 0.0;
@@ -272,27 +267,10 @@ void explore(void) {
 }
 
 void returnToBase(void) {
-    // Rssi rolling average (Conclusion: 35)
-    rssiReadings[rssiIndex] = rssiReading;
-    rssiIndex = (rssiIndex + 1) % MAXIMUM_RSSI_READINGS;
-
-    uint8_t nRssiValues = 0;
-    uint16_t rssiValuesSum = 0;
-    for (int i = 0; i < MAXIMUM_RSSI_READINGS; i++) {
-        if (rssiReadings[i] != 0) {
-            nRssiValues++;
-            rssiValuesSum += rssiReadings[i];
-        }
-    }
-
-    // uint8_t rssiAverage = rssiValuesSum / nRssiValues;
-    // DEBUG_PRINT("Rssi average: %i\n", rssiAverage);
-    // TODO: Add RSSI ? (rssiLandingThreashold)
-
     // If returned to base, land
-    // TODO: try smaller epsilon
     static const double distanceToReturnEpsilon = 0.3; // 0.005
-    if (fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
+    static const uint8_t rssiLandingThreshold = 35;
+    if (rssiReading == rssiLandingThreshold && fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
         fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
         DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);

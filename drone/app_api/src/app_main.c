@@ -379,6 +379,11 @@ uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensor
 }
 
 void broadcastPosition() {
+    // Avoid causing drone reset due to the content size
+    if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
+        return;
+    }
+
     uint64_t radioAddress = configblockGetRadioAddress();
     uint8_t myId = (uint8_t)(radioAddress & 0x00000000ff);
 

@@ -399,8 +399,10 @@ void broadcastPosition() {
         .size = sizeof(content)
     };
 
-    memcpy(&packet.data[0], &content, sizeof(content));
-    radiolinkSendP2PPacketBroadcast(&packet);
+    if (crtpIsConnected()) {
+        memcpy(&packet.data[0], &content, sizeof(content));
+        radiolinkSendP2PPacketBroadcast(&packet);
+    }
 }
 
 void p2pCallbackHandler(P2PPacket* packet) {

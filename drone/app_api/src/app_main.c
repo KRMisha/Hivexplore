@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "app.h"
 
@@ -83,7 +84,6 @@ static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
-static position_t currentPosition;
 static float rollReading;
 static float pitchReading;
 static uint8_t rssiReading;
@@ -93,6 +93,13 @@ static float targetForwardVelocity;
 static float targetLeftVelocity;
 static float targetHeight;
 static float targetYawRate;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} positionf_t;
+static positionf_t currentPosition;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -134,7 +141,7 @@ void appMain(void) {
 
         ledSet(LED_GREEN_R, isM1LedOn);
 
-        static const uint8_t broadcastPercentage = 20;
+        static const uint8_t broadcastPercentage = 5;
         if ((rand() % 100) < broadcastPercentage) {
             broadcastPosition();
         }
@@ -377,6 +384,7 @@ void broadcastPosition() {
     packet.port = 0x00;
     packet.data[0] = myId;
     memcpy(&packet.data[1], &currentPosition, sizeof(currentPosition));
+    packet.size = sizeof(currentPosition) + 1;
     radiolinkSendP2PPacketBroadcast(&packet);
 }
 
@@ -384,11 +392,11 @@ void p2pCallbackHandler(P2PPacket* packet) {
     // Get source Id
     uint8_t other_id = packet->data[0];
 
-    position_t sourcePosition;
+    positionf_t sourcePosition;
     memcpy(&sourcePosition, &packet->data[1], sizeof(sourcePosition));
 
-    uint8_t rssi = packet->rssi;
-    DEBUG_PRINT("[RSSI: -%d dBm] %d Position: X(%d), Y(%d), Z(%d) \n", rssi, other_id, sourcePosition.x, sourcePosition.y, sourcePosition.z);
+    // uint8_t rssi = packet->rssi;
+    DEBUG_PRINT("%d Position: X(%f), Y(%f), Z(%f) \n", other_id, (double)sourcePosition.x, (double)sourcePosition.y, (double)sourcePosition.z);
 }
 
 LOG_GROUP_START(hivexplore)

@@ -43,6 +43,7 @@ export default defineComponent({
 });
 // TODO: Semantic grouping inside all setup() functions
 // TODO: Investigate issue with non-null assertions for injections
+// TODO: Use v-deep and nested SCSS consistently
 </script>
 
 <style lang="scss" scoped>

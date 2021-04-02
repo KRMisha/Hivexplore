@@ -1,27 +1,27 @@
 <template>
     <Card class="card">
         <template #title>
-            <div class="center-title">Drone {{ droneId }}</div>
+            <div class="p-d-flex p-jc-center title">Drone {{ droneId }}</div>
         </template>
         <template #content>
-            <div class="card-container">
-                <div class="item-container">
-                    <h4>Velocity (m/s) 🐝</h4>
-                    <Knob v-model="velocity" readonly :size="128" :max="5" />
+            <div class="p-grid">
+                <div class="p-col p-d-flex p-flex-column p-ai-center">
+                    <span class="p-my-2 label">Velocity <span class="units">(m/s)</span></span>
+                    <Knob v-model="velocity" readonly :size="0" :max="5" />
                 </div>
-                <div class="item-container middle-container">
-                    <div class="item-container">
-                        <h4>Status 🍯</h4>
+                <div class="p-col-fixed p-d-flex p-flex-column p-px-0 p-px-sm-2 middle-container">
+                    <div class="p-d-flex p-flex-column p-ai-center">
+                        <span class="p-my-2 label">Status</span>
                         <Chip :label="droneStatus" :style="{ 'background-color': droneStatusColor }" />
                     </div>
-                    <div class="item-container">
-                        <h4>LED 💡</h4>
+                    <div class="p-d-flex p-flex-column p-ai-center p-mt-sm-2">
+                        <span class="p-my-2 label">LED</span>
                         <InputSwitch v-model="isLedEnabled" @change="setLedEnabled" />
                     </div>
                 </div>
-                <div class="item-container">
-                    <h4>Battery 🔋</h4>
-                    <Knob v-model="batteryLevel" readonly :size="128" />
+                <div class="p-col p-d-flex p-flex-column p-ai-center">
+                    <span class="p-my-2 label">Battery</span>
+                    <Knob v-model="batteryLevel" readonly :size="0" />
                 </div>
             </div>
         </template>
@@ -90,31 +90,65 @@ export default defineComponent({
     },
 });
 // TODO: Fix status colors and set the text color dynamically when needed
-// TODO: Remove excess CSS (left-align title?)
-// TODO: Make knob size responsive
+// TODO: Investigate using watch
 </script>
 
 <style lang="scss" scoped>
 .card {
-    margin-bottom: 16px;
+    flex-basis: 100%;
+    border: 1px solid var(--surface-d);
+    margin: 0 0.25rem;
+    max-width: 32rem;
 }
 
-.center-title {
-    text-align: center;
+.title {
+    font-size: 1.125rem;
 }
 
-.card-container {
-    display: flex;
-    justify-content: space-evenly;
+div::v-deep(.p-card-content) {
+    padding: 0;
 }
 
-.item-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.label {
+    font-weight: 500;
+}
+
+.units {
+    font-size: 0.75em;
 }
 
 .middle-container {
-    min-width: 100px;
+    min-width: 5.75rem;
+}
+
+div::v-deep(.p-knob) svg {
+    width: 7rem;
+    height: 7rem;
+}
+
+@media (max-width: 575px), (min-width: 900px) and (max-width: 991px) {
+    div::v-deep(.p-knob) svg {
+        width: 6rem;
+        height: 6rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .p-component {
+        font-size: 0.875rem;
+    }
+
+    .middle-container {
+        min-width: 4.25rem;
+    }
+
+    .p-chip {
+        padding: 0 0.5rem;
+    }
+
+    div::v-deep(.p-knob) svg {
+        width: 5rem;
+        height: 5rem;
+    }
 }
 </style>

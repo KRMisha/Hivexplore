@@ -31,17 +31,17 @@ export default defineComponent({
 
         const responsiveOptions = [
             {
-                breakpoint: '1199px',
+                breakpoint: '1900px',
                 numVisible: 3,
                 numScroll: 3,
             },
             {
-                breakpoint: '991px',
+                breakpoint: '1400px',
                 numVisible: 2,
                 numScroll: 2,
             },
             {
-                breakpoint: '575px',
+                breakpoint: '900px',
                 numVisible: 1,
                 numScroll: 1,
             },
@@ -53,14 +53,22 @@ export default defineComponent({
         };
     },
 });
-// TODO: Remove ul for for loop
 // TODO: Nicer UI when no drones are connected
 // TODO: Order drones
 </script>
 
 <style lang="scss" scoped>
-ul {
-    width: 100%;
-    list-style-type: none;
+div::v-deep(.p-carousel-container) {
+    @media (max-width: 575px) {
+        .p-carousel-prev,
+        .p-carousel-next {
+            display: none;
+        }
+    }
+
+    .p-carousel-item {
+        display: flex;
+        justify-content: center;
+    }
 }
 </style>

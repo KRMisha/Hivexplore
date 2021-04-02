@@ -44,14 +44,15 @@ export default defineComponent({
 // TODO: Semantic grouping inside all setup() functions
 // TODO: Investigate issue with non-null assertions for injections
 // TODO: Use v-deep and nested SCSS consistently
+// TODO: Reduce map height?
 </script>
 
 <style lang="scss" scoped>
 .topbar {
-    height: 64px;
+    height: 3.5rem;
     color: var(--primary-color-text);
     background-color: var(--primary-color);
-    font-size: 1.5rem;
+    font-size: 1.375rem;
     font-weight: 500;
 }
 </style>

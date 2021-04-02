@@ -6,16 +6,12 @@
                 <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" />
             </div>
         </template>
-        <!-- TODO: Improve HTML below -->
         <div ref="tabViewRef" class="tab-view-container">
             <TabView v-model:activeIndex="activeTabIndex" @tab-change="scrollToBottom">
-                <TabPanel v-for="(logName, index) in orderedLogNames" :key="logName" :header="logName">
+                <TabPanel v-for="logName in orderedLogNames" :key="logName" :header="logName">
                     <ScrollPanel class="scroll-panel">
-                        <div v-if="index === activeTabIndex" class="log-text">
-                            <div v-for="(logLine, index) in logs.get(logName)" :key="index">
-                                > {{ logLine }}
-                                <br />
-                            </div>
+                        <div v-for="(logLine, index) in logs.get(logName)" :key="index" class="log-line">
+                            > {{ logLine }}
                         </div>
                     </ScrollPanel>
                 </TabPanel>
@@ -140,8 +136,8 @@ export default defineComponent({
 // TODO: Rename Log to Logs
 // TODO: Use reactive for Map
 // TODO: Fix key
-// TODO: Fix absolute height for logs in CSS?
 // TODO: Reorder setup logically
+// TODO: Trim URI
 </script>
 
 <style lang="scss" scoped>
@@ -173,7 +169,10 @@ export default defineComponent({
     height: 200px;
 }
 
-.log-text {
+.log-line {
     font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    padding-left: 1.2em;
+    text-indent: -1.2em;
 }
 </style>

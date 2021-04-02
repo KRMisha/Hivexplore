@@ -60,8 +60,8 @@
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
-static const float EXPLORATION_HEIGHT = 0.2f; // 0.5f
-static const float CRUISE_VELOCITY = 0.07f; // 0.2f
+static const float EXPLORATION_HEIGHT = 0.3f; // 0.5f
+static const float CRUISE_VELOCITY = 0.1f; // 0.2f
 static const float MAXIMUM_VELOCITY = 0.4f; // 0.7f
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
@@ -71,7 +71,7 @@ static const uint16_t MAXIMUM_RSSI_READINGS = 10;
 // States
 static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
-static returning_state_t returningState = RETURNING_RETURN;
+static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
@@ -94,14 +94,6 @@ static float pitchReading;
 static uint8_t rssiReading;
 static uint8_t* rssiReadings;
 static uint8_t rssiIndex = 0;
-
-// TODO: Remove
-// static float kalmanReadingX;
-// static float kalmanReadingY;
-// static float kalmanReadingZ;
-// static float kalmanReadingVX;
-// static float kalmanReadingVY;
-// static float kalmanReadingVZ;
 
 static point_t initialPosition;
 
@@ -138,14 +130,6 @@ void appMain(void) {
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
-
-    // TODO: Remove
-    // const logVarId_t kalmanX = logGetVarId("kalman", "stateX");
-    // const logVarId_t kalmanY = logGetVarId("kalman", "stateY");
-    // const logVarId_t kalmanZ = logGetVarId("kalman", "stateZ");
-    // const logVarId_t kalmanVX = logGetVarId("kalman", "statePX");
-    // const logVarId_t kalmanVY = logGetVarId("kalman", "statePY");
-    // const logVarId_t kalmanVZ = logGetVarId("kalman", "statePZ");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
@@ -186,21 +170,6 @@ void appMain(void) {
         pitchReading = logGetFloat(pitchId);
 
         // (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
-
-        // TODO: Remove
-        // kalmanReadingX = logGetFloat(kalmanX);
-        // kalmanReadingY = logGetFloat(kalmanY);
-        // kalmanReadingZ = logGetFloat(kalmanZ);
-        // kalmanReadingVX = logGetFloat(kalmanVX);
-        // kalmanReadingVY = logGetFloat(kalmanVY);
-        // kalmanReadingVZ = logGetFloat(kalmanVZ);
-
-        // DEBUG_PRINT("kalman reading x: %f\n", (double)kalmanReadingX);
-        // DEBUG_PRINT("kalman reading y: %f\n", (double)kalmanReadingY);
-        // DEBUG_PRINT("kalman reading z: %f\n", (double)kalmanReadingZ);
-        // DEBUG_PRINT("kalman reading vx: %f\n", (double)kalmanReadingVX);
-        // DEBUG_PRINT("kalman reading vy: %f\n", (double)kalmanReadingVY);
-        // DEBUG_PRINT("kalman reading vz: %f\n", (double)kalmanReadingVZ);
 
         targetForwardVelocity = 0.0;
         targetLeftVelocity = 0.0;
@@ -243,11 +212,12 @@ void avoidObstacle(void) {
     bool isExploringAvoidanceDisallowed =
         missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF);
     bool isReturningAvoidanceDisallowed =
-        missionState == MISSION_RETURNING && (returningState == RETURNING_LAND || returningState == RETURNING_LAND);
+        missionState == MISSION_RETURNING && (returningState == RETURNING_IDLE || returningState == RETURNING_LAND);
 
     bool isAvoidanceAllowed = !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
 
     if (isAvoidanceAllowed) {
+        DEBUG_PRINT("avoiding obstacle\n");
         // Distance correction required to stay out of range of any obstacle
         uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
         uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
@@ -302,7 +272,6 @@ void explore(void) {
 }
 
 void returnToBase(void) {
-
     // Rssi rolling average (Conclusion: 35)
     rssiReadings[rssiIndex] = rssiReading;
     rssiIndex = (rssiIndex + 1) % MAXIMUM_RSSI_READINGS;
@@ -321,7 +290,8 @@ void returnToBase(void) {
     // TODO: Add RSSI ? (rssiLandingThreashold)
 
     // If returned to base, land
-    static const double distanceToReturnEpsilon = 0.005;
+    // TODO: try smaller epsilon
+    static const double distanceToReturnEpsilon = 0.3; // 0.005
     if (fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
         fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
@@ -341,13 +311,13 @@ void returnToBase(void) {
         // If the drone is towards its base
         static const double yawEpsilon = 5;
         double yawDifference = fabs(targetYawToBase - yawReading);
-        DEBUG_PRINT("Yaw difference: %f\n", yawDifference);
+        // DEBUG_PRINT("Yaw difference: %f\n", yawDifference);
         if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
             DEBUG_PRINT("I'm done turning!\n");
             returningState = RETURNING_RETURN;
         } else {
             // Turn drone towards its base
-            DEBUG_PRINT("I need to rotate\n");
+            // DEBUG_PRINT("I need to rotate\n");
             targetHeight += EXPLORATION_HEIGHT;
             updateWaypoint();
             setPoint.mode.yaw = modeAbs;
@@ -359,18 +329,28 @@ void returnToBase(void) {
 
         // Go to explore algorithm when a wall is detected in front of the drone
         // TODO: Change name
-        static const uint16_t EDGE_DETECTED_THRESHOLD_RETURN = 800;
-        if (frontSensorReading < EDGE_DETECTED_THRESHOLD_RETURN || returnWatchdog == 0) {
-            DEBUG_PRINT("Obstacle. Rotating (in return)\n");
+        // static const uint16_t EDGE_DETECTED_THRESHOLD_RETURN = 800;
+        // if (frontSensorReading < EDGE_DETECTED_THRESHOLD_RETURN || returnWatchdog == 0) {
+        //     DEBUG_PRINT("Obstacle. Rotating (in return)\n");
+        //     // Reset counters
+        //     returnWatchdog = MAXIMUM_RETURN_TICKS;
+        //     returningState = RETURNING_ROTATE;
+        // } else {
+        //     // Go to base using absolute positions
+        //     // setPoint.mode.x = modeAbs;
+        //     // setPoint.mode.y = modeAbs;
+        //     // setPoint.position.x = initialPosition.x;
+        //     // setPoint.position.y = initialPosition.y;
+        //
+        //     returnWatchdog--;
+        // }
+
+        if (!forward() || returnWatchdog == 0) {
+            DEBUG_PRINT("Obstacle. Rotating (in return) OR return watchdog finished\n");
             // Reset counters
             returnWatchdog = MAXIMUM_RETURN_TICKS;
             returningState = RETURNING_ROTATE;
         } else {
-            // Go to base using absolute positions
-            setPoint.mode.x = modeAbs;
-            setPoint.mode.y = modeAbs;
-            setPoint.position.x = initialPosition.x;
-            setPoint.position.y = initialPosition.y;
             returnWatchdog--;
         }
     } break;
@@ -399,7 +379,8 @@ void returnToBase(void) {
             exploreWatchdog = maximumExploreTicks;
             obstacleClearedCounter = STABILIZE_READING_TICKS;
 
-            returningState = RETURNING_RETURN;
+            DEBUG_PRINT("I'm going to rotate towards base!\n");
+            returningState = RETURNING_ROTATE_TOWARDS_BASE;
             break;
         }
 
@@ -422,14 +403,16 @@ void returnToBase(void) {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
-            DEBUG_PRINT("Landed\n");
+            DEBUG_PRINT("I landed!!\n");
             returningState = RETURNING_IDLE;
         }
     } break;
     case RETURNING_IDLE: {
+        DEBUG_PRINT("Returning Idle\n");
         droneStatus = STATUS_LANDED;
-
+        DEBUG_PRINT("After setting status landed (returning)\n");
         memset(&setPoint, 0, sizeof(setpoint_t));
+        DEBUG_PRINT("memset = 0\n");
     } break;
     }
 }
@@ -481,11 +464,13 @@ bool rotate(void) {
 
 bool land(void) {
     updateWaypoint();
-    static const uint16_t LANDED_HEIGHT = 50;
+    static const uint16_t LANDED_HEIGHT = 30;
+    DEBUG_PRINT("down sensor reading %d\n", downSensorReading);
     if (downSensorReading < LANDED_HEIGHT) {
         droneStatus = STATUS_LANDED;
         return true;
     }
+    DEBUG_PRINT("i can't land\n");
     return false;
 }
 

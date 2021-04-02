@@ -165,6 +165,7 @@ export default defineComponent({
 // TODO: Fix colors
 // TODO: Remove explicit type annotations for computed()
 // TODO: Remove explicit return for computed
+// TODO: Try to remove stretched div if v-deep works without it
 </script>
 
 <style lang="scss" scoped>
@@ -172,12 +173,12 @@ export default defineComponent({
     height: 100%;
 }
 
-div::v-deep(.p-panel) {
+::v-deep(.p-panel) {
     display: flex;
     flex-direction: column;
 
     .p-panel-header {
-        height: 72px;
+        min-height: 72px;
     }
 
     .p-toggleable-content {

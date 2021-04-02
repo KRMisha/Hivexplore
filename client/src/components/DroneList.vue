@@ -1,12 +1,12 @@
 <template>
-    <Panel header="Drones">
+    <Panel :header="droneIds.length > 0 ? 'Drones' : ''">
         <Carousel v-if="droneIds.length > 0" :value="droneIds" :numVisible="4" :numScroll="4" :responsiveOptions="responsiveOptions">
             <template #item="slotProps">
                 <Drone :droneId="slotProps.data" />
             </template>
         </Carousel>
-        <div v-else>
-            ✂️ No drones connected ✂️
+        <div v-else class="p-text-center p-pb-3 no-drones-text">
+            No drones connected
         </div>
     </Panel>
 </template>
@@ -53,7 +53,6 @@ export default defineComponent({
         };
     },
 });
-// TODO: Nicer UI when no drones are connected
 // TODO: Order drones
 </script>
 
@@ -70,5 +69,10 @@ div::v-deep(.p-carousel-container) {
         display: flex;
         justify-content: center;
     }
+}
+
+.no-drones-text {
+    font-size: 1.25rem;
+    font-weight: 500;
 }
 </style>

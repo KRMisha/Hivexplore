@@ -9,9 +9,9 @@
         <div ref="tabViewRef" class="tab-view-container">
             <TabView v-model:activeIndex="activeTabIndex" @tab-change="scrollToBottom">
                 <TabPanel v-for="logName in orderedLogNames" :key="logName" :header="logName">
-                    <ScrollPanel class="scroll-panel">
+                    <div class="scroll-panel">
                         <div v-for="(logLine, index) in logs.get(logName)" :key="index" class="log-line">> {{ logLine }}</div>
-                    </ScrollPanel>
+                    </div>
                 </TabPanel>
             </TabView>
         </div>
@@ -115,9 +115,9 @@ export default defineComponent({
         // Actions
 
         onMounted(() => {
-            scrollPanels = tabViewRef.value!.getElementsByClassName('p-scrollpanel-content');
+            scrollPanels = tabViewRef.value!.getElementsByClassName('scroll-panel');
             const renderIntervalMs = 250;
-            window.setInterval(renderNewLogs, renderIntervalMs);
+            setInterval(renderNewLogs, renderIntervalMs);
         });
 
         socketClient!.bindMessage('log', onLogReception);
@@ -170,6 +170,19 @@ export default defineComponent({
 
 .scroll-panel {
     height: 200px;
+    overflow-y: scroll;
+    scrollbar-color: #555 var(--surface-a);
+    &::-webkit-scrollbar-track {
+        background-color: var(--surface-a);
+    }
+
+    &::-webkit-scrollbar {
+        background-color: var(--surface-a);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #555;
+    }
 }
 
 .log-line {

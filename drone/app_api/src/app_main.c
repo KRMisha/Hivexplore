@@ -212,7 +212,7 @@ void avoidObstacle(void) {
     bool isAvoidanceAllowed = !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
 
     if (isAvoidanceAllowed) {
-        DEBUG_PRINT("avoiding obstacle\n");
+        // DEBUG_PRINT("avoiding obstacle\n");
         // Distance correction required to stay out of range of any obstacle
         uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
         uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
@@ -268,7 +268,7 @@ void explore(void) {
 
 void returnToBase(void) {
     // If returned to base, land
-    static const double distanceToReturnEpsilon = 0.3; // 0.005
+    static const double distanceToReturnEpsilon = 0.2;
     static const uint8_t rssiLandingThreshold = 35;
     if (rssiReading == rssiLandingThreshold && fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
         fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {

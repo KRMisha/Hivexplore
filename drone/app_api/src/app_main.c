@@ -84,6 +84,7 @@ static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
+static point_t currentPosition;
 static float rollReading;
 static float pitchReading;
 static uint8_t rssiReading;
@@ -98,8 +99,8 @@ typedef struct {
     float x;
     float y;
     float z;
-} positionf_t;
-static positionf_t currentPosition;
+    uint8_t sourceId;
+} P2PPacketContent;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -379,24 +380,29 @@ uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensor
 
 void broadcastPosition() {
     uint64_t radioAddress = configblockGetRadioAddress();
-    uint8_t myId = (uint8_t)((radioAddress)&0x00000000ff);
-    P2PPacket packet;
-    packet.port = 0x00;
-    packet.data[0] = myId;
-    memcpy(&packet.data[1], &currentPosition, sizeof(currentPosition));
-    packet.size = sizeof(currentPosition) + 1;
+    uint8_t myId = (uint8_t)(radioAddress & 0x00000000ff);
+
+    P2PPacketContent content = {
+        .sourceId = myId,
+        .x = currentPosition.x,
+        .y = currentPosition.y,
+        .z = currentPosition.z
+    };
+
+    P2PPacket packet = {
+        .port = 0x00,
+        .size = sizeof(content)
+    };
+
+    memcpy(&packet.data[0], &content, sizeof(content));
     radiolinkSendP2PPacketBroadcast(&packet);
 }
 
 void p2pCallbackHandler(P2PPacket* packet) {
     // Get source Id
-    uint8_t other_id = packet->data[0];
-
-    positionf_t sourcePosition;
-    memcpy(&sourcePosition, &packet->data[1], sizeof(sourcePosition));
-
-    // uint8_t rssi = packet->rssi;
-    DEBUG_PRINT("%d Position: X(%f), Y(%f), Z(%f) \n", other_id, (double)sourcePosition.x, (double)sourcePosition.y, (double)sourcePosition.z);
+    P2PPacketContent messageContent;
+    memcpy(&messageContent, &packet->data[0], sizeof(messageContent));
+    DEBUG_PRINT("Id(%d), R(%d), X(%f), Y(%f), Z(%f) \n", messageContent.sourceId, packet->rssi, (double)messageContent.x, (double)messageContent.y, (double)messageContent.z);
 }
 
 LOG_GROUP_START(hivexplore)

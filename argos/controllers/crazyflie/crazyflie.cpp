@@ -20,8 +20,8 @@ namespace {
     static constexpr std::uint16_t returnObstacleThreshold = 700;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t stabilizeReadingTicks = 50;
-    static constexpr std::uint16_t maximumReturnTicks = 500;
-    static uint16_t maximumExploreTicks = 600;
+    static constexpr std::uint16_t maximumReturnTicks = 1000;
+    static uint16_t maximumExploreTicks = 1200;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
@@ -375,18 +375,34 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Return: {
         m_droneStatus = DroneStatus::Flying;
 
+        // RLOG << m_isPositionToBaseFinished << std::endl;
+
+        // // Go to explore algorithm when a wall is detected in front of the drone
+        // if ((m_sensorReadings["front"] <= returnObstacleThreshold) || m_returnWatchdog == 0) {
+        //     // Reset counter
+        //     m_returnWatchdog = maximumReturnTicks;
+
+        //     m_isPositionToBaseFinished = true;
+        //     DebugPrint("Front obstacle detected, explore algo begins \n");
+        //     m_returningState = ReturningState::Brake;
+        // } else {
+        //     // Go to base using absolute positions
+        //     if (m_isPositionToBaseFinished) {
+        //         CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
+        //         m_pcPropellers->SetAbsolutePosition(targetPosition);
+        //         m_isPositionToBaseFinished = false;
+        //     }
+        //     m_returnWatchdog--;
+        // }
         // Go to explore algorithm when a wall is detected in front of the drone
-        if ((m_sensorReadings["front"] <= returnObstacleThreshold) || m_returnWatchdog == 0) {
+        if (!Forward() || m_returnWatchdog == 0) {
             // Reset counter
             m_returnWatchdog = maximumReturnTicks;
-
             DebugPrint("Front obstacle detected, explore algo begins \n");
             m_returningState = ReturningState::Brake;
         } else {
-            // Go to base using absolute positions
-            CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
-            m_pcPropellers->SetAbsolutePosition(targetPosition);
             m_returnWatchdog--;
+            DebugPrint("Going forward in return! \n");
         }
     } break;
     // Explore algorithm
@@ -417,8 +433,8 @@ void CCrazyflieController::ReturnToBase() {
         if ((sensorToCheck > edgeDetectedThreshold && m_obstacleClearedCounter == 0) || m_exploreWatchdog == 0) {
             DebugPrint("Obstacle has been passed \n");
             // Generation of a random explore watchdog between 200 and 600
-            static const uint16_t scopeExploreWatchdog = 400;
-            static const uint16_t minimumExploreWatchdog = 200;
+            static const uint16_t scopeExploreWatchdog = 300;
+            static const uint16_t minimumExploreWatchdog = 900;
             maximumExploreTicks = random() % scopeExploreWatchdog + minimumExploreWatchdog;
 
             // Reset counters
@@ -525,6 +541,7 @@ bool CCrazyflieController::Brake() {
     if ((m_pcPos->GetReading().Position - m_brakingReferencePosition).Length() <= brakingAcuracyEpsilon) {
         m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
         m_isBrakeCommandFinished = true;
+        m_isForwardCommandFinished = true;
         m_brakingReferencePosition = m_pcPos->GetReading().Position;
         return true;
     }

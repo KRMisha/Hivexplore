@@ -144,6 +144,7 @@ private:
     CRadians m_rotationAngle;
 
     // Return to base variables
+    bool m_isPositionToBaseFinished = true;
     bool m_isRotateToBaseFinished = true;
     CRadians m_targetYawToBase;
 

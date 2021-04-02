@@ -133,7 +133,7 @@ void appMain(void) {
 
     // Initialize random function
     time_t t;
-    srand((unsigned) time(&t));
+    srand((unsigned)time(&t));
 
     p2pRegisterCB(p2pCallbackHandler);
 
@@ -387,17 +387,9 @@ void broadcastPosition() {
     uint64_t radioAddress = configblockGetRadioAddress();
     uint8_t myId = (uint8_t)(radioAddress & 0x00000000ff);
 
-    P2PPacketContent content = {
-        .sourceId = myId,
-        .x = currentPosition.x,
-        .y = currentPosition.y,
-        .z = currentPosition.z
-    };
+    P2PPacketContent content = {.sourceId = myId, .x = currentPosition.x, .y = currentPosition.y, .z = currentPosition.z};
 
-    P2PPacket packet = {
-        .port = 0x00,
-        .size = sizeof(content)
-    };
+    P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
 
     if (crtpIsConnected()) {
         memcpy(&packet.data[0], &content, sizeof(content));
@@ -409,7 +401,12 @@ void p2pCallbackHandler(P2PPacket* packet) {
     // Get source Id
     P2PPacketContent messageContent;
     memcpy(&messageContent, &packet->data[0], sizeof(messageContent));
-    DEBUG_PRINT("Id(%d), R(%d), X(%f), Y(%f), Z(%f) \n", messageContent.sourceId, packet->rssi, (double)messageContent.x, (double)messageContent.y, (double)messageContent.z);
+    DEBUG_PRINT("Id(%d), R(%d), X(%f), Y(%f), Z(%f) \n",
+                messageContent.sourceId,
+                packet->rssi,
+                (double)messageContent.x,
+                (double)messageContent.y,
+                (double)messageContent.z);
 }
 
 LOG_GROUP_START(hivexplore)

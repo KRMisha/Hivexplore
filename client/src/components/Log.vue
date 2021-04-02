@@ -22,54 +22,22 @@
 import { computed, defineComponent, inject, nextTick, onMounted, reactive, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
+interface Log {
+    name: string;
+    message: string;
+}
+
 export default defineComponent({
     name: 'Log',
     setup() {
-        // Variables
-
-        const socketClient: SocketClient | undefined = inject('socketClient');
-        const logs = reactive<Map<string, string[]>>(new Map());
-        const logsBuffer = new Map<string, string[]>();
-        const activeTabIndex = ref(0);
-        const isAutoscrollEnabled = ref(true);
+        // Tabs
         const tabViewRef = ref<HTMLElement | undefined>(undefined);
         let scrollPanels: HTMLCollectionOf<Element>;
+        const activeTabIndex = ref(0);
 
-        const orderedLogNames = computed(() => {
-            const orderedLogNames = [...logs.keys()];
-
-            orderedLogNames.sort((first: string, second: string): number => {
-                const firstLogNames = ['Server', 'Map'];
-
-                const indexOfFirst = firstLogNames.indexOf(first);
-                const indexOfSecond = firstLogNames.indexOf(second);
-
-                // If the indices are the same (-1), sort alphabetically
-                if (indexOfFirst === indexOfSecond) {
-                    return first.localeCompare(second);
-                }
-
-                // If log names aren't in firstLogNames, they should go to the end
-                const orderOfFirst = indexOfFirst === -1 ? Infinity : indexOfFirst;
-                const orderOfSecond = indexOfSecond === -1 ? Infinity : indexOfSecond;
-
-                return orderOfFirst > orderOfSecond ? 1 : -1;
-            });
-
-            return orderedLogNames;
-        });
-
-        // Functions
-
-        function addLogTab(tabName: string) {
-            if (!logs.has(tabName) && !logsBuffer.has(tabName)) {
-                logs.set(tabName, []);
-                logsBuffer.set(tabName, []);
-            }
-        }
-
-        // TODO: Rename?
-        async function scrollToBottom() {
+        // Scrolling
+        const isAutoscrollEnabled = ref(true);
+        async function scrollToBottom() { // TODO: Rename to updateScroll
             if (isAutoscrollEnabled.value) {
                 await nextTick(); // Wait for the DOM to update and scroll to the bottom
                 const scrollPanel = scrollPanels[activeTabIndex.value];
@@ -79,66 +47,97 @@ export default defineComponent({
             }
         }
 
-        function renderNewLogs() {
-            let mustRender = false;
-            for (const [logName, logsArray] of logsBuffer) {
-                if (logsArray.length === 0) {
-                    continue;
+        // Logs
+        const logs = reactive<Map<string, string[]>>(new Map());
+        const logsBuffer = new Map<string, string[]>();
+
+        // Ordered log groups
+        const initialLogNames = ['Server', 'Map'];
+        const orderedLogNames = computed(() => {
+            const orderedLogNames = [...logs.keys()];
+
+            orderedLogNames.sort((first: string, second: string): number => {
+                const indexOfFirst = initialLogNames.indexOf(first);
+                const indexOfSecond = initialLogNames.indexOf(second);
+
+                // If the indices are the same (-1), sort alphabetically
+                if (indexOfFirst === indexOfSecond) {
+                    return first.localeCompare(second);
                 }
 
-                logs.get(logName)!.push(...logsArray);
+                // If log names aren't in initialLogNames, they should go to the end
+                const orderOfFirst = indexOfFirst === -1 ? Infinity : indexOfFirst;
+                const orderOfSecond = indexOfSecond === -1 ? Infinity : indexOfSecond;
 
-                const maxLogCount = 512;
-                logs.get(logName)!.splice(0, Math.max(0, logs.get(logName)!.length - maxLogCount));
+                return orderOfFirst > orderOfSecond ? 1 : -1;
+            });
 
-                const activeTabName = orderedLogNames.value[activeTabIndex.value];
-                mustRender = mustRender || activeTabName === logName;
-
-                logsBuffer.set(logName, []);
-            }
-
-            if (mustRender) {
-                scrollToBottom();
-            }
-        }
-
-        interface Log {
-            name: string;
-            message: string;
-        }
-        function onLogReception(log: Log) {
-            addLogTab(log.name);
-
-            logsBuffer.get(log.name)!.push(log.message);
-        }
-
-        // Actions
-
-        onMounted(() => {
-            scrollPanels = tabViewRef.value!.getElementsByClassName('scroll-panel');
-
-            const renderIntervalMs = 250;
-            setInterval(renderNewLogs, renderIntervalMs);
+            return orderedLogNames;
         });
 
-        socketClient!.bindMessage('log', onLogReception);
+        // Log group management
+        function addLogTab(tabName: string) { // TODO: Rename to addLogGroup
+            if (!logs.has(tabName)) {
+                logs.set(tabName, []);
+            }
+            if (!logsBuffer.has(tabName)) {
+                logsBuffer.set(tabName, []);
+            }
+        }
 
-        addLogTab('Server');
-        addLogTab('Map');
+        for (const logName of initialLogNames) {
+            addLogTab(logName);
+        }
+
+        // Log reception
+        const socketClient: SocketClient | undefined = inject('socketClient');
+        socketClient!.bindMessage('log', (log: Log) => {
+            addLogTab(log.name);
+            logsBuffer.get(log.name)!.push(log.message);
+        });
+
+        onMounted(() => {
+            // Initialize scroll panel references
+            scrollPanels = tabViewRef.value!.getElementsByClassName('scroll-panel');
+
+            // Render new logs periodically
+            const renderIntervalMs = 250;
+            setInterval(() => {
+                let mustRender = false;
+                for (const [logName, logsArray] of logsBuffer) {
+                    if (logsArray.length === 0) {
+                        continue;
+                    }
+
+                    logs.get(logName)!.push(...logsArray);
+
+                    const maxLogCount = 512;
+                    logs.get(logName)!.splice(0, Math.max(0, logs.get(logName)!.length - maxLogCount));
+
+                    const activeTabName = orderedLogNames.value[activeTabIndex.value];
+                    mustRender = mustRender || activeTabName === logName;
+
+                    logsBuffer.set(logName, []);
+                }
+
+                if (mustRender) { // TODO: Use watch or hook?
+                    scrollToBottom();
+                }
+            }, renderIntervalMs);
+        });
 
         return {
+            tabViewRef,
+            activeTabIndex,
+            isAutoscrollEnabled,
+            scrollToBottom,
             logs,
             orderedLogNames,
-            activeTabIndex,
-            scrollToBottom,
-            isAutoscrollEnabled,
-            tabViewRef,
         };
     },
 });
 // TODO: Rename Log to Logs
 // TODO: Fix key
-// TODO: Reorder setup logically
 // TODO: Trim URI
 // TODO: Rename log name and log tab to log group consistently
 </script>

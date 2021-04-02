@@ -401,7 +401,8 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Rotate: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (Rotate(CRadians::PI / 8)) {
+        CRadians rotationAngle = (m_shouldTurnLeft ? 1 : -1) * CRadians::PI / 8;
+        if (Rotate(rotationAngle)) {
             DebugPrint("Forward\n");
             m_returningState = ReturningState::Forward;
         }

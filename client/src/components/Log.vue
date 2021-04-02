@@ -1,14 +1,14 @@
 <template>
-    <div ref="root">
-        <Panel header="Logs" :toggleable="true">
-            <template #icons>
-                <div class="p-d-flex p-ai-center p-mr-2">
-                    <span class="p-mr-2">Autoscroll</span>
-                    <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" />
-                </div>
-            </template>
-            <!-- TODO: Improve HTML below -->
-            <TabView v-model:activeIndex="activeTabIndex" @click="scrollToBottom">
+    <Panel header="Logs" :toggleable="true">
+        <template #icons>
+            <div class="p-d-flex p-ai-center p-mr-2">
+                <span class="p-mr-2">Autoscroll</span>
+                <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" />
+            </div>
+        </template>
+        <!-- TODO: Improve HTML below -->
+        <div ref="tabViewRef" class="tab-view-container">
+            <TabView v-model:activeIndex="activeTabIndex" @tab-change="scrollToBottom">
                 <TabPanel v-for="(logName, index) in orderedLogNames" :key="logName" :header="logName">
                     <ScrollPanel class="scroll-panel">
                         <div v-if="index === activeTabIndex" class="log-text">
@@ -20,8 +20,8 @@
                     </ScrollPanel>
                 </TabPanel>
             </TabView>
-        </Panel>
-    </div>
+        </div>
+    </Panel>
 </template>
 
 <script lang="ts">
@@ -39,7 +39,7 @@ export default defineComponent({
         const orderedLogNames = ref<string[]>([]);
         const activeTabIndex = ref(0);
         const isAutoscrollEnabled = ref(true);
-        const root = ref<HTMLElement | undefined>(undefined);
+        const tabViewRef = ref<HTMLElement | undefined>(undefined);
         let scrollPanels: HTMLCollectionOf<Element>;
 
         // Functions
@@ -117,7 +117,7 @@ export default defineComponent({
         // Actions
 
         onMounted(() => {
-            scrollPanels = root.value!.getElementsByClassName('p-scrollpanel-content');
+            scrollPanels = tabViewRef.value!.getElementsByClassName('p-scrollpanel-content');
             const renderIntervalMs = 250;
             window.setInterval(renderNewLogs, renderIntervalMs);
         });
@@ -133,7 +133,7 @@ export default defineComponent({
             activeTabIndex,
             scrollToBottom,
             isAutoscrollEnabled,
-            root,
+            tabViewRef,
         };
     },
 });
@@ -165,6 +165,9 @@ export default defineComponent({
     }
 }
 
+.tab-view-container {
+    min-height: 200px;
+}
 
 .scroll-panel {
     height: 200px;

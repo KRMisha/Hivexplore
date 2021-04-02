@@ -136,6 +136,7 @@ export default defineComponent({
         };
     },
 });
+// TODO: Use ref instead of document?
 </script>
 
 <style lang="scss" scoped>

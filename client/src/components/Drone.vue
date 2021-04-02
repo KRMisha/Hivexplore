@@ -7,7 +7,7 @@
             <div class="p-grid">
                 <div class="p-col p-d-flex p-flex-column p-ai-center">
                     <span class="p-my-2 label">Velocity <span class="units">(m/s)</span></span>
-                    <Knob v-model="velocity" readonly :size="0" :max="5" />
+                    <Knob v-model="velocity" readonly :max="5" />
                 </div>
                 <div class="p-col-fixed p-d-flex p-flex-column p-px-0 p-px-sm-2 middle-container">
                     <div class="p-d-flex p-flex-column p-ai-center">
@@ -21,7 +21,7 @@
                 </div>
                 <div class="p-col p-d-flex p-flex-column p-ai-center">
                     <span class="p-my-2 label">Battery</span>
-                    <Knob v-model="batteryLevel" readonly :size="0" />
+                    <Knob v-model="batteryLevel" readonly />
                 </div>
             </div>
         </template>

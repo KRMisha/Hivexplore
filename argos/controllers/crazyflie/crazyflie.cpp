@@ -388,9 +388,9 @@ void CCrazyflieController::ReturnToBase() {
         // } else {
         //     // Go to base using absolute positions
         //     if (m_isPositionToBaseFinished) {
-        //         CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(), m_pcPos->GetReading().Position.GetZ());
-        //         m_pcPropellers->SetAbsolutePosition(targetPosition);
-        //         m_isPositionToBaseFinished = false;
+        //         CVector3 targetPosition = CVector3(m_initialPosition.GetX(), m_initialPosition.GetY(),
+        //         m_pcPos->GetReading().Position.GetZ()); m_pcPropellers->SetAbsolutePosition(targetPosition); m_isPositionToBaseFinished =
+        //         false;
         //     }
         //     m_returnWatchdog--;
         // }

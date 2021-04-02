@@ -6,7 +6,7 @@
                 <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" />
             </div>
         </template>
-        <div ref="tabViewRef" class="tab-view-container">
+        <div ref="tabViewRef">
             <TabView v-model:activeIndex="activeTabIndex" @tab-change="scrollToBottom">
                 <TabPanel v-for="logName in orderedLogNames" :key="logName" :header="logName">
                     <div class="scroll-panel">
@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, ref } from 'vue';
+import { computed, defineComponent, inject, nextTick, onMounted, ref } from 'vue';
 import { SocketClient } from '@/classes/socket-client';
 
 export default defineComponent({
@@ -69,8 +69,9 @@ export default defineComponent({
         }
 
         // TODO: Rename?
-        function scrollToBottom() {
+        async function scrollToBottom() {
             if (isAutoscrollEnabled.value) {
+                await nextTick(); // Wait for the DOM to update and scroll to the bottom
                 const scrollPanel = scrollPanels[activeTabIndex.value];
                 if (scrollPanel !== undefined) {
                     scrollPanel.scrollTop = scrollPanel.scrollHeight;
@@ -97,8 +98,7 @@ export default defineComponent({
             }
 
             if (mustRender) {
-                // Wait for the DOM to update and scroll to the bottom
-                setTimeout(scrollToBottom, 0);
+                scrollToBottom();
             }
         }
 
@@ -116,6 +116,7 @@ export default defineComponent({
 
         onMounted(() => {
             scrollPanels = tabViewRef.value!.getElementsByClassName('scroll-panel');
+
             const renderIntervalMs = 250;
             setInterval(renderNewLogs, renderIntervalMs);
         });
@@ -164,13 +165,9 @@ export default defineComponent({
     }
 }
 
-.tab-view-container {
-    min-height: 200px;
-}
-
 .scroll-panel {
     height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
     scrollbar-color: #555 var(--surface-a);
     &::-webkit-scrollbar-track {
         background-color: var(--surface-a);

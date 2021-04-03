@@ -3,11 +3,11 @@
         <template #icons>
             <div class="p-d-flex p-ai-center p-mr-2">
                 <span class="p-mr-2">Autoscroll</span>
-                <InputSwitch v-model="isAutoscrollEnabled" @change="scrollToBottom" />
+                <InputSwitch v-model="isAutoscrollEnabled" @change="updateScroll" />
             </div>
         </template>
         <div ref="tabViewRef">
-            <TabView v-model:activeIndex="activeTabIndex" @tab-change="scrollToBottom">
+            <TabView v-model:activeIndex="activeTabIndex" @tab-change="updateScroll">
                 <TabPanel v-for="logGroup in orderedLogGroups" :key="logGroup" :header="logGroup">
                     <div class="scroll-panel">
                         <div v-for="(logLine, index) in logs.get(logGroup)" :key="index" class="log-line">> {{ logLine }}</div>
@@ -37,7 +37,7 @@ export default defineComponent({
 
         // Scrolling
         const isAutoscrollEnabled = ref(true);
-        async function scrollToBottom() { // TODO: Rename to updateScroll
+        async function updateScroll() { // TODO: Rename to updateScroll
             if (isAutoscrollEnabled.value) {
                 await nextTick(); // Wait for the DOM to update and scroll to the bottom
                 const scrollPanel = scrollPanels[activeTabIndex.value];
@@ -121,7 +121,7 @@ export default defineComponent({
                 }
 
                 if (mustRender) { // TODO: Use watch or hook?
-                    scrollToBottom();
+                    updateScroll();
                 }
             }, renderIntervalMs);
         });
@@ -130,13 +130,12 @@ export default defineComponent({
             tabViewRef,
             activeTabIndex,
             isAutoscrollEnabled,
-            scrollToBottom,
+            updateScroll,
             logs,
             orderedLogGroups,
         };
     },
 });
-// TODO: Fix key
 // TODO: Trim URI
 </script>
 

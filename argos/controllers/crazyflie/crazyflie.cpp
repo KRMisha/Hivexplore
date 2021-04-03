@@ -305,7 +305,7 @@ void CCrazyflieController::Explore() {
 void CCrazyflieController::ReturnToBase() {
     // If returned to base, land
     static constexpr double distanceToReturnEpsilon = 0.1;
-    static constexpr uint8_t rssiLandingThreshold = 7;
+    static constexpr uint8_t rssiLandingThreshold = 8;
     if (m_rssiReading <= rssiLandingThreshold &&
         std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
         std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {

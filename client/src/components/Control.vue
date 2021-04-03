@@ -77,7 +77,7 @@ export default defineComponent({
             socketClient!.sendMessage('mission-state', missionState);
         }
 
-        const missionStates = computed((): MissionState[] => {
+        const missionStates = computed(() => {
             const states = Object.values(MissionState);
             const stateToRemove = missionState.value !== MissionState.Emergency ? MissionState.Emergency : MissionState.Returning;
             const index = states.indexOf(stateToRemove);
@@ -163,8 +163,6 @@ export default defineComponent({
 });
 // TODO: Simplify logic
 // TODO: Fix colors
-// TODO: Remove explicit type annotations for computed()
-// TODO: Remove explicit return for computed
 // TODO: Try to remove stretched div if v-deep works without it
 </script>
 

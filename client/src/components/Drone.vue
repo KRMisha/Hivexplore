@@ -65,7 +65,7 @@ export default defineComponent({
             socketClient!.sendDroneMessage('set-led', props.droneId!, isLedEnabled.value);
         }
 
-        const droneStatusColor = computed((): string | undefined => {
+        const droneStatusColor = computed(() => {
             // TODO: Handle color for DroneStatus.Landing, DroneStatus.Landed, DroneStatus.Liftoff
             switch (droneStatus.value) {
                 case DroneStatus.Standby:

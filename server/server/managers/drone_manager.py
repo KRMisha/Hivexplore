@@ -111,7 +111,7 @@ class DroneManager(ABC):
         self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status.name)
 
         are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
-        if are_all_drones_landed and self._mission_state != MissionState.Landed:
+        if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
     def _log_console_callback(self, drone_id: str, data: str):

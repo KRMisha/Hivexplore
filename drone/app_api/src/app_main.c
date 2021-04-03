@@ -132,8 +132,6 @@ void appMain(void) {
     }
 
     // Initialize random function
-    srand(0);
-
     p2pRegisterCB(p2pCallbackHandler);
 
     while (true) {

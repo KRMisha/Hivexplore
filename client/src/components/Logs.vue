@@ -37,7 +37,7 @@ export default defineComponent({
 
         // Scrolling
         const isAutoscrollEnabled = ref(true);
-        async function updateScroll() { // TODO: Rename to updateScroll
+        async function updateScroll() {
             if (isAutoscrollEnabled.value) {
                 await nextTick(); // Wait for the DOM to update and scroll to the bottom
                 const scrollPanel = scrollPanels[activeTabIndex.value];
@@ -123,7 +123,7 @@ export default defineComponent({
                     logBuffers.set(logGroup, []);
                 }
 
-                if (mustRender) { // TODO: Use watch or hook?
+                if (mustRender) {
                     updateScroll();
                 }
             }, renderIntervalMs);

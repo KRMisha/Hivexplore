@@ -78,7 +78,7 @@ static bool isM1LedOn = false;
 static setpoint_t setPoint;
 
 // Readings
-static point_t currentPosition;
+static point_t position;
 static uint16_t frontSensorReading;
 static uint16_t leftSensorReading;
 static uint16_t backSensorReading;
@@ -146,9 +146,9 @@ void appMain(void) {
             continue;
         }
 
-        currentPosition.x = logGetFloat(positionXId);
-        currentPosition.y = logGetFloat(positionYId);
-        currentPosition.z = logGetFloat(positionZId);
+        position.x = logGetFloat(positionXId);
+        position.y = logGetFloat(positionYId);
+        position.z = logGetFloat(positionZId);
         frontSensorReading = logGetUint(frontSensorId);
         leftSensorReading = logGetUint(leftSensorId);
         backSensorReading = logGetUint(backSensorId);
@@ -369,7 +369,7 @@ void broadcastPosition() {
     uint64_t radioAddress = configblockGetRadioAddress();
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
-    P2PPacketContent content = {.sourceId = id, .x = currentPosition.x, .y = currentPosition.y, .z = currentPosition.z};
+    P2PPacketContent content = {.sourceId = id, .x = position.x, .y = position.y, .z = position.z};
 
     P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
 

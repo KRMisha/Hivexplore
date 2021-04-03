@@ -42,9 +42,10 @@ export default defineComponent({
     },
 });
 // TODO: Semantic grouping inside all setup() functions
-// TODO: Investigate issue with non-null assertions for injections
 // TODO: Use v-deep and nested SCSS consistently
 // TODO: Reduce map height?
+// TODO: Fix dialogs on mobile
+// TODO: Check drone status fixed width on mobile
 </script>
 
 <style lang="scss" scoped>

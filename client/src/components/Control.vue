@@ -65,16 +65,16 @@ export default defineComponent({
     name: 'Control',
     setup() {
         const confirm = useConfirm();
-        const socketClient: SocketClient | undefined = inject('socketClient');
+        const socketClient = inject('socketClient') as SocketClient;
 
         const missionState = ref(MissionState.Standby);
 
-        socketClient!.bindMessage('mission-state', (newMissionState: MissionState) => {
+        socketClient.bindMessage('mission-state', (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
 
         function setMissionState(missionState: MissionState) {
-            socketClient!.sendMessage('mission-state', missionState);
+            socketClient.sendMessage('mission-state', missionState);
         }
 
         const missionStates = computed(() => {
@@ -88,7 +88,7 @@ export default defineComponent({
         });
 
         const droneCount = ref(0);
-        socketClient!.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneCount.value = newDroneIds.length;
         });
 

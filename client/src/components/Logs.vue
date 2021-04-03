@@ -93,8 +93,8 @@ export default defineComponent({
         }
 
         // Log reception
-        const socketClient: SocketClient | undefined = inject('socketClient');
-        socketClient!.bindMessage('log', (log: Log) => {
+        const socketClient = inject('socketClient') as SocketClient;
+        socketClient.bindMessage('log', (log: Log) => {
             addLogGroup(log.group);
             logBuffers.get(log.group)!.push(log.line);
         });

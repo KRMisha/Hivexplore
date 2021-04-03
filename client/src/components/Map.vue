@@ -92,7 +92,7 @@ export default defineComponent({
             renderer.render(scene, camera);
         }
 
-        const socketClient: SocketClient | undefined = inject('socketClient');
+        const socketClient = inject('socketClient') as SocketClient;
 
         function addPoint(point: [number, number, number]) {
             points.geometry.attributes.position.setXYZ(pointCount, ...point);
@@ -102,7 +102,7 @@ export default defineComponent({
             points.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient!.bindMessage('map-points', (points: [number, number, number][]) => {
+        socketClient.bindMessage('map-points', (points: [number, number, number][]) => {
             for (const point of points) {
                 // Change point coordinates to match three.js coordinate system
                 // X: Right, Y: Up, Z: Out (towards user)
@@ -110,7 +110,7 @@ export default defineComponent({
             }
         });
 
-        socketClient!.bindMessage('clear-map', () => {
+        socketClient.bindMessage('clear-map', () => {
             pointCount = 0;
             points.geometry.setDrawRange(0, pointCount);
         });

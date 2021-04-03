@@ -28,10 +28,10 @@ export default defineComponent({
         Drone,
     },
     setup() {
-        const socketClient: SocketClient | undefined = inject('socketClient');
+        const socketClient = inject('socketClient') as SocketClient;
 
         const droneIds = ref<string[]>([]);
-        socketClient!.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 

@@ -39,30 +39,30 @@ export default defineComponent({
         droneId: String,
     },
     setup(props) {
-        const socketClient: SocketClient | undefined = inject('socketClient');
+        const socketClient = inject('socketClient') as SocketClient;
 
         const batteryLevel = ref(0);
-        socketClient!.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
+        socketClient.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
             batteryLevel.value = newBatteryLevel;
         });
 
         const velocity = ref(0);
-        socketClient!.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
+        socketClient.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
         });
 
         const droneStatus = ref(DroneStatus.Standby);
-        socketClient!.bindDroneMessage('drone-status', props.droneId!, (newDroneStatus: DroneStatus) => {
+        socketClient.bindDroneMessage('drone-status', props.droneId!, (newDroneStatus: DroneStatus) => {
             droneStatus.value = newDroneStatus;
         });
 
         const isLedEnabled = ref(false);
-        socketClient!.bindDroneMessage('set-led', props.droneId!, (newIsLedEnabled: boolean) => {
+        socketClient.bindDroneMessage('set-led', props.droneId!, (newIsLedEnabled: boolean) => {
             isLedEnabled.value = newIsLedEnabled;
         });
 
         function setLedEnabled() {
-            socketClient!.sendDroneMessage('set-led', props.droneId!, isLedEnabled.value);
+            socketClient.sendDroneMessage('set-led', props.droneId!, isLedEnabled.value);
         }
 
         const droneStatusStyle = computed(() => {

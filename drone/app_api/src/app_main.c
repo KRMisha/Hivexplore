@@ -362,6 +362,7 @@ bool isCrashed(void) {
 void broadcastPosition() {
     // Avoid causing drone reset due to the content size
     if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
+        DEBUG_PRINT("P2PPacketContent size too big\n");
         return;
     }
 

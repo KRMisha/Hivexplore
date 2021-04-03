@@ -12,7 +12,7 @@
                 <div class="p-col-fixed p-d-flex p-flex-column p-px-0 p-px-sm-2 middle-container">
                     <div class="p-d-flex p-flex-column p-ai-center">
                         <span class="p-my-2 label">Status</span>
-                        <Chip :label="droneStatus" :style="{ 'background-color': droneStatusColor }" />
+                        <Chip :label="droneStatus" :style="droneStatusStyle" />
                     </div>
                     <div class="p-d-flex p-flex-column p-ai-center p-mt-sm-2">
                         <span class="p-my-2 label">LED</span>
@@ -65,18 +65,37 @@ export default defineComponent({
             socketClient!.sendDroneMessage('set-led', props.droneId!, isLedEnabled.value);
         }
 
-        const droneStatusColor = computed(() => {
-            // TODO: Handle color for DroneStatus.Landing, DroneStatus.Landed, DroneStatus.Liftoff
+        const droneStatusStyle = computed(() => {
+            let color: string | undefined = undefined; // Default text color
+            let backgroundColor: string | undefined = undefined; // Default background color
+
             switch (droneStatus.value) {
-                case DroneStatus.Standby:
-                    return undefined; // Default background color
+                case DroneStatus.Liftoff:
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--orange-400)';
+                    break;
                 case DroneStatus.Flying:
-                    return 'var(--primary-color)';
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--primary-color)';
+                    break;
+                case DroneStatus.Landing:
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--teal-300)';
+                    break;
+                case DroneStatus.Landed:
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--green-400)';
+                    break;
                 case DroneStatus.Crashed:
-                    return 'var(--orange-400)';
-                default:
-                    return undefined;
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--pink-200)';
+                    break;
             }
+
+            return {
+                color: color,
+                'background-color': backgroundColor,
+            };
         });
 
         return {
@@ -85,12 +104,11 @@ export default defineComponent({
             droneStatus,
             isLedEnabled,
             setLedEnabled,
-            droneStatusColor,
+            droneStatusStyle,
         };
     },
 });
-// TODO: Fix status colors and set the text color dynamically when needed
-// TODO: Investigate using watch
+// TODO: Investigate using watch for LED
 </script>
 
 <style lang="scss" scoped>

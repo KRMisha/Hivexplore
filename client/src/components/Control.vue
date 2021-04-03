@@ -100,7 +100,6 @@ export default defineComponent({
                 confirm.require({
                     target: event.currentTarget!,
                     message: 'The last mission was forcefully ended. Are you sure you want to start a new mission?',
-                    header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
                         setMissionState(MissionState.Exploring);
@@ -133,7 +132,6 @@ export default defineComponent({
                 confirm.require({
                     target: event.currentTarget!,
                     message: 'Are you sure you want to initiate an *emergency* landing?',
-                    header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     acceptClass: 'p-button-danger',
                     accept: () => {

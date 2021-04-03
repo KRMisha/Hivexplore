@@ -41,8 +41,6 @@ export default defineComponent({
         });
     },
 });
-// TODO: Semantic grouping inside all setup() functions
-// TODO: Reduce map height?
 </script>
 
 <style lang="scss" scoped>

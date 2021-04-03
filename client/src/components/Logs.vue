@@ -165,15 +165,14 @@ export default defineComponent({
 .scroll-panel {
     height: 200px;
     overflow-y: auto;
+
     scrollbar-color: #555 var(--surface-a);
     &::-webkit-scrollbar-track {
         background-color: var(--surface-a);
     }
-
     &::-webkit-scrollbar {
         background-color: var(--surface-a);
     }
-
     &::-webkit-scrollbar-thumb {
         background-color: #555;
     }

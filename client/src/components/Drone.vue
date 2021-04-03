@@ -44,14 +44,14 @@ export default defineComponent({
     setup(props) {
         const socketClient = inject('socketClient') as SocketClient;
 
-        const batteryLevel = ref(0);
-        socketClient.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
-            batteryLevel.value = newBatteryLevel;
-        });
-
         const velocity = ref(0);
         socketClient.bindDroneMessage('velocity', props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
+        });
+
+        const batteryLevel = ref(0);
+        socketClient.bindDroneMessage('battery-level', props.droneId!, (newBatteryLevel: number) => {
+            batteryLevel.value = newBatteryLevel;
         });
 
         const droneStatus = ref(DroneStatus.Standby);
@@ -102,8 +102,8 @@ export default defineComponent({
         });
 
         return {
-            batteryLevel,
             velocity,
+            batteryLevel,
             droneStatus,
             isLedEnabled,
             setLedEnabled,
@@ -138,7 +138,7 @@ export default defineComponent({
 }
 
 .middle-container {
-    min-width: 5.75rem;
+    min-width: 6rem;
 }
 
 div::v-deep(.p-knob) svg {

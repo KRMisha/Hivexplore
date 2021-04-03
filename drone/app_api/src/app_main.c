@@ -61,11 +61,11 @@
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
 static const float EXPLORATION_HEIGHT = 0.3f; // 0.5f
-static const float CRUISE_VELOCITY = 0.1f; // 0.2f
+static const float CRUISE_VELOCITY = 0.15f; // 0.2f
 static const float MAXIMUM_VELOCITY = 0.4f; // 0.7f
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
-static const uint16_t STABILIZE_READING_TICKS = 600;
+static const uint16_t STABILIZE_READING_TICKS = 100;
 
 // States
 static mission_state_t missionState = MISSION_STANDBY;
@@ -269,9 +269,12 @@ void explore(void) {
 
 void returnToBase(void) {
     // If returned to base, land
-    static const double distanceToReturnEpsilon = 0.2;
-    static const uint8_t rssiLandingThreshold = 35;
-    if (rssiReading == rssiLandingThreshold && fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
+    static const double distanceToReturnEpsilon = 0.30;
+    static const uint8_t rssiLandingThreshold = 200;
+    if (returningState != RETURNING_LAND &&
+        returningState != RETURNING_IDLE &&
+        rssiReading <= rssiLandingThreshold &&
+        fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
         fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
         DEBUG_PRINT("I found the base! \n");
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
@@ -402,9 +405,7 @@ void returnToBase(void) {
         }
     } break;
     case RETURNING_IDLE: {
-        DEBUG_PRINT("Returning Idle\n");
         droneStatus = STATUS_LANDED;
-        DEBUG_PRINT("After setting status landed (returning)\n");
         memset(&setPoint, 0, sizeof(setpoint_t));
         DEBUG_PRINT("memset = 0\n");
     } break;

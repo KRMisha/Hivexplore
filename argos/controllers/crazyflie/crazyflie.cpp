@@ -19,8 +19,8 @@ namespace {
 
     static constexpr std::uint16_t returnObstacleThreshold = 700;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
-    static constexpr std::uint16_t stabilizeReadingTicks = 50;
-    static constexpr std::uint16_t maximumReturnTicks = 1000;
+    static constexpr std::uint16_t stabilizeReadingTicks = 120;
+    static constexpr std::uint16_t maximumReturnTicks = 800;
     static uint16_t maximumExploreTicks = 600;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {

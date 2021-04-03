@@ -1,6 +1,12 @@
 <template>
-    <Panel :header="droneIds.length > 0 ? 'Drones' : ''">
-        <Carousel v-if="droneIds.length > 0" :value="droneIds" :numVisible="4" :numScroll="4" :responsiveOptions="responsiveOptions">
+    <Panel :header="sortedDroneIds.length > 0 ? 'Drones' : ''">
+        <Carousel
+            v-if="sortedDroneIds.length > 0"
+            :value="sortedDroneIds"
+            :numVisible="4"
+            :numScroll="4"
+            :responsiveOptions="responsiveOptions"
+        >
             <template #item="slotProps">
                 <Drone :droneId="slotProps.data" />
             </template>
@@ -12,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref } from 'vue';
+import { computed, defineComponent, inject, ref } from 'vue';
 import Drone from '@/components/Drone.vue';
 import { SocketClient } from '@/classes/socket-client';
 
@@ -27,6 +33,10 @@ export default defineComponent({
         const droneIds = ref<string[]>([]);
         socketClient!.bindMessage('drone-ids', (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
+        });
+
+        const sortedDroneIds = computed(() => {
+            return [...droneIds.value].sort((first: string, second: string): number => first.localeCompare(second));
         });
 
         const responsiveOptions = [
@@ -48,12 +58,11 @@ export default defineComponent({
         ];
 
         return {
-            droneIds,
+            sortedDroneIds,
             responsiveOptions,
         };
     },
 });
-// TODO: Order drones
 </script>
 
 <style lang="scss" scoped>

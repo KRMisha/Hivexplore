@@ -102,7 +102,7 @@ static float targetYawToBase;
 
 // Watchdogs
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS;
-static uint16_t maximumExploreTicks = 200;
+static uint16_t maximumExploreTicks = 600;
 static uint16_t exploreWatchdog;
 static uint16_t obstacleClearedCounter = STABILIZE_READING_TICKS;
 
@@ -359,16 +359,16 @@ void returnToBase(void) {
         if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && obstacleClearedCounter == 0) ||
             exploreWatchdog == 0) {
             // Generation of a random explore watchdog between 200 and 600
-            static const uint16_t SCOPE_EXPLORE_WATCHDOG = 400;
-            static const uint16_t MINIMUM_EXPLORE_WATCHDOG = 200;
-            maximumExploreTicks = rand() % SCOPE_EXPLORE_WATCHDOG + MINIMUM_EXPLORE_WATCHDOG;
-
-            // Reset counters
+            //static const uint16_t SCOPE_EXPLORE_WATCHDOG = 400;
+            //static const uint16_t MINIMUM_EXPLORE_WATCHDOG = 200;
+            //maximumExploreTicks = rand() % SCOPE_EXPLORE_WATCHDOG + MINIMUM_EXPLORE_WATCHDOG;
+            maximumExploreTicks = 2 * maximumExploreTicks;
             if (exploreWatchdog == 0) {
                 DEBUG_PRINT("Explore: explore watchdog finished\n");
             } else {
                 DEBUG_PRINT("Explore: Obstacle has been cleared\n");
             }
+            // Reset counters
             exploreWatchdog = maximumExploreTicks;
             obstacleClearedCounter = STABILIZE_READING_TICKS;
 

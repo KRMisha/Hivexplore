@@ -271,9 +271,7 @@ void returnToBase(void) {
     // If returned to base, land
     static const double distanceToReturnEpsilon = 0.30;
     static const uint8_t rssiLandingThreshold = 60;
-    if (returningState != RETURNING_LAND &&
-        returningState != RETURNING_IDLE &&
-        rssiReading <= rssiLandingThreshold &&
+    if (returningState != RETURNING_LAND && returningState != RETURNING_IDLE && rssiReading <= rssiLandingThreshold &&
         fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
         fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
         DEBUG_PRINT("I found the base! \n");
@@ -362,9 +360,9 @@ void returnToBase(void) {
         if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && obstacleClearedCounter == 0) ||
             exploreWatchdog == 0) {
             // Generation of a random explore watchdog between 200 and 600
-            //static const uint16_t SCOPE_EXPLORE_WATCHDOG = 400;
-            //static const uint16_t MINIMUM_EXPLORE_WATCHDOG = 200;
-            //maximumExploreTicks = rand() % SCOPE_EXPLORE_WATCHDOG + MINIMUM_EXPLORE_WATCHDOG;
+            // static const uint16_t SCOPE_EXPLORE_WATCHDOG = 400;
+            // static const uint16_t MINIMUM_EXPLORE_WATCHDOG = 200;
+            // maximumExploreTicks = rand() % SCOPE_EXPLORE_WATCHDOG + MINIMUM_EXPLORE_WATCHDOG;
             maximumExploreTicks = 2 * maximumExploreTicks;
             if (exploreWatchdog == 0) {
                 DEBUG_PRINT("Explore: explore watchdog finished\n");
@@ -443,7 +441,7 @@ bool forward(void) {
     targetHeight += EXPLORATION_HEIGHT;
     targetForwardVelocity += CRUISE_VELOCITY;
     updateWaypoint();
- 
+
     return frontSensorReading >= EDGE_DETECTED_THRESHOLD;
 }
 

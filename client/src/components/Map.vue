@@ -13,6 +13,17 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 import { SocketClient } from '@/classes/socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
+// TODO: Move this to comm folder
+interface DronePosition {
+    droneId: string,
+    position: [number, number, number],
+};
+
+interface DroneOrientation {
+    droneId: string,
+    orientation: [number, number, number],
+};
+
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
 export default defineComponent({
@@ -20,7 +31,8 @@ export default defineComponent({
     setup() {
         const socketClient: SocketClient | undefined = inject('socketClient');
 
-        const maxPoints = 1_000_000;
+        const maxMapPoints = 1_000_000;
+        const maxDronePositions = 1_000;
 
         let container: HTMLDivElement;
 
@@ -31,8 +43,12 @@ export default defineComponent({
 
         let stats: Stats;
 
-        let points: THREE.Points;
+        let droneIds: Map<string, number> = new Map();
+
+        let mapPoints: THREE.Points;
         let pointCount = 0;
+        let dronePoints: THREE.Points;
+        let droneIndexes = 0;
 
         function onWindowResize() {
             camera.aspect = container.clientWidth / container.clientHeight;
@@ -53,18 +69,33 @@ export default defineComponent({
             camera.position.set(0, 10, -6);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
+            // Map points variables
             // Geometry - buffer to hold all point positions
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(maxPoints * 3);
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setDrawRange(0, 0);
+            const mapGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(maxMapPoints * 3);
+            mapGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            mapGeometry.setDrawRange(0, 0);
 
             // Material
-            const material = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 });
+            const mapMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 });
 
             // Points
-            points = new THREE.Points(geometry, material);
-            scene.add(points);
+            mapPoints = new THREE.Points(mapGeometry, mapMaterial);
+            scene.add(mapPoints);
+
+            // Drone positions variables
+            // Geometry - buffer to hold all point positions
+            const droneGeometry = new THREE.BufferGeometry();
+            const dronePositions = new Float32Array(maxDronePositions * 3);
+            droneGeometry.setAttribute('position', new THREE.BufferAttribute(dronePositions, 3));
+            droneGeometry.setDrawRange(0, 0);
+
+            // Material
+            const droneMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xff0000 });
+
+            // Points
+            dronePoints = new THREE.Points(droneGeometry, droneMaterial);
+            scene.add(dronePoints);
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -99,24 +130,48 @@ export default defineComponent({
         }
 
         function addPoint(point: [number, number, number]) {
-            points.geometry.attributes.position.setXYZ(pointCount, ...point);
+            mapPoints.geometry.attributes.position.setXYZ(pointCount, ...point);
             pointCount++;
 
-            points.geometry.setDrawRange(0, pointCount);
-            points.geometry.attributes.position.needsUpdate = true;
+            mapPoints.geometry.setDrawRange(0, pointCount);
+            mapPoints.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient!.bindMessage('map-points', (points: [number, number, number][]) => {
-            for (const point of points) {
+        function setDronePosition(droneId: string, position: [number, number, number]) {
+            if (!droneIds.get(droneId)) {
+                droneIds.set(droneId, droneIndexes);
+                dronePoints.geometry.attributes.position.setXYZ(droneIds.get(droneId)!, ...position);
+                droneIndexes++;
+                dronePoints.geometry.setDrawRange(0, droneIndexes);
+            } else {
+                dronePoints.geometry.attributes.position.setXYZ(droneIds.get(droneId)!, ...position);
+            }
+            dronePoints.geometry.attributes.position.needsUpdate = true;
+        }
+
+        socketClient!.bindMessage('map-points', (mapPoints: [number, number, number][]) => {
+            for (const point of mapPoints) {
                 // Change point coordinates to match three.js coordinate system
                 // X: Right, Y: Up, Z: Out (towards user)
                 addPoint([point[1], point[2], point[0]]);
             }
         });
 
+        socketClient!.bindMessage('drone-orientation', (droneOrientation: DroneOrientation) => {
+            // Change point coordinates to match three.js coordinate system
+            // X: Right, Y: Up, Z: Out (towards user)
+            // TODO
+        });
+
+        socketClient!.bindMessage('drone-position', (dronePosition: DronePosition) => {
+            // Change point coordinates to match three.js coordinate system
+            // X: Right, Y: Up, Z: Out (towards user)
+            setDronePosition(dronePosition.droneId, [dronePosition.position[1], dronePosition.position[2], dronePosition.position[0]]);
+        });
+
         socketClient!.bindMessage('clear-map', () => {
             pointCount = 0;
-            points.geometry.setDrawRange(0, pointCount);
+            mapPoints.geometry.setDrawRange(0, pointCount);
         });
 
         function saveAsImage() {

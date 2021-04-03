@@ -132,8 +132,7 @@ void appMain(void) {
     }
 
     // Initialize random function
-    time_t t;
-    srand((unsigned)time(&t));
+    srand(0);
 
     p2pRegisterCB(p2pCallbackHandler);
 

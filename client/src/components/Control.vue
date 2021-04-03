@@ -30,23 +30,16 @@
                     </div>
                     <div class="p-d-flex p-jc-between p-ai-center">
                         <span class="label">Drone count</span>
-                        <Chip :label="droneCount.toString()" :class="{ 'colored-chip': droneCount > 0 }" />
+                        <Chip :label="droneCount.toString()" :class="droneCountChipClass" />
                     </div>
                 </div>
                 <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-center">
                     <Timeline :value="missionStates">
                         <template #marker="slotProps">
-                            <div class="p-timeline-event-marker" :class="{ 'selected-marker': slotProps.item === missionState }"></div>
+                            <div class="p-timeline-event-marker" :class="timelineMarkerClass(slotProps.item)"></div>
                         </template>
                         <template #content="slotProps">
-                            <div
-                                :class="{
-                                    'selected-content': slotProps.item === missionState,
-                                    'p-error': slotProps.item === MissionState.Emergency,
-                                }"
-                            >
-                                {{ slotProps.item }}
-                            </div>
+                            <div :class="timelineContentClass(slotProps.item)">{{ slotProps.item }}</div>
                         </template>
                     </Timeline>
                 </div>
@@ -145,6 +138,21 @@ export default defineComponent({
             }
         }
 
+        const droneCountChipClass = computed(() => {
+            return { 'colored-chip': droneCount.value > 0 };
+        });
+
+        function timelineMarkerClass(timelineMissionState: MissionState) {
+            return { 'selected-marker': timelineMissionState === missionState.value };
+        }
+
+        function timelineContentClass(timelineMissionState: MissionState) {
+            return {
+                'selected-content': timelineMissionState === missionState.value,
+                'p-error': timelineMissionState === MissionState.Emergency,
+            };
+        }
+
         return {
             MissionState,
             missionState,
@@ -156,6 +164,9 @@ export default defineComponent({
             endMissionButtonIcon,
             endMissionButtonClass,
             onEndMissionButtonClick,
+            droneCountChipClass,
+            timelineMarkerClass,
+            timelineContentClass,
         };
     },
 });

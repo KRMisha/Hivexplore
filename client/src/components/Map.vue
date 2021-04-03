@@ -3,12 +3,12 @@
         <template #icons>
             <Button class="p-panel-header-icon" icon="pi pi-download" v-tooltip.left="'Download map'" @click="saveAsImage" />
         </template>
-        <div id="map-container"></div>
+        <div ref="containerRef" class="container"></div>
     </Panel>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, onUnmounted } from 'vue';
+import { defineComponent, inject, onMounted, onUnmounted, ref } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { SocketClient } from '@/classes/socket-client';
@@ -23,7 +23,7 @@ export default defineComponent({
 
         const maxPoints = 1_000_000;
 
-        let container: HTMLElement;
+        const containerRef = ref<HTMLElement | undefined>(undefined);
 
         let scene: THREE.Scene;
         let camera: THREE.PerspectiveCamera;
@@ -34,21 +34,19 @@ export default defineComponent({
         let pointCount = 0;
 
         function onWindowResize() {
-            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.aspect = containerRef.value!.clientWidth / containerRef.value!.clientHeight;
             camera.updateProjectionMatrix();
 
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(containerRef.value!.clientWidth, containerRef.value!.clientHeight);
         }
 
         function init() {
-            container = document.getElementById('map-container')! as HTMLDivElement;
-
             // Scene
             scene = new THREE.Scene();
 
             // Camera
             const fov = 70;
-            camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
+            camera = new THREE.PerspectiveCamera(fov, containerRef.value!.clientWidth / containerRef.value!.clientHeight);
             camera.position.set(0, 10, -6);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
@@ -67,9 +65,9 @@ export default defineComponent({
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(containerRef.value!.clientWidth, containerRef.value!.clientHeight);
             renderer.setClearColor(0xffffff, 0);
-            container.append(renderer.domElement);
+            containerRef.value!.append(renderer.domElement);
 
             // Controls
             controls = new OrbitControls(camera, renderer.domElement);
@@ -132,15 +130,15 @@ export default defineComponent({
         });
 
         return {
+            containerRef,
             saveAsImage,
         };
     },
 });
-// TODO: Use ref instead of document?
 </script>
 
 <style lang="scss" scoped>
-#map-container {
+.container {
     height: 300px;
 }
 </style>

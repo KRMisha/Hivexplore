@@ -295,7 +295,7 @@ void CCrazyflieController::Explore() {
     case ExploringState::Rotate: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (Rotate(CRadians::PI / 8)) {
+        if (Rotate()) {
             m_exploringState = ExploringState::Explore;
         }
     } break;
@@ -304,7 +304,7 @@ void CCrazyflieController::Explore() {
 
 void CCrazyflieController::ReturnToBase() {
     // If returned to base, land
-    static constexpr double distanceToReturnEpsilon = 0.1;
+    static constexpr double distanceToReturnEpsilon = 0.3;
     static constexpr uint8_t rssiLandingThreshold = 8;
     if (m_returningState != ReturningState::Land && m_returningState != ReturningState::Idle && m_rssiReading <= rssiLandingThreshold &&
         std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
@@ -416,8 +416,7 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Rotate: {
         m_droneStatus = DroneStatus::Flying;
 
-        CRadians rotationAngle = (m_shouldTurnLeft ? 1 : -1) * CRadians::PI / 8;
-        if (Rotate(rotationAngle)) {
+        if (Rotate()) {
             DebugPrint("Forward\n");
             m_returningState = ReturningState::Forward;
         }
@@ -549,13 +548,14 @@ bool CCrazyflieController::Brake() {
     return false;
 }
 
-bool CCrazyflieController::Rotate(const CRadians rotationAngle) {
+bool CCrazyflieController::Rotate() {
     // Get current yaw
     CRadians currentYaw;
     CVector3 rotationAxis;
     m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
 
     // Order rotation
+    CRadians rotationAngle = (m_shouldTurnLeft ? 1 : -1) * CRadians::PI / 8;
     if (m_isRotateCommandFinished) {
         m_rotationAngle = rotationAngle;
         m_lastReferenceYaw = currentYaw;

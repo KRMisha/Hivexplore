@@ -81,7 +81,7 @@ private:
     bool Liftoff();
     bool Forward();
     bool Brake();
-    bool Rotate(const CRadians rotationAngle);
+    bool Rotate();
     bool Land();
     bool IsCrashed();
 

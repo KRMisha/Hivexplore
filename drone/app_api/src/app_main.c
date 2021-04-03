@@ -141,11 +141,6 @@ void appMain(void) {
 
         ledSet(LED_GREEN_R, isM1LedOn);
 
-        static const uint8_t broadcastProbabilityPercentage = 5;
-        if ((rand() % 100) < broadcastProbabilityPercentage) {
-            broadcastPosition();
-        }
-
         if (isOutOfService) {
             ledSet(LED_RED_R, true);
             continue;
@@ -171,6 +166,11 @@ void appMain(void) {
         targetLeftVelocity = 0.0;
         targetHeight = 0.0;
         targetYawRate = 0.0;
+
+        static const uint8_t broadcastProbabilityPercentage = 5;
+        if ((rand() % 100) < broadcastProbabilityPercentage) {
+            broadcastPosition();
+        }
 
         switch (missionState) {
         case MISSION_STANDBY:

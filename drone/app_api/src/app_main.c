@@ -443,10 +443,8 @@ bool forward(void) {
     targetHeight += EXPLORATION_HEIGHT;
     targetForwardVelocity += CRUISE_VELOCITY;
     updateWaypoint();
-    if (frontSensorReading < EDGE_DETECTED_THRESHOLD) {
-        return false;
-    }
-    return true;
+ 
+    return frontSensorReading >= EDGE_DETECTED_THRESHOLD;
 }
 
 bool rotate(void) {

@@ -144,7 +144,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .p-panel::v-deep(.p-panel-header) .p-panel-icons {
     display: flex;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
 
     .p-inputswitch {
         width: 1.8rem;

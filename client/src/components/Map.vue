@@ -135,7 +135,7 @@ export default defineComponent({
         }
 
         function setDronePosition(droneId: string, position: [number, number, number]) {
-            if (!droneIds.get(droneId)) {
+            if (droneIds.get(droneId) === undefined) {
                 droneIds.set(droneId, droneIndexes);
                 dronePoints.geometry.attributes.position.setXYZ(droneIds.get(droneId)!, ...position);
                 droneIndexes++;

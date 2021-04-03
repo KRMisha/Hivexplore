@@ -306,7 +306,7 @@ void CCrazyflieController::ReturnToBase() {
     // If returned to base, land
     static constexpr double distanceToReturnEpsilon = 0.1;
     static constexpr uint8_t rssiLandingThreshold = 8;
-    if (m_rssiReading <= rssiLandingThreshold &&
+    if (m_returningState != ReturningState::Land && m_returningState != ReturningState::Idle && m_rssiReading <= rssiLandingThreshold &&
         std::abs(m_pcPos->GetReading().Position.GetX() - m_initialPosition.GetX()) <= distanceToReturnEpsilon &&
         std::abs(m_pcPos->GetReading().Position.GetY() - m_initialPosition.GetY()) <= distanceToReturnEpsilon) {
         m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
@@ -402,7 +402,6 @@ void CCrazyflieController::ReturnToBase() {
             m_returningState = ReturningState::Brake;
         } else {
             m_returnWatchdog--;
-            DebugPrint("Going forward in return! \n");
         }
     } break;
     // Explore algorithm

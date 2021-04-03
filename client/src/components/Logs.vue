@@ -28,7 +28,7 @@ interface Log {
 }
 
 export default defineComponent({
-    name: 'Log',
+    name: 'Logs',
     setup() {
         // Tabs
         const tabViewRef = ref<HTMLElement | undefined>(undefined);
@@ -136,7 +136,6 @@ export default defineComponent({
         };
     },
 });
-// TODO: Rename Log to Logs
 // TODO: Fix key
 // TODO: Trim URI
 // TODO: Rename log name and log tab to log group consistently

@@ -11,7 +11,7 @@
             <DroneList />
         </div>
         <div class="p-col-12 p-order-4">
-            <Log />
+            <Logs />
         </div>
     </div>
 </template>
@@ -20,7 +20,7 @@
 import { defineComponent, onUnmounted, provide } from 'vue';
 import Control from '@/components/Control.vue';
 import DroneList from '@/components/DroneList.vue';
-import Log from '@/components/Log.vue';
+import Logs from '@/components/Logs.vue';
 import Map from '@/components/Map.vue';
 import { SocketClient } from '@/classes/socket-client';
 
@@ -29,7 +29,7 @@ export default defineComponent({
     components: {
         Control,
         DroneList,
-        Log,
+        Logs,
         Map,
     },
     setup() {

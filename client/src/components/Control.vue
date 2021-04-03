@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-center">
-                    <Timeline :value="missionStates" class="timeline">
+                    <Timeline :value="missionStates">
                         <template #marker="slotProps">
                             <div class="p-timeline-event-marker" :class="{ 'selected-marker': slotProps.item === missionState }"></div>
                         </template>
@@ -161,8 +161,6 @@ export default defineComponent({
         };
     },
 });
-// TODO: Simplify logic
-// TODO: Fix colors
 </script>
 
 <style lang="scss" scoped>
@@ -195,24 +193,27 @@ export default defineComponent({
     background-color: var(--primary-color);
 }
 
-.timeline {
+.p-timeline {
     flex-grow: 0;
 }
 
 @media (max-width: 575px), (min-width: 992px) and (max-width: 1280px) {
-    .timeline {
-        margin-left: -4.5rem;
+    .p-timeline::v-deep(.p-timeline-event) {
+        .p-timeline-event-opposite {
+            flex-grow: 2;
+            padding-right: 0;
+        }
+
+        .p-timeline-event-content {
+            flex-grow: 5;
+            padding-right: 0;
+        }
     }
 }
 
 @media (max-width: 400px) {
     .p-component {
         font-size: 0.875rem;
-    }
-
-    .timeline {
-        margin-left: -5rem;
-        margin-right: -2rem;
     }
 }
 

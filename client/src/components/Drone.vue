@@ -111,7 +111,6 @@ export default defineComponent({
         };
     },
 });
-// TODO: Investigate using watch for LED
 </script>
 
 <style lang="scss" scoped>

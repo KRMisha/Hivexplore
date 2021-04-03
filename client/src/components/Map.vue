@@ -60,7 +60,7 @@ export default defineComponent({
             geometry.setDrawRange(0, 0);
 
             // Material
-            const material = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 });
+            const material = new THREE.PointsMaterial({ size: 0.5, color: 0xfbc02d });
 
             // Points
             points = new THREE.Points(geometry, material);
@@ -145,5 +145,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .container {
     height: 300px;
+
+    @media (max-width: 575px) {
+        height: 225px;
+    }
 }
 </style>

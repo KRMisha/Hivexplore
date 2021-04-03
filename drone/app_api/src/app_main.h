@@ -19,9 +19,10 @@ void returnToBase(void);
 void emergencyLand(void);
 bool liftoff(void);
 bool land(void);
+bool isCrashed(void);
+
 void broadcastPosition();
 void p2pCallbackHandler(P2PPacket* packet);
-bool isCrashed(void);
 
 void updateWaypoint(void);
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);

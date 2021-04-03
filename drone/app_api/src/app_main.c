@@ -78,13 +78,13 @@ static bool isM1LedOn = false;
 static setpoint_t setPoint;
 
 // Readings
+static point_t currentPosition;
 static uint16_t frontSensorReading;
 static uint16_t leftSensorReading;
 static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
-static point_t currentPosition;
 static float rollReading;
 static float pitchReading;
 static uint8_t rssiReading;
@@ -105,6 +105,9 @@ typedef struct {
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
+    const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
+    const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
+    const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
     const logVarId_t frontSensorId = logGetVarId("range", "front");
     const logVarId_t leftSensorId = logGetVarId("range", "left");
     const logVarId_t backSensorId = logGetVarId("range", "back");
@@ -114,9 +117,6 @@ void appMain(void) {
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
-    const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
-    const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
-    const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
@@ -151,15 +151,15 @@ void appMain(void) {
             continue;
         }
 
+        currentPosition.x = logGetFloat(positionXId);
+        currentPosition.y = logGetFloat(positionYId);
+        currentPosition.z = logGetFloat(positionZId);
         frontSensorReading = logGetUint(frontSensorId);
         leftSensorReading = logGetUint(leftSensorId);
         backSensorReading = logGetUint(backSensorId);
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
-        currentPosition.x = logGetFloat(positionXId);
-        currentPosition.y = logGetFloat(positionYId);
-        currentPosition.z = logGetFloat(positionZId);
 
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
@@ -359,24 +359,6 @@ bool isCrashed(void) {
     return isCrashed;
 }
 
-void updateWaypoint(void) {
-    setPoint.velocity_body = true;
-    setPoint.mode.x = modeVelocity;
-    setPoint.mode.y = modeVelocity;
-    setPoint.velocity.x = targetForwardVelocity;
-    setPoint.velocity.y = targetLeftVelocity;
-
-    setPoint.mode.yaw = modeVelocity;
-    setPoint.attitudeRate.yaw = targetYawRate;
-
-    setPoint.mode.z = modeAbs;
-    setPoint.position.z = targetHeight;
-}
-
-uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
-    return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
-}
-
 void broadcastPosition() {
     // Avoid causing drone reset due to the content size
     if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
@@ -400,6 +382,24 @@ void p2pCallbackHandler(P2PPacket* packet) {
     // Get source ID
     P2PPacketContent content;
     memcpy(&content, &packet->data[0], sizeof(content));
+}
+
+void updateWaypoint(void) {
+    setPoint.velocity_body = true;
+    setPoint.mode.x = modeVelocity;
+    setPoint.mode.y = modeVelocity;
+    setPoint.velocity.x = targetForwardVelocity;
+    setPoint.velocity.y = targetLeftVelocity;
+
+    setPoint.mode.yaw = modeVelocity;
+    setPoint.attitudeRate.yaw = targetYawRate;
+
+    setPoint.mode.z = modeAbs;
+    setPoint.position.z = targetHeight;
+}
+
+uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
+    return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
 LOG_GROUP_START(hivexplore)

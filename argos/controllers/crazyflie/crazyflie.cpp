@@ -21,7 +21,7 @@ namespace {
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t stabilizeReadingTicks = 50;
     static constexpr std::uint16_t maximumReturnTicks = 1000;
-    static uint16_t maximumExploreTicks = 1200;
+    static uint16_t maximumExploreTicks = 600;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
@@ -433,11 +433,12 @@ void CCrazyflieController::ReturnToBase() {
         if ((sensorToCheck > edgeDetectedThreshold && m_obstacleClearedCounter == 0) || m_exploreWatchdog == 0) {
             DebugPrint("Obstacle has been passed \n");
             // Generation of a random explore watchdog between 200 and 600
-            static const uint16_t scopeExploreWatchdog = 300;
-            static const uint16_t minimumExploreWatchdog = 900;
-            maximumExploreTicks = random() % scopeExploreWatchdog + minimumExploreWatchdog;
+            // static const uint16_t scopeExploreWatchdog = 300;
+            // static const uint16_t minimumExploreWatchdog = 900;
+            // maximumExploreTicks = random() % scopeExploreWatchdog + minimumExploreWatchdog;
 
             // Reset counters
+            maximumExploreTicks = maximumExploreTicks * 2;
             m_exploreWatchdog = maximumExploreTicks;
             m_obstacleClearedCounter = stabilizeReadingTicks;
 

@@ -20,7 +20,7 @@
                     </div>
                 </div>
                 <div class="p-col p-d-flex p-flex-column p-ai-center">
-                    <span class="p-my-2 label">Battery</span>
+                    <span class="p-my-2 label">Battery <span class="units">(%)</span></span>
                     <Knob v-model="batteryLevel" readonly />
                 </div>
             </div>

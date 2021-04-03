@@ -36,7 +36,10 @@ import { DroneStatus } from '@/enums/drone-status';
 export default defineComponent({
     name: 'Drone',
     props: {
-        droneId: String,
+        droneId: {
+            type: String,
+            required: true,
+        },
     },
     setup(props) {
         const socketClient = inject('socketClient') as SocketClient;

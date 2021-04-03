@@ -77,11 +77,14 @@ export default defineComponent({
 
         // Log group management
         function addLogGroup(logGroup: string) {
-            if (!logs.has(logGroup)) {
-                logs.set(logGroup, []);
+            // Trim URI to extract Crazyflie address
+            const trimmedLogGroup = logGroup.replace('radio://0/80/2M/', '')
+
+            if (!logs.has(trimmedLogGroup)) {
+                logs.set(trimmedLogGroup, []);
             }
-            if (!logBuffers.has(logGroup)) {
-                logBuffers.set(logGroup, []);
+            if (!logBuffers.has(trimmedLogGroup)) {
+                logBuffers.set(trimmedLogGroup, []);
             }
         }
 
@@ -136,7 +139,6 @@ export default defineComponent({
         };
     },
 });
-// TODO: Trim URI
 </script>
 
 <style lang="scss" scoped>

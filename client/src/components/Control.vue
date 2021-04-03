@@ -131,7 +131,7 @@ export default defineComponent({
                 // Emergency land
                 confirm.require({
                     target: event.currentTarget!,
-                    message: 'Are you sure you want to initiate an *emergency* landing?',
+                    message: 'Are you sure you want to initiate an emergency landing?',
                     icon: 'pi pi-exclamation-triangle',
                     acceptClass: 'p-button-danger',
                     accept: () => {

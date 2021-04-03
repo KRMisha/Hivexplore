@@ -142,8 +142,8 @@ void appMain(void) {
 
         ledSet(LED_GREEN_R, isM1LedOn);
 
-        static const uint8_t broadcastPercentage = 5;
-        if ((rand() % 100) < broadcastPercentage) {
+        static const uint8_t broadcastProbabilityPercentage = 5;
+        if ((rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
 
@@ -385,9 +385,9 @@ void broadcastPosition() {
     }
 
     uint64_t radioAddress = configblockGetRadioAddress();
-    uint8_t myId = (uint8_t)(radioAddress & 0x00000000ff);
+    uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
-    P2PPacketContent content = {.sourceId = myId, .x = currentPosition.x, .y = currentPosition.y, .z = currentPosition.z};
+    P2PPacketContent content = {.sourceId = id, .x = currentPosition.x, .y = currentPosition.y, .z = currentPosition.z};
 
     P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
 
@@ -398,15 +398,15 @@ void broadcastPosition() {
 }
 
 void p2pCallbackHandler(P2PPacket* packet) {
-    // Get source Id
-    P2PPacketContent messageContent;
-    memcpy(&messageContent, &packet->data[0], sizeof(messageContent));
+    // Get source ID
+    P2PPacketContent content;
+    memcpy(&content, &packet->data[0], sizeof(content));
     DEBUG_PRINT("Id(%d), R(%d), X(%f), Y(%f), Z(%f) \n",
-                messageContent.sourceId,
+                content.sourceId,
                 packet->rssi,
-                (double)messageContent.x,
-                (double)messageContent.y,
-                (double)messageContent.z);
+                (double)content.x,
+                (double)content.y,
+                (double)content.z);
 }
 
 LOG_GROUP_START(hivexplore)

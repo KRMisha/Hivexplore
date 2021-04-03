@@ -270,7 +270,7 @@ void explore(void) {
 void returnToBase(void) {
     // If returned to base, land
     static const double distanceToReturnEpsilon = 0.30;
-    static const uint8_t rssiLandingThreshold = 200;
+    static const uint8_t rssiLandingThreshold = 60;
     if (returningState != RETURNING_LAND &&
         returningState != RETURNING_IDLE &&
         rssiReading <= rssiLandingThreshold &&

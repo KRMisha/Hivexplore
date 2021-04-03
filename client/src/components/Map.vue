@@ -1,15 +1,22 @@
 <template>
-    <Panel header="Map" class="map">
-        <div id="map-container"></div>
+    <Panel header="Map">
+        <template #icons>
+            <Button
+                class="p-panel-header-icon"
+                icon="pi pi-download"
+                v-tooltip.left="'Download map'"
+                aria-label="Download map"
+                @click="saveAsImage"
+            />
+        </template>
+        <div ref="containerRef" class="container"></div>
     </Panel>
-    <Button class="button" label="Download map" @click="saveAsImage()" />
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, onUnmounted } from 'vue';
+import { defineComponent, inject, onMounted, onUnmounted, ref } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import Stats from 'three/examples/jsm/libs/stats.module';
 import { SocketClient } from '@/classes/socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
@@ -29,21 +36,17 @@ interface DroneOrientation {
 export default defineComponent({
     name: 'Map',
     setup() {
-        const socketClient: SocketClient | undefined = inject('socketClient');
-
         const maxMapPoints = 1_000_000;
         const maxDronePositions = 1_000;
 
-        let container: HTMLDivElement;
+        const containerRef = ref<HTMLElement | undefined>(undefined);
 
         let scene: THREE.Scene;
         let camera: THREE.PerspectiveCamera;
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
 
-        let stats: Stats;
-
-        let droneIds: Map<string, number> = new Map();
+        let droneIds = new Map<string, number>();
 
         let mapPoints: THREE.Points;
         let pointCount = 0;
@@ -51,21 +54,19 @@ export default defineComponent({
         let droneIndexes = 0;
 
         function onWindowResize() {
-            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.aspect = containerRef.value!.clientWidth / containerRef.value!.clientHeight;
             camera.updateProjectionMatrix();
 
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(containerRef.value!.clientWidth, containerRef.value!.clientHeight);
         }
 
         function init() {
-            container = document.getElementById('map-container')! as HTMLDivElement;
-
             // Scene
             scene = new THREE.Scene();
 
             // Camera
             const fov = 70;
-            camera = new THREE.PerspectiveCamera(fov, container.clientWidth / container.clientHeight);
+            camera = new THREE.PerspectiveCamera(fov, containerRef.value!.clientWidth / containerRef.value!.clientHeight);
             camera.position.set(0, 10, -6);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
@@ -77,7 +78,7 @@ export default defineComponent({
             mapGeometry.setDrawRange(0, 0);
 
             // Material
-            const mapMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0x00ff00 });
+            const mapMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xfbc02d });
 
             // Points
             mapPoints = new THREE.Points(mapGeometry, mapMaterial);
@@ -98,9 +99,10 @@ export default defineComponent({
             scene.add(dronePoints);
 
             // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.append(renderer.domElement);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(containerRef.value!.clientWidth, containerRef.value!.clientHeight);
+            renderer.setClearColor(0xffffff, 0);
+            containerRef.value!.append(renderer.domElement);
 
             // Controls
             controls = new OrbitControls(camera, renderer.domElement);
@@ -112,11 +114,6 @@ export default defineComponent({
             const gridHelper = new THREE.GridHelper(16, 16);
             scene.add(gridHelper);
 
-            // Stats
-            stats = Stats();
-            stats.dom.style.position = 'absolute';
-            container.append(stats.dom);
-
             // Resize canvas on window resize
             window.addEventListener('resize', onWindowResize);
         }
@@ -125,9 +122,9 @@ export default defineComponent({
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
-
-            stats.update();
         }
+
+        const socketClient = inject('socketClient') as SocketClient;
 
         function addPoint(point: [number, number, number]) {
             mapPoints.geometry.attributes.position.setXYZ(pointCount, ...point);
@@ -149,7 +146,7 @@ export default defineComponent({
             dronePoints.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient!.bindMessage('map-points', (mapPoints: [number, number, number][]) => {
+        socketClient.bindMessage('map-points', (mapPoints: [number, number, number][]) => {
             for (const point of mapPoints) {
                 // Change point coordinates to match three.js coordinate system
                 // X: Right, Y: Up, Z: Out (towards user)
@@ -157,19 +154,19 @@ export default defineComponent({
             }
         });
 
-        socketClient!.bindMessage('drone-orientation', (droneOrientation: DroneOrientation) => {
+        socketClient.bindMessage('drone-orientation', (droneOrientation: DroneOrientation) => {
             // Change point coordinates to match three.js coordinate system
             // X: Right, Y: Up, Z: Out (towards user)
             // TODO
         });
 
-        socketClient!.bindMessage('drone-position', (dronePosition: DronePosition) => {
+        socketClient.bindMessage('drone-position', (dronePosition: DronePosition) => {
             // Change point coordinates to match three.js coordinate system
             // X: Right, Y: Up, Z: Out (towards user)
             setDronePosition(dronePosition.droneId, [dronePosition.position[1], dronePosition.position[2], dronePosition.position[0]]);
         });
 
-        socketClient!.bindMessage('clear-map', () => {
+        socketClient.bindMessage('clear-map', () => {
             pointCount = 0;
             mapPoints.geometry.setDrawRange(0, pointCount);
         });
@@ -194,23 +191,19 @@ export default defineComponent({
         });
 
         return {
+            containerRef,
             saveAsImage,
         };
     },
 });
 </script>
 
-<style scoped lang="scss">
-.map {
-    width: 100%;
-}
-
-#map-container {
+<style lang="scss" scoped>
+.container {
     height: 300px;
-    position: relative;
-}
 
-.button {
-    margin-top: 16px;
+    @media (max-width: 575px) {
+        height: 225px;
+    }
 }
 </style>

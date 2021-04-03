@@ -400,12 +400,6 @@ void p2pCallbackHandler(P2PPacket* packet) {
     // Get source ID
     P2PPacketContent content;
     memcpy(&content, &packet->data[0], sizeof(content));
-    DEBUG_PRINT("Id(%d), R(%d), X(%f), Y(%f), Z(%f) \n",
-                content.sourceId,
-                packet->rssi,
-                (double)content.x,
-                (double)content.y,
-                (double)content.z);
 }
 
 LOG_GROUP_START(hivexplore)

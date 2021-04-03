@@ -8,9 +8,9 @@
         </template>
         <div ref="tabViewRef">
             <TabView v-model:activeIndex="activeTabIndex" @tab-change="scrollToBottom">
-                <TabPanel v-for="logName in orderedLogNames" :key="logName" :header="logName">
+                <TabPanel v-for="logGroup in orderedLogGroups" :key="logGroup" :header="logGroup">
                     <div class="scroll-panel">
-                        <div v-for="(logLine, index) in logs.get(logName)" :key="index" class="log-line">> {{ logLine }}</div>
+                        <div v-for="(logLine, index) in logs.get(logGroup)" :key="index" class="log-line">> {{ logLine }}</div>
                     </div>
                 </TabPanel>
             </TabView>
@@ -23,8 +23,8 @@ import { computed, defineComponent, inject, nextTick, onMounted, reactive, ref }
 import { SocketClient } from '@/classes/socket-client';
 
 interface Log {
-    name: string;
-    message: string;
+    group: string;
+    line: string;
 }
 
 export default defineComponent({
@@ -48,52 +48,52 @@ export default defineComponent({
         }
 
         // Logs
-        const logs = reactive<Map<string, string[]>>(new Map());
-        const logsBuffer = new Map<string, string[]>();
+        const logs = reactive(new Map<string, string[]>());
+        const logBuffers = new Map<string, string[]>();
 
         // Ordered log groups
-        const initialLogNames = ['Server', 'Map'];
-        const orderedLogNames = computed(() => {
-            const orderedLogNames = [...logs.keys()];
+        const initialLogGroups = ['Server', 'Map'];
+        const orderedLogGroups = computed(() => {
+            const orderedLogGroups = [...logs.keys()];
 
-            orderedLogNames.sort((first: string, second: string): number => {
-                const indexOfFirst = initialLogNames.indexOf(first);
-                const indexOfSecond = initialLogNames.indexOf(second);
+            orderedLogGroups.sort((first: string, second: string): number => {
+                const indexOfFirst = initialLogGroups.indexOf(first);
+                const indexOfSecond = initialLogGroups.indexOf(second);
 
                 // If the indices are the same (-1), sort alphabetically
                 if (indexOfFirst === indexOfSecond) {
                     return first.localeCompare(second);
                 }
 
-                // If log names aren't in initialLogNames, they should go to the end
+                // If log groups aren't in initialLogGroups, they should go to the end
                 const orderOfFirst = indexOfFirst === -1 ? Infinity : indexOfFirst;
                 const orderOfSecond = indexOfSecond === -1 ? Infinity : indexOfSecond;
 
                 return orderOfFirst > orderOfSecond ? 1 : -1;
             });
 
-            return orderedLogNames;
+            return orderedLogGroups;
         });
 
         // Log group management
-        function addLogTab(tabName: string) { // TODO: Rename to addLogGroup
-            if (!logs.has(tabName)) {
-                logs.set(tabName, []);
+        function addLogGroup(logGroup: string) {
+            if (!logs.has(logGroup)) {
+                logs.set(logGroup, []);
             }
-            if (!logsBuffer.has(tabName)) {
-                logsBuffer.set(tabName, []);
+            if (!logBuffers.has(logGroup)) {
+                logBuffers.set(logGroup, []);
             }
         }
 
-        for (const logName of initialLogNames) {
-            addLogTab(logName);
+        for (const logGroup of initialLogGroups) {
+            addLogGroup(logGroup);
         }
 
         // Log reception
         const socketClient: SocketClient | undefined = inject('socketClient');
         socketClient!.bindMessage('log', (log: Log) => {
-            addLogTab(log.name);
-            logsBuffer.get(log.name)!.push(log.message);
+            addLogGroup(log.group);
+            logBuffers.get(log.group)!.push(log.line);
         });
 
         onMounted(() => {
@@ -104,20 +104,20 @@ export default defineComponent({
             const renderIntervalMs = 250;
             setInterval(() => {
                 let mustRender = false;
-                for (const [logName, logsArray] of logsBuffer) {
-                    if (logsArray.length === 0) {
+                for (const [logGroup, logBuffer] of logBuffers) {
+                    if (logBuffer.length === 0) {
                         continue;
                     }
 
-                    logs.get(logName)!.push(...logsArray);
+                    logs.get(logGroup)!.push(...logBuffer);
 
                     const maxLogCount = 512;
-                    logs.get(logName)!.splice(0, Math.max(0, logs.get(logName)!.length - maxLogCount));
+                    logs.get(logGroup)!.splice(0, Math.max(0, logs.get(logGroup)!.length - maxLogCount));
 
-                    const activeTabName = orderedLogNames.value[activeTabIndex.value];
-                    mustRender = mustRender || activeTabName === logName;
+                    const activeTabGroupName = orderedLogGroups.value[activeTabIndex.value];
+                    mustRender = mustRender || activeTabGroupName === logGroup;
 
-                    logsBuffer.set(logName, []);
+                    logBuffers.set(logGroup, []);
                 }
 
                 if (mustRender) { // TODO: Use watch or hook?
@@ -132,13 +132,12 @@ export default defineComponent({
             isAutoscrollEnabled,
             scrollToBottom,
             logs,
-            orderedLogNames,
+            orderedLogGroups,
         };
     },
 });
 // TODO: Fix key
 // TODO: Trim URI
-// TODO: Rename log name and log tab to log group consistently
 </script>
 
 <style lang="scss" scoped>

@@ -66,7 +66,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-div::v-deep(.p-carousel-container) {
+.p-carousel::v-deep(.p-carousel-container) {
     @media (max-width: 575px) {
         .p-carousel-prev,
         .p-carousel-next {

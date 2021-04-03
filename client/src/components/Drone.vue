@@ -126,7 +126,7 @@ export default defineComponent({
     font-size: 1.125rem;
 }
 
-div::v-deep(.p-card-content) {
+.p-card::v-deep(.p-card-content) {
     padding: 0;
 }
 

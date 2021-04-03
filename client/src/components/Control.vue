@@ -163,7 +163,6 @@ export default defineComponent({
 });
 // TODO: Simplify logic
 // TODO: Fix colors
-// TODO: Try to remove stretched div if v-deep works without it
 </script>
 
 <style lang="scss" scoped>

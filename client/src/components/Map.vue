@@ -19,10 +19,6 @@ import { getLocalTimestamp } from '@/utils/local-timestamp';
 export default defineComponent({
     name: 'Map',
     setup() {
-        const socketClient: SocketClient | undefined = inject('socketClient');
-
-        const maxPoints = 1_000_000;
-
         const containerRef = ref<HTMLElement | undefined>(undefined);
 
         let scene: THREE.Scene;
@@ -30,6 +26,7 @@ export default defineComponent({
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
 
+        const maxPoints = 1_000_000;
         let points: THREE.Points;
         let pointCount = 0;
 
@@ -88,6 +85,8 @@ export default defineComponent({
             controls.update();
             renderer.render(scene, camera);
         }
+
+        const socketClient: SocketClient | undefined = inject('socketClient');
 
         function addPoint(point: [number, number, number]) {
             points.geometry.attributes.position.setXYZ(pointCount, ...point);

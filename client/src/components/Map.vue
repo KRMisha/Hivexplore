@@ -1,7 +1,7 @@
 <template>
     <Panel header="Map">
         <template #icons>
-            <Button class="p-panel-header-icon" icon="pi pi-download" v-tooltip.left="'Download map'" @click="saveAsImage" />
+            <Button class="p-panel-header-icon" icon="pi pi-download" v-tooltip.left="'Download map'" aria-label="Download map" @click="saveAsImage" />
         </template>
         <div ref="containerRef" class="container"></div>
     </Panel>

@@ -20,10 +20,17 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { SocketClient } from '@/classes/socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
+type Point = [number, number, number];
+
 // TODO: Move this to comm folder
 interface DronePosition {
     droneId: string,
-    position: [number, number, number],
+    position: Point,
+};
+
+interface DroneSensorLine {
+    droneId: string,
+    lines: Point[][],
 };
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
@@ -130,7 +137,18 @@ export default defineComponent({
 
         const socketClient = inject('socketClient') as SocketClient;
 
-        function addPoint(point: [number, number, number]) {
+        function setDroneSensorLines(droneId: string, allDroneSensorLines: Point[][]) {
+            // for (const droneSensorLine of allDroneSensorLines) {
+            //     for (const point of droneSensorLine) {
+            //         droneSensorLinePoints.geometry.attributes.position.setXYZ(0, ...point);
+            //         droneSensorLinePoints.geometry.attributes.position.setXYZ(1, ...point);
+            //     }
+            // }
+            // droneSensorLinePoints.geometry.setDrawRange(0, 2);
+            // droneSensorLinePoints.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function addPoint(point: Point) {
             mapPoints.geometry.attributes.position.setXYZ(pointCount, ...point);
             pointCount++;
 
@@ -138,7 +156,7 @@ export default defineComponent({
             mapPoints.geometry.attributes.position.needsUpdate = true;
         }
 
-        function setDronePosition(droneId: string, position: [number, number, number]) {
+        function setDronePosition(droneId: string, position: Point) {
             if (droneIds.get(droneId) === undefined) {
                 droneIds.set(droneId, droneIndexes);
                 dronePoints.geometry.attributes.position.setXYZ(droneIds.get(droneId)!, ...position);
@@ -150,7 +168,23 @@ export default defineComponent({
             dronePoints.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient.bindMessage('map-points', (mapPoints: [number, number, number][]) => {
+        socketClient.bindMessage('drone-sensor-lines', (allDroneSensorLines: DroneSensorLine) => {
+            // Change point coordinates to match three.js coordinate system
+            // X: Right, Y: Up, Z: Out (towards user)
+            let newDroneSensorLines = Array<Array<Point>>();
+            for (const droneSensorLine of allDroneSensorLines.lines) {
+                let newDroneSensorLine = Array<Point>();
+                for (const point of droneSensorLine) {
+                    newDroneSensorLine.push([point[1], point[2], point[0]]);
+                }
+                newDroneSensorLines.push(newDroneSensorLine);
+            }
+
+            // console.log(allDroneSensorLines.droneId, newDroneSensorLines);
+            setDroneSensorLines(allDroneSensorLines.droneId, newDroneSensorLines);
+        });
+
+        socketClient.bindMessage('map-points', (mapPoints: Point[]) => {
             for (const point of mapPoints) {
                 // Change point coordinates to match three.js coordinate system
                 // X: Right, Y: Up, Z: Out (towards user)

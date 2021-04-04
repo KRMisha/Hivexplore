@@ -101,8 +101,8 @@ static float targetYawToBase;
 
 // Watchdogs
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS;
-static uint16_t maximumExploreTicks = 600;
-static uint16_t exploreWatchdog;
+static uint64_t maximumExploreTicks = 600;
+static uint64_t exploreWatchdog;
 static uint16_t obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
 
 void appMain(void) {

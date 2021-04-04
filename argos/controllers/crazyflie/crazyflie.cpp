@@ -21,7 +21,7 @@ namespace {
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t clearObstacleTicks = 120;
     static constexpr std::uint16_t maximumReturnTicks = 800;
-    static uint16_t maximumExploreTicks = 600;
+    static uint64_t maximumExploreTicks = 600;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);

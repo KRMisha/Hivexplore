@@ -131,20 +131,18 @@ class MapGenerator:
     def _calculate_drone_sensor_lines(last_position: Point, points: List[Point]) -> List[Tuple[Point, Point]]:
         # TODO: Refactor this
         drone_sensor_lines = []
-        no_line = (last_position, last_position)
+        blank_line = (last_position, last_position)
 
-        if points == []:
-            for _ in range(4):
-                drone_sensor_lines.append(no_line)
-            return drone_sensor_lines
+        if len(points) == 0:
+            return [blank_line for _ in range(4)]
 
         for point in points:
             drone_sensor_lines.append((last_position, point))
 
-        number_of_blanc_lines = 4 - len(points)
-        if number_of_blanc_lines != 0:
-            for _ in range(number_of_blanc_lines):
-                drone_sensor_lines.append(no_line)
+        blank_line_count = 4 - len(points)
+        if blank_line_count != 0:
+            for _ in range(blank_line_count):
+                drone_sensor_lines.append(blank_line)
 
         return drone_sensor_lines
 

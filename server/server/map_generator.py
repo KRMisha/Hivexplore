@@ -1,6 +1,6 @@
 import logging
 import math
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import numpy as np
 from server.logger import Logger
 from server.sockets.web_socket_server import WebSocketServer
@@ -26,11 +26,11 @@ class MapGenerator:
 
     def add_range_reading(self, drone_id: str, range_reading: Range):
         points = self._calculate_points_from_readings(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
-        lines = self._calculate_drone_sensor_lines(self._last_positions[drone_id], points)
         self._points.extend(points)
         self._logger.log_map_data(logging.INFO, drone_id, points)
-        self._web_socket_server.send_message('drone-sensor-lines', {'droneId': drone_id, 'lines': lines})
         self._web_socket_server.send_message('map-points', points)
+        lines = self._calculate_drone_sensor_lines(self._last_positions[drone_id], points)
+        self._web_socket_server.send_message('drone-sensor-lines', {'droneId': drone_id, 'lines': lines})
 
     def clear(self):
         self._points.clear()
@@ -128,10 +128,10 @@ class MapGenerator:
         return Point(*rotated_point)
 
     @staticmethod
-    def _calculate_drone_sensor_lines(last_position: Point, points: List[Point]) -> List[List[Point]]:
+    def _calculate_drone_sensor_lines(last_position: Point, points: List[Point]) -> List[Tuple[Point, Point]]:
         # TODO: Refactor this
         drone_sensor_lines = []
-        no_line = [last_position, last_position]
+        no_line = (last_position, last_position)
 
         if points == []:
             for _ in range(4):
@@ -139,7 +139,7 @@ class MapGenerator:
             return drone_sensor_lines
 
         for point in points:
-            drone_sensor_lines.append([last_position, point])
+            drone_sensor_lines.append((last_position, point))
 
         number_of_blanc_lines = 4 - len(points)
         if number_of_blanc_lines != 0:

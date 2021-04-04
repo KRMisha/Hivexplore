@@ -30,7 +30,7 @@ interface DronePosition {
 
 interface DroneSensorLine {
     droneId: string,
-    lines: Point[][],
+    lines: [Point, Point][],
 };
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
@@ -137,7 +137,7 @@ export default defineComponent({
 
         const socketClient = inject('socketClient') as SocketClient;
 
-        function setDroneSensorLines(droneId: string, allDroneSensorLines: Point[][]) {
+        function setDroneSensorLines(droneId: string, allDroneSensorLines: [Point, Point][]) {
             // for (const droneSensorLine of allDroneSensorLines) {
             //     for (const point of droneSensorLine) {
             //         droneSensorLinePoints.geometry.attributes.position.setXYZ(0, ...point);
@@ -171,16 +171,15 @@ export default defineComponent({
         socketClient.bindMessage('drone-sensor-lines', (allDroneSensorLines: DroneSensorLine) => {
             // Change point coordinates to match three.js coordinate system
             // X: Right, Y: Up, Z: Out (towards user)
-            let newDroneSensorLines = Array<Array<Point>>();
+            let newDroneSensorLines: [Point, Point][] = [];
             for (const droneSensorLine of allDroneSensorLines.lines) {
-                let newDroneSensorLine = Array<Point>();
-                for (const point of droneSensorLine) {
-                    newDroneSensorLine.push([point[1], point[2], point[0]]);
-                }
+                const firstPoint = droneSensorLine[0]
+                const secondPoint = droneSensorLine[1]
+                const newDroneSensorLine: [Point, Point] = [[firstPoint[1], firstPoint[2], firstPoint[0]], [secondPoint[1], secondPoint[2], secondPoint[0]]];
                 newDroneSensorLines.push(newDroneSensorLine);
             }
 
-            // console.log(allDroneSensorLines.droneId, newDroneSensorLines);
+            console.log(allDroneSensorLines.droneId, newDroneSensorLines);
             setDroneSensorLines(allDroneSensorLines.droneId, newDroneSensorLines);
         });
 

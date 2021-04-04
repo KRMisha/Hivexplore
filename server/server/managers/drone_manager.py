@@ -151,7 +151,7 @@ class DroneManager(ABC):
                     'DroneManager warning: At least one drone\'s battery level is unknown, preventing the mission from starting')
                 return
 
-            if can_drones_takeoff is False:
+            if not can_drones_takeoff:
                 self._logger.log_server_data(
                     logging.WARNING,
                     'DroneManager warning: At least one drone under the minimum battery level is preventing the mission from starting')

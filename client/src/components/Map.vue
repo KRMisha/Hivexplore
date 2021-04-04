@@ -23,15 +23,21 @@ import { getLocalTimestamp } from '@/utils/local-timestamp';
 type Point = [number, number, number];
 
 // TODO: Move this to comm folder
+interface DroneInfo {
+    index: number;
+    dronePosition: THREE.Points;
+    droneLines: [THREE.Line, THREE.Line, THREE.Line, THREE.Line];
+}
+
 interface DronePosition {
-    droneId: string,
-    position: Point,
-};
+    droneId: string;
+    position: Point;
+}
 
 interface DroneSensorLine {
-    droneId: string,
-    lines: [Point, Point][],
-};
+    droneId: string;
+    lines: [Point, Point][];
+}
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
@@ -39,23 +45,23 @@ export default defineComponent({
     name: 'Map',
     setup() {
         const maxMapPoints = 1_000_000;
-        const maxDronePositions = 1_000;
 
         const containerRef = ref<HTMLElement | undefined>(undefined);
 
-        let scene: THREE.Scene;
+        let scene = new THREE.Scene();
+        let droneGroups = new THREE.Group();
         let camera: THREE.PerspectiveCamera;
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
 
-        let droneIds = new Map<string, number>();
-
+        // Map related variables
         let mapPoints: THREE.Points;
-        let pointCount = 0;
-        let dronePoints: THREE.Points;
-        let droneIndexes = 0;
-        let droneSensorLinePoints: THREE.Line;
-        let droneSensorLinesCount = 0;
+        let mapPointCount = 0;
+
+        // Drone related variables
+        let allDronesInfo = new Map<string, DroneInfo>();
+        // let droneIds = new Map<string, number>();
+
 
         function onWindowResize() {
             camera.aspect = containerRef.value!.clientWidth / containerRef.value!.clientHeight;
@@ -65,9 +71,6 @@ export default defineComponent({
         }
 
         function init() {
-            // Scene
-            scene = new THREE.Scene();
-
             // Camera
             const fov = 70;
             camera = new THREE.PerspectiveCamera(fov, containerRef.value!.clientWidth / containerRef.value!.clientHeight);
@@ -75,39 +78,18 @@ export default defineComponent({
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Map points variables
-            // Geometry - buffer to hold all point positions
+            /// Geometry - buffer to hold all point positions
             const mapGeometry = new THREE.BufferGeometry();
             const positions = new Float32Array(maxMapPoints * 3);
             mapGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             mapGeometry.setDrawRange(0, 0);
 
-            // Material
+            /// Material
             const mapMaterial = new THREE.PointsMaterial({ size: 0.2, color: 0xfbc02d });
 
-            // Points
+            /// Points
             mapPoints = new THREE.Points(mapGeometry, mapMaterial);
             scene.add(mapPoints);
-
-            // Drone related variables
-            // Geometry - buffer to hold all point positions
-            const droneGeometry = new THREE.BufferGeometry();
-            const dronePositions = new Float32Array(maxDronePositions * 3);
-            droneGeometry.setAttribute('position', new THREE.BufferAttribute(dronePositions, 3));
-            droneGeometry.setDrawRange(0, 0);
-            const droneSensorLinesGeometry = new THREE.BufferGeometry();
-            const droneSensorLines = new Float32Array(maxDronePositions * 4 * 3);
-            droneSensorLinesGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLines, 3));
-            droneSensorLinesGeometry.setDrawRange(0, 0);
-
-            // Material
-            const droneMaterial = new THREE.PointsMaterial({ size: 0.4, color: 0xfb4c0d });
-            const droneSensorLineMaterial = new THREE.PointsMaterial({ size: 0.4, color: 0x00ff00 });
-
-            // Points
-            dronePoints = new THREE.Points(droneGeometry, droneMaterial);
-            droneSensorLinePoints = new THREE.Line(droneSensorLinesGeometry, droneSensorLineMaterial);
-            scene.add(dronePoints);
-            scene.add(droneSensorLinePoints);
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
@@ -137,35 +119,69 @@ export default defineComponent({
 
         const socketClient = inject('socketClient') as SocketClient;
 
+        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
+            scene.remove(droneGroups);
+
+            const droneCount = newDroneIds.length;
+
+            /// Geometries - buffers to hold all points
+            const droneGeometry = new THREE.BufferGeometry();
+            const dronePositions = new Float32Array(droneCount * 3);
+            droneGeometry.setAttribute('position', new THREE.BufferAttribute(dronePositions, 3));
+            droneGeometry.setDrawRange(0, droneCount);
+            const droneSensorLineGeometry = new THREE.BufferGeometry();
+            const droneSensorLines = new Float32Array(droneCount * 4 * 2 * 3);
+            droneSensorLineGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLines, 3));
+            droneSensorLineGeometry.setDrawRange(0, droneCount * 4 * 2);
+
+            /// Materials
+            const droneMaterial = new THREE.PointsMaterial({ size: 0.4, color: 0xfb4c0d });
+            const droneSensorLineMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0x00ff00 });
+
+            let index = 0;
+            for (const newDroneId of newDroneIds) {
+                let dronePositionPoint = new THREE.Points(droneGeometry, droneMaterial);
+
+                // TODO: Might want to refactor this
+                let lineFront = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
+                let lineRight = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
+                let lineBack = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
+                let lineLeft = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
+                const lineGroup = new THREE.Group();
+                lineGroup.add(lineFront);
+                lineGroup.add(lineRight);
+                lineGroup.add(lineBack);
+                lineGroup.add(lineLeft);
+
+                const droneGroup = new THREE.Group();
+                droneGroup.add(dronePositionPoint);
+                droneGroup.add(lineGroup);
+                allDronesInfo.set(newDroneId, {index: index, dronePosition: dronePositionPoint, droneLines: [lineFront, lineRight, lineBack, lineLeft]})
+                index++;
+
+                scene.add(droneGroup);
+            }
+        });
+
         function setDroneSensorLines(droneId: string, allDroneSensorLines: [Point, Point][]) {
-            // for (const droneSensorLine of allDroneSensorLines) {
-            //     for (const point of droneSensorLine) {
-            //         droneSensorLinePoints.geometry.attributes.position.setXYZ(0, ...point);
-            //         droneSensorLinePoints.geometry.attributes.position.setXYZ(1, ...point);
-            //     }
-            // }
-            // droneSensorLinePoints.geometry.setDrawRange(0, 2);
-            // droneSensorLinePoints.geometry.attributes.position.needsUpdate = true;
+
         }
 
-        function addPoint(point: Point) {
-            mapPoints.geometry.attributes.position.setXYZ(pointCount, ...point);
-            pointCount++;
+        function addMapPoint(point: Point) {
+            mapPoints.geometry.attributes.position.setXYZ(mapPointCount, ...point);
+            mapPointCount++;
 
-            mapPoints.geometry.setDrawRange(0, pointCount);
+            mapPoints.geometry.setDrawRange(0, mapPointCount);
             mapPoints.geometry.attributes.position.needsUpdate = true;
         }
 
         function setDronePosition(droneId: string, position: Point) {
-            if (droneIds.get(droneId) === undefined) {
-                droneIds.set(droneId, droneIndexes);
-                dronePoints.geometry.attributes.position.setXYZ(droneIds.get(droneId)!, ...position);
-                droneIndexes++;
-                dronePoints.geometry.setDrawRange(0, droneIndexes);
-            } else {
-                dronePoints.geometry.attributes.position.setXYZ(droneIds.get(droneId)!, ...position);
+            let droneInfo = allDronesInfo.get(droneId);
+            if (droneInfo === undefined) {
+                return;
             }
-            dronePoints.geometry.attributes.position.needsUpdate = true;
+            droneInfo.dronePosition.geometry.attributes.position.setXYZ(droneInfo.index, ...position);
+            droneInfo.dronePosition.geometry.attributes.position.needsUpdate = true;
         }
 
         socketClient.bindMessage('drone-sensor-lines', (allDroneSensorLines: DroneSensorLine) => {
@@ -179,7 +195,7 @@ export default defineComponent({
                 newDroneSensorLines.push(newDroneSensorLine);
             }
 
-            console.log(allDroneSensorLines.droneId, newDroneSensorLines);
+            // console.log(allDroneSensorLines.droneId, newDroneSensorLines);
             setDroneSensorLines(allDroneSensorLines.droneId, newDroneSensorLines);
         });
 
@@ -187,7 +203,7 @@ export default defineComponent({
             for (const point of mapPoints) {
                 // Change point coordinates to match three.js coordinate system
                 // X: Right, Y: Up, Z: Out (towards user)
-                addPoint([point[1], point[2], point[0]]);
+                addMapPoint([point[1], point[2], point[0]]);
             }
         });
 
@@ -198,8 +214,8 @@ export default defineComponent({
         });
 
         socketClient.bindMessage('clear-map', () => {
-            pointCount = 0;
-            mapPoints.geometry.setDrawRange(0, pointCount);
+            mapPointCount = 0;
+            mapPoints.geometry.setDrawRange(0, mapPointCount);
         });
 
         function saveAsImage() {

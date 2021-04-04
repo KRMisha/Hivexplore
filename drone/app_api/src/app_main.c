@@ -46,7 +46,6 @@
 #include "app_channel.h"
 #include "commander.h"
 #include "sitaw.h"
-#include "time.h"
 
 #include "app_main.h"
 
@@ -65,7 +64,7 @@ static const float CRUISE_VELOCITY = 0.15f; // 0.2f
 static const float MAXIMUM_VELOCITY = 0.4f; // 0.7f
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
-static const uint16_t STABILIZE_READING_TICKS = 100;
+static const uint16_t CLEAR_OBSTACLE_TICKS = 100;
 
 // States
 static mission_state_t missionState = MISSION_STANDBY;
@@ -104,13 +103,10 @@ static float targetYawToBase;
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS;
 static uint16_t maximumExploreTicks = 600;
 static uint16_t exploreWatchdog;
-static uint16_t obstacleClearedCounter = STABILIZE_READING_TICKS;
+static uint16_t obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
-
-    // Use current time as seed for random generator
-    srand(time(0));
 
     const logVarId_t frontSensorId = logGetVarId("range", "front");
     const logVarId_t leftSensorId = logGetVarId("range", "left");
@@ -212,7 +208,6 @@ void avoidObstacle(void) {
     bool isAvoidanceAllowed = !isExploringAvoidanceDisallowed && !isReturningAvoidanceDisallowed;
 
     if (isAvoidanceAllowed) {
-        // DEBUG_PRINT("avoiding obstacle\n");
         // Distance correction required to stay out of range of any obstacle
         uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
         uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
@@ -239,7 +234,6 @@ void explore(void) {
             DEBUG_PRINT("Liftoff\n");
             initialPosition = positionReading;
             shouldTurnLeft = true;
-            DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
             exploringState = EXPLORING_LIFTOFF;
         }
     } break;
@@ -269,12 +263,12 @@ void explore(void) {
 
 void returnToBase(void) {
     // If returned to base, land
-    static const double distanceToReturnEpsilon = 0.30;
+    static const double distanceToReturnEpsilon = 0.3;
     static const uint8_t rssiLandingThreshold = 60;
     if (returningState != RETURNING_LAND && returningState != RETURNING_IDLE && rssiReading <= rssiLandingThreshold &&
         fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
         fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
-        DEBUG_PRINT("I found the base! \n");
+        DEBUG_PRINT("Found the base\n");
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
         DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
         DEBUG_PRINT("Diffence in x = %f \n", (double)positionReading.x - (double)initialPosition.x);
@@ -288,15 +282,12 @@ void returnToBase(void) {
 
         // Calculate rotation angle to turn towards base
         targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
-        // DEBUG_PRINT("Target Yaw: %f\n", (double)targetYawToBase);
-        // DEBUG_PRINT("Current yaw: %f\n", (double)yawReading);
 
         // If the drone is towards its base
         static const double yawEpsilon = 5;
         double yawDifference = fabs(targetYawToBase - yawReading);
-        // DEBUG_PRINT("Yaw difference: %f\n", yawDifference);
         if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
-            DEBUG_PRINT("I'm done turning!\n");
+            DEBUG_PRINT("Return: Finished rotating towards base\n");
             returningState = RETURNING_RETURN;
         } else {
             // Keep turning drone towards its base
@@ -309,32 +300,17 @@ void returnToBase(void) {
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
 
-        // Go to explore algorithm when a wall is detected in front of the drone
-        // TODO: Change name
-        // static const uint16_t EDGE_DETECTED_THRESHOLD_RETURN = 800;
-        // if (frontSensorReading < EDGE_DETECTED_THRESHOLD_RETURN || returnWatchdog == 0) {
-        //     DEBUG_PRINT("Obstacle. Rotating (in return)\n");
-        //     // Reset counters
-        //     returnWatchdog = MAXIMUM_RETURN_TICKS;
-        //     returningState = RETURNING_ROTATE;
-        // } else {
-        //     // Go to base using absolute positions
-        //     // setPoint.mode.x = modeAbs;
-        //     // setPoint.mode.y = modeAbs;
-        //     // setPoint.position.x = initialPosition.x;
-        //     // setPoint.position.y = initialPosition.y;
-        //
-        //     returnWatchdog--;
-        // }
-
+        // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
         if (!forward() || returnWatchdog == 0) {
             if (returnWatchdog == 0) {
                 DEBUG_PRINT("Return: Return watchdog finished\n");
             } else {
-                DEBUG_PRINT("Return: Obstacle detected \n");
+                DEBUG_PRINT("Return: Obstacle detected\n");
             }
-            // Reset counters
+
+            // Reset counter
             returnWatchdog = MAXIMUM_RETURN_TICKS;
+
             returningState = RETURNING_ROTATE;
         } else {
             returnWatchdog--;
@@ -344,51 +320,47 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         if (rotate()) {
-            DEBUG_PRINT("Explore: Finished rotating. Going to explore\n");
             returningState = RETURNING_FORWARD;
         }
     } break;
     case RETURNING_FORWARD: {
         droneStatus = STATUS_FLYING;
-        // DEBUG_PRINT("Forward \n");
 
         // The drone must check its right sensor when it is turning left, and its left sensor when turning right
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;
 
-        // Obstacle has been passed go back to returning with absolute positions
+        // Return to base when obstacle has been passed or explore watchdog is finished
         static const uint16_t OPEN_SPACE_THRESHOLD = 300;
         if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && obstacleClearedCounter == 0) ||
             exploreWatchdog == 0) {
-            // Generation of a random explore watchdog between 200 and 600
-            // static const uint16_t SCOPE_EXPLORE_WATCHDOG = 400;
-            // static const uint16_t MINIMUM_EXPLORE_WATCHDOG = 200;
-            // maximumExploreTicks = rand() % SCOPE_EXPLORE_WATCHDOG + MINIMUM_EXPLORE_WATCHDOG;
-            maximumExploreTicks = 2 * maximumExploreTicks;
-            if (exploreWatchdog == 0) {
-                DEBUG_PRINT("Explore: explore watchdog finished\n");
-            } else {
+            if (obstacleClearedCounter == 0) {
                 DEBUG_PRINT("Explore: Obstacle has been cleared\n");
             }
+            if (exploreWatchdog == 0) {
+                DEBUG_PRINT("Explore: Explore watchdog finished\n");
+            }
+
             // Reset counters
+            maximumExploreTicks *= 2;
             exploreWatchdog = maximumExploreTicks;
-            obstacleClearedCounter = STABILIZE_READING_TICKS;
+            obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
 
             shouldTurnLeft = !shouldTurnLeft;
 
-            DEBUG_PRINT("Explore: I'm going to rotate towards base!\n");
+            DEBUG_PRINT("Explore: Rotating towards base\n");
             returningState = RETURNING_ROTATE_TOWARDS_BASE;
             break;
         }
 
         if (!forward()) {
-            obstacleClearedCounter = STABILIZE_READING_TICKS;
+            obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
             returningState = RETURNING_ROTATE;
         } else {
-            // Reset right sensor reading counter if obstacle on the right is detected
+            // Reset sensor reading counter if obstacle is detected
             if (sensorReadingToCheck > EDGE_DETECTED_THRESHOLD) {
                 obstacleClearedCounter--;
             } else {
-                obstacleClearedCounter = STABILIZE_READING_TICKS;
+                obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
             }
         }
         exploreWatchdog--;
@@ -398,32 +370,30 @@ void returnToBase(void) {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
-            DEBUG_PRINT("I landed!!\n");
             returningState = RETURNING_IDLE;
         }
     } break;
     case RETURNING_IDLE: {
         droneStatus = STATUS_LANDED;
         memset(&setPoint, 0, sizeof(setpoint_t));
-        DEBUG_PRINT("memset = 0\n");
     } break;
     }
 }
 
 void emergencyLand(void) {
     switch (emergencyState) {
-    case EMERGENCY_LAND:
+    case EMERGENCY_LAND: {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
             emergencyState = EMERGENCY_IDLE;
         }
-        break;
-    case EMERGENCY_IDLE:
+    } break;
+    case EMERGENCY_IDLE: {
         droneStatus = STATUS_LANDED;
 
         memset(&setPoint, 0, sizeof(setpoint_t));
-        break;
+    } break;
     }
 }
 
@@ -456,12 +426,10 @@ bool rotate(void) {
 bool land(void) {
     updateWaypoint();
     static const uint16_t LANDED_HEIGHT = 30;
-    DEBUG_PRINT("down sensor reading %d\n", downSensorReading);
     if (downSensorReading < LANDED_HEIGHT) {
         droneStatus = STATUS_LANDED;
         return true;
     }
-    DEBUG_PRINT("i can't land\n");
     return false;
 }
 

@@ -22,7 +22,7 @@ bool land(void);
 bool isCrashed(void);
 
 void broadcastPosition();
-void p2pCallbackHandler(P2PPacket* packet);
+void p2pReceivedCallback(P2PPacket* packet);
 
 void updateWaypoint(void);
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);

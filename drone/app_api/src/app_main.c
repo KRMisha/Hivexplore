@@ -132,7 +132,7 @@ void appMain(void) {
     }
 
     // Initialize random function
-    p2pRegisterCB(p2pCallbackHandler);
+    p2pRegisterCB(p2pReceivedCallback);
 
     while (true) {
         vTaskDelay(M2T(10));
@@ -377,7 +377,7 @@ void broadcastPosition() {
     }
 }
 
-void p2pCallbackHandler(P2PPacket* packet) {
+void p2pReceivedCallback(P2PPacket* packet) {
     // Get source ID
     P2PPacketContent content;
     memcpy(&content, &packet->data[0], sizeof(content));

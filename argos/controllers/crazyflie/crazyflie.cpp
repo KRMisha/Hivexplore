@@ -472,7 +472,7 @@ void CCrazyflieController::EmergencyLand() {
 }
 
 bool CCrazyflieController::Liftoff() {
-    static constexpr double targetDroneHeight = 0.5;
+    static constexpr double targetDroneHeight = 0.2;
     static constexpr double targetDroneHeightEpsilon = 0.005;
 
     CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneHeight);

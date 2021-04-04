@@ -471,6 +471,7 @@ void CCrazyflieController::EmergencyLand() {
     }
 }
 
+// Returns true when the action is finished
 bool CCrazyflieController::Liftoff() {
     static constexpr double targetDroneHeight = 0.2;
     static constexpr double targetDroneHeightEpsilon = 0.005;
@@ -487,6 +488,8 @@ bool CCrazyflieController::Liftoff() {
     return false;
 }
 
+// Returns true when the action is on going to finished
+// Returns false when it can't be done because of an obstacle in front
 bool CCrazyflieController::Forward() {
     // Change state when a wall is detected in front of the drone
     static constexpr double distanceToTravelEpsilon = 0.005;
@@ -511,6 +514,7 @@ bool CCrazyflieController::Forward() {
     return true;
 }
 
+// Returns true when the action is finished
 bool CCrazyflieController::Brake() {
     // Order brake
     if (m_isBrakeCommandFinished) {
@@ -533,6 +537,7 @@ bool CCrazyflieController::Brake() {
     return false;
 }
 
+// Returns true when the action is finished
 bool CCrazyflieController::Rotate() {
     // Get current yaw
     CRadians currentYaw;
@@ -560,6 +565,7 @@ bool CCrazyflieController::Rotate() {
     return false;
 }
 
+// Returns true when the action is finished
 bool CCrazyflieController::Land() {
     static constexpr double targetDroneLandHeight = 0.09;
     static constexpr double targetDroneHeightEpsilon = 0.05;

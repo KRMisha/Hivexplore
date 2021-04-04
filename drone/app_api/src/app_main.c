@@ -399,6 +399,7 @@ void emergencyLand(void) {
     }
 }
 
+// Returns true when the action is finished
 bool liftoff(void) {
     targetHeight += EXPLORATION_HEIGHT;
     updateWaypoint();
@@ -409,6 +410,8 @@ bool liftoff(void) {
     return false;
 }
 
+// Returns true when the action is on going to finished
+// Returns false when it can't be done because of an obstacle in front
 bool forward(void) {
     targetHeight += EXPLORATION_HEIGHT;
     targetForwardVelocity += CRUISE_VELOCITY;
@@ -417,6 +420,7 @@ bool forward(void) {
     return frontSensorReading >= EDGE_DETECTED_THRESHOLD;
 }
 
+// Returns true when the action is finished
 bool rotate(void) {
     static const uint16_t OPEN_SPACE_THRESHOLD = 300;
     targetHeight += EXPLORATION_HEIGHT;
@@ -425,6 +429,7 @@ bool rotate(void) {
     return frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD;
 }
 
+// Returns true when the action is finished
 bool land(void) {
     updateWaypoint();
     static const uint16_t LANDED_HEIGHT = 30;

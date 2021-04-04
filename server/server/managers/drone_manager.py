@@ -115,7 +115,7 @@ class DroneManager(ABC):
         try:
             are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
         except KeyError:
-            self._logger.log_server_data(logging.WARNING, 'DroneManager warning: One or more drone\'s status is unknown')
+            self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
             are_all_drones_landed = False
 
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
@@ -148,13 +148,13 @@ class DroneManager(ABC):
             except KeyError:
                 self._logger.log_server_data(
                     logging.WARNING,
-                    'DroneManager warning: One or more drone\'s battery level is unknown, preventing the mission from starting')
+                    'DroneManager warning: At least one drone\'s battery level is unknown, preventing the mission from starting')
                 return
 
             if can_drones_takeoff is False:
                 self._logger.log_server_data(
                     logging.WARNING,
-                    'DroneManager warning: One or more drone under the minimum battery level is preventing the mission from starting')
+                    'DroneManager warning: At least one drone under the minimum battery level is preventing the mission from starting')
                 return
 
         self._mission_state = new_mission_state

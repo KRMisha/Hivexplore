@@ -380,6 +380,8 @@ void returnToBase(void) {
     }
 }
 
+// TODO: Add a reset internal state function to reaffect all the values (like in the ARGoS controller)
+
 void emergencyLand(void) {
     switch (emergencyState) {
     case EMERGENCY_LAND: {

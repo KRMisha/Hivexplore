@@ -51,4 +51,12 @@ export default defineComponent({
     font-size: 1.375rem;
     font-weight: 500;
 }
+
+::v-deep(.p-panel) .p-panel-header .p-panel-title {
+    font-weight: 600;
+}
+
+::v-deep(.p-card) .p-card-title {
+    font-weight: 500;
+}
 </style>

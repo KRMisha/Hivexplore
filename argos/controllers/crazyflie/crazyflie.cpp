@@ -366,12 +366,7 @@ void CCrazyflieController::ReturnToBase() {
             m_stabilizeRotationCounter = stabilizeRotationTicks;
 
             DebugPrint("Return: Finished rotating towards base\n");
-            if (m_sensorReadings["front"] <= returnObstacleThreshold) {
-                // Go to explore algorithm
-                m_returningState = ReturningState::Brake;
-            } else {
-                m_returningState = ReturningState::Return;
-            }
+            m_returningState = ReturningState::Return;
         }
     } break;
     case ReturningState::Return: {

@@ -118,7 +118,7 @@ class DroneManager(ABC):
             self._logger.log_server_data(logging.WARNING, 'DroneManager warning: One or more drone\'s status is unknown')
             are_all_drones_landed = False
 
-        if are_all_drones_landed and self._mission_state != MissionState.Landed:
+        if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
     def _log_console_callback(self, drone_id: str, data: str):

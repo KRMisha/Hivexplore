@@ -144,16 +144,13 @@ private:
     CRadians m_rotationAngle;
 
     // Return to base variables
-    bool m_isPositionToBaseFinished = true;
     bool m_isRotateToBaseFinished = true;
+    bool m_shouldTurnLeft = true;
     CRadians m_targetYawToBase;
-
     std::uint16_t m_stabilizeRotationCounter;
     std::uint16_t m_obstacleClearedCounter;
     std::uint16_t m_returnWatchdog;
     std::uint16_t m_exploreWatchdog;
-    bool m_hasDetectedObstacle = false;
-    bool m_shouldTurnLeft = true;
 
     // Crash detection variables
     CVector3 m_lastActivePosition;

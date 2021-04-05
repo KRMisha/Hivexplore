@@ -207,14 +207,9 @@ export default defineComponent({
         }
 
         socketClient.bindMessage('drone-sensor-lines', (newDroneSensorLines: DroneSensorLine) => {
-            const droneSensorLines: Line[] = [];
-            for (const droneSensorLine of newDroneSensorLines.lines) {
-                const firstPoint = droneSensorLine[0];
-                const secondPoint = droneSensorLine[1];
-                const newDroneSensorLine: Line = [convertServerPointCoords(firstPoint), convertServerPointCoords(secondPoint)];
-                droneSensorLines.push(newDroneSensorLine);
-            }
-
+            const droneSensorLines: Line[] = newDroneSensorLines.lines.map((line: Line) => {
+                return [convertServerPointCoords(line[0]), convertServerPointCoords(line[1])]
+            });
             setDroneSensorLines(newDroneSensorLines.droneId, droneSensorLines);
         });
 

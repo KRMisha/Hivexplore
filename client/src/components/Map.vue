@@ -36,7 +36,7 @@ interface DronePosition {
 
 interface DroneSensorLine {
     droneId: string;
-    lines: Line[];
+    sensorLines: Line[];
 }
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
@@ -47,7 +47,6 @@ export default defineComponent({
         const containerRef = ref<HTMLElement | undefined>(undefined);
 
         const scene = new THREE.Scene();
-        const droneGroups = new THREE.Group();
         let camera: THREE.PerspectiveCamera;
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
@@ -56,6 +55,7 @@ export default defineComponent({
         let mapPoints: THREE.Points;
         let mapPointCount = 0;
 
+        const droneGroups = new THREE.Group();
         const droneInfos = new Map<string, DroneInfo>();
 
         function onWindowResize() {
@@ -119,8 +119,8 @@ export default defineComponent({
             for (const newDroneId of newDroneIds) {
                 // Drone
                 const droneGeometry = new THREE.BufferGeometry();
-                const dronePositions = new Float32Array(3);
-                droneGeometry.setAttribute('position', new THREE.BufferAttribute(dronePositions, 3));
+                const dronePosition = new Float32Array(3);
+                droneGeometry.setAttribute('position', new THREE.BufferAttribute(dronePosition, 3));
                 const droneMaterial = new THREE.PointsMaterial({ size: 0.4, color: 0xfb4c0d });
                 const dronePositionPoint = new THREE.Points(droneGeometry, droneMaterial);
 
@@ -203,7 +203,7 @@ export default defineComponent({
         }
 
         socketClient.bindMessage('drone-sensor-lines', (newDroneSensorLines: DroneSensorLine) => {
-            const droneSensorLines: Line[] = newDroneSensorLines.lines.map((line: Line) => {
+            const droneSensorLines: Line[] = newDroneSensorLines.sensorLines.map((line: Line) => {
                 return [convertServerPointCoords(line[0]), convertServerPointCoords(line[1])];
             });
             setDroneSensorLines(newDroneSensorLines.droneId, droneSensorLines);

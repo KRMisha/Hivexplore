@@ -160,7 +160,7 @@ void appMain(void) {
         targetYawRate = 0.0;
 
         static const uint8_t broadcastProbabilityPercentage = 5;
-        if ((rand() % 100) < broadcastProbabilityPercentage) {
+        if (droneStatus == STATUS_FLYING && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
 
@@ -355,10 +355,6 @@ void broadcastPosition() {
     // Avoid causing drone reset due to the content size
     if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
         DEBUG_PRINT("P2PPacketContent size too big\n");
-        return;
-    }
-
-    if (droneStatus != STATUS_FLYING) {
         return;
     }
 

@@ -25,7 +25,7 @@ type Line = [Point, Point];
 
 interface DroneInfo {
     dronePosition: THREE.Points;
-    droneLines: [THREE.Line, THREE.Line, THREE.Line, THREE.Line];
+    droneSensorLines: [THREE.Line, THREE.Line, THREE.Line, THREE.Line];
 }
 
 // TODO: Move this to communication folder
@@ -142,7 +142,7 @@ export default defineComponent({
                 droneGroup.add(lineGroup);
                 droneInfos.set(newDroneId, {
                     dronePosition: dronePositionPoint,
-                    droneLines: lines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line],
+                    droneSensorLines: lines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line],
                 });
 
                 scene.add(droneGroup);
@@ -195,9 +195,9 @@ export default defineComponent({
 
             let index = 0;
             for (let i = 0; i < newDroneSensorLines.length; i++) {
-                droneInfo.droneLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][0]);
-                droneInfo.droneLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][1]);
-                droneInfo.droneLines[i].geometry.attributes.position.needsUpdate = true;
+                droneInfo.droneSensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][0]);
+                droneInfo.droneSensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][1]);
+                droneInfo.droneSensorLines[i].geometry.attributes.position.needsUpdate = true;
             }
         }
 

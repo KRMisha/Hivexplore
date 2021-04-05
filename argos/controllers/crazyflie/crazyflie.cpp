@@ -15,7 +15,6 @@ namespace {
 
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
 
-    static constexpr std::uint16_t returnObstacleThreshold = 700;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t clearObstacleTicks = 120;
     static constexpr std::uint16_t maximumReturnTicks = 800;

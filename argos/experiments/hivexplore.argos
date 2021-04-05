@@ -30,7 +30,7 @@
                 <range_and_bearing implementation="medium" medium="rab" show_rays="false" />
                 <crazyflie_distance_scanner implementation="rot_z_only" show_rays="true" />
                 <positioning implementation="default"/>
-                <battery implementation="default"/>
+                <battery implementation="default" noise_range="-0.02:0.02"/>
             </sensors>
 
             <params>
@@ -67,7 +67,7 @@
             <entity quantity="4" max_trials="100">
                 <crazyflie id="s">
                     <controller config="cfc" />
-                    <battery model="time_motion" delta="1e-3" pos_delta="1e-3" orient_delta="1e-3"/>
+                    <battery model="time_motion" delta="1e-4" pos_delta="1e-1" orient_delta="1e-1"/>
                 </crazyflie>
             </entity>
         </distribute>

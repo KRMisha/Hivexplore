@@ -29,36 +29,36 @@
     --inline-spacing: 0.5rem;
 }
 
-/* roboto-regular - latin-ext_latin */
+/* Roboto Regular 400 */
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
-    src: local('Roboto'), local('Roboto-Regular'),
-        url('~primevue/resources/themes/md-dark-indigo//fonts/roboto-v20-latin-ext_latin-regular.woff2') format('woff2'),
-        url('~primevue/resources/themes/md-dark-indigo//fonts/roboto-v20-latin-ext_latin-regular.woff') format('woff');
-    /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+    src: local('Roboto'), local('Roboto-Regular'), url('../fonts/Roboto-Regular.ttf') format('truetype');
 }
-/* roboto-500 - latin-ext_latin */
+/* Roboto Medium 500 */
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 500;
-    src: local('Roboto Medium'), local('Roboto-Medium'),
-        url('~primevue/resources/themes/md-dark-indigo//fonts/roboto-v20-latin-ext_latin-500.woff2') format('woff2'),
-        url('~primevue/resources/themes/md-dark-indigo//fonts/roboto-v20-latin-ext_latin-500.woff') format('woff');
-    /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+    src: local('Roboto Medium'), local('Roboto-Medium'), url('../fonts/Roboto-Medium.ttf') format('truetype');
 }
-/* roboto-700 - latin-ext_latin */
+/* Roboto Bold 700 */
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 700;
-    src: local('Roboto Bold'), local('Roboto-Bold'),
-        url('~primevue/resources/themes/md-dark-indigo//fonts/roboto-v20-latin-ext_latin-700.woff2') format('woff2'),
-        url('~primevue/resources/themes/md-dark-indigo//fonts/roboto-v20-latin-ext_latin-700.woff') format('woff');
-    /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+    src: local('Roboto Bold'), local('Roboto-Bold'), url('../fonts/Roboto-Bold.ttf') format('truetype');
 }
+/* Roboto Mono Regular 400 */
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: norma;
+    font-weight: 400;
+    src: local('Roboto Mono'), local('Roboto Mono Regular'), local('RobotoMono'), local('RobotoMono-Regular'),
+        url('../fonts/RobotoMono-Regular.ttf') format('truetype');
+}
+
 * {
     box-sizing: border-box;
 }

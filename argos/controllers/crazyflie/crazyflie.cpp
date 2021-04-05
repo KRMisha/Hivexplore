@@ -2,8 +2,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"
@@ -17,11 +15,10 @@ namespace {
 
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
 
-    static constexpr std::uint16_t returnObstacleThreshold = 700;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t clearObstacleTicks = 120;
     static constexpr std::uint16_t maximumReturnTicks = 800;
-    static uint64_t maximumExploreTicks = 600;
+    static std::uint64_t maximumExploreTicks = 600;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
@@ -371,6 +368,7 @@ void CCrazyflieController::ReturnToBase() {
     } break;
     case ReturningState::Return: {
         m_droneStatus = DroneStatus::Flying;
+
         // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
         if (!Forward() || m_returnWatchdog == 0) {
             if (m_returnWatchdog == 0) {
@@ -441,7 +439,6 @@ void CCrazyflieController::ReturnToBase() {
             }
         }
         m_exploreWatchdog--;
-
     } break;
     case ReturningState::Land: {
         m_droneStatus = DroneStatus::Landing;
@@ -541,8 +538,8 @@ bool CCrazyflieController::Brake() {
 bool CCrazyflieController::Rotate() {
     // Get current yaw
     CRadians currentYaw;
-    CVector3 rotationAxis;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
+    CVector3 unitaryAngleVector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, unitaryAngleVector);
 
     // Order rotation
     CRadians rotationAngle = (m_shouldTurnLeft ? 1 : -1) * CRadians::PI / 8;
@@ -578,7 +575,6 @@ bool CCrazyflieController::Land() {
         m_droneStatus = DroneStatus::Landed;
         return true;
     }
-
     return false;
 }
 
@@ -612,12 +608,12 @@ void CCrazyflieController::ResetInternalStates() {
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
 
+    m_shouldTurnLeft = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_obstacleClearedCounter = clearObstacleTicks;
     maximumExploreTicks = 600;
     m_returnWatchdog = maximumReturnTicks;
     m_exploreWatchdog = maximumExploreTicks;
-    m_shouldTurnLeft = true;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

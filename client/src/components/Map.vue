@@ -55,7 +55,7 @@ export default defineComponent({
         let mapPoints: THREE.Points;
         let mapPointCount = 0;
 
-        const droneGroups = new THREE.Group();
+        let droneGroups = new THREE.Group();
         const droneInfos = new Map<string, DroneInfo>();
 
         function onWindowResize() {
@@ -115,6 +115,7 @@ export default defineComponent({
 
         socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
             scene.remove(droneGroups);
+            droneGroups = new THREE.Group();
 
             for (const newDroneId of newDroneIds) {
                 // Drone
@@ -148,6 +149,7 @@ export default defineComponent({
 
                 droneGroups.add(droneGroup);
             }
+
             scene.add(droneGroups);
         });
 

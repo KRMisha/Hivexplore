@@ -93,7 +93,7 @@ static float yawReading;
 static float rollReading;
 static float pitchReading;
 static uint8_t rssiReading;
-P2PPacketContent latestP2PContent;
+static P2PPacketContent latestP2PContent;
 
 // Targets
 static float targetForwardVelocity;

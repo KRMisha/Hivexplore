@@ -52,7 +52,10 @@ void CCrazyflieController::ControlStep() {
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
-    PingOtherDrones();
+
+    if (m_droneStatus == DroneStatus::Flying) {
+        PingOtherDrones();
+    }
 
     switch (m_missionState) {
     case MissionState::Standby:

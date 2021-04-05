@@ -128,9 +128,9 @@ export default defineComponent({
                 const dronePositionPoint = new THREE.Points(droneGeometry, droneMaterial);
 
                 const droneSensorLineGeometry = new THREE.BufferGeometry();
-                const droneSensorLines = new Float32Array(2 * 3);
+                const droneSensorLines = new Float32Array(2 * 4 * 3);
                 droneSensorLineGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLines, 3));
-                droneSensorLineGeometry.setDrawRange(0, 3);
+                droneSensorLineGeometry.setDrawRange(0, 8);
                 const droneSensorLineMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff });
                 const lineFront = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
                 const lineLeft = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);

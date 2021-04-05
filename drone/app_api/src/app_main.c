@@ -358,6 +358,10 @@ void broadcastPosition() {
         return;
     }
 
+    if (droneStatus != STATUS_FLYING) {
+        return;
+    }
+
     uint64_t radioAddress = configblockGetRadioAddress();
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 

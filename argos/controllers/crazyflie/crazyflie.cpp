@@ -13,11 +13,10 @@ namespace {
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
-    // Return to base constants and variable
+    // Return to base constants
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
     static constexpr std::uint16_t maximumReturnTicks = 800;
     static constexpr std::uint64_t initialExploreTicks = 600;
-    static std::uint64_t maximumExploreTicks = initialExploreTicks;
     static constexpr std::uint16_t clearObstacleTicks = 120;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
@@ -415,8 +414,8 @@ void CCrazyflieController::ReturnToBase() {
             }
 
             // Reset counters
-            maximumExploreTicks *= 2;
-            m_exploreWatchdog = maximumExploreTicks;
+            m_maximumExploreTicks *= 2;
+            m_exploreWatchdog = m_maximumExploreTicks;
             m_clearObstacleCounter = clearObstacleTicks;
 
             m_shouldTurnLeft = !m_shouldTurnLeft;
@@ -611,8 +610,8 @@ void CCrazyflieController::ResetInternalStates() {
     m_shouldTurnLeft = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_returnWatchdog = maximumReturnTicks;
-    maximumExploreTicks = initialExploreTicks;
-    m_exploreWatchdog = maximumExploreTicks;
+    m_maximumExploreTicks = initialExploreTicks;
+    m_exploreWatchdog = m_maximumExploreTicks;
     m_clearObstacleCounter = clearObstacleTicks;
 }
 

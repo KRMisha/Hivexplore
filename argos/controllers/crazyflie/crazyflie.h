@@ -147,10 +147,11 @@ private:
     bool m_isRotateToBaseCommandFinished = true;
     bool m_shouldTurnLeft = true;
     CRadians m_targetYawToBase;
-    std::uint16_t m_stabilizeRotationCounter;
-    std::uint16_t m_returnWatchdog;
-    std::uint64_t m_exploreWatchdog;
-    std::uint16_t m_clearObstacleCounter;
+    std::uint16_t m_stabilizeRotationCounter; // Ensure drone is oriented towards the base before resuming
+    std::uint16_t m_returnWatchdog; // Prevent staying stuck in return state by exploring periodically
+    std::uint64_t m_maximumExploreTicks;
+    std::uint64_t m_exploreWatchdog; // Prevent staying stuck in forward state by attempting to beeline periodically
+    std::uint16_t m_clearObstacleCounter; // Ensure obstacles are sufficiently cleared before resuming
 
     // Crash detection variables
     CVector3 m_lastActivePosition;

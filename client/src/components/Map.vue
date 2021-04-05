@@ -24,8 +24,8 @@ type Point = [number, number, number];
 type Line = [Point, Point];
 
 interface DroneInfo {
-    dronePosition: THREE.Points;
-    droneSensorLines: [THREE.Line, THREE.Line, THREE.Line, THREE.Line];
+    position: THREE.Points;
+    sensorLines: [THREE.Line, THREE.Line, THREE.Line, THREE.Line];
 }
 
 // TODO: Move this to communication folder
@@ -125,24 +125,25 @@ export default defineComponent({
                 const dronePositionPoint = new THREE.Points(droneGeometry, droneMaterial);
 
                 // Drone sensor lines
+                const sensorLinesPerDrone = 4;
                 const droneSensorLineGeometry = new THREE.BufferGeometry();
-                const droneSensorLines = new Float32Array(2 * 4 * 3);
-                droneSensorLineGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLines, 3));
+                const droneSensorLinePositions = new Float32Array(2 * sensorLinesPerDrone * 3);
+                droneSensorLineGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLinePositions, 3));
                 const droneSensorLineMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff });
-                const lineGroup = new THREE.Group();
-                const lines: THREE.Line[] = [];
-                for (let i = 0; i < 4; i++) {
+                const droneSensorLineGroup = new THREE.Group();
+                const droneSensorLines: THREE.Line[] = [];
+                for (let i = 0; i < sensorLinesPerDrone; i++) {
                     const line = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
-                    lines.push(line);
-                    lineGroup.add(line);
+                    droneSensorLines.push(line);
+                    droneSensorLineGroup.add(line);
                 }
 
                 const droneGroup = new THREE.Group();
                 droneGroup.add(dronePositionPoint);
-                droneGroup.add(lineGroup);
+                droneGroup.add(droneSensorLineGroup);
                 droneInfos.set(newDroneId, {
-                    dronePosition: dronePositionPoint,
-                    droneSensorLines: lines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line],
+                    position: dronePositionPoint,
+                    sensorLines: droneSensorLines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line],
                 });
 
                 scene.add(droneGroup);
@@ -179,8 +180,8 @@ export default defineComponent({
             if (droneInfo === undefined) {
                 return;
             }
-            droneInfo.dronePosition.geometry.attributes.position.setXYZ(0, ...position);
-            droneInfo.dronePosition.geometry.attributes.position.needsUpdate = true;
+            droneInfo.position.geometry.attributes.position.setXYZ(0, ...position);
+            droneInfo.position.geometry.attributes.position.needsUpdate = true;
         }
 
         socketClient.bindMessage('drone-position', (dronePosition: DronePosition) => {
@@ -195,9 +196,9 @@ export default defineComponent({
 
             let index = 0;
             for (let i = 0; i < newDroneSensorLines.length; i++) {
-                droneInfo.droneSensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][0]);
-                droneInfo.droneSensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][1]);
-                droneInfo.droneSensorLines[i].geometry.attributes.position.needsUpdate = true;
+                droneInfo.sensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][0]);
+                droneInfo.sensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][1]);
+                droneInfo.sensorLines[i].geometry.attributes.position.needsUpdate = true;
             }
         }
 

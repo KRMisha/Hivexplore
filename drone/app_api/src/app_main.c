@@ -366,8 +366,9 @@ void avoidDrone() {
 
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
     // forward: X, left:Y
-    targetForwardVelocity += (float)fabs(vectorAwayFromDrone.x) * cosf(vectorAngle - yawReading);
-    targetLeftVelocity += (float)fabs(vectorAwayFromDrone.y) * sinf(vectorAngle - yawReading);
+    static const float SCALING_FACTOR = 1;
+    targetForwardVelocity += ((float)fabs(vectorAwayFromDrone.x) * cosf(vectorAngle - yawReading)) * SCALING_FACTOR;
+    targetLeftVelocity += ((float)fabs(vectorAwayFromDrone.y) * sinf(vectorAngle - yawReading)) * SCALING_FACTOR;
 }
 
 void broadcastPosition() {

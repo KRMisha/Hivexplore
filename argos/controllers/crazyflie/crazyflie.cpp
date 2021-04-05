@@ -407,8 +407,8 @@ void CCrazyflieController::ReturnToBase() {
         static float sensorToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
 
         // Return to base when obstacle has been passed or explore watchdog is finished
-        if ((sensorToCheck > edgeDetectedThreshold && m_obstacleClearedCounter == 0) || m_exploreWatchdog == 0) {
-            if (m_obstacleClearedCounter == 0) {
+        if ((sensorToCheck > edgeDetectedThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
+            if (m_clearObstacleCounter == 0) {
                 DebugPrint("Explore: Obstacle has been passed\n");
             }
             if (m_exploreWatchdog == 0) {
@@ -418,7 +418,7 @@ void CCrazyflieController::ReturnToBase() {
             // Reset counters
             maximumExploreTicks *= 2;
             m_exploreWatchdog = maximumExploreTicks;
-            m_obstacleClearedCounter = clearObstacleTicks;
+            m_clearObstacleCounter = clearObstacleTicks;
 
             m_shouldTurnLeft = !m_shouldTurnLeft;
 
@@ -428,14 +428,14 @@ void CCrazyflieController::ReturnToBase() {
         }
 
         if (!Forward()) {
-            m_obstacleClearedCounter = clearObstacleTicks;
+            m_clearObstacleCounter = clearObstacleTicks;
             m_returningState = ReturningState::Brake;
         } else {
             // Reset sensor reading counter if obstacle is detected
             if (sensorToCheck > edgeDetectedThreshold) {
-                m_obstacleClearedCounter--;
+                m_clearObstacleCounter--;
             } else {
-                m_obstacleClearedCounter = clearObstacleTicks;
+                m_clearObstacleCounter = clearObstacleTicks;
             }
         }
         m_exploreWatchdog--;
@@ -613,7 +613,7 @@ void CCrazyflieController::ResetInternalStates() {
     m_returnWatchdog = maximumReturnTicks;
     maximumExploreTicks = initialExploreTicks;
     m_exploreWatchdog = maximumExploreTicks;
-    m_obstacleClearedCounter = clearObstacleTicks;
+    m_clearObstacleCounter = clearObstacleTicks;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

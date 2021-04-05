@@ -150,7 +150,7 @@ private:
     std::uint16_t m_stabilizeRotationCounter;
     std::uint16_t m_returnWatchdog;
     std::uint64_t m_exploreWatchdog;
-    std::uint16_t m_obstacleClearedCounter;
+    std::uint16_t m_clearObstacleCounter;
 
     // Crash detection variables
     CVector3 m_lastActivePosition;

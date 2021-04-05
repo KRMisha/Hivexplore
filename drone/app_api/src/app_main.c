@@ -101,7 +101,7 @@ static float targetYawToBase;
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS;
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS;
-static uint16_t obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
+static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
 
 typedef struct {
     float x;
@@ -343,9 +343,9 @@ void returnToBase(void) {
 
         // Return to base when obstacle has been passed or explore watchdog is finished
         static const uint16_t OPEN_SPACE_THRESHOLD = 300;
-        if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && obstacleClearedCounter == 0) ||
+        if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && clearObstacleCounter == 0) ||
             exploreWatchdog == 0) {
-            if (obstacleClearedCounter == 0) {
+            if (clearObstacleCounter == 0) {
                 DEBUG_PRINT("Explore: Obstacle has been cleared\n");
             }
             if (exploreWatchdog == 0) {
@@ -355,7 +355,7 @@ void returnToBase(void) {
             // Reset counters
             maximumExploreTicks *= 2;
             exploreWatchdog = maximumExploreTicks;
-            obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
+            clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
 
             shouldTurnLeft = !shouldTurnLeft;
 
@@ -365,14 +365,14 @@ void returnToBase(void) {
         }
 
         if (!forward()) {
-            obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
+            clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
             returningState = RETURNING_ROTATE;
         } else {
             // Reset sensor reading counter if obstacle is detected
             if (sensorReadingToCheck > EDGE_DETECTED_THRESHOLD) {
-                obstacleClearedCounter--;
+                clearObstacleCounter--;
             } else {
-                obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
+                clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
             }
         }
         exploreWatchdog--;

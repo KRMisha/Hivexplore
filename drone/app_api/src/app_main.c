@@ -74,21 +74,21 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isM1LedOn = false;
 static setpoint_t setPoint;
+static point_t initialPosition;
 static bool shouldTurnLeft = true;
 
 // Readings
+static float rollReading;
+static float pitchReading;
+static float yawReading;
+static point_t positionReading;
 static uint16_t frontSensorReading;
 static uint16_t leftSensorReading;
 static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
-static point_t positionReading;
-static float yawReading;
-static float rollReading;
-static float pitchReading;
 static uint8_t rssiReading;
-static point_t initialPosition;
 
 // Targets
 static float targetForwardVelocity;
@@ -106,18 +106,18 @@ static uint16_t obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
+    const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
+    const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
+    const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
+    const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
+    const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
+    const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
     const logVarId_t frontSensorId = logGetVarId("range", "front");
     const logVarId_t leftSensorId = logGetVarId("range", "left");
     const logVarId_t backSensorId = logGetVarId("range", "back");
     const logVarId_t rightSensorId = logGetVarId("range", "right");
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
-    const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
-    const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
-    const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
-    const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
-    const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
-    const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
@@ -143,20 +143,20 @@ void appMain(void) {
             continue;
         }
 
+        rollReading = logGetFloat(rollId);
+        pitchReading = logGetFloat(pitchId);
+        yawReading = logGetFloat(yawId);
+
+        positionReading.x = logGetFloat(positionXId);
+        positionReading.y = logGetFloat(positionYId);
+        positionReading.z = logGetFloat(positionZId);
+
         frontSensorReading = logGetUint(frontSensorId);
         leftSensorReading = logGetUint(leftSensorId);
         backSensorReading = logGetUint(backSensorId);
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
-
-        positionReading.x = logGetFloat(positionXId);
-        positionReading.y = logGetFloat(positionYId);
-        positionReading.z = logGetFloat(positionZId);
-
-        yawReading = logGetFloat(yawId);
-        rollReading = logGetFloat(rollId);
-        pitchReading = logGetFloat(pitchId);
 
         rssiReading = logGetUint(rssiId);
 
@@ -269,8 +269,8 @@ void returnToBase(void) {
         DEBUG_PRINT("Found the base\n");
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
         DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
-        DEBUG_PRINT("Difference in x: %f \n", (double)positionReading.x - (double)initialPosition.x);
-        DEBUG_PRINT("Difference in y: %f \n", (double)positionReading.y - (double)initialPosition.y);
+        DEBUG_PRINT("Difference in x: %f\n", (double)positionReading.x - (double)initialPosition.x);
+        DEBUG_PRINT("Difference in y: %f\n", (double)positionReading.y - (double)initialPosition.y);
         returningState = RETURNING_LAND;
     }
 
@@ -282,7 +282,7 @@ void returnToBase(void) {
         targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
         // If the drone is towards its base
-        static const double yawEpsilon = 5;
+        static const double yawEpsilon = 5.0;
         double yawDifference = fabs(targetYawToBase - yawReading);
         if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
             DEBUG_PRINT("Return: Finished rotating towards base\n");
@@ -362,7 +362,6 @@ void returnToBase(void) {
             }
         }
         exploreWatchdog--;
-
     } break;
     case RETURNING_LAND: {
         droneStatus = STATUS_LANDING;

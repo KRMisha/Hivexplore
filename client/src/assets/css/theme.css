@@ -34,24 +34,29 @@
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
-    src: local('Roboto'), local('Roboto-Regular'),
-        url('../fonts/Roboto-Regular.ttf') format('truetype');
+    src: local('Roboto'), local('Roboto-Regular'), url('../fonts/Roboto-Regular.ttf') format('truetype');
 }
 /* Roboto Medium 500 */
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 500;
-    src: local('Roboto Medium'), local('Roboto-Medium'),
-        url('../fonts/Roboto-Medium.ttf') format('truetype');
+    src: local('Roboto Medium'), local('Roboto-Medium'), url('../fonts/Roboto-Medium.ttf') format('truetype');
 }
 /* Roboto Bold 700 */
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 700;
-    src: local('Roboto Bold'), local('Roboto-Bold'),
-        url('../fonts/Roboto-Bold.ttf') format('truetype');
+    src: local('Roboto Bold'), local('Roboto-Bold'), url('../fonts/Roboto-Bold.ttf') format('truetype');
+}
+/* Roboto Mono Regular 400 */
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: norma;
+    font-weight: 400;
+    src: local('Roboto Mono'), local('Roboto Mono Regular'), local('RobotoMono'), local('RobotoMono-Regular'),
+        url('../fonts/RobotoMono-Regular.ttf') format('truetype');
 }
 
 * {

@@ -165,8 +165,8 @@ export default defineComponent({
         }
 
         socketClient.bindMessage('map-points', (mapPoints: Point[]) => {
-            for (const point of mapPoints) {
-                addMapPoint(convertServerPointCoords(point));
+            for (const mapPoint of mapPoints) {
+                addMapPoint(convertServerPointCoords(mapPoint));
             }
         });
 
@@ -180,6 +180,7 @@ export default defineComponent({
             if (droneInfo === undefined) {
                 return;
             }
+
             droneInfo.position.geometry.attributes.position.setXYZ(0, ...position);
             droneInfo.position.geometry.attributes.position.needsUpdate = true;
         }

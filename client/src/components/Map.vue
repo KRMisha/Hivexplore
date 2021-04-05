@@ -146,8 +146,9 @@ export default defineComponent({
                     sensorLines: droneSensorLines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line],
                 });
 
-                scene.add(droneGroup);
+                droneGroups.add(droneGroup);
             }
+            scene.add(droneGroups);
         });
 
         function convertServerPointCoords(point: Point): Point {

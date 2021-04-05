@@ -368,6 +368,7 @@ void CCrazyflieController::ReturnToBase() {
     } break;
     case ReturningState::Return: {
         m_droneStatus = DroneStatus::Flying;
+        
         // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
         if (!Forward() || m_returnWatchdog == 0) {
             if (m_returnWatchdog == 0) {

@@ -69,7 +69,7 @@ export default defineComponent({
             // Camera
             const fov = 70;
             camera = new THREE.PerspectiveCamera(fov, containerRef.value!.clientWidth / containerRef.value!.clientHeight);
-            camera.position.set(0, 10, -6);
+            camera.position.set(0, 8, -5);
             camera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Map point geometry - buffer to hold all map point positions

@@ -372,6 +372,7 @@ void returnToBase(void) {
     } break;
     case RETURNING_IDLE: {
         droneStatus = STATUS_LANDED;
+
         memset(&setPoint, 0, sizeof(setpoint_t));
     } break;
     }

@@ -55,7 +55,7 @@ export default defineComponent({
         let mapPoints: THREE.Points;
         let mapPointCount = 0;
 
-        let droneGroups = new THREE.Group();
+        let droneGroups: THREE.Group;
         const droneInfos = new Map<string, DroneInfo>();
 
         function onWindowResize() {

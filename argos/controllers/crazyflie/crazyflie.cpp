@@ -77,6 +77,10 @@ void CCrazyflieController::ControlStep() {
         break;
     }
 
+    if (IsCrashed()) {
+        m_droneStatus = DroneStatus::Crashed;
+    }
+
     m_previousPosition = m_pcPos->GetReading().Position;
 }
 
@@ -381,7 +385,7 @@ void CCrazyflieController::EmergencyLand() {
 }
 
 bool CCrazyflieController::Liftoff() {
-    static constexpr double targetDroneHeight = 0.5;
+    static constexpr double targetDroneHeight = 0.2;
     static constexpr double targetDroneHeightEpsilon = 0.005;
 
     CVector3 targetPosition = CVector3(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY(), targetDroneHeight);
@@ -408,6 +412,23 @@ bool CCrazyflieController::Land() {
         return true;
     }
     return false;
+}
+
+bool CCrazyflieController::IsCrashed() {
+    if (m_droneStatus != DroneStatus::Crashed && (m_droneStatus == DroneStatus::Standby || m_droneStatus == DroneStatus::Landed)) {
+        return false;
+    }
+
+    static constexpr double positionEpsilon = 0.005;
+    if ((m_lastActivePosition - m_pcPos->GetReading().Position).Length() <= positionEpsilon) {
+        m_watchdogCounter++;
+    } else {
+        m_watchdogCounter = 0;
+        m_lastActivePosition = m_pcPos->GetReading().Position;
+    }
+
+    static constexpr std::uint8_t watchdogTimeout = 250;
+    return m_watchdogCounter == watchdogTimeout;
 }
 
 void CCrazyflieController::ResetInternalStates() {

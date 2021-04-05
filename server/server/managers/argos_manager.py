@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional, Set, List
 from server.logger import Logger
 from server.managers.drone_manager import DroneManager
@@ -43,13 +44,14 @@ class ArgosManager(DroneManager):
         self._send_drone_ids()
         self._drone_statuses.clear()
         self._drone_leds.clear()
+        self._drone_battery_levels.clear()
         self._set_mission_state(MissionState.Standby.name)
 
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data
         self._send_drone_ids()
 
-        self._logger.log_server_data(f'Received drone IDs: {self._drone_ids}')
+        self._logger.log_server_data(logging.INFO, f'Received drone IDs: {self._drone_ids}')
 
     def _log_console_callback(self, drone_id: str, data: str):
         for line in data.split('\n'):

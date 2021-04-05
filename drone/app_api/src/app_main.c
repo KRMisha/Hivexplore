@@ -26,7 +26,7 @@
  *             sure they are compiled in CI.
  */
 
-#include <string.h>
+#include <stdlib.h>
 
 #include "app.h"
 
@@ -37,13 +37,13 @@
 
 #include "ledseq.h"
 #include "crtp_commander_high_level.h"
-#include "locodeck.h"
-#include "mem.h"
 #include "log.h"
 #include "param.h"
 #include "pm.h"
 #include "app_channel.h"
 #include "commander.h"
+#include "configblock.h"
+#include "sitaw.h"
 
 #include "app_main.h"
 
@@ -56,7 +56,7 @@
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
-static const float EXPLORATION_HEIGHT = 0.5f;
+static const float EXPLORATION_HEIGHT = 0.2f;
 static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 1.0f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
@@ -73,12 +73,15 @@ static bool isM1LedOn = false;
 static setpoint_t setPoint;
 
 // Readings
+static point_t positionReading;
 static uint16_t frontSensorReading;
 static uint16_t leftSensorReading;
 static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
+static float rollReading;
+static float pitchReading;
 static uint8_t rssiReading;
 
 // Targets
@@ -87,15 +90,27 @@ static float targetLeftVelocity;
 static float targetHeight;
 static float targetYawRate;
 
+typedef struct {
+    float x;
+    float y;
+    float z;
+    uint8_t sourceId;
+} P2PPacketContent;
+
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
+    const logVarId_t positionXId = logGetVarId("stateEstimate", "x");
+    const logVarId_t positionYId = logGetVarId("stateEstimate", "y");
+    const logVarId_t positionZId = logGetVarId("stateEstimate", "z");
     const logVarId_t frontSensorId = logGetVarId("range", "front");
     const logVarId_t leftSensorId = logGetVarId("range", "left");
     const logVarId_t backSensorId = logGetVarId("range", "back");
     const logVarId_t rightSensorId = logGetVarId("range", "right");
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
+    const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
+    const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
@@ -103,13 +118,15 @@ void appMain(void) {
 
     const bool isFlowDeckInitialized = paramGetUint(flowDeckModuleId);
     const bool isMultirangerInitialized = paramGetUint(multirangerModuleId);
-    const bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
+    bool isOutOfService = !isFlowDeckInitialized || !isMultirangerInitialized;
     if (!isFlowDeckInitialized) {
         DEBUG_PRINT("FlowDeckV2 is not connected\n");
     }
     if (!isMultirangerInitialized) {
         DEBUG_PRINT("Multiranger is not connected\n");
     }
+
+    p2pRegisterCB(p2pReceivedCallback);
 
     while (true) {
         vTaskDelay(M2T(10));
@@ -121,12 +138,18 @@ void appMain(void) {
             continue;
         }
 
+        positionReading.x = logGetFloat(positionXId);
+        positionReading.y = logGetFloat(positionYId);
+        positionReading.z = logGetFloat(positionZId);
         frontSensorReading = logGetUint(frontSensorId);
         leftSensorReading = logGetUint(leftSensorId);
         backSensorReading = logGetUint(backSensorId);
         rightSensorReading = logGetUint(rightSensorId);
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
+
+        rollReading = logGetFloat(rollId);
+        pitchReading = logGetFloat(pitchId);
 
         rssiReading = logGetUint(rssiId);
         (void)rssiReading; // TODO: Remove (this silences the unused variable compiler warning which is treated as an error)
@@ -135,6 +158,11 @@ void appMain(void) {
         targetLeftVelocity = 0.0;
         targetHeight = 0.0;
         targetYawRate = 0.0;
+
+        static const uint8_t broadcastProbabilityPercentage = 5;
+        if ((rand() % 100) < broadcastProbabilityPercentage) {
+            broadcastPosition();
+        }
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -154,6 +182,12 @@ void appMain(void) {
         case MISSION_LANDED:
             droneStatus = STATUS_LANDED;
             break;
+        }
+
+        if (isCrashed()) {
+            isOutOfService = true;
+            droneStatus = STATUS_CRASHED;
+            memset(&setPoint, 0, sizeof(setpoint_t));
         }
 
         static const uint8_t TASK_PRIORITY = 3;
@@ -288,6 +322,59 @@ bool land(void) {
         return true;
     }
     return false;
+}
+
+bool isCrashed(void) {
+    bool isCrashed = false;
+
+    if (sitAwTuDetected()) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: firmware tumble detected\n");
+    }
+
+    if (sitAwFFDetected()) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: firmware freefall detected\n");
+    }
+
+    static const uint8_t maxAngle = 55;
+    if (fabs(rollReading) > maxAngle) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: high roll angle detected\n");
+    }
+
+    if (fabs(pitchReading) > maxAngle) {
+        isCrashed = true;
+        DEBUG_PRINT("Drone crash detected. Reason: high pitch angle detected\n");
+    }
+
+    return isCrashed;
+}
+
+void broadcastPosition() {
+    // Avoid causing drone reset due to the content size
+    if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
+        DEBUG_PRINT("P2PPacketContent size too big\n");
+        return;
+    }
+
+    uint64_t radioAddress = configblockGetRadioAddress();
+    uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
+
+    P2PPacketContent content = {.sourceId = id, .x = positionReading.x, .y = positionReading.y, .z = positionReading.z};
+
+    P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
+
+    if (crtpIsConnected()) {
+        memcpy(&packet.data[0], &content, sizeof(content));
+        radiolinkSendP2PPacketBroadcast(&packet);
+    }
+}
+
+void p2pReceivedCallback(P2PPacket* packet) {
+    P2PPacketContent content;
+    memcpy(&content, &packet->data[0], sizeof(content));
+    // TODO: Forward P2P content to methods needing the information
 }
 
 void updateWaypoint(void) {

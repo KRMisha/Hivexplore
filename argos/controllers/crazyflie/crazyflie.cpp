@@ -91,6 +91,7 @@ void CCrazyflieController::ControlStep() {
 }
 
 void CCrazyflieController::Reset() {
+    ResetInternalStates();
 }
 
 void CCrazyflieController::Destroy() {

@@ -19,6 +19,7 @@ class DroneManager(ABC):
         self._drone_statuses: Dict[str, DroneStatus] = {}
         self._drone_leds: Dict[str, bool] = {}
         self._drone_battery_levels: Dict[str, int] = {}
+        self._can_drones_takeoff = False
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -54,6 +55,16 @@ class DroneManager(ABC):
         self._drone_battery_levels[drone_id] = battery_level
         self._logger.log_drone_data(logging.INFO, drone_id, f'Battery level: {battery_level}')
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
+
+        try:
+            MINIMUM_BATTERY_LEVEL = 30
+            new_can_drones_takeoff = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
+        except KeyError:
+            new_can_drones_takeoff = False
+
+        if new_can_drones_takeoff != self.can_drones_takeoff:
+            self.web_socket_server.send_message('can-drone-takeoff', new_can_drones_takeoff)
+            self.can_drones_takeoff = new_can_drones_takeoff
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -141,21 +152,11 @@ class DroneManager(ABC):
             return
 
         # Deny changing mission state to Exploring if a drone is under 30% battery
-        if new_mission_state == MissionState.Exploring:
-            try:
-                MINIMUM_BATTERY_LEVEL = 30
-                can_drones_takeoff = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
-            except KeyError:
-                self._logger.log_server_data(
-                    logging.WARNING,
-                    'DroneManager warning: At least one drone\'s battery level is unknown, preventing the mission from starting')
-                return
-
-            if not can_drones_takeoff:
-                self._logger.log_server_data(
-                    logging.WARNING,
-                    'DroneManager warning: At least one drone under the minimum battery level is preventing the mission from starting')
-                return
+        if new_mission_state == MissionState.Exploring and not self.can_drones_takeoff:
+            self._logger.log_server_data(
+                logging.WARNING,
+                'DroneManager warning: At least one drone under the minimum battery level is preventing the mission from starting')
+            return
 
         self._mission_state = new_mission_state
 

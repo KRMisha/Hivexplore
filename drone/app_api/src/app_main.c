@@ -54,7 +54,6 @@
 // Min max helper macros
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
-#define ABS(a) ((a < 0) ? -a : a)
 
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;

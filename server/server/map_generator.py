@@ -29,6 +29,7 @@ class MapGenerator:
         self._points.extend(points)
         self._logger.log_map_data(logging.INFO, drone_id, points)
         self._web_socket_server.send_message('map-points', points)
+
         lines = self._calculate_drone_sensor_lines(self._last_positions[drone_id], points)
         self._web_socket_server.send_message('drone-sensor-lines', {'droneId': drone_id, 'lines': lines})
 

@@ -2,8 +2,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <stdlib.h>
-#include <time.h>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "experiments/constants.h"

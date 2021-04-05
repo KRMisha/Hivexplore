@@ -10,15 +10,15 @@ namespace {
     // Sensor reading constants
     static constexpr std::uint8_t obstacleTooClose = 0;
     static constexpr std::uint16_t obstacleTooFar = 4000;
-
+    static constexpr std::uint16_t edgeDetectedThreshold = 1200;
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
-    static constexpr std::uint16_t edgeDetectedThreshold = 1200;
-
+    // Return to base constants and variable
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
-    static constexpr std::uint16_t clearObstacleTicks = 120;
     static constexpr std::uint16_t maximumReturnTicks = 800;
-    static std::uint64_t maximumExploreTicks = 600;
+    static constexpr std::uint64_t initialExploreTicks = 600;
+    static std::uint64_t maximumExploreTicks = initialExploreTicks;
+    static constexpr std::uint16_t clearObstacleTicks = 120;
 
     constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
@@ -325,7 +325,7 @@ void CCrazyflieController::ReturnToBase() {
         m_droneStatus = DroneStatus::Flying;
 
         // Turn drone towards its base
-        if (m_isRotateToBaseFinished) {
+        if (m_isRotateToBaseCommandFinished) {
             DebugPrint("Return: Rotating towards base\n");
 
             // Calculate rotation angle to turn towards base
@@ -334,7 +334,7 @@ void CCrazyflieController::ReturnToBase() {
                                 CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
 
             m_pcPropellers->SetAbsoluteYaw(m_targetYawToBase);
-            m_isRotateToBaseFinished = false;
+            m_isRotateToBaseCommandFinished = false;
         }
 
         // Get current absolute yaw
@@ -351,13 +351,13 @@ void CCrazyflieController::ReturnToBase() {
             (((yawDifference <= yawEpsilon) && (yawDifference >= -yawEpsilon)) ||
              ((yawDifference <= (CRadians::PI * 2 + yawEpsilon)) && (yawDifference >= (CRadians::PI * 2 - yawEpsilon))));
 
-        if (!m_isRotateToBaseFinished && m_stabilizeRotationCounter != 0 && isYawTowardsBase) {
+        if (!m_isRotateToBaseCommandFinished && m_stabilizeRotationCounter != 0 && isYawTowardsBase) {
             m_stabilizeRotationCounter--;
         }
 
         // If the drone orientation is towards its base and is stable
         if (m_stabilizeRotationCounter == 0) {
-            m_isRotateToBaseFinished = true;
+            m_isRotateToBaseCommandFinished = true;
 
             // Reset counter
             m_stabilizeRotationCounter = stabilizeRotationTicks;
@@ -610,10 +610,10 @@ void CCrazyflieController::ResetInternalStates() {
 
     m_shouldTurnLeft = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
-    m_obstacleClearedCounter = clearObstacleTicks;
-    maximumExploreTicks = 600;
     m_returnWatchdog = maximumReturnTicks;
+    maximumExploreTicks = initialExploreTicks;
     m_exploreWatchdog = maximumExploreTicks;
+    m_obstacleClearedCounter = clearObstacleTicks;
 }
 
 void CCrazyflieController::UpdateSensorReadings() {

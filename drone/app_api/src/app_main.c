@@ -62,6 +62,7 @@ static const float CRUISE_VELOCITY = 0.15f;
 static const float MAXIMUM_VELOCITY = 0.4f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
+static const uint64_t INITIAL_EXPLORE_TICKS = 600;
 static const uint16_t CLEAR_OBSTACLE_TICKS = 100;
 
 // States
@@ -99,8 +100,8 @@ static float targetYawToBase;
 
 // Watchdogs
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS;
-static uint64_t maximumExploreTicks = 600;
-static uint64_t exploreWatchdog;
+static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
+static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS;
 static uint16_t obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
 
 void appMain(void) {

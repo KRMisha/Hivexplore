@@ -19,7 +19,7 @@ void emergencyLand(void);
 bool liftoff(void);
 bool land(void);
 bool isCrashed(void);
-void avoidDrone(point_t dronePosition);
+void avoidDrone();
 
 void broadcastPosition();
 void p2pReceivedCallback(P2PPacket* packet);

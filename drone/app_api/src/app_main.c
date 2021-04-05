@@ -53,6 +53,14 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(a, b) ((a < b) ? a : b)
 
+// Structs
+typedef struct {
+    float x;
+    float y;
+    float z;
+    uint8_t sourceId;
+} P2PPacketContent;
+
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -66,7 +74,6 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_RETURN;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
-static bool isDroneDroneAvoidanceEnabled = false;
 static point_t initialPosition;
 
 // Data
@@ -86,19 +93,13 @@ static float yawReading;
 static float rollReading;
 static float pitchReading;
 static uint8_t rssiReading;
+P2PPacketContent latestP2PContent;
 
 // Targets
 static float targetForwardVelocity;
 static float targetLeftVelocity;
 static float targetHeight;
 static float targetYawRate;
-
-typedef struct {
-    float x;
-    float y;
-    float z;
-    uint8_t sourceId;
-} P2PPacketContent;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -356,15 +357,12 @@ bool isCrashed(void) {
     return isCrashed;
 }
 
-void avoidDrone(point_t dronePosition) {
-    if (!isDroneDroneAvoidanceEnabled) {
-        return;
-    }
-
-    vector_t vectorAwayFromDrone;
-    vectorAwayFromDrone.x = (initialPosition.x + positionReading.x) - dronePosition.x;
-    vectorAwayFromDrone.y = (initialPosition.y + positionReading.y) - dronePosition.y;
-    vectorAwayFromDrone.z = (initialPosition.z + positionReading.z) - dronePosition.z;
+void avoidDrone() {
+    vector_t vectorAwayFromDrone = {
+        .x = (initialPosition.x + positionReading.x) - latestP2PContent.x,
+        .y = (initialPosition.y + positionReading.y) - latestP2PContent.y,
+        .z = (initialPosition.z + positionReading.z) - latestP2PContent.z
+    };
 
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
     // forward: X, left:Y
@@ -396,6 +394,7 @@ void p2pReceivedCallback(P2PPacket* packet) {
     P2PPacketContent content;
     memcpy(&content, &packet->data[0], sizeof(content));
     // TODO: Forward P2P content to methods needing the information
+    latestP2PContent = content;
 }
 
 void updateWaypoint(void) {

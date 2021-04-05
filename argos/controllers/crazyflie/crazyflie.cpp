@@ -110,14 +110,14 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Orientation group
     CRadians angleRadians;
-    CVector3 unitaryAngleVector;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, unitaryAngleVector);
+    CVector3 angleUnitVector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
     Real angleDegrees = ToDegrees(angleRadians.SignedNormalize()).GetValue();
     LogVariableMap orientationLog;
-    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * unitaryAngleVector.GetX()));
-    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * unitaryAngleVector.GetY()));
+    orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * angleUnitVector.GetX()));
+    orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * angleUnitVector.GetY()));
     // Rotate the drone 90 degrees clockwise to make a yaw of 0 face forward
-    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * unitaryAngleVector.GetZ() - 90.0));
+    orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * angleUnitVector.GetZ() - 90.0));
     logDataMap.emplace_back("orientation", orientationLog);
 
     // Position group
@@ -339,9 +339,9 @@ void CCrazyflieController::ReturnToBase() {
 
         // Get current absolute yaw
         CRadians angleRadians;
-        CVector3 unitaryAngleVector;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, unitaryAngleVector);
-        CRadians currentAbsoluteYaw = angleRadians * unitaryAngleVector.GetZ();
+        CVector3 angleUnitVector;
+        m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
+        CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
 
         // If the drone is towards its base, decrease stabilize rotation counter
         static const CRadians yawEpsilon = CRadians::PI / 64;
@@ -538,8 +538,8 @@ bool CCrazyflieController::Brake() {
 bool CCrazyflieController::Rotate() {
     // Get current yaw
     CRadians currentYaw;
-    CVector3 unitaryAngleVector;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, unitaryAngleVector);
+    CVector3 angleUnitVector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, angleUnitVector);
 
     // Order rotation
     CRadians rotationAngle = (m_shouldTurnLeft ? 1 : -1) * CRadians::PI / 8;

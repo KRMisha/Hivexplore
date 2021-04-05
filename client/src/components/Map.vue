@@ -52,12 +52,10 @@ export default defineComponent({
         let renderer: THREE.WebGLRenderer;
         let controls: OrbitControls;
 
-        // Map-related variables
         const maxMapPoints = 1_000_000;
         let mapPoints: THREE.Points;
         let mapPointCount = 0;
 
-        // Drone-related variables
         const droneInfos = new Map<string, DroneInfo>();
 
         function onWindowResize() {

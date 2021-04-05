@@ -2,7 +2,6 @@
 #define APP_MAIN_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
 #include "radiolink.h"
 
@@ -13,23 +12,17 @@ typedef enum { RETURNING_RETURN, RETURNING_LAND, RETURNING_IDLE } returning_stat
 typedef enum { EMERGENCY_LAND, EMERGENCY_IDLE } emergency_state_t;
 typedef enum { STATUS_STANDBY, STATUS_LIFTOFF, STATUS_FLYING, STATUS_LANDING, STATUS_LANDED, STATUS_CRASHED } drone_status_t;
 
-// Structs
-typedef struct {
-    int16_t x;
-    int16_t y;
-    int16_t z;
-} position_t;
-
 void avoidObstacle(void);
 void explore(void);
 void returnToBase(void);
 void emergencyLand(void);
 bool liftoff(void);
 bool land(void);
-void broadcastPosition();
-void p2pCallbackHandler(P2PPacket* packet);
 bool isCrashed(void);
 void avoidDrone(point_t dronePosition);
+
+void broadcastPosition();
+void p2pReceivedCallback(P2PPacket* packet);
 
 void updateWaypoint(void);
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);

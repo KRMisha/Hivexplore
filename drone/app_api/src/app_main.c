@@ -131,7 +131,6 @@ void appMain(void) {
         DEBUG_PRINT("Multiranger is not connected\n");
     }
 
-    // Initialize random function
     p2pRegisterCB(p2pReceivedCallback);
 
     while (true) {
@@ -378,9 +377,9 @@ void broadcastPosition() {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    // Get source ID
     P2PPacketContent content;
     memcpy(&content, &packet->data[0], sizeof(content));
+    // TODO: Forward P2P content to methods needing the information
 }
 
 void updateWaypoint(void) {

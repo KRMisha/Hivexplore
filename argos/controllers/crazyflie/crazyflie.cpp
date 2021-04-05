@@ -538,8 +538,8 @@ bool CCrazyflieController::Brake() {
 bool CCrazyflieController::Rotate() {
     // Get current yaw
     CRadians currentYaw;
-    CVector3 rotationAxis;
-    m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, rotationAxis);
+    CVector3 unitaryAngleVector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(currentYaw, unitaryAngleVector);
 
     // Order rotation
     CRadians rotationAngle = (m_shouldTurnLeft ? 1 : -1) * CRadians::PI / 8;

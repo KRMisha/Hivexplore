@@ -575,7 +575,6 @@ bool CCrazyflieController::Land() {
         m_droneStatus = DroneStatus::Landed;
         return true;
     }
-
     return false;
 }
 

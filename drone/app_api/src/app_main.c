@@ -97,11 +97,11 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYawToBase;
 
-// Watchdogs
-static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS;
+// Watchdogs (return to base)
+static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
-static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS;
-static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
+static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
+static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
 
 typedef struct {
     float x;
@@ -343,8 +343,7 @@ void returnToBase(void) {
 
         // Return to base when obstacle has been passed or explore watchdog is finished
         static const uint16_t OPEN_SPACE_THRESHOLD = 300;
-        if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && clearObstacleCounter == 0) ||
-            exploreWatchdog == 0) {
+        if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && clearObstacleCounter == 0) || exploreWatchdog == 0) {
             if (clearObstacleCounter == 0) {
                 DEBUG_PRINT("Explore: Obstacle has been cleared\n");
             }
@@ -422,8 +421,8 @@ bool liftoff(void) {
     return false;
 }
 
-// Returns true when the action is on going to finished
-// Returns false when it can't be done because of an obstacle in front
+// Returns true as long as the path forward is clear
+// Returns false when the path forward is obstructed by an obstacle
 bool forward(void) {
     targetHeight += EXPLORATION_HEIGHT;
     targetForwardVelocity += CRUISE_VELOCITY;

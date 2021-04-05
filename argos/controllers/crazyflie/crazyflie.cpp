@@ -485,8 +485,8 @@ bool CCrazyflieController::Liftoff() {
     return false;
 }
 
-// Returns true when the action is on going to finished
-// Returns false when it can't be done because of an obstacle in front
+// Returns true as long as the path forward is clear
+// Returns false when the path forward is obstructed by an obstacle
 bool CCrazyflieController::Forward() {
     // Change state when a wall is detected in front of the drone
     static constexpr double distanceToTravelEpsilon = 0.005;

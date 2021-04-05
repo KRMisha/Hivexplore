@@ -418,6 +418,7 @@ bool liftoff(void) {
         DEBUG_PRINT("Liftoff finished\n");
         return true;
     }
+
     return false;
 }
 
@@ -437,6 +438,7 @@ bool rotate(void) {
     targetHeight += EXPLORATION_HEIGHT;
     targetYawRate = (shouldTurnLeft ? 1 : -1) * 50;
     updateWaypoint();
+
     return frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD;
 }
 
@@ -448,6 +450,7 @@ bool land(void) {
         droneStatus = STATUS_LANDED;
         return true;
     }
+
     return false;
 }
 

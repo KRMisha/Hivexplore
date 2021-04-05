@@ -385,7 +385,6 @@ void CCrazyflieController::ReturnToBase() {
             m_returnWatchdog--;
         }
     } break;
-    // Explore algorithm
     case ReturningState::Brake: {
         m_droneStatus = DroneStatus::Flying;
 

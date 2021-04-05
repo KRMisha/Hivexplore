@@ -166,6 +166,7 @@ class CrazyflieManager(DroneManager):
 
         self._drone_statuses.pop(link_uri, None)
         self._drone_leds.pop(link_uri, None)
+        self._drone_battery_levels.pop(link_uri, None)
 
     def _connection_failed(self, link_uri: str, msg: str):
         self._logger.log_server_data(logging.WARN, f'Connection to {link_uri} failed: {msg}')

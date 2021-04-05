@@ -26,10 +26,7 @@
  *             sure they are compiled in CI.
  */
 
-#include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
 
 #include "app.h"
 
@@ -40,8 +37,6 @@
 
 #include "ledseq.h"
 #include "crtp_commander_high_level.h"
-#include "locodeck.h"
-#include "mem.h"
 #include "log.h"
 #include "param.h"
 #include "pm.h"

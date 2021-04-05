@@ -269,8 +269,8 @@ void returnToBase(void) {
         DEBUG_PRINT("Found the base\n");
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
         DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
-        DEBUG_PRINT("Diffence in x = %f \n", (double)positionReading.x - (double)initialPosition.x);
-        DEBUG_PRINT("Diffence in y = %f \n", (double)positionReading.y - (double)initialPosition.y);
+        DEBUG_PRINT("Difference in x: %f \n", (double)positionReading.x - (double)initialPosition.x);
+        DEBUG_PRINT("Difference in y: %f \n", (double)positionReading.y - (double)initialPosition.y);
         returningState = RETURNING_LAND;
     }
 

@@ -279,7 +279,6 @@ void CCrazyflieController::Explore() {
         if (!Forward()) {
             m_exploringState = ExploringState::Brake;
         }
-
     } break;
     case ExploringState::Brake: {
         m_droneStatus = DroneStatus::Flying;

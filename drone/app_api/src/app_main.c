@@ -445,7 +445,7 @@ bool rotate(void) {
 // Returns true when the action is finished
 bool land(void) {
     updateWaypoint();
-    static const uint16_t LANDED_HEIGHT = 30;
+    static const uint8_t LANDED_HEIGHT = 30;
     if (downSensorReading < LANDED_HEIGHT) {
         droneStatus = STATUS_LANDED;
         return true;

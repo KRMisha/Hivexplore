@@ -27,6 +27,7 @@
  */
 
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "app.h"
@@ -38,13 +39,12 @@
 
 #include "ledseq.h"
 #include "crtp_commander_high_level.h"
-#include "locodeck.h"
-#include "mem.h"
 #include "log.h"
 #include "param.h"
 #include "pm.h"
 #include "app_channel.h"
 #include "commander.h"
+#include "configblock.h"
 #include "sitaw.h"
 
 #include "app_main.h"
@@ -104,6 +104,13 @@ static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS;
 static uint16_t obstacleClearedCounter = CLEAR_OBSTACLE_TICKS;
 
+typedef struct {
+    float x;
+    float y;
+    float z;
+    uint8_t sourceId;
+} P2PPacketContent;
+
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
@@ -133,6 +140,8 @@ void appMain(void) {
     if (!isMultirangerInitialized) {
         DEBUG_PRINT("Multiranger is not connected\n");
     }
+
+    p2pRegisterCB(p2pReceivedCallback);
 
     while (true) {
         vTaskDelay(M2T(10));
@@ -166,6 +175,11 @@ void appMain(void) {
         targetHeight = 0.0;
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
+
+        static const uint8_t broadcastProbabilityPercentage = 5;
+        if ((rand() % 100) < broadcastProbabilityPercentage) {
+            broadcastPosition();
+        }
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -464,6 +478,32 @@ bool isCrashed(void) {
     }
 
     return isCrashed;
+}
+
+void broadcastPosition() {
+    // Avoid causing drone reset due to the content size
+    if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
+        DEBUG_PRINT("P2PPacketContent size too big\n");
+        return;
+    }
+
+    uint64_t radioAddress = configblockGetRadioAddress();
+    uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
+
+    P2PPacketContent content = {.sourceId = id, .x = positionReading.x, .y = positionReading.y, .z = positionReading.z};
+
+    P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
+
+    if (crtpIsConnected()) {
+        memcpy(&packet.data[0], &content, sizeof(content));
+        radiolinkSendP2PPacketBroadcast(&packet);
+    }
+}
+
+void p2pReceivedCallback(P2PPacket* packet) {
+    P2PPacketContent content;
+    memcpy(&content, &packet->data[0], sizeof(content));
+    // TODO: Forward P2P content to methods needing the information
 }
 
 void updateWaypoint(void) {

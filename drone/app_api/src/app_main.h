@@ -2,7 +2,8 @@
 #define APP_MAIN_H
 
 #include <stdbool.h>
-#include <stdint.h>
+
+#include "radiolink.h"
 
 // Enums
 typedef enum { MISSION_STANDBY, MISSION_EXPLORING, MISSION_RETURNING, MISSION_EMERGENCY, MISSION_LANDED } mission_state_t;
@@ -18,6 +19,9 @@ void emergencyLand(void);
 bool liftoff(void);
 bool land(void);
 bool isCrashed(void);
+
+void broadcastPosition();
+void p2pReceivedCallback(P2PPacket* packet);
 
 void updateWaypoint(void);
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);

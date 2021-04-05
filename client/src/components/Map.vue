@@ -21,6 +21,7 @@ import { SocketClient } from '@/classes/socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 type Point = [number, number, number];
+type Line = [Point, Point];
 
 interface DroneInfo {
     dronePosition: THREE.Points;
@@ -35,7 +36,7 @@ interface DronePosition {
 
 interface DroneSensorLine {
     droneId: string;
-    lines: [Point, Point][];
+    lines: Line[];
 }
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
@@ -123,7 +124,6 @@ export default defineComponent({
                 const droneGeometry = new THREE.BufferGeometry();
                 const dronePositions = new Float32Array(3);
                 droneGeometry.setAttribute('position', new THREE.BufferAttribute(dronePositions, 3));
-                droneGeometry.setDrawRange(0, 1);
                 const droneMaterial = new THREE.PointsMaterial({ size: 0.4, color: 0xfb4c0d });
                 const dronePositionPoint = new THREE.Points(droneGeometry, droneMaterial);
 
@@ -131,7 +131,6 @@ export default defineComponent({
                 const droneSensorLineGeometry = new THREE.BufferGeometry();
                 const droneSensorLines = new Float32Array(2 * 4 * 3);
                 droneSensorLineGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLines, 3));
-                droneSensorLineGeometry.setDrawRange(0, 8);
                 const droneSensorLineMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff });
                 const lineFront = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
                 const lineLeft = new THREE.Line(droneSensorLineGeometry, droneSensorLineMaterial);
@@ -193,7 +192,7 @@ export default defineComponent({
             setDronePosition(dronePosition.droneId, convertServerPointCoords(dronePosition.position));
         });
 
-        function setDroneSensorLines(droneId: string, newDroneSensorLines: [Point, Point][]) {
+        function setDroneSensorLines(droneId: string, newDroneSensorLines: Line[]) {
             const droneInfo = droneInfos.get(droneId);
             if (droneInfo === undefined) {
                 return;
@@ -208,14 +207,11 @@ export default defineComponent({
         }
 
         socketClient.bindMessage('drone-sensor-lines', (newDroneSensorLines: DroneSensorLine) => {
-            const droneSensorLines: [Point, Point][] = [];
+            const droneSensorLines: Line[] = [];
             for (const droneSensorLine of newDroneSensorLines.lines) {
                 const firstPoint = droneSensorLine[0];
                 const secondPoint = droneSensorLine[1];
-                const newDroneSensorLine: [Point, Point] = [
-                    convertServerPointCoords(firstPoint),
-                    convertServerPointCoords(secondPoint),
-                ];
+                const newDroneSensorLine: Line = [convertServerPointCoords(firstPoint), convertServerPointCoords(secondPoint)];
                 droneSensorLines.push(newDroneSensorLine);
             }
 

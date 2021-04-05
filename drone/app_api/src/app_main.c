@@ -51,8 +51,7 @@
 
 #define DEBUG_MODULE "APPAPI"
 
-// Min max helper macros
-#define MAX(a, b) ((a > b) ? a : b)
+// Min helper macro
 #define MIN(a, b) ((a < b) ? a : b)
 
 // Constants

@@ -80,7 +80,7 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 static point_t initialOffsetFromBase = {
     .x = 0.0,
     .y = 0.0,
-    .x = 0.0
+    .z = 0.0
 };
 
 // Data
@@ -102,7 +102,12 @@ static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static uint8_t rssiReading;
-static P2PPacketContent latestP2PContent;
+static P2PPacketContent latestP2PContent = {
+    .x = 0.0,
+    .y = 0.0,
+    .z = 0.0,
+    .sourceId = 0
+};
 
 // Targets
 static float targetForwardVelocity;

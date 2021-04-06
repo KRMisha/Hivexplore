@@ -57,7 +57,7 @@
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
 static const float EXPLORATION_HEIGHT = 0.3f;
-static const float CRUISE_VELOCITY = 0.15f;
+static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
@@ -346,6 +346,7 @@ void returnToBase(void) {
         if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && clearObstacleCounter == 0) || exploreWatchdog == 0) {
             if (clearObstacleCounter == 0) {
                 DEBUG_PRINT("Explore: Obstacle has been cleared\n");
+                maximumExploreTicks = INITIAL_EXPLORE_TICKS;
             }
             if (exploreWatchdog == 0) {
                 DEBUG_PRINT("Explore: Explore watchdog finished\n");

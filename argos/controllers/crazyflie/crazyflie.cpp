@@ -408,6 +408,7 @@ void CCrazyflieController::ReturnToBase() {
         if ((sensorToCheck > edgeDetectedThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
             if (m_clearObstacleCounter == 0) {
                 DebugPrint("Explore: Obstacle has been passed\n");
+                m_maximumExploreTicks = initialExploreTicks;
             }
             if (m_exploreWatchdog == 0) {
                 DebugPrint("Explore: Explore watchdog finished\n");

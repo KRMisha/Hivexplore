@@ -1,27 +1,27 @@
 <template>
     <Card class="card">
         <template #title>
-            <div class="center-title">Drone {{ droneId }}</div>
+            <div class="p-d-flex p-jc-center title">Drone {{ droneId }}</div>
         </template>
         <template #content>
-            <div class="card-container">
-                <div class="item-container">
-                    <h4>Velocity (m/s) 🐝</h4>
-                    <Knob v-model="velocity" readonly :size="128" :max="5" />
+            <div class="p-grid">
+                <div class="p-col p-d-flex p-flex-column p-ai-center">
+                    <span class="p-my-2 label">Velocity <span class="units">(m/s)</span></span>
+                    <Knob v-model="velocity" readonly :max="5" />
                 </div>
-                <div class="item-container middle-container">
-                    <div class="item-container">
-                        <h4>Status 🍯</h4>
-                        <Chip :label="droneStatus" :style="{ 'background-color': droneStatusColor }" />
+                <div class="p-col-fixed p-d-flex p-flex-column p-px-0 p-px-sm-2 middle-container">
+                    <div class="p-d-flex p-flex-column p-ai-center">
+                        <span class="p-my-2 label">Status</span>
+                        <Chip :label="droneStatus" :style="droneStatusStyle" />
                     </div>
-                    <div class="item-container">
-                        <h4>LED 💡</h4>
+                    <div class="p-d-flex p-flex-column p-ai-center p-mt-sm-2">
+                        <span class="p-my-2 label">LED</span>
                         <InputSwitch v-model="isLedEnabled" @change="setLedEnabled" />
                     </div>
                 </div>
-                <div class="item-container">
-                    <h4>Battery 🔋</h4>
-                    <Knob v-model="batteryLevel" readonly :size="128" />
+                <div class="p-col p-d-flex p-flex-column p-ai-center">
+                    <span class="p-my-2 label">Battery <span class="units">(%)</span></span>
+                    <Knob v-model="batteryLevel" readonly />
                 </div>
             </div>
         </template>
@@ -37,82 +37,139 @@ import { SocketEvent } from '@/enums/socket-event';
 export default defineComponent({
     name: 'Drone',
     props: {
-        droneId: String,
+        droneId: {
+            type: String,
+            required: true,
+        },
     },
     setup(props) {
-        const socketClient: SocketClient | undefined = inject('socketClient');
-
-        const batteryLevel = ref(0);
-        socketClient!.bindDroneMessage(SocketEvent.BatteryLevel, props.droneId!, (newBatteryLevel: number) => {
-            batteryLevel.value = newBatteryLevel;
-        });
+        const socketClient = inject('socketClient') as SocketClient;
 
         const velocity = ref(0);
-        socketClient!.bindDroneMessage(SocketEvent.Velocity, props.droneId!, (newVelocity: number) => {
+        socketClient.bindDroneMessage(SocketEvent.Velocity, props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
         });
 
+        const batteryLevel = ref(0);
+        socketClient.bindDroneMessage(SocketEvent.BatteryLevel, props.droneId!, (newBatteryLevel: number) => {
+            batteryLevel.value = newBatteryLevel;
+        });
+
         const droneStatus = ref(DroneStatus.Standby);
-        socketClient!.bindDroneMessage(SocketEvent.DroneStatus, props.droneId!, (newDroneStatus: DroneStatus) => {
+        socketClient.bindDroneMessage(SocketEvent.DroneStatus, props.droneId!, (newDroneStatus: DroneStatus) => {
             droneStatus.value = newDroneStatus;
         });
 
         const isLedEnabled = ref(false);
-        socketClient!.bindDroneMessage(SocketEvent.SetLed, props.droneId!, (newIsLedEnabled: boolean) => {
+        socketClient.bindDroneMessage(SocketEvent.SetLed, props.droneId!, (newIsLedEnabled: boolean) => {
             isLedEnabled.value = newIsLedEnabled;
         });
 
         function setLedEnabled() {
-            socketClient!.sendDroneMessage(SocketEvent.SetLed, props.droneId!, isLedEnabled.value);
+            socketClient.sendDroneMessage(SocketEvent.SetLed, props.droneId!, isLedEnabled.value);
         }
 
-        const droneStatusColor = computed((): string | undefined => {
-            // TODO: Handle color for DroneStatus.Landing, DroneStatus.Landed, DroneStatus.Liftoff
+        const droneStatusStyle = computed(() => {
+            let color: string | undefined = undefined; // Default text color
+            let backgroundColor: string | undefined = undefined; // Default background color
+
             switch (droneStatus.value) {
-                case DroneStatus.Standby:
-                    return undefined; // Default background color
+                case DroneStatus.Liftoff:
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--orange-400)';
+                    break;
                 case DroneStatus.Flying:
-                    return 'var(--primary-color)';
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--primary-color)';
+                    break;
+                case DroneStatus.Landing:
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--teal-300)';
+                    break;
+                case DroneStatus.Landed:
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--green-400)';
+                    break;
                 case DroneStatus.Crashed:
-                    return 'var(--orange-400)';
-                default:
-                    return undefined;
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--pink-200)';
+                    break;
             }
+
+            return {
+                color: color,
+                'background-color': backgroundColor,
+            };
         });
 
         return {
-            batteryLevel,
             velocity,
+            batteryLevel,
             droneStatus,
             isLedEnabled,
             setLedEnabled,
-            droneStatusColor,
+            droneStatusStyle,
         };
     },
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .card {
-    margin-bottom: 16px;
+    flex-basis: 100%;
+    border: 1px solid var(--surface-d);
+    margin: 0 0.25rem;
+    max-width: 32rem;
 }
 
-.center-title {
-    text-align: center;
+.title {
+    font-size: 1.125rem;
 }
 
-.card-container {
-    display: flex;
-    justify-content: space-evenly;
+.p-card::v-deep(.p-card-content) {
+    padding: 0;
 }
 
-.item-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.label {
+    font-weight: 500;
+}
+
+.units {
+    font-size: 0.75em;
 }
 
 .middle-container {
-    min-width: 100px;
+    min-width: 6rem;
+}
+
+div::v-deep(.p-knob) svg {
+    width: 7rem;
+    height: 7rem;
+}
+
+@media (max-width: 575px), (min-width: 900px) and (max-width: 991px) {
+    div::v-deep(.p-knob) svg {
+        width: 6rem;
+        height: 6rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .p-component {
+        font-size: 0.875rem;
+    }
+
+    .middle-container {
+        min-width: 4.25rem;
+    }
+
+    .p-chip {
+        padding: 0 0.5rem;
+    }
+
+    div::v-deep(.p-knob) svg {
+        width: 5rem;
+        height: 5rem;
+    }
 }
 </style>

@@ -13,7 +13,7 @@ export class SocketClient {
     private timeout = baseConnectionTimeout;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private callbacks: Map<string, Map<string | undefined, Array<(data: any) => void>>> = new Map();
+    private callbacks = new Map<string, Map<string | undefined, Array<(data: any) => void>>>();
 
     constructor() {
         this.connect();

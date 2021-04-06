@@ -5,8 +5,9 @@ import socket
 from typing import Any, Callable, Dict, List, Optional
 from server.logger import Logger
 
-EVENT_DENYLIST = {'disconnect'}
+from server.sockets.socket_event import SocketEvent
 
+EVENT_DENYLIST = {SocketEvent.Disconnect}
 
 class UnixSocketError(Exception):
     pass
@@ -15,7 +16,7 @@ class UnixSocketError(Exception):
 class UnixSocketClient:
     def __init__(self, logger: Logger):
         self._logger = logger
-        self._callbacks: Dict[str, List[Callable]] = {}
+        self._callbacks: Dict[SocketEvent, List[Callable]] = {}
         self._message_queue: asyncio.Queue
         self._create_socket()
 
@@ -51,7 +52,7 @@ class UnixSocketClient:
                 except (UnixSocketError, ConnectionResetError) as exc:
                     self._logger.log_server_data(logging.ERROR, f'UnixSocketClient communication error: {exc}')
 
-                    for callback in self._callbacks.get('disconnect', []):
+                    for callback in self._callbacks.get(SocketEvent.Disconnect, []):
                         callback()
 
                     for task in tasks:
@@ -61,10 +62,10 @@ class UnixSocketClient:
         finally:
             self._socket.close()
 
-    def bind(self, log_name: str, callback: Callable[[Optional[str], Any], None]):
+    def bind(self, log_name: SocketEvent, callback: Callable[[Optional[str], Any], None]):
         self._callbacks.setdefault(log_name, []).append(callback)
 
-    def send(self, param_name: str, drone_id: str, value: Any):
+    def send(self, param_name: SocketEvent, drone_id: str, value: Any):
         self._message_queue.put_nowait({
             'paramName': param_name,
             'droneId': drone_id,

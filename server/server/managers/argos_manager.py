@@ -6,8 +6,7 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.unix_socket_client import UnixSocketClient
 from server.sockets.web_socket_server import WebSocketServer
-
-
+from server.sockets.socket_event import SocketEvent
 class ArgosManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, logger: Logger, map_generator: MapGenerator):
         super().__init__(web_socket_server, logger, map_generator)
@@ -16,16 +15,16 @@ class ArgosManager(DroneManager):
 
     async def start(self):
         # ARGoS bindings
-        self._unix_socket_client.bind('disconnect', self._unix_socket_disconnect_callback)
-        self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
-        self._unix_socket_client.bind('battery-level', self._log_battery_callback)
-        self._unix_socket_client.bind('orientation', self._log_orientation_callback)
-        self._unix_socket_client.bind('position', self._log_position_callback)
-        self._unix_socket_client.bind('velocity', self._log_velocity_callback)
-        self._unix_socket_client.bind('range', self._log_range_callback)
-        self._unix_socket_client.bind('rssi', self._log_rssi_callback)
-        self._unix_socket_client.bind('drone-status', self._log_drone_status_callback)
-        self._unix_socket_client.bind('console', self._log_console_callback)
+        self._unix_socket_client.bind(SocketEvent.Disconnect, self._unix_socket_disconnect_callback)
+        self._unix_socket_client.bind(SocketEvent.DroneIds, self._get_drone_ids_callback)
+        self._unix_socket_client.bind(SocketEvent.BatteryLevel, self._log_battery_callback)
+        self._unix_socket_client.bind(SocketEvent.Orientation, self._log_orientation_callback)
+        self._unix_socket_client.bind(SocketEvent.Position, self._log_position_callback)
+        self._unix_socket_client.bind(SocketEvent.Velocity, self._log_velocity_callback)
+        self._unix_socket_client.bind(SocketEvent.Range, self._log_range_callback)
+        self._unix_socket_client.bind(SocketEvent.Rssi, self._log_rssi_callback)
+        self._unix_socket_client.bind(SocketEvent.DroneStatus, self._log_drone_status_callback)
+        self._unix_socket_client.bind(SocketEvent.Console, self._log_console_callback)
 
         await self._unix_socket_client.serve()
 
@@ -35,7 +34,7 @@ class ArgosManager(DroneManager):
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         return drone_id in self._drone_ids
 
-    def _set_drone_param(self, param: str, drone_id: str, value: Any):
+    def _set_drone_param(self, param: SocketEvent, drone_id: str, value: Any):
         super()._set_drone_param(param, drone_id, value)
         self._unix_socket_client.send(param, drone_id, value)
 

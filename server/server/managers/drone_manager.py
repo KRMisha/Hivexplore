@@ -18,6 +18,7 @@ class DroneManager(ABC):
         self._mission_state = MissionState.Standby
         self._drone_statuses: Dict[str, DroneStatus] = {}
         self._drone_leds: Dict[str, bool] = {}
+        self._drone_battery_levels: Dict[str, int] = {}
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -50,6 +51,7 @@ class DroneManager(ABC):
 
     def _log_battery_callback(self, drone_id: str, data: Dict[str, int]):
         battery_level = data['pm.batteryLevel']
+        self._drone_battery_levels[drone_id] = battery_level
         self._logger.log_drone_data(logging.INFO, drone_id, f'Battery level: {battery_level}')
         self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
 
@@ -61,8 +63,7 @@ class DroneManager(ABC):
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Orientation: {orientation}')
-        if self._mission_state != MissionState.Standby:
-            self._map_generator.set_orientation(drone_id, orientation)
+        self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
         point = Point(
@@ -72,8 +73,7 @@ class DroneManager(ABC):
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Position: {point}')
-        if self._mission_state != MissionState.Standby:
-            self._map_generator.set_position(drone_id, point)
+        self._map_generator.set_position(drone_id, point)
 
     def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
         velocity = Velocity(
@@ -81,9 +81,10 @@ class DroneManager(ABC):
             vy=data['stateEstimate.vy'],
             vz=data['stateEstimate.vz'],
         )
+
         velocity_magnitude = np.linalg.norm(list(velocity))
         self._logger.log_drone_data(logging.INFO, drone_id, f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
-        self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 4))
+        self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 3))
 
     def _log_range_callback(self, drone_id: str, data: Dict[str, float]):
         range_reading = Range(
@@ -110,7 +111,12 @@ class DroneManager(ABC):
         self._drone_statuses[drone_id] = drone_status
         self._web_socket_server.send_drone_message('drone-status', drone_id, drone_status.name)
 
-        are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
+        try:
+            are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
+        except KeyError:
+            self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
+            are_all_drones_landed = False
+
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
@@ -128,10 +134,29 @@ class DroneManager(ABC):
 
     def _set_mission_state(self, mission_state_str: str):
         try:
-            self._mission_state = MissionState[mission_state_str]
+            new_mission_state = MissionState[mission_state_str]
         except KeyError:
             self._logger.log_server_data(logging.ERROR, f'DroneManager error: Unknown mission state received: {mission_state_str}')
             return
+
+        # Deny changing mission state to Exploring if a drone is under 30% battery
+        if new_mission_state == MissionState.Exploring:
+            try:
+                MINIMUM_BATTERY_LEVEL = 30
+                can_drones_takeoff = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
+            except KeyError:
+                self._logger.log_server_data(
+                    logging.WARNING,
+                    'DroneManager warning: At least one drone\'s battery level is unknown, preventing the mission from starting')
+                return
+
+            if not can_drones_takeoff:
+                self._logger.log_server_data(
+                    logging.WARNING,
+                    'DroneManager warning: At least one drone under the minimum battery level is preventing the mission from starting')
+                return
+
+        self._mission_state = new_mission_state
 
         self._logger.log_server_data(logging.INFO, f'Set mission state: {self._mission_state}')
         for drone_id in self._get_drone_ids():

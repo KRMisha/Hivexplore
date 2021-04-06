@@ -77,7 +77,11 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
-static point_t initialOffsetFromBase;
+static point_t initialOffsetFromBase = {
+    .x = 0.0,
+    .y = 0.0,
+    .x = 0.0
+};
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;

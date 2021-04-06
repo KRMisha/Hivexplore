@@ -83,6 +83,7 @@ class DroneManager(ABC):
             vy=data['stateEstimate.vy'],
             vz=data['stateEstimate.vz'],
         )
+
         velocity_magnitude = np.linalg.norm(list(velocity))
         self._logger.log_drone_data(logging.INFO, drone_id, f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
         self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 3))

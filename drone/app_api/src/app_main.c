@@ -74,7 +74,7 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_RETURN;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
-static point_t initialPosition;
+static point_t initialOffsetFromBase;
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
@@ -359,9 +359,9 @@ bool isCrashed(void) {
 
 void avoidDrone() {
     vector_t vectorAwayFromDrone = {
-        .x = (initialPosition.x + positionReading.x) - latestP2PContent.x,
-        .y = (initialPosition.y + positionReading.y) - latestP2PContent.y,
-        .z = (initialPosition.z + positionReading.z) - latestP2PContent.z
+        .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PContent.x,
+        .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PContent.y,
+        .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z
     };
 
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);

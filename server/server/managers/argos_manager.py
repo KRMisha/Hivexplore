@@ -7,6 +7,8 @@ from server.map_generator import MapGenerator
 from server.sockets.unix_socket_client import UnixSocketClient
 from server.sockets.web_socket_server import WebSocketServer
 from server.sockets.socket_event import SocketEvent
+
+
 class ArgosManager(DroneManager):
     def __init__(self, web_socket_server: WebSocketServer, logger: Logger, map_generator: MapGenerator):
         super().__init__(web_socket_server, logger, map_generator)

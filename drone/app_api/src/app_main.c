@@ -112,13 +112,6 @@ typedef struct {
     uint8_t sourceId;
 } P2PPacketContent;
 
-typedef struct {
-    float x;
-    float y;
-    float z;
-    uint8_t sourceId;
-} P2PPacketContent;
-
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
@@ -134,8 +127,6 @@ void appMain(void) {
     const logVarId_t rightSensorId = logGetVarId("range", "right");
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
-    const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
-    const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
@@ -178,9 +169,6 @@ void appMain(void) {
         upSensorReading = logGetUint(upSensorId);
         downSensorReading = logGetUint(downSensorId);
 
-        rollReading = logGetFloat(rollId);
-        pitchReading = logGetFloat(pitchId);
-
         rssiReading = logGetUint(rssiId);
 
         targetForwardVelocity = 0.0;
@@ -188,11 +176,6 @@ void appMain(void) {
         targetHeight = 0.0;
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
-
-        static const uint8_t broadcastProbabilityPercentage = 5;
-        if ((rand() % 100) < broadcastProbabilityPercentage) {
-            broadcastPosition();
-        }
 
         static const uint8_t broadcastProbabilityPercentage = 5;
         if ((rand() % 100) < broadcastProbabilityPercentage) {

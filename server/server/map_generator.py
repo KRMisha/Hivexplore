@@ -7,6 +7,7 @@ from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Orientation, Point, Range
 from server.sockets.socket_event import SocketEvent
 
+
 class MapGenerator:
     def __init__(self, web_socket_server: WebSocketServer, logger: Logger):
         self._web_socket_server = web_socket_server

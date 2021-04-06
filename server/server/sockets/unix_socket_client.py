@@ -4,7 +4,6 @@ import logging
 import socket
 from typing import Any, Callable, Dict, List, Optional
 from server.logger import Logger
-
 from server.sockets.socket_event import SocketEvent
 
 EVENT_DENYLIST = {SocketEvent.Disconnect}

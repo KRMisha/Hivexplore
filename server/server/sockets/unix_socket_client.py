@@ -90,7 +90,12 @@ class UnixSocketClient:
                     continue
 
                 try:
-                    callbacks = self._callbacks[message['logName']]
+                    log_name = SocketEvent(message['logName']) # TODO: Use LogName enum over SocketEvent for comm with ARGoS/Crazyflie
+                    callbacks = self._callbacks[log_name]
+                except ValueError:
+                    self._logger.log_server_data(logging.WARN,
+                                                 f'UnixSocketClient warning: Invalid log name received: {message["logName"]}')
+                    continue
                 except KeyError:
                     self._logger.log_server_data(logging.WARN,
                                                  f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')

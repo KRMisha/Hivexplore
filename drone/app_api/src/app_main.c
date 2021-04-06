@@ -494,11 +494,22 @@ void avoidDrone() {
         .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z
     };
 
+    static const float DRONE_AVOIDANCE_THRESHOLD = 0.4;
+    const float vectorLength = calculateVectorLength(vectorAwayFromDrone);
+    if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
+        return;
+    }
+
+    const vector_t unitVectorAway = {
+        .x = vectorAwayFromDrone.x / vectorLength,
+        .y = vectorAwayFromDrone.y / vectorLength,
+        .z = vectorAwayFromDrone.z / vectorLength
+    };
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
+    static const float SCALING_FACTOR = 0.1;
     // forward: X, left:Y
-    static const float SCALING_FACTOR = 1;
-    targetForwardVelocity += ((float)fabs(vectorAwayFromDrone.x) * cosf(vectorAngle - yawReading)) * SCALING_FACTOR;
-    targetLeftVelocity += ((float)fabs(vectorAwayFromDrone.y) * sinf(vectorAngle - yawReading)) * SCALING_FACTOR;
+    targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * SCALING_FACTOR;
+    targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * SCALING_FACTOR;
 }
 
 void broadcastPosition() {
@@ -544,6 +555,10 @@ void updateWaypoint(void) {
 
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
+}
+
+float calculateVectorLength(vector_t vector) {
+    return sqrtf(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
 }
 
 LOG_GROUP_START(hivexplore)

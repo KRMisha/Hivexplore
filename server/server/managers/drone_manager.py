@@ -54,7 +54,7 @@ class DroneManager(ABC):
         battery_level = data['pm.batteryLevel']
         self._drone_battery_levels[drone_id] = battery_level
         self._logger.log_drone_data(logging.INFO, drone_id, f'Battery level: {battery_level}')
-        self._web_socket_server.send_drone_message('battery-level', drone_id, battery_level)
+        self._web_socket_server.send_drone_message(SocketEvent.BatteryLevel, drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -85,7 +85,7 @@ class DroneManager(ABC):
 
         velocity_magnitude = np.linalg.norm(list(velocity))
         self._logger.log_drone_data(logging.INFO, drone_id, f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
-        self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 3))
+        self._web_socket_server.send_drone_message(SocketEvent.Velocity, drone_id, round(velocity_magnitude, 3))
 
     def _log_range_callback(self, drone_id: str, data: Dict[str, float]):
         range_reading = Range(

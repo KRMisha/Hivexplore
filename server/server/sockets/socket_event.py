@@ -18,3 +18,5 @@ class SocketEvent(enum.Enum):
     SetLed = 'set-led'
     MapPoints = 'map-points'
     ClearMap = 'clear-map'
+    DronePosition = 'drone-position'
+    DroneSensorLines = 'drone-sensor-lines'

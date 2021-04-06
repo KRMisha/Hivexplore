@@ -533,10 +533,7 @@ void broadcastPosition() {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    P2PPacketContent content;
-    memcpy(&content, &packet->data[0], sizeof(content));
-    // TODO: Forward P2P content to methods needing the information
-    latestP2PContent = content;
+    memcpy(&latestP2PContent, &packet->data[0], sizeof(P2PPacketContent));
 }
 
 void updateWaypoint(void) {

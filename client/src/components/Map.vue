@@ -114,7 +114,7 @@ export default defineComponent({
 
         const socketClient = inject('socketClient') as SocketClient;
 
-        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        socketClient.bindMessage(SocketEvent.DroneIds, (newDroneIds: string[]) => {
             scene.remove(droneGroups);
             droneGroups = new THREE.Group();
 
@@ -189,7 +189,7 @@ export default defineComponent({
             droneInfo.position.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient.bindMessage('drone-position', (dronePosition: DronePosition) => {
+        socketClient.bindMessage(SocketEvent.DronePosition, (dronePosition: DronePosition) => {
             setDronePosition(dronePosition.droneId, convertServerPointCoords(dronePosition.position));
         });
 
@@ -207,7 +207,7 @@ export default defineComponent({
             }
         }
 
-        socketClient.bindMessage('drone-sensor-lines', (newDroneSensorLines: DroneSensorLine) => {
+        socketClient.bindMessage(SocketEvent.DroneSensorLines, (newDroneSensorLines: DroneSensorLine) => {
             const droneSensorLines: Line[] = newDroneSensorLines.sensorLines.map((line: Line) => {
                 return [convertServerPointCoords(line[0]), convertServerPointCoords(line[1])];
             });

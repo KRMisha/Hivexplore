@@ -21,6 +21,7 @@
 import { computed, defineComponent, inject, ref } from 'vue';
 import Drone from '@/components/Drone.vue';
 import { SocketClient } from '@/classes/socket-client';
+import { SocketEvent } from '@/enums/socket-event';
 
 export default defineComponent({
     name: 'DroneList',
@@ -31,7 +32,7 @@ export default defineComponent({
         const socketClient = inject('socketClient') as SocketClient;
 
         const droneIds = ref<string[]>([]);
-        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        socketClient.bindMessage(SocketEvent.DroneIds, (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 

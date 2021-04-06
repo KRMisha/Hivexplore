@@ -5,7 +5,9 @@ export enum SocketEvent {
     DroneStatus = 'drone-status',
     MissionState = 'mission-state',
     MapPoints = 'map-points',
-    SetLed = 'set-led',
     ClearMap = 'clear-map',
+    DronePosition = 'drone-position',
+    DroneSensorLines = 'drone-sensor-lines',
+    SetLed = 'set-led',
     Log = 'log',
 }

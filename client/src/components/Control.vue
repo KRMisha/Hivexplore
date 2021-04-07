@@ -90,8 +90,8 @@ export default defineComponent({
         });
 
         const areAllDronesAboveMinimumBatteryLevel = ref(false);
-        socketClient.bindMessage('are-all-drones-above-minimum-battery-level', (newCanDronesTakeoff: boolean) => {
-            areAllDronesAboveMinimumBatteryLevel.value = newCanDronesTakeoff;
+        socketClient.bindMessage('are-all-drones-above-minimum-battery-level', (newAreAllDronesAboveMinimumBatteryLevel: boolean) => {
+            areAllDronesAboveMinimumBatteryLevel.value = newAreAllDronesAboveMinimumBatteryLevel;
         });
 
         let wasEmergencyLandingCalled = false;

@@ -6,7 +6,7 @@ from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
 from server.tuples import Point
 
-CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_conig.json'
+CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_config.json'
 
 
 def load_crazyflie_initial_positions_from_file() -> Dict[str, Point]:

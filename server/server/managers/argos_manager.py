@@ -6,6 +6,7 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.unix_socket_client import UnixSocketClient
 from server.sockets.web_socket_server import WebSocketServer
+from server.tuples import Point
 
 
 class ArgosManager(DroneManager):
@@ -28,6 +29,9 @@ class ArgosManager(DroneManager):
         self._unix_socket_client.bind('console', self._log_console_callback)
 
         await self._unix_socket_client.serve()
+
+    def _get_drone_position_offset(self, _drone_id: str) -> Point:
+        return Point(x=0, y=0, z=0)
 
     def _get_drone_ids(self) -> List[str]:
         return list(self._drone_ids)

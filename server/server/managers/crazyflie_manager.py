@@ -9,7 +9,7 @@ from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
-from server.utils.config_parser import load_crazyflie_uris_from_file
+from server.utils.config_parser import load_crazyflie_initial_positions_from_file, load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):
@@ -18,6 +18,7 @@ class CrazyflieManager(DroneManager):
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
         self._crazyflie_uris: List[str] = []
+        self._crazyflie_initial_positions: Dict[str, Point] = {}
 
         try:
             self._crazyflie_uris = load_crazyflie_uris_from_file()
@@ -33,6 +34,9 @@ class CrazyflieManager(DroneManager):
 
             CRAZYFLIE_CONNECTION_PERIOD_S = 5
             await asyncio.sleep(CRAZYFLIE_CONNECTION_PERIOD_S)
+
+    def _get_drone_position_offset(self, drone_id: str) -> Point:
+        return self._crazyflie_initial_positions[drone_id]
 
     def _connect_crazyflies(self):
         for uri in self._crazyflie_uris:
@@ -182,6 +186,19 @@ class CrazyflieManager(DroneManager):
 
     def _log_error_callback(self, logconf, msg):
         self._logger.log_server_data(logging.ERROR, f'Error when logging {logconf.name}: {msg}')
+
+    # Client callbacks
+
+    def _set_mission_state(self, mission_state_str: str):
+        super()._set_mission_state(mission_state_str)
+
+        if self._mission_state == MissionState.Exploring:
+            try:
+                self._crazyflie_initial_positions = load_crazyflie_initial_positions_from_file()
+            except ValueError:
+                self._logger.log_server_data(logging.ERROR, "Crazyflie Manager error: Could not load initial positions from file")
+                self._logger.log_server_data(logging.INFO, "Crazyflie Manager: Changing mission state back to Standby")
+                super()._set_mission_state(MissionState.Standby)
 
     # Param callbacks
 

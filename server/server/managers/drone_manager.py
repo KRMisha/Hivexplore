@@ -30,6 +30,10 @@ class DroneManager(ABC):
         pass
 
     @abstractmethod
+    def _get_drone_position_offset(self, drone_id: str) -> Point:
+        pass
+
+    @abstractmethod
     def _get_drone_ids(self) -> List[str]:
         pass
 
@@ -66,10 +70,11 @@ class DroneManager(ABC):
         self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
+        position_offset = self._get_drone_position_offset(drone_id)
         point = Point(
-            x=data['stateEstimate.x'],
-            y=data['stateEstimate.y'],
-            z=data['stateEstimate.z'],
+            x=data['stateEstimate.x'] + position_offset.x,
+            y=data['stateEstimate.y'] + position_offset.y,
+            z=data['stateEstimate.z'] + position_offset.z,
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Position: {point}')

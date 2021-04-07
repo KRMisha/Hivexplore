@@ -9,7 +9,8 @@ from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
-from server.utils.config_parser import load_crazyflie_initial_positions_from_file, load_crazyflie_uris_from_file
+from server.tuples import Point
+from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflie_initial_positions_from_file, load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):
@@ -26,6 +27,7 @@ class CrazyflieManager(DroneManager):
             self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load URIs from file')
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
+        self._logger.log_server_data(logging.INFO, f'The crazyflies\' initial positions are in {CRAZYFLIES_CONFIG_FILENAME}')
 
     async def start(self):
         while True:
@@ -198,10 +200,10 @@ class CrazyflieManager(DroneManager):
             except ValueError:
                 self._logger.log_server_data(logging.ERROR, "Crazyflie Manager error: Could not load initial positions from file")
                 self._logger.log_server_data(logging.INFO, "Crazyflie Manager: Changing mission state back to Standby")
-                super()._set_mission_state(MissionState.Standby)
+                super()._set_mission_state(MissionState.Standby.name)
                 return
 
-            for drone_id, initial_position in self._crazyflie_initial_positions:
+            for drone_id, initial_position in self._crazyflie_initial_positions.items():
                 self._set_drone_param('hivexplore.initialPositionX', drone_id, initial_position.x)
                 self._set_drone_param('hivexplore.initialPositionY', drone_id, initial_position.y)
                 self._set_drone_param('hivexplore.initialPositionZ', drone_id, initial_position.z)

@@ -70,6 +70,11 @@ static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
+// Initial position
+static float initialPositionX = 0;
+static float initialPositionY = 0;
+static float initialPositionZ = 0;
+
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isM1LedOn = false;
@@ -531,4 +536,10 @@ LOG_GROUP_STOP(hivexplore)
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
 PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
+PARAM_GROUP_STOP(hivexplore)
+
+PARAM_GROUP_START(hivexplore)
+PARAM_ADD(PARAM_FLOAT, initialPositionX, &initialPositionX)
+PARAM_ADD(PARAM_FLOAT, initialPositionY, &initialPositionY)
+PARAM_ADD(PARAM_FLOAT, initialPositionZ, &initialPositionZ)
 PARAM_GROUP_STOP(hivexplore)

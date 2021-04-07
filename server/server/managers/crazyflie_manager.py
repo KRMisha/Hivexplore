@@ -199,6 +199,12 @@ class CrazyflieManager(DroneManager):
                 self._logger.log_server_data(logging.ERROR, "Crazyflie Manager error: Could not load initial positions from file")
                 self._logger.log_server_data(logging.INFO, "Crazyflie Manager: Changing mission state back to Standby")
                 super()._set_mission_state(MissionState.Standby)
+                return
+
+            for drone_id, initial_position in self._crazyflie_initial_positions:
+                self._set_drone_param('hivexplore.initialPositionX', drone_id, initial_position.x)
+                self._set_drone_param('hivexplore.initialPositionY', drone_id, initial_position.y)
+                self._set_drone_param('hivexplore.initialPositionZ', drone_id, initial_position.z)
 
     # Param callbacks
 

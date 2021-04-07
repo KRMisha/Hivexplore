@@ -197,10 +197,12 @@ void appMain(void) {
             droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
+            avoidDrone();
             avoidObstacle();
             explore();
             break;
         case MISSION_RETURNING:
+            avoidDrone();
             avoidObstacle();
             returnToBase();
             break;

@@ -5,14 +5,14 @@ from cflib.crazyflie.mem.i2c_element import I2CElement
 from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
 
-CRAZYFLIE_URIS_FILENAME = 'server/config/crazyflie_uris.json'
+CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_conig.json'
 
 
 def load_crazyflie_uris_from_file() -> List[str]:
-    with open(CRAZYFLIE_URIS_FILENAME, 'r+') as uris_file:
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
         try:
-            uris = json.load(uris_file)
-            return uris
+            crazyflies_config = json.load(file)
+            return [crazyflie_config['uri'] for crazyflie_config in crazyflies_config]
         except ValueError:
             print('load_crazyflie_uris_from_file error: Could not load URIs from file')
             raise
@@ -62,6 +62,6 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
     # Append new drone URI
     uris.append(new_uri)
 
-    with open(CRAZYFLIE_URIS_FILENAME, 'w') as uris_file:
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as uris_file:
         json.dump(uris, uris_file)
         uris_file.write('\n')

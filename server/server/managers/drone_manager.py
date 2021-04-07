@@ -62,9 +62,9 @@ class DroneManager(ABC):
         except KeyError:
             new_can_drones_takeoff = False
 
-        if new_can_drones_takeoff != self.can_drones_takeoff:
-            self.web_socket_server.send_message('can-drone-takeoff', new_can_drones_takeoff)
-            self.can_drones_takeoff = new_can_drones_takeoff
+        if new_can_drones_takeoff != self._can_drones_takeoff:
+            self._web_socket_server.send_message('are-all-drones-above-minimum-battery-level', new_can_drones_takeoff)
+            self._can_drones_takeoff = new_can_drones_takeoff
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -140,6 +140,7 @@ class DroneManager(ABC):
     def _web_socket_connect_callback(self, client_id: str):
         self._send_drone_ids(client_id)
         self._web_socket_server.send_message_to_client(client_id, 'mission-state', self._mission_state.name)
+        self._web_socket_server.send_message_to_client(client_id, 'are-all-drones-above-minimum-battery-level', self._can_drones_takeoff)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
             self._web_socket_server.send_drone_message_to_client(client_id, 'set-led', drone_id, is_led_enabled)
@@ -152,7 +153,7 @@ class DroneManager(ABC):
             return
 
         # Deny changing mission state to Exploring if a drone is under 30% battery
-        if new_mission_state == MissionState.Exploring and not self.can_drones_takeoff:
+        if new_mission_state == MissionState.Exploring and not self._can_drones_takeoff:
             self._logger.log_server_data(
                 logging.WARNING,
                 'DroneManager warning: At least one drone under the minimum battery level is preventing the mission from starting')

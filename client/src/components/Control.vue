@@ -3,13 +3,17 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
-                <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-evenly">
+                <div v-if="startMissionDisabledText!==''" class="p-col-12 p-d-flex p-jc-center p-p-0 p-mb-5">
+                    <InlineMessage severity="info" class="start-mission-deny-message p-p-2">{{startMissionDisabledText}}</InlineMessage>
+                </div>
+
+                <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-between">
                     <div class="p-d-flex p-flex-column">
                         <Button
                             label="Start mission"
                             icon="pi pi-send"
                             class="p-my-1"
-                            :disabled="droneCount === 0 || missionState !== MissionState.Standby"
+                            :disabled="droneCount === 0 || missionState !== MissionState.Standby || !areAllDronesAboveMinimumBatteryLevel"
                             @click="onStartMissionButtonClick($event)"
                         />
                         <Button
@@ -85,6 +89,11 @@ export default defineComponent({
             droneCount.value = newDroneIds.length;
         });
 
+        const areAllDronesAboveMinimumBatteryLevel = ref(false);
+        socketClient.bindMessage('are-all-drones-above-minimum-battery-level', (newCanDronesTakeoff: boolean) => {
+            areAllDronesAboveMinimumBatteryLevel.value = newCanDronesTakeoff;
+        });
+
         let wasEmergencyLandingCalled = false;
 
         function onStartMissionButtonClick(event: Event) {
@@ -117,6 +126,22 @@ export default defineComponent({
             return {
                 'p-button-danger': missionState.value !== MissionState.Landed,
             };
+        });
+
+        const startMissionDisabledText = computed(() => {
+            if (missionState.value !== MissionState.Standby) {
+                return '';
+            }
+
+            if (droneCount.value === 0) {
+                return 'At least one drone must be connected for the mission to start';
+            }
+
+            if (!areAllDronesAboveMinimumBatteryLevel.value) {
+                return 'At least one drone\'s battery level is under the minimum battery level required';
+            }
+
+            return '';
         });
 
         function onEndMissionButtonClick(event: Event) {
@@ -159,10 +184,12 @@ export default defineComponent({
             missionStates,
             setMissionState,
             droneCount,
+            areAllDronesAboveMinimumBatteryLevel,
             onStartMissionButtonClick,
             endMissionButtonLabel,
             endMissionButtonIcon,
             endMissionButtonClass,
+            startMissionDisabledText,
             onEndMissionButtonClick,
             droneCountChipClass,
             timelineMarkerClass,
@@ -232,5 +259,19 @@ export default defineComponent({
 
 .selected-content {
     font-weight: bold;
+}
+
+.start-mission-deny-message {
+    margin-top: -0.5rem;
+    width: 100%;
+}
+
+div::v-deep(.p-inline-message) {
+    background: var(--primary-color);
+    color: var(--primary-color-text);
+}
+
+div::v-deep(.p-inline-message-icon) {
+    color: var(--primary-color-text) !important; 
 }
 </style>

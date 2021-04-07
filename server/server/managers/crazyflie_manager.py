@@ -27,8 +27,11 @@ class CrazyflieManager(DroneManager):
             self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load URIs from file')
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
-        self._logger.log_server_data(logging.INFO, f'The crazyflies\' initial positions are in {CRAZYFLIES_CONFIG_FILENAME}')
-
+        self._web_socket_server.bind(
+            'connect',
+            lambda: self._logger.log_server_data(logging.INFO, f'The crazyflies\' initial positions are in {CRAZYFLIES_CONFIG_FILENAME}')
+        )
+        
     async def start(self):
         while True:
             if self._mission_state == MissionState.Standby:

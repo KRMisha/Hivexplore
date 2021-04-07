@@ -48,20 +48,17 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
 
     PowerSwitch(crazyflie.link_uri).stm_power_cycle()
 
-    try:
-        uris = load_crazyflie_uris_from_file()
-    except ValueError:
-        uris = []
 
-    # Remove old drone URI
-    try:
-        uris.remove(crazyflie.link_uri)
-    except ValueError:
-        pass
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
+        crazyflies_config = json.load(file)
+    
+    for crazyflie_config in crazyflies_config:
+        if crazyflie_config['uri'] == crazyflie.link_uri:
+            crazyflie_config['uri'] = new_uri
+            break
+    else:
+        crazyflies_config.append({'uri': new_uri, 'initial-position': {'x': 0, 'y': 0, 'z': 0}})
 
-    # Append new drone URI
-    uris.append(new_uri)
-
-    with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as uris_file:
-        json.dump(uris, uris_file)
-        uris_file.write('\n')
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as file:
+        json.dump(crazyflies_config, file)
+        

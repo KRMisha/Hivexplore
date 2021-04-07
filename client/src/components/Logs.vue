@@ -179,7 +179,7 @@ export default defineComponent({
 }
 
 .log-line {
-    font-family: 'Courier New', monospace;
+    font-family: 'Roboto Mono', monospace;
     font-size: 0.875rem;
     padding-left: 1.2em;
     text-indent: -1.2em;

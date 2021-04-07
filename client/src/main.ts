@@ -17,7 +17,7 @@ import Tooltip from 'primevue/tooltip';
 
 import ConfirmationService from 'primevue/confirmationservice';
 
-import '@/assets/theme.css';
+import '@/assets/css/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';

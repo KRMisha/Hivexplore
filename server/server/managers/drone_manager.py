@@ -74,8 +74,7 @@ class DroneManager(ABC):
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Orientation: {orientation}')
-        if self._mission_state != MissionState.Standby:
-            self._map_generator.set_orientation(drone_id, orientation)
+        self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
         point = Point(
@@ -85,8 +84,7 @@ class DroneManager(ABC):
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Position: {point}')
-        if self._mission_state != MissionState.Standby:
-            self._map_generator.set_position(drone_id, point)
+        self._map_generator.set_position(drone_id, point)
 
     def _log_velocity_callback(self, drone_id: str, data: Dict[str, float]):
         velocity = Velocity(
@@ -94,6 +92,7 @@ class DroneManager(ABC):
             vy=data['stateEstimate.vy'],
             vz=data['stateEstimate.vz'],
         )
+
         velocity_magnitude = np.linalg.norm(list(velocity))
         self._logger.log_drone_data(logging.INFO, drone_id, f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
         self._web_socket_server.send_drone_message('velocity', drone_id, round(velocity_magnitude, 3))

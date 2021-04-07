@@ -1,7 +1,7 @@
 import sys
 import cflib
 from cflib.crazyflie import Crazyflie
-from server.utils.uri import load_crazyflie_uris_from_file, set_crazyflie_radio_address
+from server.utils.config_parser import load_crazyflie_uris_from_file, set_crazyflie_radio_address
 
 
 def main():

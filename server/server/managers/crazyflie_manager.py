@@ -9,7 +9,7 @@ from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
-from server.utils.uri import load_crazyflie_uris_from_file
+from server.utils.config_parser import load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):

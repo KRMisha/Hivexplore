@@ -1,11 +1,22 @@
 import json
-from typing import List
+from typing import Dict, List
 from cflib.crazyflie.mem import MemoryElement
 from cflib.crazyflie.mem.i2c_element import I2CElement
 from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
+from server.tuples import Point
 
 CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_conig.json'
+
+
+def load_crazyflie_initial_positions_from_file() -> Dict[str, Point]:
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
+        try:
+            crazyflies_config = json.load(file)
+            return {crazyflie_config['uri']: Point(**crazyflie_config['initial-position']) for crazyflie_config in crazyflies_config}
+        except ValueError:
+            print('load_crazyflie_positions_from_file error: Could not load initial positions from file')
+            raise
 
 
 def load_crazyflie_uris_from_file() -> List[str]:
@@ -48,10 +59,9 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
 
     PowerSwitch(crazyflie.link_uri).stm_power_cycle()
 
-
     with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
         crazyflies_config = json.load(file)
-    
+
     for crazyflie_config in crazyflies_config:
         if crazyflie_config['uri'] == crazyflie.link_uri:
             crazyflie_config['uri'] = new_uri
@@ -61,4 +71,3 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
 
     with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as file:
         json.dump(crazyflies_config, file)
-        

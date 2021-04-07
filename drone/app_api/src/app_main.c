@@ -89,6 +89,7 @@ static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static uint8_t rssiReading;
+static uint8_t batteryLevelReading;
 
 // Targets
 static float targetForwardVelocity;
@@ -126,6 +127,7 @@ void appMain(void) {
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
+    const logVarId_t batteryLevelId = logGetVarId("pm", "batteryLevel");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
@@ -169,6 +171,8 @@ void appMain(void) {
 
         rssiReading = logGetUint(rssiId);
 
+        batteryLevelReading = logGetUint(batteryLevelId);
+
         targetForwardVelocity = 0.0;
         targetLeftVelocity = 0.0;
         targetHeight = 0.0;
@@ -185,6 +189,11 @@ void appMain(void) {
             droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
+            if (batteryLevelReading <= 30) {
+                missionState = MISSION_RETURNING;
+                droneStatus = STATUS_DRAINED;
+                break;
+            }
             avoidObstacle();
             explore();
             break;

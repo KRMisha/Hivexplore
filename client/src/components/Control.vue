@@ -3,7 +3,7 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
-                <div v-if="startMissionDisabledText!==''" class="p-col-12 p-d-flex p-jc-center p-p-0 p-mb-5">
+                <div v-if="startMissionDisabledText!==''" class="p-col-12 p-p-0 p-mb-5">
                     <InlineMessage severity="info" class="start-mission-deny-message p-p-2">{{startMissionDisabledText}}</InlineMessage>
                 </div>
 

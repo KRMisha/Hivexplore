@@ -77,6 +77,7 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
+// TODO: Initialize from server using param
 static point_t initialOffsetFromBase = {
     .x = 0.0,
     .y = 0.0,
@@ -501,7 +502,7 @@ void avoidDrone() {
         .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z
     };
 
-    static const float DRONE_AVOIDANCE_THRESHOLD = 0.4;
+    static const float DRONE_AVOIDANCE_THRESHOLD = 2.0;
     const float vectorLength = calculateVectorLength(vectorAwayFromDrone);
     if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
         return;
@@ -513,7 +514,7 @@ void avoidDrone() {
         .z = vectorAwayFromDrone.z / vectorLength
     };
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
-    static const float SCALING_FACTOR = 0.1;
+    static const float SCALING_FACTOR = 0.2;
     // forward: X, left:Y
     targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * SCALING_FACTOR;
     targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * SCALING_FACTOR;
@@ -529,7 +530,12 @@ void broadcastPosition() {
     uint64_t radioAddress = configblockGetRadioAddress();
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
-    P2PPacketContent content = {.sourceId = id, .x = positionReading.x, .y = positionReading.y, .z = positionReading.z};
+    P2PPacketContent content = {
+        .sourceId = id,
+        .x = positionReading.x + initialOffsetFromBase.x,
+        .y = positionReading.y + initialOffsetFromBase.y,
+        .z = positionReading.z + initialOffsetFromBase.z
+    };
 
     P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
 

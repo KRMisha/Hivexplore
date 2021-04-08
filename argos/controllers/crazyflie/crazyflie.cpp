@@ -60,13 +60,21 @@ void CCrazyflieController::ControlStep() {
     UpdateRssi();
     PingOtherDrones();
 
+    static const std::uint8_t lowBatteryThreshold = 30;
+
     switch (m_missionState) {
     case MissionState::Standby:
-        m_droneStatus = DroneStatus::Standby;
-        ResetInternalStates();
+        if (m_pcBattery->GetReading().AvailableCharge * 100 < lowBatteryThreshold) {
+            m_droneStatus = DroneStatus::Drained;
+        } else {
+            m_droneStatus = DroneStatus::Standby;
+            ResetInternalStates();
+        }
         break;
     case MissionState::Exploring:
-        if (!AvoidObstacle()) {
+        if (m_pcBattery->GetReading().AvailableCharge * 100 <= lowBatteryThreshold) {
+            m_missionState = MissionState::Returning;
+        } else if (!AvoidObstacle()) {
             Explore();
         }
         break;
@@ -79,7 +87,11 @@ void CCrazyflieController::ControlStep() {
         EmergencyLand();
         break;
     case MissionState::Landed:
-        m_droneStatus = DroneStatus::Landed;
+        if (m_pcBattery->GetReading().AvailableCharge * 100 <= lowBatteryThreshold) {
+            m_droneStatus = DroneStatus::Drained;
+        } else {
+            m_droneStatus = DroneStatus::Landed;
+        }
         break;
     }
 

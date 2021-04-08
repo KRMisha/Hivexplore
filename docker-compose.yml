@@ -5,6 +5,7 @@ services:
         image: hivexplore/client
         ports:
             - 3995:80
+
     server:
         image: hivexplore/server
         command: argos # TODO: Crazyflie vs ARGoS args? How to pass args to Docker Compose?
@@ -13,3 +14,13 @@ services:
         volumes:
             - /tmp/hivexplore:/tmp/hivexplore # TODO: Document this directory
             - /tmp/logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
+
+    argos:
+        image: hivexplore/argos
+        volumes:
+            - $XSOCKET:$XSOCKET
+            - $XAUTHORITY:$XAUTHORITY
+            - /tmp/hivexplore:/tmp/hivexplore # TODO: Document this directory
+        environment:
+            DISPLAY: $DISPLAY
+            XAUTHORITY: $XAUTHORITY

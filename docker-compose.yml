@@ -2,11 +2,13 @@ version: "3.8"
 
 services:
     client:
+        build: ./client
         image: hivexplore/client
         ports:
             - 3995:80
 
     server:
+        build: ./server
         image: hivexplore/server
         command: argos # TODO: Crazyflie vs ARGoS args? How to pass args to Docker Compose?
         ports:
@@ -16,6 +18,7 @@ services:
             - /tmp/logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
 
     argos:
+        build: ./argos
         image: hivexplore/argos
         volumes:
             - $XSOCKET:$XSOCKET

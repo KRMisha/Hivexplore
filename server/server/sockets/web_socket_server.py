@@ -95,12 +95,14 @@ class WebSocketServer:
             try:
                 message = json.loads(message_str)
 
-                if message['event'] in EVENT_DENYLIST:
+                event_name = SocketEvent(message['event'])
+                if event_name in EVENT_DENYLIST:
                     self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Invalid event received: {message["event"]}')
                     continue
 
                 try:
-                    callbacks = self._callbacks[message['event']]
+                    event_name = SocketEvent(message['event'])
+                    callbacks = self._callbacks[event_name]
                 except KeyError:
                     self._logger.log_server_local_data(logging.WARNING,
                                                        f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')

@@ -14,8 +14,8 @@ services:
         ports:
             - 5678:5678
         volumes:
-            - /tmp/hivexplore:/tmp/hivexplore # TODO: Document this directory
-            - /tmp/logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
+            - socket:/tmp/hivexplore # TODO: Document this directory # TODO: Check if /tmp/ is conventional for socket location inside container
+            - logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
 
     argos:
         build: ./argos
@@ -23,7 +23,14 @@ services:
         volumes:
             - $XSOCKET:$XSOCKET
             - $XAUTHORITY:$XAUTHORITY
-            - /tmp/hivexplore:/tmp/hivexplore # TODO: Document this directory
+            - socket:/tmp/hivexplore # TODO: Document this directory
         environment:
             DISPLAY: $DISPLAY
             XAUTHORITY: $XAUTHORITY
+
+volumes:
+    socket:
+    logs:
+    # TODO: Rename volumes?
+    # TODO: Multiple volumes or one volume?
+    # TODO: Fix permission issue, maybe this link: https://stackoverflow.com/questions/24288616/permission-denied-on-accessing-host-directory-in-docker

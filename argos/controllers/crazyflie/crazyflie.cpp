@@ -47,6 +47,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
         THROW_ARGOSEXCEPTION_NESTED("Error initializing the Crazyflie controller for robot \"" << GetId() << "\"", e);
     }
 
+    m_initialPosition = m_pcPos->GetReading().Position;
+
     Reset();
 }
 
@@ -265,7 +267,6 @@ void CCrazyflieController::Explore() {
     case ExploringState::Idle: {
         m_droneStatus = DroneStatus::Standby;
 
-        m_initialPosition = m_pcPos->GetReading().Position;
         m_exploringState = ExploringState::Liftoff;
     } break;
     case ExploringState::Liftoff: {

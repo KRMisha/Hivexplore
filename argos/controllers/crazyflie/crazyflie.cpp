@@ -11,6 +11,7 @@ namespace {
     static constexpr std::uint8_t obstacleTooClose = 0;
     static constexpr std::uint16_t obstacleTooFar = 4000;
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
+    static constexpr std::uint16_t openSpaceThreshold = 600;
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
     // Return to base constants
@@ -405,7 +406,7 @@ void CCrazyflieController::ReturnToBase() {
         static float sensorToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
 
         // Return to base when obstacle has been passed or explore watchdog is finished
-        if ((sensorToCheck > edgeDetectedThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
+        if ((sensorToCheck > edgeDetectedThreshold + openSpaceThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
             if (m_clearObstacleCounter == 0) {
                 DebugPrint("Explore: Obstacle has been passed\n");
                 m_maximumExploreTicks = initialExploreTicks;
@@ -551,7 +552,7 @@ bool CCrazyflieController::Rotate() {
 
     // Wait for rotation to finish
     if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= m_rotationAngle.GetValue()) {
-        if (m_sensorReadings["front"] > edgeDetectedThreshold) {
+        if (m_sensorReadings["front"] > edgeDetectedThreshold + openSpaceThreshold) {
             m_isRotateCommandFinished = true;
             return true;
         }

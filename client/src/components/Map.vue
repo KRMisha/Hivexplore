@@ -40,25 +40,6 @@ interface DroneSensorLine {
     sensorLines: Line[];
 }
 
-type Point = [number, number, number];
-type Line = [Point, Point];
-
-interface DroneInfo {
-    position: THREE.Points;
-    sensorLines: [THREE.Line, THREE.Line, THREE.Line, THREE.Line];
-}
-
-// TODO: Move this to communication folder
-interface DronePosition {
-    droneId: string;
-    position: Point;
-}
-
-interface DroneSensorLine {
-    droneId: string;
-    sensorLines: Line[];
-}
-
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
 export default defineComponent({

@@ -68,7 +68,7 @@ static const float EXPLORATION_HEIGHT = 0.3f;
 static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
-static const uint64_t MAXIMUM_REORIENTATION_TICKS = 4000;
+static const uint64_t MAXIMUM_REORIENTATION_TICKS = 1500;
 //static const uint16_t N_LATEST_P2P_POSITIONS = 10;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
 static const uint64_t INITIAL_EXPLORE_TICKS = 600;
@@ -280,6 +280,7 @@ void explore(void) {
         droneStatus = STATUS_FLYING;
 
         if (reorientationWatchdog == 0 ) {
+            DEBUG_PRINT("Going to rotate away!");
             targetYawRate = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;
         }
@@ -292,6 +293,7 @@ void explore(void) {
     case EXPLORING_ROTATE_AWAY: {
         if (rotateTowardsTargetYaw()) {
             reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
+            DEBUG_PRINT("Finished rotate away!");
             exploringState = EXPLORING_EXPLORE;
         }
     }
@@ -619,6 +621,8 @@ double calculateAngleAwayFromCenterOfMass() {
 
     centerOfMass.x = (latestP2PContent.x + initialOffsetFromBase.x + positionReading.x) / 2;
     centerOfMass.y = (latestP2PContent.y + initialOffsetFromBase.y + positionReading.y) / 2;
+    DEBUG_PRINT("Center of mass x: %f", centerOfMass.x);
+    DEBUG_PRINT("Center of mass y: %f", centerOfMass.y);
 
     // for (int i = 0; i++; i < N_LATEST_P2P_POSITIONS) {
     //     centerOfMass.x += latestP2PContents[i].x;
@@ -633,7 +637,7 @@ double calculateAngleAwayFromCenterOfMass() {
     };
 
     double angleAway = atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
-
+    DEBUG_PRINT("Angle away: %f", angleAway);
     return angleAway;
 }
 

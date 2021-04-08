@@ -59,7 +59,11 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateRssi();
 
-    if (m_droneStatus == DroneStatus::Flying) {
+    const bool shouldNotBroadcastPosition =
+        (m_missionState == MissionState::Standby)
+        || (m_missionState == MissionState::Exploring && (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff))
+        || (m_missionState == MissionState::Emergency && m_emergencyState == EmergencyState::Idle);
+    if (!shouldNotBroadcastPosition) {
         PingOtherDrones();
     }
 

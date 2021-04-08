@@ -88,8 +88,6 @@ static uint16_t backSensorReading;
 static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
-static float rollReading;
-static float pitchReading;
 static uint8_t rssiReading;
 
 // Targets

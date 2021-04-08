@@ -142,6 +142,12 @@ void appMain(void) {
 
     p2pRegisterCB(p2pReceivedCallback);
 
+    initialPosition.x = logGetFloat(positionXId);
+    initialPosition.y = logGetFloat(positionYId);
+    initialPosition.z = logGetFloat(positionZId);
+
+    DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
+
     while (true) {
         vTaskDelay(M2T(10));
 
@@ -244,7 +250,6 @@ void explore(void) {
         // Check if any obstacle is in the way before taking off
         if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
             DEBUG_PRINT("Liftoff\n");
-            initialPosition = positionReading;
             shouldTurnLeft = true;
             exploringState = EXPLORING_LIFTOFF;
         }
@@ -398,6 +403,8 @@ void emergencyLand(void) {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
+            DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
+            DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
             emergencyState = EMERGENCY_IDLE;
         }
     } break;

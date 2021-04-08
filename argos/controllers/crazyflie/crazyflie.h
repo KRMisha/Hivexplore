@@ -34,7 +34,12 @@ enum class ExploringState {
 };
 
 enum class ReturningState {
+    BrakeTowardsBase,
+    RotateTowardsBase,
     Return,
+    Brake,
+    Rotate,
+    Forward,
     Land,
     Idle,
 };
@@ -74,6 +79,9 @@ private:
     void ReturnToBase();
     void EmergencyLand();
     bool Liftoff();
+    bool Forward();
+    bool Brake();
+    bool Rotate();
     bool Land();
     bool IsCrashed();
 
@@ -100,7 +108,7 @@ private:
     // States
     MissionState m_missionState = MissionState::Standby;
     ExploringState m_exploringState = ExploringState::Idle;
-    ReturningState m_returningState = ReturningState::Return;
+    ReturningState m_returningState = ReturningState::BrakeTowardsBase;
     EmergencyState m_emergencyState = EmergencyState::Land;
 
     // Data
@@ -115,7 +123,7 @@ private:
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;
     ExploringState m_exploringStateOnHold = ExploringState::Idle;
-    ReturningState m_returningStateOnHold = ReturningState::Return;
+    ReturningState m_returningStateOnHold = ReturningState::BrakeTowardsBase;
     CVector3 m_obstacleDetectedPosition;
     double m_correctionDistance = 0.0;
 
@@ -133,6 +141,17 @@ private:
     // Rotation variables
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
+    CRadians m_rotationAngle;
+
+    // Return to base variables
+    bool m_isRotateToBaseCommandFinished = true;
+    bool m_shouldTurnLeft = true;
+    CRadians m_targetYawToBase;
+    std::uint16_t m_stabilizeRotationCounter; // Ensure drone is oriented towards the base before resuming
+    std::uint16_t m_returnWatchdog; // Prevent staying stuck in return state by exploring periodically
+    std::uint64_t m_maximumExploreTicks;
+    std::uint64_t m_exploreWatchdog; // Prevent staying stuck in forward state by attempting to beeline periodically
+    std::uint16_t m_clearObstacleCounter; // Ensure obstacles are sufficiently cleared before resuming
 
     // Crash detection variables
     CVector3 m_lastActivePosition;

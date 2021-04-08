@@ -68,6 +68,8 @@ static const float EXPLORATION_HEIGHT = 0.3f;
 static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
+static const uint64_t MAXIMUM_REORIENTATION_TICKS = 4000;
+//static const uint16_t N_LATEST_P2P_POSITIONS = 10;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
 static const uint64_t INITIAL_EXPLORE_TICKS = 600;
 static const uint16_t CLEAR_OBSTACLE_TICKS = 100;
@@ -109,6 +111,8 @@ static P2PPacketContent latestP2PContent = {
     .z = 0.0,
     .sourceId = 0
 };
+// static P2PPacketContent[N_LATEST_P2P_POSITIONS] latestP2PContents;
+// static latestP2PContentsIndex = 0;
 
 // Targets
 static float targetForwardVelocity;
@@ -117,7 +121,8 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYawToBase;
 
-// Watchdogs (return to base)
+// Watchdogs
+static uint16_t reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS; // To reorient drone away from the swarm's center of mass
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
@@ -274,10 +279,22 @@ void explore(void) {
     case EXPLORING_EXPLORE: {
         droneStatus = STATUS_FLYING;
 
+        if (reorientationWatchdog == 0 ) {
+            targetYawRate = calculateAngleAwayFromCenterOfMass();
+            exploringState = EXPLORING_ROTATE_AWAY;
+        }
+        saveLatestP2PContents();
         if (!forward()) {
             exploringState = EXPLORING_ROTATE;
         }
+        reorientationWatchdog--;
     } break;
+    case EXPLORING_ROTATE_AWAY: {
+        if (rotateTowardsTargetYaw()) {
+            reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
+            exploringState = EXPLORING_EXPLORE;
+        }
+    }
     case EXPLORING_ROTATE: {
         droneStatus = STATUS_FLYING;
 
@@ -306,20 +323,28 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         // Calculate rotation angle to turn towards base
+        //targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+
+        // // If the drone is towards its base
+        // static const double yawEpsilon = 5.0;
+        // double yawDifference = fabs(targetYawToBase - yawReading);
+        // if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
+        //     DEBUG_PRINT("Return: Finished rotating towards base\n");
+        //     returningState = RETURNING_RETURN;
+        // } else {
+        //     // Keep turning drone towards its base
+        //     targetHeight += EXPLORATION_HEIGHT;
+        //     updateWaypoint();
+        //     setPoint.mode.yaw = modeAbs;
+        //     setPoint.attitude.yaw = targetYawToBase;
+        // }
+        // // Calculate rotation angle to turn towards base
+        // targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+
         targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
-        // If the drone is towards its base
-        static const double yawEpsilon = 5.0;
-        double yawDifference = fabs(targetYawToBase - yawReading);
-        if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
-            DEBUG_PRINT("Return: Finished rotating towards base\n");
+        if (rotateTowardsTargetYaw()) {
             returningState = RETURNING_RETURN;
-        } else {
-            // Keep turning drone towards its base
-            targetHeight += EXPLORATION_HEIGHT;
-            updateWaypoint();
-            setPoint.mode.yaw = modeAbs;
-            setPoint.attitude.yaw = targetYawToBase;
         }
     } break;
     case RETURNING_RETURN: {
@@ -456,6 +481,23 @@ bool rotate(void) {
     return frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD;
 }
 
+bool rotateTowardsTargetYaw() {
+    // If the drone is towards its target yaw
+    static const double yawEpsilon = 5.0;
+    double yawDifference = fabs(targetYawToBase - yawReading);
+    if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
+        DEBUG_PRINT("Return: Finished rotating towards target yaw\n");
+        return true;
+    } else {
+        // Keep turning drone towards its target yaw
+        targetHeight += EXPLORATION_HEIGHT;
+        updateWaypoint();
+        setPoint.mode.yaw = modeAbs;
+        setPoint.attitude.yaw = targetYawToBase;
+        return false;
+    }
+}
+
 // Returns true when the action is finished
 bool land(void) {
     updateWaypoint();
@@ -549,6 +591,11 @@ void p2pReceivedCallback(P2PPacket* packet) {
     memcpy(&latestP2PContent, &packet->data[0], sizeof(P2PPacketContent));
 }
 
+// saveLatestP2PContents() {
+//     latestP2PContents[latestP2PContentsIndex] = latestP2PContent;
+//     latestP2PContentsIndex = (latestP2PContentsIndex + 1) % N_LATEST_P2P_POSITIONS;
+// }
+
 void updateWaypoint(void) {
     setPoint.velocity_body = true;
     setPoint.mode.x = modeVelocity;
@@ -565,6 +612,29 @@ void updateWaypoint(void) {
 
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
+}
+
+float calculateAngleAwayFromCenterOfMass() {
+    point_t centerOfMass
+
+    centerOfMass.x = (latestP2PContent.x + initialOffsetFromBase.x + positionReading.x) / 2;
+    centerOfMass.y = (latestP2PContent.y + initialOffsetFromBase.y + positionReading.y) / 2;
+
+    // for (int i = 0; i++; i < N_LATEST_P2P_POSITIONS) {
+    //     centerOfMass.x += latestP2PContents[i].x;
+    //     centerOfMass.y += latestP2PContents[i].y;
+    // }
+    // centerOfMass.x = (centerOfMass.x + initialOffsetFromBase.x + positionReading.x) / (N_LATEST_P2P_POSITIONS + 2)
+    // centerOfMass.y = (centerOfMass.y + initialOffsetFromBase.y + positionReading.y) / (N_LATEST_P2P_POSITIONS + 2)
+
+    vector_t vectorAway = {
+        .x = (initialOffsetFromBase.x + positionReading.x) - centerOfMass.x,
+        .y = (initialOffsetFromBase.y + positionReading.y) - centerOfMass.y,
+    }
+
+    float angleAway = atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
+
+    return angleAway;
 }
 
 float calculateVectorLength(vector_t vector) {

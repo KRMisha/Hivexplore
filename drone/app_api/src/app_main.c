@@ -189,6 +189,7 @@ void appMain(void) {
         switch (missionState) {
         case MISSION_STANDBY:
             droneStatus = STATUS_STANDBY;
+            resetInternalStates();
             break;
         case MISSION_EXPLORING:
             avoidObstacle();
@@ -485,6 +486,18 @@ bool isCrashed(void) {
     }
 
     return isCrashed;
+}
+
+void resetInternalStates(void) {
+    exploringState = EXPLORING_IDLE;
+    returningState = RETURNING_ROTATE_TOWARDS_BASE;
+    emergencyState = EMERGENCY_LAND;
+
+    shouldTurnLeft = true;
+    returnWatchdog = MAXIMUM_RETURN_TICKS;
+    maximumExploreTicks = INITIAL_EXPLORE_TICKS;
+    exploreWatchdog = INITIAL_EXPLORE_TICKS;
+    clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
 }
 
 void broadcastPosition() {

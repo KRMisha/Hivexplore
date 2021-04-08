@@ -53,6 +53,8 @@ bool rotate(void);
 bool land(void);
 bool isCrashed(void);
 
+void resetInternalStates(void);
+
 void broadcastPosition();
 void p2pReceivedCallback(P2PPacket* packet);
 

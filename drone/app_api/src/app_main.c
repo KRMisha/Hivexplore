@@ -56,6 +56,7 @@
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
+static const uint16_t OPEN_SPACE_THRESHOLD = 300;
 static const float EXPLORATION_HEIGHT = 0.3f;
 static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
@@ -346,7 +347,6 @@ void returnToBase(void) {
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;
 
         // Return to base when obstacle has been passed or explore watchdog is finished
-        static const uint16_t OPEN_SPACE_THRESHOLD = 300;
         if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && clearObstacleCounter == 0) || exploreWatchdog == 0) {
             if (clearObstacleCounter == 0) {
                 DEBUG_PRINT("Explore: Obstacle has been cleared\n");
@@ -441,7 +441,6 @@ bool forward(void) {
 
 // Returns true when the action is finished
 bool rotate(void) {
-    static const uint16_t OPEN_SPACE_THRESHOLD = 300;
     targetHeight += EXPLORATION_HEIGHT;
     targetYawRate = (shouldTurnLeft ? 1 : -1) * 50;
     updateWaypoint();

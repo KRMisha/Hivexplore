@@ -373,7 +373,7 @@ void returnToBase(void) {
             returningState = RETURNING_ROTATE;
         } else {
             // Reset sensor reading counter if obstacle is detected
-            if (sensorReadingToCheck > EDGE_DETECTED_THRESHOLD) {
+            if (sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
                 clearObstacleCounter--;
             } else {
                 clearObstacleCounter = CLEAR_OBSTACLE_TICKS;

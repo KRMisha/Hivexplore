@@ -283,7 +283,7 @@ void explore(void) {
             targetYawRate = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;
         }
-        saveLatestP2PContents();
+        //saveLatestP2PContents();
         if (!forward()) {
             exploringState = EXPLORING_ROTATE;
         }
@@ -591,7 +591,7 @@ void p2pReceivedCallback(P2PPacket* packet) {
     memcpy(&latestP2PContent, &packet->data[0], sizeof(P2PPacketContent));
 }
 
-// saveLatestP2PContents() {
+//void saveLatestP2PContents() {
 //     latestP2PContents[latestP2PContentsIndex] = latestP2PContent;
 //     latestP2PContentsIndex = (latestP2PContentsIndex + 1) % N_LATEST_P2P_POSITIONS;
 // }
@@ -614,8 +614,8 @@ uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensor
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
-float calculateAngleAwayFromCenterOfMass() {
-    point_t centerOfMass
+double calculateAngleAwayFromCenterOfMass() {
+    point_t centerOfMass;
 
     centerOfMass.x = (latestP2PContent.x + initialOffsetFromBase.x + positionReading.x) / 2;
     centerOfMass.y = (latestP2PContent.y + initialOffsetFromBase.y + positionReading.y) / 2;
@@ -630,9 +630,9 @@ float calculateAngleAwayFromCenterOfMass() {
     vector_t vectorAway = {
         .x = (initialOffsetFromBase.x + positionReading.x) - centerOfMass.x,
         .y = (initialOffsetFromBase.y + positionReading.y) - centerOfMass.y,
-    }
+    };
 
-    float angleAway = atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
+    double angleAway = atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
 
     return angleAway;
 }

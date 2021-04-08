@@ -16,6 +16,8 @@ services:
         volumes:
             - socket:/tmp/hivexplore # TODO: Document this directory # TODO: Check if /tmp/ is conventional for socket location inside container
             - logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
+        devices:
+            - /dev/bus/usb # TODO: Only if Crazyflie profile # TODO: Test
 
     argos:
         build: ./argos

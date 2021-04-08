@@ -179,6 +179,8 @@ void appMain(void) {
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
 
+        static const uint8_t lowBatteryThreshold = 30;
+
         static const uint8_t broadcastProbabilityPercentage = 5;
         if ((rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
@@ -186,16 +188,19 @@ void appMain(void) {
 
         switch (missionState) {
         case MISSION_STANDBY:
-            droneStatus = STATUS_STANDBY;
+            if (batteryLevelReading <= lowBatteryThreshold) {
+                droneStatus = STATUS_DRAINED;
+            } else {
+                droneStatus = STATUS_STANDBY;
+            }
             break;
         case MISSION_EXPLORING:
-            if (batteryLevelReading <= 30) {
+            if (batteryLevelReading <= lowBatteryThreshold) {
                 missionState = MISSION_RETURNING;
-                droneStatus = STATUS_DRAINED;
-                break;
+            } else {
+                avoidObstacle();
+                explore();
             }
-            avoidObstacle();
-            explore();
             break;
         case MISSION_RETURNING:
             avoidObstacle();
@@ -205,7 +210,11 @@ void appMain(void) {
             emergencyLand();
             break;
         case MISSION_LANDED:
-            droneStatus = STATUS_LANDED;
+            if (batteryLevelReading <= lowBatteryThreshold) {
+                droneStatus = STATUS_DRAINED;
+            } else {
+                droneStatus = STATUS_LANDED;
+            }
             break;
         }
 

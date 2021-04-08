@@ -34,6 +34,9 @@ class MapGenerator:
         lines = self._calculate_drone_sensor_lines(self._last_positions[drone_id], points)
         self._web_socket_server.send_message(SocketEvent.DroneSensorLines, {'droneId': drone_id, 'sensorLines': lines})
 
+        lines = self._calculate_drone_sensor_lines(self._last_positions[drone_id], points)
+        self._web_socket_server.send_message('drone-sensor-lines', {'droneId': drone_id, 'sensorLines': lines})
+
     def clear(self):
         self._points.clear()
         self._web_socket_server.send_message(SocketEvent.ClearMap, None)

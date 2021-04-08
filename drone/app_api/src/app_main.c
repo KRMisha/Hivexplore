@@ -80,7 +80,7 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 // TODO: Initialize from server using param
 static point_t initialOffsetFromBase = {
     .x = 0.0,
-    .y = 0.0,
+    .y = -0.3,
     .z = 0.0
 };
 
@@ -502,7 +502,7 @@ void avoidDrone() {
         .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z
     };
 
-    static const float DRONE_AVOIDANCE_THRESHOLD = 2.0;
+    static const float DRONE_AVOIDANCE_THRESHOLD = 1.0;
     const float vectorLength = calculateVectorLength(vectorAwayFromDrone);
     if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
         return;

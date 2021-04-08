@@ -17,6 +17,7 @@ typedef enum {
     EXPLORING_IDLE,
     EXPLORING_LIFTOFF,
     EXPLORING_EXPLORE,
+    EXPLORING_ROTATE_AWAY,
     EXPLORING_ROTATE,
 } exploring_state_t;
 

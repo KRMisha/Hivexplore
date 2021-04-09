@@ -99,7 +99,8 @@ class CrazyflieManager(DroneManager):
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name=LogNameEvent.Range.value, period_in_ms=POLLING_PERIOD_MS), # Must be added after orientation and position
+                'log_config': LogConfig(name=LogNameEvent.Range.value,
+                                        period_in_ms=POLLING_PERIOD_MS), # Must be added after orientation and position
                 'variables': ['range.front', 'range.left', 'range.back', 'range.right', 'range.up', 'range.zrange'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_range_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,

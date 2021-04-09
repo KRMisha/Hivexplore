@@ -10,6 +10,7 @@ from server.sockets.log_name_event import LogNameEvent
 
 EVENT_DENYLIST = {UnixSocketEvent.Disconnect}
 
+
 class UnixSocketError(Exception):
     pass
 
@@ -95,8 +96,7 @@ class UnixSocketClient:
                     log_name = LogNameEvent(message['logName'])
                     callbacks = self._callbacks[log_name]
                 except ValueError:
-                    self._logger.log_server_data(logging.WARN,
-                                                 f'UnixSocketClient warning: Invalid log name received: {message["logName"]}')
+                    self._logger.log_server_data(logging.WARN, f'UnixSocketClient warning: Invalid log name received: {message["logName"]}')
                     continue
                 except KeyError:
                     self._logger.log_server_data(logging.WARN,

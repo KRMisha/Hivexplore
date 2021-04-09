@@ -514,7 +514,7 @@ void avoidDrone() {
         .z = vectorAwayFromDrone.z / vectorLength,
     };
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
-    static const float SCALING_FACTOR = CRUISE_VELOCITY * 1.05;
+    static const float SCALING_FACTOR = CRUISE_VELOCITY * 1.05f;
     // forward: X, left:Y
     targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * SCALING_FACTOR;
     targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * SCALING_FACTOR;

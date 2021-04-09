@@ -111,7 +111,7 @@ typedef struct {
 } P2PPacketContent;
 
 // Latest P2P packets
-static const uint8_t maxNumberOfDrones = 0xff;
+static const uint16_t maxNumberOfDrones = 256;
 static P2PPacketContent latestP2PPackets[maxNumberOfDrones];
 static uint8_t activeP2PIds[maxNumberOfDrones];
 static uint8_t numberOfActiveP2PCommunications = 0; // TODO: reset to 0 on resetInternalStates (future MR)

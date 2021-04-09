@@ -13,7 +13,7 @@ export class WebSocketClient {
     private timeout = baseConnectionTimeout;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private callbacks = new Map<string, Map<string | undefined, Array<(data: any) => void>>>();
+    private callbacks = new Map<WebSocketEvent, Map<string | undefined, Array<(data: any) => void>>>();
 
     constructor() {
         this.connect();

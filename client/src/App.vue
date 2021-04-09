@@ -22,7 +22,7 @@ import Control from '@/components/Control.vue';
 import DroneList from '@/components/DroneList.vue';
 import Logs from '@/components/Logs.vue';
 import Map from '@/components/Map.vue';
-import { SocketClient } from '@/classes/socket-client';
+import { WebSocketClient } from '@/communication/web-socket-client';
 
 export default defineComponent({
     name: 'App',
@@ -33,8 +33,8 @@ export default defineComponent({
         Map,
     },
     setup() {
-        const socketClient = new SocketClient();
-        provide('socketClient', socketClient);
+        const socketClient = new WebSocketClient();
+        provide('webSocketClient', socketClient);
 
         onUnmounted(() => {
             socketClient.close();

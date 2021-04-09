@@ -20,8 +20,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, nextTick, onMounted, reactive, ref } from 'vue';
-import { SocketClient } from '@/classes/socket-client';
-import { WebSocketEvent } from '@/enums/socket-event';
+import { WebSocketClient } from '@/communication/web-socket-client';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 
 interface Log {
     group: string;
@@ -94,7 +94,7 @@ export default defineComponent({
         }
 
         // Log reception
-        const socketClient = inject('socketClient') as SocketClient;
+        const socketClient = inject('webSocketClient') as WebSocketClient;
         socketClient.bindMessage(WebSocketEvent.Log, (log: Log) => {
             addLogGroup(log.group);
             logBuffers.get(log.group)!.push(log.line);

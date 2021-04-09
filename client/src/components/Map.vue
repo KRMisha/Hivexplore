@@ -17,9 +17,9 @@
 import { defineComponent, inject, onMounted, onUnmounted, ref } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { SocketClient } from '@/classes/socket-client';
+import { WebSocketClient } from '@/communication/web-socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
-import { WebSocketEvent } from '@/enums/socket-event';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 
 type Point = [number, number, number];
 type Line = [Point, Point];
@@ -112,7 +112,7 @@ export default defineComponent({
             renderer.render(scene, camera);
         }
 
-        const socketClient = inject('socketClient') as SocketClient;
+        const socketClient = inject('webSocketClient') as WebSocketClient;
 
         socketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             scene.remove(droneGroups);

@@ -51,15 +51,15 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
-import { SocketClient } from '@/classes/socket-client';
-import { WebSocketEvent } from '@/enums/socket-event';
+import { WebSocketClient } from '@/communication/web-socket-client';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 import { MissionState } from '@/enums/mission-state';
 
 export default defineComponent({
     name: 'Control',
     setup() {
         const confirm = useConfirm();
-        const socketClient = inject('socketClient') as SocketClient;
+        const socketClient = inject('webSocketClient') as WebSocketClient;
 
         const missionState = ref(MissionState.Standby);
 

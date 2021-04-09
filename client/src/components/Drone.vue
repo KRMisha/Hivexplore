@@ -30,9 +30,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
-import { SocketClient } from '@/classes/socket-client';
+import { WebSocketClient } from '@/communication/web-socket-client';
 import { DroneStatus } from '@/enums/drone-status';
-import { WebSocketEvent } from '@/enums/socket-event';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 
 export default defineComponent({
     name: 'Drone',
@@ -43,7 +43,7 @@ export default defineComponent({
         },
     },
     setup(props) {
-        const socketClient = inject('socketClient') as SocketClient;
+        const socketClient = inject('webSocketClient') as WebSocketClient;
 
         const velocity = ref(0);
         socketClient.bindDroneMessage(WebSocketEvent.Velocity, props.droneId!, (newVelocity: number) => {

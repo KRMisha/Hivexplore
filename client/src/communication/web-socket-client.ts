@@ -1,13 +1,13 @@
 import { getLocalTimestamp } from '@/utils/local-timestamp';
-import { WebSocketEvent } from '@/enums/socket-event';
-import { Message } from '@/interfaces/message';
+import { WebSocketEvent } from '@/communication/web-socket-event';
+import { Message } from '@/communication/message';
 
 const serverPort = 5678;
 const serverUrl = `ws://${window.location.hostname}:${serverPort}`;
 const baseConnectionTimeout = 2000; // Milliseconds
 const maxConnectionTimeout = 8000; // Milliseconds
 
-export class SocketClient {
+export class WebSocketClient {
     private socket!: WebSocket;
 
     private timeout = baseConnectionTimeout;

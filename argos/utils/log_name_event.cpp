@@ -15,7 +15,7 @@ namespace {
     };
 } // namespace
 
-const std::string eventToString(const LogNameEvent& event) {
+const std::string logEventToString(const LogNameEvent& event) {
     auto it = socketEventStrings.find(event);
     if (it != socketEventStrings.end()) {
         return it->second;

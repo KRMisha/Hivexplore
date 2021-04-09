@@ -171,7 +171,7 @@ void CHivexploreLoopFunctions::StartSocket() {
 
 bool CHivexploreLoopFunctions::Send(const LogNameEvent& logName, const json& droneId, const json& variables) {
     json packet = {
-        {"logName", eventToString(logName)},
+        {"logName", logEventToString(logName)},
         {"droneId", droneId},
         {"variables", variables},
     };

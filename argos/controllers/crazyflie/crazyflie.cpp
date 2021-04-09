@@ -5,6 +5,7 @@
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "utils/constants.h"
+#include "utils/param_name_event.h"
 
 namespace {
     // Sensor reading constants
@@ -167,10 +168,10 @@ const std::string& CCrazyflieController::GetDebugPrint() const {
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
-    if (param == "hivexplore.missionState") {
+    if (param == "hivexplore." + paramEventToString(ParamNameEvent::MissionState)) {
         m_missionState = static_cast<MissionState>(value.get<std::uint8_t>());
         RLOG << "Set mission state: " << static_cast<std::uint8_t>(m_missionState) << '\n';
-    } else if (param == "hivexplore.isM1LedOn") {
+    } else if (param == "hivexplore." + paramEventToString(ParamNameEvent::IsM1LedOn)) {
         // Print LED state since simulated Crazyflie doesn't have LEDs
         RLOG << "Set LED state: " << value.get<bool>() << '\n';
     } else {

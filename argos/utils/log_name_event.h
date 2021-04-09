@@ -15,6 +15,6 @@ enum class LogNameEvent {
     Console,
 };
 
-const std::string eventToString(const LogNameEvent& event);
+const std::string logEventToString(const LogNameEvent& event);
 
 #endif

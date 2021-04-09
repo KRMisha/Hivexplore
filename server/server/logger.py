@@ -6,6 +6,7 @@ import logging.config
 from typing import List, TYPE_CHECKING
 import yaml
 from server.tuples import Point
+from server.sockets.web_socket_event import WebSocketEvent
 if TYPE_CHECKING:
     from server.sockets.web_socket_server import WebSocketServer
 
@@ -39,15 +40,15 @@ class Logger:
 
     def log_server_data(self, level: int, data: str):
         self._logger.log(level, data)
-        self._web_socket_server.send_message('log', {'group': 'Server', 'line': data})
+        self._web_socket_server.send_message(WebSocketEvent.Log, {'group': 'Server', 'line': data})
 
     def log_drone_data(self, level: int, drone_id: str, data: str):
         self._logger.log(level, f'{drone_id}: {data}') # pylint: disable=logging-fstring-interpolation
-        self._web_socket_server.send_message('log', {'group': drone_id, 'line': data})
+        self._web_socket_server.send_message(WebSocketEvent.Log, {'group': drone_id, 'line': data})
 
     def log_map_data(self, level: int, drone_id: str, data: List[Point]):
         if len(data) == 0:
             return
         message = f'Points detected by drone {drone_id}: {data}'
         self._logger.log(level, message)
-        self._web_socket_server.send_message('log', {'group': 'Map', 'line': message})
+        self._web_socket_server.send_message(WebSocketEvent.Log, {'group': 'Map', 'line': message})

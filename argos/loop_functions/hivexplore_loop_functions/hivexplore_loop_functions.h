@@ -4,7 +4,7 @@
 #include <sys/un.h>
 #include <argos3/core/simulator/loop_functions.h>
 #include "controllers/crazyflie/crazyflie.h"
-#include "experiments/socket_event.h"
+#include "utils/log_name_event.h"
 
 using namespace argos;
 
@@ -20,7 +20,7 @@ public:
 
 private:
     void StartSocket();
-    bool Send(const SocketEvent& logName, const json& droneId, const json& variables);
+    bool Send(const LogNameEvent& logName, const json& droneId, const json& variables);
     void Stop();
     void SendDroneIdsToServer();
     std::vector<std::reference_wrapper<CCrazyflieController>> GetControllers();

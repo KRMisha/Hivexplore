@@ -81,7 +81,7 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 static point_t initialOffsetFromBase = {
     .x = 0.0,
     .y = -0.3,
-    .z = 0.0
+    .z = 0.0,
 };
 
 // Data
@@ -107,7 +107,7 @@ static P2PPacketContent latestP2PContent = {
     .x = 0.0,
     .y = 0.0,
     .z = 0.0,
-    .sourceId = 0
+    .sourceId = 0,
 };
 
 // Targets
@@ -499,7 +499,7 @@ void avoidDrone() {
     vector_t vectorAwayFromDrone = {
         .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PContent.x,
         .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PContent.y,
-        .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z
+        .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z,
     };
 
     static const float DRONE_AVOIDANCE_THRESHOLD = 1.0;
@@ -511,7 +511,7 @@ void avoidDrone() {
     const vector_t unitVectorAway = {
         .x = vectorAwayFromDrone.x / vectorLength,
         .y = vectorAwayFromDrone.y / vectorLength,
-        .z = vectorAwayFromDrone.z / vectorLength
+        .z = vectorAwayFromDrone.z / vectorLength,
     };
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
     static const float SCALING_FACTOR = CRUISE_VELOCITY * 1.05;
@@ -534,7 +534,7 @@ void broadcastPosition() {
         .sourceId = id,
         .x = positionReading.x + initialOffsetFromBase.x,
         .y = positionReading.y + initialOffsetFromBase.y,
-        .z = positionReading.z + initialOffsetFromBase.z
+        .z = positionReading.z + initialOffsetFromBase.z,
     };
 
     P2PPacket packet = {.port = 0x00, .size = sizeof(content)};

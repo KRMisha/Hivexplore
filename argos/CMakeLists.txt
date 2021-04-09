@@ -38,6 +38,9 @@ include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
 # Set ARGoS link dir
 link_directories(${ARGOS_LIBRARY_DIRS})
 
+# Descend into the utils directory
+add_subdirectory(utils)
+
 # Descend into the controllers directory
 add_subdirectory(controllers)
 

@@ -5,6 +5,7 @@ add_library(hivexplore_loop_functions MODULE
 target_compile_features(hivexplore_loop_functions PRIVATE cxx_std_17)
 
 target_link_libraries(hivexplore_loop_functions
+  utils
   argos3core_simulator
   argos3plugin_simulator_entities
   argos3plugin_simulator_footbot

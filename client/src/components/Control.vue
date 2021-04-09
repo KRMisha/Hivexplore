@@ -52,7 +52,7 @@
 import { computed, defineComponent, inject, ref } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
 import { SocketClient } from '@/classes/socket-client';
-import { SocketEvent } from '@/enums/socket-event';
+import { WebSocketEvent } from '@/enums/socket-event';
 import { MissionState } from '@/enums/mission-state';
 
 export default defineComponent({
@@ -63,12 +63,12 @@ export default defineComponent({
 
         const missionState = ref(MissionState.Standby);
 
-        socketClient.bindMessage(SocketEvent.MissionState, (newMissionState: MissionState) => {
+        socketClient.bindMessage(WebSocketEvent.MissionState, (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
 
         function setMissionState(missionState: MissionState) {
-            socketClient.sendMessage(SocketEvent.MissionState, missionState);
+            socketClient.sendMessage(WebSocketEvent.MissionState, missionState);
         }
 
         const missionStates = computed(() => {
@@ -82,7 +82,7 @@ export default defineComponent({
         });
 
         const droneCount = ref(0);
-        socketClient.bindMessage(SocketEvent.DroneIds, (newDroneIds: string[]) => {
+        socketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             droneCount.value = newDroneIds.length;
         });
 

@@ -1,4 +1,4 @@
-export enum SocketEvent {
+export enum WebSocketEvent {
     DroneIds = 'drone-ids',
     BatteryLevel = 'battery-level',
     Velocity = 'velocity',

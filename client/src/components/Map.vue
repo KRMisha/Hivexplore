@@ -19,7 +19,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { SocketClient } from '@/classes/socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
-import { SocketEvent } from '@/enums/socket-event';
+import { WebSocketEvent } from '@/enums/socket-event';
 
 type Point = [number, number, number];
 type Line = [Point, Point];
@@ -114,7 +114,7 @@ export default defineComponent({
 
         const socketClient = inject('socketClient') as SocketClient;
 
-        socketClient.bindMessage(SocketEvent.DroneIds, (newDroneIds: string[]) => {
+        socketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             scene.remove(droneGroups);
             droneGroups = new THREE.Group();
 
@@ -168,13 +168,13 @@ export default defineComponent({
             mapPoints.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient.bindMessage(SocketEvent.MapPoints, (mapPoints: Point[]) => {
+        socketClient.bindMessage(WebSocketEvent.MapPoints, (mapPoints: Point[]) => {
             for (const mapPoint of mapPoints) {
                 addMapPoint(convertServerPointCoords(mapPoint));
             }
         });
 
-        socketClient.bindMessage(SocketEvent.ClearMap, () => {
+        socketClient.bindMessage(WebSocketEvent.ClearMap, () => {
             mapPointCount = 0;
             mapPoints.geometry.setDrawRange(0, mapPointCount);
         });
@@ -189,7 +189,7 @@ export default defineComponent({
             droneInfo.position.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient.bindMessage(SocketEvent.DronePosition, (dronePosition: DronePosition) => {
+        socketClient.bindMessage(WebSocketEvent.DronePosition, (dronePosition: DronePosition) => {
             setDronePosition(dronePosition.droneId, convertServerPointCoords(dronePosition.position));
         });
 
@@ -207,7 +207,7 @@ export default defineComponent({
             }
         }
 
-        socketClient.bindMessage(SocketEvent.DroneSensorLines, (newDroneSensorLines: DroneSensorLine) => {
+        socketClient.bindMessage(WebSocketEvent.DroneSensorLines, (newDroneSensorLines: DroneSensorLine) => {
             const droneSensorLines: Line[] = newDroneSensorLines.sensorLines.map((line: Line) => {
                 return [convertServerPointCoords(line[0]), convertServerPointCoords(line[1])];
             });

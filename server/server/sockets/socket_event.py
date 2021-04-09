@@ -1,7 +1,7 @@
 import enum
 
 
-class SocketEvent(enum.Enum):
+class WebSocketEvent(enum.Enum):
     Connect = 'connect'
     Disconnect = 'disconnect'
     DroneIds = 'drone-ids'

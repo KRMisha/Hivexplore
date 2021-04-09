@@ -6,7 +6,6 @@ import logging.config
 from typing import List, TYPE_CHECKING
 import yaml
 from server.tuples import Point
-from server.sockets.socket_event import SocketEvent
 if TYPE_CHECKING:
     from server.sockets.web_socket_server import WebSocketServer
 

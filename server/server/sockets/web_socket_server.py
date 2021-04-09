@@ -10,17 +10,17 @@ import websockets
 if TYPE_CHECKING:
     from server.logger import Logger
 
-from server.sockets.socket_event import SocketEvent
+from server.sockets.socket_event import WebSocketEvent
 
 IP_ADDRESS = ''
 PORT = 5678
-EVENT_DENYLIST = {SocketEvent.Connect}
+EVENT_DENYLIST = {WebSocketEvent.Connect}
 
 
 class WebSocketServer:
     def __init__(self, logger: Logger):
         self._logger = logger
-        self._callbacks: Dict[SocketEvent, List[Callable]] = {}
+        self._callbacks: Dict[WebSocketEvent, List[Callable]] = {}
         self._message_queues: Dict[str, asyncio.Queue] = {}
         self._loop: asyncio.AbstractEventLoop
 
@@ -30,23 +30,23 @@ class WebSocketServer:
         self._logger.log_server_local_data(logging.INFO, 'WebSocketServer started')
         await server.wait_closed()
 
-    def bind(self, event: SocketEvent, callback: Union[Callable[[Any], None], Callable[[str, Any], None]]):
+    def bind(self, event: WebSocketEvent, callback: Union[Callable[[Any], None], Callable[[str, Any], None]]):
         self._callbacks.setdefault(event, []).append(callback)
 
-    def send_message(self, event: SocketEvent, data: Any):
+    def send_message(self, event: WebSocketEvent, data: Any):
         # None represents an event not related to a specific drone
         self._send(event, None, data)
 
-    def send_drone_message(self, event: SocketEvent, drone_id: str, data: Any):
+    def send_drone_message(self, event: WebSocketEvent, drone_id: str, data: Any):
         self._send(event, drone_id, data)
 
-    def send_message_to_client(self, client_id, event: SocketEvent, data: Any):
+    def send_message_to_client(self, client_id, event: WebSocketEvent, data: Any):
         self._send_to_client(client_id, event, None, data)
 
-    def send_drone_message_to_client(self, client_id, event: SocketEvent, drone_id: str, data: Any):
+    def send_drone_message_to_client(self, client_id, event: WebSocketEvent, drone_id: str, data: Any):
         self._send_to_client(client_id, event, drone_id, data)
 
-    def _send(self, event: SocketEvent, drone_id: Optional[str], data: Any):
+    def _send(self, event: WebSocketEvent, drone_id: Optional[str], data: Any):
         for message_queue in self._message_queues.values():
             asyncio.run_coroutine_threadsafe(
                 message_queue.put({
@@ -56,7 +56,7 @@ class WebSocketServer:
                     'timestamp': datetime.now().isoformat(),
                 }), self._loop)
 
-    def _send_to_client(self, client_id: str, event: SocketEvent, drone_id: Optional[str], data: Any):
+    def _send_to_client(self, client_id: str, event: WebSocketEvent, drone_id: Optional[str], data: Any):
         if client_id not in self._message_queues:
             self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Unknown client ID: {client_id}')
             return
@@ -76,7 +76,7 @@ class WebSocketServer:
 
         self._message_queues[client_id] = asyncio.Queue()
 
-        for callback in self._callbacks.get(SocketEvent.Connect, []):
+        for callback in self._callbacks.get(WebSocketEvent.Connect, []):
             callback(client_id)
 
         receive_task = asyncio.create_task(self._receive_handler(websocket, path))
@@ -95,13 +95,13 @@ class WebSocketServer:
             try:
                 message = json.loads(message_str)
 
-                event_name = SocketEvent(message['event'])
+                event_name = WebSocketEvent(message['event'])
                 if event_name in EVENT_DENYLIST:
                     self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Invalid event received: {message["event"]}')
                     continue
 
                 try:
-                    event_name = SocketEvent(message['event'])
+                    event_name = WebSocketEvent(message['event'])
                     callbacks = self._callbacks[event_name]
                 except KeyError:
                     self._logger.log_server_local_data(logging.WARNING,

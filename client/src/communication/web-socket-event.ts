@@ -1,13 +1,13 @@
 export enum WebSocketEvent {
-    DroneIds = 'drone-ids',
-    BatteryLevel = 'battery-level',
-    Velocity = 'velocity',
-    DroneStatus = 'drone-status',
     MissionState = 'mission-state',
+    DroneIds = 'drone-ids',
     MapPoints = 'map-points',
     ClearMap = 'clear-map',
     DronePosition = 'drone-position',
     DroneSensorLines = 'drone-sensor-lines',
+    Velocity = 'velocity',
+    BatteryLevel = 'battery-level',
+    DroneStatus = 'drone-status',
     SetLed = 'set-led',
     Log = 'log',
 }

@@ -162,7 +162,7 @@ class DroneManager(ABC):
 
         self._logger.log_server_data(logging.INFO, f'Set mission state: {self._mission_state}')
         for drone_id in self._get_drone_ids():
-            self._set_drone_param(f'hivexplore.{ParamNameEvent.MissionState}', drone_id, self._mission_state)
+            self._set_drone_param(f'hivexplore.{ParamNameEvent.MissionState.value}', drone_id, self._mission_state)
         self._web_socket_server.send_message(WebSocketEvent.MissionState, mission_state_str)
 
         if self._mission_state == MissionState.Exploring:
@@ -174,7 +174,7 @@ class DroneManager(ABC):
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):
             self._logger.log_server_data(logging.INFO, f'Set LED for {drone_id}: {is_enabled}')
-            self._set_drone_param(f'hivexplore.{ParamNameEvent.IsM1LedOn}', drone_id, is_enabled)
+            self._set_drone_param(f'hivexplore.{ParamNameEvent.IsM1LedOn.value}', drone_id, is_enabled)
             self._web_socket_server.send_drone_message(WebSocketEvent.SetLed, drone_id, is_enabled)
             self._drone_leds[drone_id] = is_enabled
         else:

@@ -508,12 +508,13 @@ void broadcastPosition() {
 
 void p2pReceivedCallback(P2PPacket* packet) {
     P2PPacketContent* content = (P2PPacketContent*)packet->data;
-    latestP2PPackets[content->sourceId] = *content;
+    latestP2PPackets[content->sourceId % MAX_DRONE_COUNT] = *content;
 
     bool alreadyInContact = false;
     for (unsigned i = 0; i < activeP2PCommunicationCount; i++) {
         if (activeP2PIds[i] == content->sourceId) {
             alreadyInContact = true;
+            break;
         }
     }
 

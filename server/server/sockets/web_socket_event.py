@@ -3,7 +3,7 @@ import enum
 
 # Use non-standard enum names to match ...
 # pylint: disable=invalid-name
-class WebSocketEvent(enum.Enum):
+class WebSocketEvent(str, enum.Enum):
     Connect = 'connect'
     MissionState = 'mission-state'
     DroneIds = 'drone-ids'

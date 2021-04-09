@@ -117,5 +117,8 @@ class WebSocketServer:
     async def _send_handler(self, websocket, _path, message_queue):
         while True:
             message = await message_queue.get()
-            message_str = json.dumps(message)
+            try:
+                message_str = json.dumps(message)
+            except TypeError as exc:
+                self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Unable to serialize: {exc}')
             await websocket.send(message_str)

@@ -2,11 +2,13 @@ import asyncio
 import json
 import logging
 import socket
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from server.logger import Logger
-from server.sockets.socket_event import SocketEvent
+from server.sockets.unix_socket_event import UnixSocketEvent
+from server.sockets.web_socket_event import WebSocketEvent
+from server.sockets.log_name_event import LogNameEvent
 
-EVENT_DENYLIST = {SocketEvent.Disconnect}
+EVENT_DENYLIST = {UnixSocketEvent.Disconnect}
 
 class UnixSocketError(Exception):
     pass
@@ -15,7 +17,7 @@ class UnixSocketError(Exception):
 class UnixSocketClient:
     def __init__(self, logger: Logger):
         self._logger = logger
-        self._callbacks: Dict[SocketEvent, List[Callable]] = {}
+        self._callbacks: Dict[Union[LogNameEvent, UnixSocketEvent, WebSocketEvent], List[Callable]] = {}
         self._message_queue: asyncio.Queue
         self._create_socket()
 
@@ -51,7 +53,7 @@ class UnixSocketClient:
                 except (UnixSocketError, ConnectionResetError) as exc:
                     self._logger.log_server_data(logging.ERROR, f'UnixSocketClient communication error: {exc}')
 
-                    for callback in self._callbacks.get(SocketEvent.Disconnect, []):
+                    for callback in self._callbacks.get(UnixSocketEvent.Disconnect, []):
                         callback()
 
                     for task in tasks:
@@ -61,10 +63,10 @@ class UnixSocketClient:
         finally:
             self._socket.close()
 
-    def bind(self, log_name: SocketEvent, callback: Callable[[Optional[str], Any], None]):
+    def bind(self, log_name: LogNameEvent, callback: Callable[[Optional[str], Any], None]):
         self._callbacks.setdefault(log_name, []).append(callback)
 
-    def send(self, param_name: SocketEvent, drone_id: str, value: Any):
+    def send(self, param_name: str, drone_id: str, value: Any):
         self._message_queue.put_nowait({
             'paramName': param_name,
             'droneId': drone_id,
@@ -85,12 +87,12 @@ class UnixSocketClient:
             try:
                 message = json.loads(message_bytes.decode('utf-8'))
 
-                if message['logName'] in EVENT_DENYLIST:
+                if LogNameEvent(message['logName']) in EVENT_DENYLIST:
                     self._logger.log_server_data(logging.ERROR, f'UnixSocketClient error: Invalid event received: {message["logName"]}')
                     continue
 
                 try:
-                    log_name = SocketEvent(message['logName']) # TODO: Use LogName enum over SocketEvent for comm with ARGoS/Crazyflie
+                    log_name = LogNameEvent(message['logName'])
                     callbacks = self._callbacks[log_name]
                 except ValueError:
                     self._logger.log_server_data(logging.WARN,

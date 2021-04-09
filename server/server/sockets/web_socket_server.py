@@ -7,10 +7,9 @@ import logging
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 import uuid
 import websockets
+from server.sockets.web_socket_event import WebSocketEvent
 if TYPE_CHECKING:
     from server.logger import Logger
-
-from server.sockets.socket_event import WebSocketEvent
 
 IP_ADDRESS = ''
 PORT = 5678
@@ -95,8 +94,7 @@ class WebSocketServer:
             try:
                 message = json.loads(message_str)
 
-                event_name = WebSocketEvent(message['event'])
-                if event_name in EVENT_DENYLIST:
+                if WebSocketEvent(message['event']) in EVENT_DENYLIST:
                     self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Invalid event received: {message["event"]}')
                     continue
 

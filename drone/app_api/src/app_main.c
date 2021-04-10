@@ -71,7 +71,7 @@ static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Base offset
-static point_t baseOffset = {.x = 0.0f, .y = 0.0f, .z = 0.0f };
+static point_t baseOffset = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;

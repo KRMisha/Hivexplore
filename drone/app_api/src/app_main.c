@@ -508,17 +508,17 @@ void avoidDrone() {
             .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
         };
 
-        const float vectorLength = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
+        const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
                                          vectorAwayFromDrone.z * vectorAwayFromDrone.z);
         static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
-        if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
+        if (vectorMagnitude > DRONE_AVOIDANCE_THRESHOLD) {
             return;
         }
 
         const vector_t unitVectorAway = {
-            .x = vectorAwayFromDrone.x / vectorLength,
-            .y = vectorAwayFromDrone.y / vectorLength,
-            .z = vectorAwayFromDrone.z / vectorLength,
+            .x = vectorAwayFromDrone.x / vectorMagnitude,
+            .y = vectorAwayFromDrone.y / vectorMagnitude,
+            .z = vectorAwayFromDrone.z / vectorMagnitude,
         };
         const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
         static const float COLLISION_AVOIDANCE_SCALING_FACTOR = CRUISE_VELOCITY * 1.05f;

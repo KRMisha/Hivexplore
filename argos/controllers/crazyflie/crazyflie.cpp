@@ -77,7 +77,7 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (batteryLevelReading <= lowBatteryThreshold) {
+        if (batteryLevelReading < lowBatteryThreshold) {
             m_missionState = MissionState::Returning;
         } else if (!AvoidObstacle()) {
             Explore();

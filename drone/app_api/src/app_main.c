@@ -197,7 +197,7 @@ void appMain(void) {
             droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
-            if (batteryLevelReading <= lowBatteryThreshold) {
+            if (batteryLevelReading < lowBatteryThreshold) {
                 missionState = MISSION_RETURNING;
             } else {
                 avoidObstacle();

@@ -1,9 +1,9 @@
-#ifndef LOG_NAME_EVENT_H
-#define LOG_NAME_EVENT_H
+#ifndef LOG_NAME_H
+#define LOG_NAME_H
 
 #include <string>
 
-enum class LogNameEvent {
+enum class LogName {
     DroneIds,
     BatteryLevel,
     Orientation,
@@ -15,6 +15,6 @@ enum class LogNameEvent {
     Console,
 };
 
-const std::string& logEventToString(const LogNameEvent& event);
+const std::string& logEventToString(const LogName& log);
 
 #endif

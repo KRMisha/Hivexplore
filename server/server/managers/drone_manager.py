@@ -72,9 +72,9 @@ class DroneManager(ABC):
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
         base_offset = self._get_drone_base_offset(drone_id)
         point = Point(
-            x=data['stateEstimate.x'] + position_offset.x,
-            y=data['stateEstimate.y'] + position_offset.y,
-            z=data['stateEstimate.z'] + position_offset.z,
+            x=data['stateEstimate.x'] + base_offset.x,
+            y=data['stateEstimate.y'] + base_offset.y,
+            z=data['stateEstimate.z'] + base_offset.z,
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Position: {point}')

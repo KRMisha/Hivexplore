@@ -19,7 +19,7 @@ class CrazyflieManager(DroneManager):
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
         self._crazyflie_uris: List[str] = []
-        self._crazyflie_base_offsets: Dict[str, Point] = {}
+        self._crazyflie_base_offsets = load_crazyflie_base_offsets()
 
         try:
             self._crazyflie_uris = load_crazyflie_uris_from_file()
@@ -28,10 +28,12 @@ class CrazyflieManager(DroneManager):
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
         self._web_socket_server.bind(
-            'connect',
-            lambda: self._logger.log_server_data(logging.INFO, f'The crazyflies\' base offsets are in {CRAZYFLIES_CONFIG_FILENAME}')
-        )
-        
+            'connect', lambda client_id: self._web_socket_server.send_message_to_client(
+                client_id, 'log', {
+                    'group': 'Server',
+                    'line': f'The crazyflies\' base offsets are in {CRAZYFLIES_CONFIG_FILENAME}'
+                }))
+
     async def start(self):
         while True:
             if self._mission_state == MissionState.Standby:

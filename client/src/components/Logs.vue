@@ -20,13 +20,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, nextTick, onMounted, reactive, ref } from 'vue';
+import { Log } from '@/communication/log';
 import { WebSocketClient } from '@/communication/web-socket-client';
 import { WebSocketEvent } from '@/communication/web-socket-event';
-
-interface Log {
-    group: string;
-    line: string;
-}
 
 export default defineComponent({
     name: 'Logs',

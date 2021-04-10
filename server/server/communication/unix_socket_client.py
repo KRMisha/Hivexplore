@@ -18,7 +18,7 @@ class UnixSocketError(Exception):
 class UnixSocketClient:
     def __init__(self, logger: Logger):
         self._logger = logger
-        self._callbacks: Dict[Union[LogName, UnixSocketEvent, WebSocketEvent], List[Callable]] = {}
+        self._callbacks: Dict[Union[LogName, UnixSocketEvent], List[Callable]] = {}
         self._message_queue: asyncio.Queue
         self._create_socket()
 

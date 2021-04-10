@@ -1,18 +1,16 @@
 import enum
 
 
-# Use non-standard enum names to match client string enum
-# pylint: disable=invalid-name
 class WebSocketEvent(str, enum.Enum):
-    Connect = 'connect'
-    MissionState = 'mission-state'
-    DroneIds = 'drone-ids'
-    MapPoints = 'map-points'
-    ClearMap = 'clear-map'
-    DronePosition = 'drone-position'
-    DroneSensorLines = 'drone-sensor-lines'
-    Velocity = 'velocity'
-    BatteryLevel = 'battery-level'
-    DroneStatus = 'drone-status'
-    SetLed = 'set-led'
-    Log = 'log'
+    CONNECT = 'connect'
+    MISSION_STATE = 'mission-state'
+    DRONE_IDS = 'drone-ids'
+    MAP_POINTS = 'map-points'
+    CLEAR_MAP = 'clear-map'
+    DRONE_POSITIONS = 'drone-position'
+    DRONE_SENSOR_LINES = 'drone-sensor-lines'
+    VELOCITY = 'velocity'
+    BATTERY_LEVEL = 'battery-level'
+    DRONE_STATUS = 'drone-status'
+    SET_LED = 'set-led'
+    LOG = 'log'

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 IP_ADDRESS = ''
 PORT = 5678
-EVENT_DENYLIST = {WebSocketEvent.Connect}
+EVENT_DENYLIST = {WebSocketEvent.CONNECT}
 
 
 class WebSocketServer:
@@ -75,7 +75,7 @@ class WebSocketServer:
 
         self._message_queues[client_id] = asyncio.Queue()
 
-        for callback in self._callbacks.get(WebSocketEvent.Connect, []):
+        for callback in self._callbacks.get(WebSocketEvent.CONNECT, []):
             callback(client_id)
 
         receive_task = asyncio.create_task(self._receive_handler(websocket, path))

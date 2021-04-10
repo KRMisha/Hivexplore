@@ -9,7 +9,7 @@ from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Orientation, Point, Range, Velocity
 from server.sockets.web_socket_event import WebSocketEvent
-from server.sockets.param_name_event import ParamNameEvent
+from server.sockets.param_name import ParamName
 
 
 class DroneManager(ABC):
@@ -23,9 +23,9 @@ class DroneManager(ABC):
         self._drone_battery_levels: Dict[str, int] = {}
 
         # Client bindings
-        self._web_socket_server.bind(WebSocketEvent.Connect, self._web_socket_connect_callback)
-        self._web_socket_server.bind(WebSocketEvent.MissionState, self._set_mission_state)
-        self._web_socket_server.bind(WebSocketEvent.SetLed, self._set_led_enabled)
+        self._web_socket_server.bind(WebSocketEvent.CONNECT, self._web_socket_connect_callback)
+        self._web_socket_server.bind(WebSocketEvent.MISSION_STATE, self._set_mission_state)
+        self._web_socket_server.bind(WebSocketEvent.SET_LED, self._set_led_enabled)
 
     @abstractmethod
     async def start(self):
@@ -45,9 +45,9 @@ class DroneManager(ABC):
 
     def _send_drone_ids(self, client_id=None):
         if client_id is None:
-            self._web_socket_server.send_message(WebSocketEvent.DroneIds, self._get_drone_ids())
+            self._web_socket_server.send_message(WebSocketEvent.DRONE_IDS, self._get_drone_ids())
         else:
-            self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.DroneIds, self._get_drone_ids())
+            self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.DRONE_IDS, self._get_drone_ids())
 
     # Drone callbacks
 
@@ -55,7 +55,7 @@ class DroneManager(ABC):
         battery_level = data['pm.batteryLevel']
         self._drone_battery_levels[drone_id] = battery_level
         self._logger.log_drone_data(logging.INFO, drone_id, f'Battery level: {battery_level}')
-        self._web_socket_server.send_drone_message(WebSocketEvent.BatteryLevel, drone_id, battery_level)
+        self._web_socket_server.send_drone_message(WebSocketEvent.BATTERY_LEVEL, drone_id, battery_level)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -86,7 +86,7 @@ class DroneManager(ABC):
 
         velocity_magnitude = np.linalg.norm(list(velocity))
         self._logger.log_drone_data(logging.INFO, drone_id, f'Velocity: {velocity} | Magnitude: {velocity_magnitude}')
-        self._web_socket_server.send_drone_message(WebSocketEvent.Velocity, drone_id, round(velocity_magnitude, 3))
+        self._web_socket_server.send_drone_message(WebSocketEvent.VELOCITY, drone_id, round(velocity_magnitude, 3))
 
     def _log_range_callback(self, drone_id: str, data: Dict[str, float]):
         range_reading = Range(
@@ -111,7 +111,7 @@ class DroneManager(ABC):
         self._logger.log_drone_data(logging.INFO, drone_id, f'Status: {drone_status.name}')
 
         self._drone_statuses[drone_id] = drone_status
-        self._web_socket_server.send_drone_message(WebSocketEvent.DroneStatus, drone_id, drone_status.name)
+        self._web_socket_server.send_drone_message(WebSocketEvent.DRONE_STATUS, drone_id, drone_status.name)
 
         try:
             are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
@@ -129,10 +129,10 @@ class DroneManager(ABC):
 
     def _web_socket_connect_callback(self, client_id: str):
         self._send_drone_ids(client_id)
-        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MissionState, self._mission_state.name)
+        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MISSION_STATE, self._mission_state.name)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
-            self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.SetLed, drone_id, is_led_enabled)
+            self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.SET_LED, drone_id, is_led_enabled)
 
     def _set_mission_state(self, mission_state_str: str):
         try:
@@ -162,8 +162,8 @@ class DroneManager(ABC):
 
         self._logger.log_server_data(logging.INFO, f'Set mission state: {self._mission_state}')
         for drone_id in self._get_drone_ids():
-            self._set_drone_param(f'hivexplore.{ParamNameEvent.MissionState.value}', drone_id, self._mission_state)
-        self._web_socket_server.send_message(WebSocketEvent.MissionState, mission_state_str)
+            self._set_drone_param(f'hivexplore.{ParamName.MISSION_STATE.value}', drone_id, self._mission_state)
+        self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, mission_state_str)
 
         if self._mission_state == MissionState.Exploring:
             self._map_generator.clear()
@@ -174,8 +174,8 @@ class DroneManager(ABC):
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):
             self._logger.log_server_data(logging.INFO, f'Set LED for {drone_id}: {is_enabled}')
-            self._set_drone_param(f'hivexplore.{ParamNameEvent.IsM1LedOn.value}', drone_id, is_enabled)
-            self._web_socket_server.send_drone_message(WebSocketEvent.SetLed, drone_id, is_enabled)
+            self._set_drone_param(f'hivexplore.{ParamName.IS_M1_LED_ON.value}', drone_id, is_enabled)
+            self._web_socket_server.send_drone_message(WebSocketEvent.SET_LED, drone_id, is_enabled)
             self._drone_leds[drone_id] = is_enabled
         else:
             self._logger.log_server_data(logging.ERROR, f'DroneManager error: Unknown drone ID received: {drone_id}')

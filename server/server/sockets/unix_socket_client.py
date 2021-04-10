@@ -6,9 +6,9 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from server.logger import Logger
 from server.sockets.unix_socket_event import UnixSocketEvent
 from server.sockets.web_socket_event import WebSocketEvent
-from server.sockets.log_name_event import LogNameEvent
+from server.sockets.log_name import LogName
 
-EVENT_DENYLIST = {UnixSocketEvent.Disconnect}
+EVENT_DENYLIST = {UnixSocketEvent.DISCONNECT}
 
 
 class UnixSocketError(Exception):
@@ -18,7 +18,7 @@ class UnixSocketError(Exception):
 class UnixSocketClient:
     def __init__(self, logger: Logger):
         self._logger = logger
-        self._callbacks: Dict[Union[LogNameEvent, UnixSocketEvent, WebSocketEvent], List[Callable]] = {}
+        self._callbacks: Dict[Union[LogName, UnixSocketEvent, WebSocketEvent], List[Callable]] = {}
         self._message_queue: asyncio.Queue
         self._create_socket()
 
@@ -54,7 +54,7 @@ class UnixSocketClient:
                 except (UnixSocketError, ConnectionResetError) as exc:
                     self._logger.log_server_data(logging.ERROR, f'UnixSocketClient communication error: {exc}')
 
-                    for callback in self._callbacks.get(UnixSocketEvent.Disconnect, []):
+                    for callback in self._callbacks.get(UnixSocketEvent.DISCONNECT, []):
                         callback()
 
                     for task in tasks:
@@ -64,7 +64,7 @@ class UnixSocketClient:
         finally:
             self._socket.close()
 
-    def bind(self, log_name: LogNameEvent, callback: Callable[[Optional[str], Any], None]):
+    def bind(self, log_name: LogName, callback: Callable[[Optional[str], Any], None]):
         self._callbacks.setdefault(log_name, []).append(callback)
 
     def send(self, param_name: str, drone_id: str, value: Any):
@@ -88,12 +88,12 @@ class UnixSocketClient:
             try:
                 message = json.loads(message_bytes.decode('utf-8'))
 
-                if LogNameEvent(message['logName']) in EVENT_DENYLIST:
+                if LogName(message['logName']) in EVENT_DENYLIST:
                     self._logger.log_server_data(logging.ERROR, f'UnixSocketClient error: Invalid event received: {message["logName"]}')
                     continue
 
                 try:
-                    log_name = LogNameEvent(message['logName'])
+                    log_name = LogName(message['logName'])
                     callbacks = self._callbacks[log_name]
                 except ValueError:
                     self._logger.log_server_data(logging.WARN, f'UnixSocketClient warning: Invalid log name received: {message["logName"]}')

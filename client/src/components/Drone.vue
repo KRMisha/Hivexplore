@@ -30,9 +30,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
-import { DroneStatus } from '@/enums/drone-status';
 import { WebSocketClient } from '@/communication/web-socket-client';
 import { WebSocketEvent } from '@/communication/web-socket-event';
+import { DroneStatus } from '@/enums/drone-status';
 
 export default defineComponent({
     name: 'Drone',

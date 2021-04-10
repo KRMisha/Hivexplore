@@ -68,8 +68,8 @@ void CCrazyflieController::ControlStep() {
         PingOtherDrones();
     }
 
-    static const std::uint8_t lowBatteryThreshold = 30;
-    std::uint8_t batteryLevelReading = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
+    static constexpr std::uint8_t lowBatteryThreshold = 30;
+    const std::uint8_t batteryLevelReading = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
 
     switch (m_missionState) {
     case MissionState::Standby:

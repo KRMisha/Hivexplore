@@ -1,5 +1,3 @@
-include_directories(${CMAKE_SOURCE_DIR})
-
 add_library(utils SHARED
   log_name.h
   log_name.cpp

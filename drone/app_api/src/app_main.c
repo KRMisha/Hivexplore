@@ -178,8 +178,14 @@ void appMain(void) {
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
 
+        const bool shouldNotBroadcastPosition =
+            missionState == MISSION_STANDBY ||
+            (missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF)) ||
+            (missionState == MISSION_RETURNING && returningState == RETURNING_IDLE) ||
+            (missionState == MISSION_EMERGENCY && emergencyState == EMERGENCY_IDLE);
+
         static const uint8_t broadcastProbabilityPercentage = 5;
-        if ((rand() % 100) < broadcastProbabilityPercentage) {
+        if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
 

@@ -3,8 +3,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <argos3/plugins/robots/crazyflie/simulator/crazyflie_entity.h>
-#include "experiments/constants.h"
 #include "libs/json.hpp"
+#include "utils/constants.h"
 
 using json = nlohmann::json;
 
@@ -98,7 +98,7 @@ void CHivexploreLoopFunctions::PreStep() {
             // Send console log data if it has been flushed (with '\n') in the previous step
             std::string debugPrint = controller.get().GetDebugPrint();
             if (debugPrint.find('\n') != std::string::npos) {
-                if (!Send("Console", controller.get().GetId(), debugPrint)) {
+                if (!Send(LogName::Console, controller.get().GetId(), debugPrint)) {
                     return;
                 }
             }
@@ -169,9 +169,9 @@ void CHivexploreLoopFunctions::StartSocket() {
     std::cout << "Unix socket connection accepted\n";
 }
 
-bool CHivexploreLoopFunctions::Send(const std::string& logName, const json& droneId, const json& variables) {
+bool CHivexploreLoopFunctions::Send(LogName logName, const json& droneId, const json& variables) {
     json packet = {
-        {"logName", logName},
+        {"logName", logNameToString(logName)},
         {"droneId", droneId},
         {"variables", variables},
     };
@@ -207,7 +207,7 @@ void CHivexploreLoopFunctions::SendDroneIdsToServer() {
         return controller.get().GetId();
     });
 
-    if (!Send("drone-ids", nullptr, droneIds)) {
+    if (!Send(LogName::DroneIds, nullptr, droneIds)) {
         return;
     }
 }

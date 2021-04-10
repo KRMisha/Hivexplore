@@ -2,8 +2,9 @@ import logging
 import math
 from typing import Dict, List, Tuple
 import numpy as np
+from server.communication.web_socket_event import WebSocketEvent
+from server.communication.web_socket_server import WebSocketServer
 from server.logger import Logger
-from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Orientation, Point, Range
 
 
@@ -15,27 +16,27 @@ class MapGenerator:
         self._last_positions: Dict[str, Point] = {}
         self._points: List[Point] = []
 
-        self._web_socket_server.bind('connect', self._web_socket_connect_callback)
+        self._web_socket_server.bind(WebSocketEvent.CONNECT, self._web_socket_connect_callback)
 
     def set_orientation(self, drone_id: str, orientation: Orientation):
         self._last_orientations[drone_id] = orientation
 
     def set_position(self, drone_id: str, position: Point):
         self._last_positions[drone_id] = position
-        self._web_socket_server.send_message('drone-position', {'droneId': drone_id, 'position': position})
+        self._web_socket_server.send_message(WebSocketEvent.DRONE_POSITION, {'droneId': drone_id, 'position': position})
 
     def add_range_reading(self, drone_id: str, range_reading: Range):
         points = self._calculate_points_from_readings(self._last_orientations[drone_id], self._last_positions[drone_id], range_reading)
         self._points.extend(points)
         self._logger.log_map_data(logging.INFO, drone_id, points)
-        self._web_socket_server.send_message('map-points', points)
+        self._web_socket_server.send_message(WebSocketEvent.MAP_POINTS, points)
 
         lines = self._calculate_drone_sensor_lines(self._last_positions[drone_id], points)
-        self._web_socket_server.send_message('drone-sensor-lines', {'droneId': drone_id, 'sensorLines': lines})
+        self._web_socket_server.send_message(WebSocketEvent.DRONE_SENSOR_LINES, {'droneId': drone_id, 'sensorLines': lines})
 
     def clear(self):
         self._points.clear()
-        self._web_socket_server.send_message('clear-map', None)
+        self._web_socket_server.send_message(WebSocketEvent.CLEAR_MAP, None)
 
     def _calculate_points_from_readings(self, last_orientation: Orientation, last_position: Point, range_reading: Range) -> List[Point]:
         IS_DOWN_SENSOR_PLOTTING_ENABLED = False
@@ -143,4 +144,4 @@ class MapGenerator:
     # Client callbacks
 
     def _web_socket_connect_callback(self, client_id: str):
-        self._web_socket_server.send_message_to_client(client_id, 'map-points', self._points)
+        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MAP_POINTS, self._points)

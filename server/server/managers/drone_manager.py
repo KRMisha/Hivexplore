@@ -58,13 +58,13 @@ class DroneManager(ABC):
 
         try:
             MINIMUM_BATTERY_LEVEL = 30
-            new_can_drones_takeoff = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
+            can_drones_takeoff = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
         except KeyError:
-            new_can_drones_takeoff = False
+            can_drones_takeoff = False
 
-        if new_can_drones_takeoff != self._can_drones_takeoff:
-            self._web_socket_server.send_message('are-all-drones-above-minimum-battery-level', new_can_drones_takeoff)
-            self._can_drones_takeoff = new_can_drones_takeoff
+        if can_drones_takeoff != self._can_drones_takeoff:
+            self._can_drones_takeoff = can_drones_takeoff
+            self._web_socket_server.send_message('are-all-drones-above-minimum-battery-level', self._can_drones_takeoff)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -155,7 +155,7 @@ class DroneManager(ABC):
         if new_mission_state == MissionState.Exploring and not self._can_drones_takeoff:
             self._logger.log_server_data(
                 logging.WARNING,
-                'DroneManager warning: At least one drone under the minimum battery level is preventing the mission from starting')
+                'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
             return
 
         self._mission_state = new_mission_state

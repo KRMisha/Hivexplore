@@ -77,12 +77,6 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
-// TODO: Initialize from server using param
-static point_t initialOffsetFromBase = {
-    .x = 0.0,
-    .y = -0.3,
-    .z = 0.0,
-};
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
@@ -90,6 +84,11 @@ static bool isM1LedOn = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
+static point_t initialOffsetFromBase = {
+    .x = 0.0,
+    .y = -0.3,
+    .z = 0.0,
+}; // TODO: Initialize from server using param
 
 // Readings
 static float rollReading;
@@ -502,7 +501,7 @@ void avoidDrone() {
         .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z,
     };
 
-    static const float DRONE_AVOIDANCE_THRESHOLD = 1.0;
+    static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
 
     const float vectorLength = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
                                      vectorAwayFromDrone.z * vectorAwayFromDrone.z);
@@ -534,10 +533,10 @@ void broadcastPosition() {
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
     P2PPacketContent content = {
-        .sourceId = id,
         .x = positionReading.x + initialOffsetFromBase.x,
         .y = positionReading.y + initialOffsetFromBase.y,
         .z = positionReading.z + initialOffsetFromBase.z,
+        .sourceId = id,
     };
 
     P2PPacket packet = {.port = 0x00, .size = sizeof(content)};

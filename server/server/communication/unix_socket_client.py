@@ -110,7 +110,6 @@ class UnixSocketClient:
 
             except (json.JSONDecodeError, KeyError) as exc:
                 self._logger.log_server_data(logging.ERROR, f'UnixSocketClient error: Invalid message received: {exc}')
-                continue
 
     async def _send_handler(self):
         while True:

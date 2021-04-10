@@ -43,7 +43,7 @@ typedef enum {
     STATUS_CRASHED,
 } drone_status_t;
 
-void avoidDrones();
+void avoidDrones(void);
 void avoidObstacles(void);
 void explore(void);
 void returnToBase(void);
@@ -54,7 +54,7 @@ bool rotate(void);
 bool land(void);
 bool isCrashed(void);
 
-void broadcastPosition();
+void broadcastPosition(void);
 void p2pReceivedCallback(P2PPacket* packet);
 
 void updateWaypoint(void);

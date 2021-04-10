@@ -227,7 +227,7 @@ void appMain(void) {
     }
 }
 
-void avoidDrones() {
+void avoidDrones(void) {
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         vector_t vectorAwayFromDrone = {
             .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
@@ -524,7 +524,7 @@ bool isCrashed(void) {
     return isCrashed;
 }
 
-void broadcastPosition() {
+void broadcastPosition(void) {
     // Avoid causing drone reset due to the content size
     if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
         DEBUG_PRINT("P2PPacketContent size too big\n");

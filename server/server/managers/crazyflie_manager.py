@@ -19,12 +19,17 @@ class CrazyflieManager(DroneManager):
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
         self._crazyflie_uris: List[str] = []
-        self._crazyflie_base_offsets = load_crazyflie_base_offsets()
+        self._crazyflie_base_offsets: Dict[str, Point] = {}
 
         try:
             self._crazyflie_uris = load_crazyflie_uris_from_file()
         except ValueError:
             self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load URIs from file')
+
+        try:
+            self._crazyflie_base_offsets = load_crazyflie_base_offsets()
+        except ValueError:
+            self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load base offsets from file')
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
         self._web_socket_server.bind(

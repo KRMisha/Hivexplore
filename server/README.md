@@ -62,6 +62,10 @@ make run
 
 > Note: the Crazyradio PA must be connected to the computer.
 
+### Set the Crazyflie's offsets from the base
+
+When starting a mission, the crazyflie's offset from base when taking off must be accurate. You can change their offsets, in meters, by modifying server/config/crazyflies_config.json.
+
 ### Assign a Crazyflie's address
 ```
 python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/<current address> <new address>

@@ -154,8 +154,7 @@ class DroneManager(ABC):
         # Deny changing mission state to Exploring if a drone is under 30% battery
         if new_mission_state == MissionState.Exploring and not self._can_drones_takeoff:
             self._logger.log_server_data(
-                logging.WARNING,
-                'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
+                logging.WARNING, 'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
             return
 
         self._mission_state = new_mission_state

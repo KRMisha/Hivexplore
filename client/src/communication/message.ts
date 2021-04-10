@@ -1,4 +1,4 @@
-import { WebSocketEvent } from './web-socket-event';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 
 export interface Message {
     event: WebSocketEvent;

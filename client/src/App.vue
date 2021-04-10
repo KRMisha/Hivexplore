@@ -33,11 +33,11 @@ export default defineComponent({
         Map,
     },
     setup() {
-        const socketClient = new WebSocketClient();
-        provide('webSocketClient', socketClient);
+        const webSocketClient = new WebSocketClient();
+        provide('webSocketClient', webSocketClient);
 
         onUnmounted(() => {
-            socketClient.close();
+            webSocketClient.close();
         });
     },
 });

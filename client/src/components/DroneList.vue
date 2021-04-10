@@ -29,10 +29,10 @@ export default defineComponent({
         Drone,
     },
     setup() {
-        const socketClient = inject('webSocketClient') as WebSocketClient;
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
 
         const droneIds = ref<string[]>([]);
-        socketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
+        webSocketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 

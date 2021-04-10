@@ -17,10 +17,10 @@
 import { defineComponent, inject, onMounted, onUnmounted, ref } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { WebSocketClient } from '@/communication/web-socket-client';
-import { getLocalTimestamp } from '@/utils/local-timestamp';
-import { WebSocketEvent } from '@/communication/web-socket-event';
 import { DroneInfo, DronePosition, DroneSensorLine, Line, Point } from '@/communication/drone-map-info';
+import { getLocalTimestamp } from '@/utils/local-timestamp';
+import { WebSocketClient } from '@/communication/web-socket-client';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 
@@ -94,9 +94,9 @@ export default defineComponent({
             renderer.render(scene, camera);
         }
 
-        const socketClient = inject('webSocketClient') as WebSocketClient;
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
 
-        socketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
+        webSocketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             scene.remove(droneGroups);
             droneGroups = new THREE.Group();
 
@@ -150,13 +150,13 @@ export default defineComponent({
             mapPoints.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient.bindMessage(WebSocketEvent.MapPoints, (mapPoints: Point[]) => {
+        webSocketClient.bindMessage(WebSocketEvent.MapPoints, (mapPoints: Point[]) => {
             for (const mapPoint of mapPoints) {
                 addMapPoint(convertServerPointCoords(mapPoint));
             }
         });
 
-        socketClient.bindMessage(WebSocketEvent.ClearMap, () => {
+        webSocketClient.bindMessage(WebSocketEvent.ClearMap, () => {
             mapPointCount = 0;
             mapPoints.geometry.setDrawRange(0, mapPointCount);
         });
@@ -171,7 +171,7 @@ export default defineComponent({
             droneInfo.position.geometry.attributes.position.needsUpdate = true;
         }
 
-        socketClient.bindMessage(WebSocketEvent.DronePosition, (dronePosition: DronePosition) => {
+        webSocketClient.bindMessage(WebSocketEvent.DronePosition, (dronePosition: DronePosition) => {
             setDronePosition(dronePosition.droneId, convertServerPointCoords(dronePosition.position));
         });
 
@@ -189,7 +189,7 @@ export default defineComponent({
             }
         }
 
-        socketClient.bindMessage(WebSocketEvent.DroneSensorLines, (newDroneSensorLines: DroneSensorLine) => {
+        webSocketClient.bindMessage(WebSocketEvent.DroneSensorLines, (newDroneSensorLines: DroneSensorLine) => {
             const droneSensorLines: Line[] = newDroneSensorLines.sensorLines.map((line: Line) => {
                 return [convertServerPointCoords(line[0]), convertServerPointCoords(line[1])];
             });

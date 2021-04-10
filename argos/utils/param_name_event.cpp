@@ -8,7 +8,7 @@ namespace {
     };
 } // namespace
 
-const std::string paramEventToString(const ParamNameEvent& event) {
+const std::string& paramEventToString(const ParamNameEvent& event) {
     auto it = socketEventStrings.find(event);
     if (it != socketEventStrings.end()) {
         return it->second;

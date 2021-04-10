@@ -30,8 +30,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
-import { WebSocketClient } from '@/communication/web-socket-client';
 import { DroneStatus } from '@/enums/drone-status';
+import { WebSocketClient } from '@/communication/web-socket-client';
 import { WebSocketEvent } from '@/communication/web-socket-event';
 
 export default defineComponent({
@@ -43,30 +43,30 @@ export default defineComponent({
         },
     },
     setup(props) {
-        const socketClient = inject('webSocketClient') as WebSocketClient;
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
 
         const velocity = ref(0);
-        socketClient.bindDroneMessage(WebSocketEvent.Velocity, props.droneId!, (newVelocity: number) => {
+        webSocketClient.bindDroneMessage(WebSocketEvent.Velocity, props.droneId!, (newVelocity: number) => {
             velocity.value = newVelocity;
         });
 
         const batteryLevel = ref(0);
-        socketClient.bindDroneMessage(WebSocketEvent.BatteryLevel, props.droneId!, (newBatteryLevel: number) => {
+        webSocketClient.bindDroneMessage(WebSocketEvent.BatteryLevel, props.droneId!, (newBatteryLevel: number) => {
             batteryLevel.value = newBatteryLevel;
         });
 
         const droneStatus = ref(DroneStatus.Standby);
-        socketClient.bindDroneMessage(WebSocketEvent.DroneStatus, props.droneId!, (newDroneStatus: DroneStatus) => {
+        webSocketClient.bindDroneMessage(WebSocketEvent.DroneStatus, props.droneId!, (newDroneStatus: DroneStatus) => {
             droneStatus.value = newDroneStatus;
         });
 
         const isLedEnabled = ref(false);
-        socketClient.bindDroneMessage(WebSocketEvent.SetLed, props.droneId!, (newIsLedEnabled: boolean) => {
+        webSocketClient.bindDroneMessage(WebSocketEvent.SetLed, props.droneId!, (newIsLedEnabled: boolean) => {
             isLedEnabled.value = newIsLedEnabled;
         });
 
         function setLedEnabled() {
-            socketClient.sendDroneMessage(WebSocketEvent.SetLed, props.droneId!, isLedEnabled.value);
+            webSocketClient.sendDroneMessage(WebSocketEvent.SetLed, props.droneId!, isLedEnabled.value);
         }
 
         const droneStatusStyle = computed(() => {

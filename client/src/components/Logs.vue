@@ -94,8 +94,8 @@ export default defineComponent({
         }
 
         // Log reception
-        const socketClient = inject('webSocketClient') as WebSocketClient;
-        socketClient.bindMessage(WebSocketEvent.Log, (log: Log) => {
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
+        webSocketClient.bindMessage(WebSocketEvent.Log, (log: Log) => {
             addLogGroup(log.group);
             logBuffers.get(log.group)!.push(log.line);
         });

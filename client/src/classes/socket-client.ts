@@ -9,9 +9,9 @@ const maxConnectionTimeout = 8000; // Milliseconds
 export class SocketClient {
     private socket!: WebSocket;
 
-    private timeout = baseConnectionTimeout;
-
     private _isConnected = ref(false);
+
+    private timeout = baseConnectionTimeout;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private callbacks = new Map<string, Map<string | undefined, Array<(data: any) => void>>>();

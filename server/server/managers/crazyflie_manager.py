@@ -10,7 +10,7 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Point
-from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflie_base_offsets, load_crazyflie_uris_from_file
+from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflie_base_offsets, load_crazyflie_uris
 
 
 class CrazyflieManager(DroneManager):
@@ -22,7 +22,7 @@ class CrazyflieManager(DroneManager):
         self._crazyflie_base_offsets: Dict[str, Point] = {}
 
         try:
-            self._crazyflie_uris = load_crazyflie_uris_from_file()
+            self._crazyflie_uris = load_crazyflie_uris_()
         except ValueError:
             self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load URIs from file')
 

@@ -1,7 +1,7 @@
 import sys
 import cflib
 from cflib.crazyflie import Crazyflie
-from server.utils.config_parser import load_crazyflie_uris_from_file, set_crazyflie_radio_address
+from server.utils.config_parser import load_crazyflie_uris, set_crazyflie_radio_address
 
 
 def main():
@@ -10,7 +10,7 @@ def main():
         sys.exit(1)
 
     try:
-        if sys.argv[1] not in load_crazyflie_uris_from_file():
+        if sys.argv[1] not in load_crazyflie_uris():
             print('Warning: URI of drone not in config file')
     except ValueError:
         sys.exit(1)

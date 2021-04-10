@@ -15,7 +15,7 @@
                             label="Start mission"
                             icon="pi pi-send"
                             class="p-my-1"
-                            :disabled="isStartMissionDisabled"
+                            :disabled="isStartMissionButtonDisabled"
                             @click="onStartMissionButtonClick($event)"
                         />
                         <Button
@@ -116,7 +116,7 @@ export default defineComponent({
             return '';
         });
 
-        const isStartMissionDisabled = computed(() => {
+        const isStartMissionButtonDisabled = computed(() => {
             return (
                 droneCount.value === 0 ||
                 missionState.value !== MissionState.Standby ||
@@ -201,7 +201,7 @@ export default defineComponent({
             droneCount,
             areAllDronesAboveMinimumBatteryLevel,
             disabledMissionStartMessage,
-            isStartMissionDisabled,
+            isStartMissionButtonDisabled,
             onStartMissionButtonClick,
             endMissionButtonLabel,
             endMissionButtonIcon,

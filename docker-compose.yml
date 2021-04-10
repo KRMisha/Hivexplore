@@ -1,14 +1,5 @@
 version: "3.8"
 
-x-server:
-    &server-base
-    build: ./server
-    image: hivexplore/server
-    ports:
-        - 5678:5678
-    volumes:
-        - logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
-
 services:
     client:
         build: ./client
@@ -16,35 +7,16 @@ services:
         ports:
             - 3995:80
 
-    server_crazyflie:
-        << : *server-base
-        profiles: ["crazyflie"]
-        devices:
-            - /dev/bus/usb
-
-    server_argos:
-        << : *server-base
-        profiles: ["argos"]
-        command: argos
+    server:
+        build: ./server
+        image: hivexplore/server
+        ports:
+            - 5678:5678
         volumes:
-            - socket:/tmp/hivexplore # TODO: Document this directory # TODO: Check if /tmp/ is conventional for socket location inside container
-
-    argos:
-        build: ./argos
-        image: hivexplore/argos
-        profiles: ["argos"]
-        volumes:
-            - $XSOCKET:$XSOCKET
-            - $XAUTHORITY:$XAUTHORITY
-            - socket:/tmp/hivexplore # TODO: Document this directory
-        environment:
-            DISPLAY: $DISPLAY
-            XAUTHORITY: $XAUTHORITY
+            - logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
 
 volumes:
-    socket:
     logs:
     # TODO: Rename volumes?
-    # TODO: Multiple volumes or one volume?
     # TODO: Fix permission issue, maybe this link: https://stackoverflow.com/questions/24288616/permission-denied-on-accessing-host-directory-in-docker
-    # TODO: Profiles?
+

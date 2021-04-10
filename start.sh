@@ -16,4 +16,6 @@ echo $x_env
 export $x_env
 
 echo Running Docker Compose
-docker-compose up
+docker-compose -f docker-compose.yml -f docker-compose.argos.yml up
+
+# TODO: Arguments

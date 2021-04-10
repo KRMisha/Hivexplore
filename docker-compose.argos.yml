@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+    server:
+        command: argos
+        volumes:
+            - socket:/tmp/hivexplore # TODO: Document this directory # TODO: Check if /tmp/ is conventional for socket location inside container
+
+    argos:
+        build: ./argos
+        image: hivexplore/argos
+        volumes:
+            - $XSOCKET:$XSOCKET
+            - $XAUTHORITY:$XAUTHORITY
+            - socket:/tmp/hivexplore # TODO: Document this directory
+        environment:
+            DISPLAY: $DISPLAY
+            XAUTHORITY: $XAUTHORITY
+
+volumes:
+    socket:

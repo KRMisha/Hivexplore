@@ -28,10 +28,6 @@ namespace {
         return value < 0 ? -1 : 1;
     }
 
-    constexpr double calculateDroneDistanceCorrection(double threshold, double distance) {
-        return getSign(distance) * (threshold - std::abs(distance));
-    }
-
 } // namespace
 
 void CCrazyflieController::Init(TConfigurationNode& t_node) {
@@ -58,7 +54,15 @@ void CCrazyflieController::ControlStep() {
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
-    PingOtherDrones();
+
+    const bool shouldNotBroadcastPosition = m_missionState == MissionState::Standby ||
+                                            (m_missionState == MissionState::Exploring &&
+                                             (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff)) ||
+                                            (m_missionState == MissionState::Returning && m_returningState == ReturningState::Idle) ||
+                                            (m_missionState == MissionState::Emergency && m_emergencyState == EmergencyState::Idle);
+    if (!shouldNotBroadcastPosition) {
+        PingOtherDrones();
+    }
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -216,12 +220,10 @@ bool CCrazyflieController::AvoidObstacle() {
             for (const auto& packet : m_pcRABS->GetReadings()) {
                 const double horizontalAngle = packet.HorizontalBearing.GetValue();
                 // Convert packet range from cm to mm
-                const auto vectorToDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
+                const auto vectorAwayFromDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
                 static const double droneAvoidanceSensitivity = 1.0 / 3000.0;
-                leftDistanceCorrection +=
-                    calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetX()) * droneAvoidanceSensitivity;
-                backDistanceCorrection +=
-                    calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetY()) * droneAvoidanceSensitivity;
+                leftDistanceCorrection += vectorAwayFromDrone.GetX() * droneAvoidanceSensitivity;
+                backDistanceCorrection += vectorAwayFromDrone.GetY() * droneAvoidanceSensitivity;
             }
         }
 

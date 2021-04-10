@@ -69,7 +69,6 @@ static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
 static const uint64_t MAXIMUM_REORIENTATION_TICKS = 1500;
-//static const uint16_t N_LATEST_P2P_POSITIONS = 10;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
 static const uint64_t INITIAL_EXPLORE_TICKS = 600;
 static const uint16_t CLEAR_OBSTACLE_TICKS = 100;
@@ -79,12 +78,6 @@ static mission_state_t missionState = MISSION_STANDBY;
 static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
-// TODO: Initialize from server using param
-static point_t initialOffsetFromBase = {
-    .x = 0.0,
-    .y = 0.0,
-    .z = 0.0
-};
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
@@ -92,6 +85,11 @@ static bool isM1LedOn = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
+static point_t initialOffsetFromBase = {
+    .x = 0.0,
+    .y = 0.0,
+    .z = 0.0,
+}; // TODO: Initialize from server using param
 
 // Readings
 static float rollReading;
@@ -105,14 +103,6 @@ static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static uint8_t rssiReading;
-static P2PPacketContent latestP2PContent = {
-    .x = 0.0,
-    .y = 0.0,
-    .z = 0.0,
-    .sourceId = 0
-};
-// static P2PPacketContent[N_LATEST_P2P_POSITIONS] latestP2PContents;
-// static latestP2PContentsIndex = 0;
 
 // Targets
 static float targetForwardVelocity;
@@ -127,6 +117,12 @@ static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck 
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
+
+// Latest P2P packets
+#define MAX_DRONE_COUNT 256
+static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
+static uint8_t activeP2PIds[MAX_DRONE_COUNT] = {};
+static uint8_t activeP2PIdsCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -193,8 +189,14 @@ void appMain(void) {
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
 
+        const bool shouldNotBroadcastPosition =
+            missionState == MISSION_STANDBY ||
+            (missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF)) ||
+            (missionState == MISSION_RETURNING && returningState == RETURNING_IDLE) ||
+            (missionState == MISSION_EMERGENCY && emergencyState == EMERGENCY_IDLE);
+
         static const uint8_t broadcastProbabilityPercentage = 5;
-        if ((rand() % 100) < broadcastProbabilityPercentage) {
+        if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
 
@@ -540,28 +542,31 @@ bool isCrashed(void) {
 }
 
 void avoidDrone() {
-    vector_t vectorAwayFromDrone = {
-        .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PContent.x,
-        .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PContent.y,
-        .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z
-    };
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        vector_t vectorAwayFromDrone = {
+            .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
+            .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
+            .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
+        };
 
-    static const float DRONE_AVOIDANCE_THRESHOLD = 2.0;
-    const float vectorLength = calculateVectorLength(vectorAwayFromDrone);
-    if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
-        return;
+        const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
+                                            vectorAwayFromDrone.z * vectorAwayFromDrone.z);
+        static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
+        if (vectorMagnitude > DRONE_AVOIDANCE_THRESHOLD) {
+            return;
+        }
+
+        const vector_t unitVectorAway = {
+            .x = vectorAwayFromDrone.x / vectorMagnitude,
+            .y = vectorAwayFromDrone.y / vectorMagnitude,
+            .z = vectorAwayFromDrone.z / vectorMagnitude,
+        };
+        const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
+        static const float COLLISION_AVOIDANCE_SCALING_FACTOR = CRUISE_VELOCITY * 1.05f;
+        // Y: Left, -Y: Right, X: Forward, -X: Back
+        targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
+        targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
     }
-
-    const vector_t unitVectorAway = {
-        .x = vectorAwayFromDrone.x / vectorLength,
-        .y = vectorAwayFromDrone.y / vectorLength,
-        .z = vectorAwayFromDrone.z / vectorLength
-    };
-    const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
-    static const float SCALING_FACTOR = 0.2;
-    // forward: X, left:Y
-    targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * SCALING_FACTOR;
-    targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * SCALING_FACTOR;
 }
 
 void broadcastPosition() {
@@ -575,10 +580,10 @@ void broadcastPosition() {
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
     P2PPacketContent content = {
-        .sourceId = id,
         .x = positionReading.x + initialOffsetFromBase.x,
         .y = positionReading.y + initialOffsetFromBase.y,
-        .z = positionReading.z + initialOffsetFromBase.z
+        .z = positionReading.z + initialOffsetFromBase.z,
+        .sourceId = id,
     };
 
     P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
@@ -590,13 +595,22 @@ void broadcastPosition() {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    memcpy(&latestP2PContent, &packet->data[0], sizeof(P2PPacketContent));
-}
+    P2PPacketContent* content = (P2PPacketContent*)packet->data;
+    latestP2PPackets[content->sourceId] = *content;
 
-//void saveLatestP2PContents() {
-//     latestP2PContents[latestP2PContentsIndex] = latestP2PContent;
-//     latestP2PContentsIndex = (latestP2PContentsIndex + 1) % N_LATEST_P2P_POSITIONS;
-// }
+    bool isAlreadyInContactWithSource = false;
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        if (activeP2PIds[i] == content->sourceId) {
+            isAlreadyInContactWithSource = true;
+            break;
+        }
+    }
+
+    if (!isAlreadyInContactWithSource) {
+        activeP2PIds[activeP2PIdsCount] = content->sourceId;
+        activeP2PIdsCount++;
+    }
+}
 
 void updateWaypoint(void) {
     setPoint.velocity_body = true;
@@ -623,13 +637,6 @@ double calculateAngleAwayFromCenterOfMass() {
     centerOfMass.y = (latestP2PContent.y + initialOffsetFromBase.y + positionReading.y) / 2;
     DEBUG_PRINT("Center of mass x: %f", centerOfMass.x);
     DEBUG_PRINT("Center of mass y: %f", centerOfMass.y);
-
-    // for (int i = 0; i++; i < N_LATEST_P2P_POSITIONS) {
-    //     centerOfMass.x += latestP2PContents[i].x;
-    //     centerOfMass.y += latestP2PContents[i].y;
-    // }
-    // centerOfMass.x = (centerOfMass.x + initialOffsetFromBase.x + positionReading.x) / (N_LATEST_P2P_POSITIONS + 2)
-    // centerOfMass.y = (centerOfMass.y + initialOffsetFromBase.y + positionReading.y) / (N_LATEST_P2P_POSITIONS + 2)
 
     vector_t vectorAway = {
         .x = (initialOffsetFromBase.x + positionReading.x) - centerOfMass.x,

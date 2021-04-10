@@ -93,26 +93,30 @@ class WebSocketServer:
         async for message_str in websocket:
             try:
                 message = json.loads(message_str)
-
-                if WebSocketEvent(message['event']) in EVENT_DENYLIST:
-                    self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Invalid event received: {message["event"]}')
-                    continue
-
-                try:
-                    event_name = WebSocketEvent(message['event'])
-                    callbacks = self._callbacks[event_name]
-                except KeyError:
-                    self._logger.log_server_local_data(logging.WARNING,
-                                                       f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
-                    continue
-
-                for callback in callbacks:
-                    if message['droneId'] is None:
-                        callback(message['data'])
-                    else:
-                        callback(message['droneId'], message['data'])
             except (json.JSONDecodeError, KeyError) as exc:
                 self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Invalid message received: {exc}')
+                continue
+
+            try:
+                event_name = WebSocketEvent(message['event'])
+                callbacks = self._callbacks[event_name]
+            except ValueError:
+                self._logger.log_server_data(logging.WARN, f'UnixSocketClient warning: Invalid event received: {message["event"]}')
+                continue
+            except KeyError:
+                self._logger.log_server_local_data(logging.WARNING,
+                                                    f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
+                continue
+
+            if event_name in EVENT_DENYLIST:
+                self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Forbidden event received: {message["event"]}')
+                continue
+
+            for callback in callbacks:
+                if message['droneId'] is None:
+                    callback(message['data'])
+                else:
+                    callback(message['droneId'], message['data'])
 
     async def _send_handler(self, websocket, _path, message_queue):
         while True:

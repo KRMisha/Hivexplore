@@ -502,7 +502,6 @@ bool isCrashed(void) {
 
 void avoidDrone() {
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
-
         vector_t vectorAwayFromDrone = {
             .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
             .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
@@ -510,7 +509,7 @@ void avoidDrone() {
         };
 
         const float vectorLength = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
-                                        vectorAwayFromDrone.z * vectorAwayFromDrone.z);
+                                         vectorAwayFromDrone.z * vectorAwayFromDrone.z);
         static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
         if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
             return;

@@ -200,6 +200,11 @@ class CrazyflieManager(DroneManager):
     def _log_error_callback(self, logconf, msg):
         self._logger.log_server_data(logging.ERROR, f'Error when logging {logconf.name}: {msg}')
 
+    # Param callbacks
+
+    def _param_update_callback(self, name, value):
+        self._logger.log_server_data(logging.INFO, f'Param readback: {name}={value}')
+
     # Client callbacks
 
     def _set_mission_state(self, mission_state_str: str):
@@ -218,8 +223,3 @@ class CrazyflieManager(DroneManager):
                 self._set_drone_param('hivexplore.baseOffsetX', drone_id, base_offset.x)
                 self._set_drone_param('hivexplore.baseOffsetY', drone_id, base_offset.y)
                 self._set_drone_param('hivexplore.baseOffsetZ', drone_id, base_offset.z)
-
-    # Param callbacks
-
-    def _param_update_callback(self, name, value):
-        self._logger.log_server_data(logging.INFO, f'Param readback: {name}={value}')

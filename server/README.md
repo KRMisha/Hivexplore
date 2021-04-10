@@ -72,6 +72,8 @@ Example:
 python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7E7E7E701
 ```
 
+> Note: all drone addresses should start with `E7E7E7E7`, with the form `E7E7E7E7##`. The are no restrictions on the last two bytes; this allows for a maximum of 256 possible addresses.
+
 ### Run program to connect with the ARGoS simulation
 ```
 make run-argos

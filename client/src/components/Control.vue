@@ -239,7 +239,7 @@ export default defineComponent({
 div::v-deep(.p-inline-message) {
     color: var(--primary-color-text);
     background-color: var(--primary-color);
-    
+
     .p-inline-message-icon {
         color: var(--primary-color-text);
     }

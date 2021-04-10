@@ -111,7 +111,11 @@ class UnixSocketClient:
     async def _send_handler(self):
         while True:
             message = await self._message_queue.get()
-            message_str = json.dumps(message)
+            try:
+                message_str = json.dumps(message)
+            except TypeError as exc:
+                self._logger.log_server_local_data(logging.ERROR, f'UnixSocketClient error: Unable to serialize: {exc}')
+
             sent = await asyncio.get_event_loop().sock_sendall(self._socket, message_str.encode('utf-8'))
 
             if sent == 0:

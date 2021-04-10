@@ -121,4 +121,5 @@ class WebSocketServer:
                 message_str = json.dumps(message)
             except TypeError as exc:
                 self._logger.log_server_local_data(logging.ERROR, f'WebSocketServer error: Unable to serialize: {exc}')
+
             await websocket.send(message_str)

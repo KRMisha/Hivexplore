@@ -10,7 +10,7 @@ from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
 from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Point
-from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflie_initial_positions_from_file, load_crazyflie_uris_from_file
+from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflie_initial_offset_from_base, load_crazyflie_uris_from_file
 
 
 class CrazyflieManager(DroneManager):
@@ -19,7 +19,7 @@ class CrazyflieManager(DroneManager):
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
         self._crazyflie_uris: List[str] = []
-        self._crazyflie_initial_positions: Dict[str, Point] = {}
+        self._crazyflie_initial_offset_from_base: Dict[str, Point] = {}
 
         try:
             self._crazyflie_uris = load_crazyflie_uris_from_file()
@@ -29,7 +29,7 @@ class CrazyflieManager(DroneManager):
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
         self._web_socket_server.bind(
             'connect',
-            lambda: self._logger.log_server_data(logging.INFO, f'The crazyflies\' initial positions are in {CRAZYFLIES_CONFIG_FILENAME}')
+            lambda: self._logger.log_server_data(logging.INFO, f'The crazyflies\' initial offsets from base are in {CRAZYFLIES_CONFIG_FILENAME}')
         )
         
     async def start(self):
@@ -41,7 +41,7 @@ class CrazyflieManager(DroneManager):
             await asyncio.sleep(CRAZYFLIE_CONNECTION_PERIOD_S)
 
     def _get_drone_position_offset(self, drone_id: str) -> Point:
-        return self._crazyflie_initial_positions[drone_id]
+        return self._crazyflie_initial_offset_from_base[drone_id]
 
     def _connect_crazyflies(self):
         for uri in self._crazyflie_uris:
@@ -199,17 +199,17 @@ class CrazyflieManager(DroneManager):
 
         if self._mission_state == MissionState.Exploring:
             try:
-                self._crazyflie_initial_positions = load_crazyflie_initial_positions_from_file()
+                self._crazyflie_initial_offset_from_base = load_crazyflie_initial_offset_from_base()
             except ValueError:
-                self._logger.log_server_data(logging.ERROR, "Crazyflie Manager error: Could not load initial positions from file")
+                self._logger.log_server_data(logging.ERROR, "Crazyflie Manager error: Could not load initial offsets from base")
                 self._logger.log_server_data(logging.INFO, "Crazyflie Manager: Changing mission state back to Standby")
                 super()._set_mission_state(MissionState.Standby.name)
                 return
 
-            for drone_id, initial_position in self._crazyflie_initial_positions.items():
-                self._set_drone_param('hivexplore.initialPositionX', drone_id, initial_position.x)
-                self._set_drone_param('hivexplore.initialPositionY', drone_id, initial_position.y)
-                self._set_drone_param('hivexplore.initialPositionZ', drone_id, initial_position.z)
+            for drone_id, initial_offset_from_base in self._crazyflie_initial_offset_from_base.items():
+                self._set_drone_param('hivexplore.initialOffsetFromBaseX', drone_id, initial_offset_from_base.x)
+                self._set_drone_param('hivexplore.initialOffsetFromBaseY', drone_id, initial_offset_from_base.y)
+                self._set_drone_param('hivexplore.initialOffsetFromBaseZ', drone_id, initial_offset_from_base.z)
 
     # Param callbacks
 

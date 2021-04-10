@@ -9,7 +9,7 @@ from server.tuples import Point
 CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_config.json'
 
 
-def load_crazyflie_initial_positions_from_file() -> Dict[str, Point]:
+def load_crazyflie_initial_offset_from_base() -> Dict[str, Point]:
     with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
         try:
             crazyflies_config = json.load(file)

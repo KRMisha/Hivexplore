@@ -171,7 +171,7 @@ void CCrazyflieController::SetParamData(const std::string& param, json value) {
     if (param == "hivexplore." + paramNameToString(ParamName::MissionState)) {
         m_missionState = static_cast<MissionState>(value.get<std::uint8_t>());
         RLOG << "Set mission state: " << static_cast<std::uint8_t>(m_missionState) << '\n';
-    } else if (param == "hivexplore." + paramNameToString(ParamName::IsM1LedOn)) {
+    } else if (param == "hivexplore." + paramNameToString(ParamName::IsLedEnabled)) {
         // Print LED state since simulated Crazyflie doesn't have LEDs
         RLOG << "Set LED state: " << value.get<bool>() << '\n';
     } else {

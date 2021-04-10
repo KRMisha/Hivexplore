@@ -4,7 +4,7 @@
 namespace {
     const std::unordered_map<ParamName, std::string> paramNameStrings = {
         {ParamName::MissionState, "missionState"},
-        {ParamName::IsM1LedOn, "isM1LedOn"},
+        {ParamName::IsLedEnabled, "isLedEnabled"},
     };
 } // namespace
 

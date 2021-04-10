@@ -5,7 +5,7 @@
 
 enum class ParamName {
     MissionState,
-    IsM1LedOn,
+    IsLedEnabled,
 };
 
 const std::string& paramNameToString(const ParamName& param);

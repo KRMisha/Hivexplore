@@ -136,7 +136,7 @@ class CrazyflieManager(DroneManager):
 
     def _setup_param(self, crazyflie: Crazyflie):
         crazyflie.param.add_update_callback(group='hivexplore', name=ParamName.MISSION_STATE.value, cb=self._param_update_callback)
-        crazyflie.param.add_update_callback(group='hivexplore', name=ParamName.IS_M1_LED_ON.value, cb=self._param_update_callback)
+        crazyflie.param.add_update_callback(group='hivexplore', name=ParamName.IS_LED_ENABLED.value, cb=self._param_update_callback)
 
     # Connection callbacks
 

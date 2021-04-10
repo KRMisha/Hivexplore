@@ -174,7 +174,7 @@ class DroneManager(ABC):
     def _set_led_enabled(self, drone_id: str, is_enabled: bool):
         if self._is_drone_id_valid(drone_id):
             self._logger.log_server_data(logging.INFO, f'Set LED for {drone_id}: {is_enabled}')
-            self._set_drone_param(f'hivexplore.{ParamName.IS_M1_LED_ON.value}', drone_id, is_enabled)
+            self._set_drone_param(f'hivexplore.{ParamName.IS_LED_ENABLED.value}', drone_id, is_enabled)
             self._web_socket_server.send_drone_message(WebSocketEvent.LED, drone_id, is_enabled)
             self._drone_leds[drone_id] = is_enabled
         else:

@@ -72,7 +72,7 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
-static bool isM1LedOn = false;
+static bool isLedEnabled = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
@@ -145,7 +145,7 @@ void appMain(void) {
     while (true) {
         vTaskDelay(M2T(10));
 
-        ledSet(LED_GREEN_R, isM1LedOn);
+        ledSet(LED_GREEN_R, isLedEnabled);
 
         if (isOutOfService) {
             ledSet(LED_RED_R, true);
@@ -536,5 +536,5 @@ LOG_GROUP_STOP(hivexplore)
 
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
-PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
+PARAM_ADD(PARAM_UINT8, isLedEnabled, &isLedEnabled)
 PARAM_GROUP_STOP(hivexplore)

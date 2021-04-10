@@ -8,6 +8,6 @@ enum class ParamName {
     IsLedEnabled,
 };
 
-const std::string& paramNameToString(const ParamName& param);
+const std::string& paramNameToString(ParamName paramName);
 
 #endif

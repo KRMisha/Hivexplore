@@ -15,8 +15,8 @@ namespace {
     };
 } // namespace
 
-const std::string& logNameToString(const LogName& log) {
-    auto it = logNameStrings.find(log);
+const std::string& logNameToString(LogName logName) {
+    auto it = logNameStrings.find(logName);
     if (it != logNameStrings.end()) {
         return it->second;
     }

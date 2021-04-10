@@ -15,6 +15,6 @@ enum class LogName {
     Console,
 };
 
-const std::string& logNameToString(const LogName& log);
+const std::string& logNameToString(LogName logName);
 
 #endif

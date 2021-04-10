@@ -8,8 +8,8 @@ namespace {
     };
 } // namespace
 
-const std::string& paramNameToString(const ParamName& param) {
-    auto it = paramNameStrings.find(param);
+const std::string& paramNameToString(ParamName paramName) {
+    auto it = paramNameStrings.find(paramName);
     if (it != paramNameStrings.end()) {
         return it->second;
     }

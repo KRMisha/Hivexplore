@@ -5,7 +5,6 @@ import socket
 from typing import Any, Callable, Dict, List, Optional, Union
 from server.communication.log_name import LogName
 from server.communication.unix_socket_event import UnixSocketEvent
-from server.communication.web_socket_event import WebSocketEvent
 from server.logger import Logger
 
 EVENT_DENYLIST = {UnixSocketEvent.DISCONNECT}

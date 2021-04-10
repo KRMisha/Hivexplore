@@ -17,9 +17,12 @@
 import { defineComponent, inject, onMounted, onUnmounted, ref } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { DroneInfo, DronePosition, DroneSensorLine, Line, Point } from '@/communication/drone-map-info';
+import { DronePosition } from '@/communication/drone-position';
+import { DroneSensorLine } from '@/communication/drone-sensor-line';
 import { WebSocketClient } from '@/communication/web-socket-client';
 import { WebSocketEvent } from '@/communication/web-socket-event';
+import { DroneInfo } from '@/interfaces/drone-info';
+import { Line, Point } from '@/interfaces/map-types';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component

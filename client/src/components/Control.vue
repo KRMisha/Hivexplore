@@ -246,8 +246,8 @@ div::v-deep(.p-inline-message) {
 }
 
 .disabled-mission-start-message {
-    margin-top: -0.5rem;
     width: 100%;
+    margin-top: -0.5rem;
 }
 
 .label {

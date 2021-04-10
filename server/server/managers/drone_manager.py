@@ -19,7 +19,7 @@ class DroneManager(ABC):
         self._drone_statuses: Dict[str, DroneStatus] = {}
         self._drone_leds: Dict[str, bool] = {}
         self._drone_battery_levels: Dict[str, int] = {}
-        self._can_drones_takeoff = False
+        self._are_all_drones_charged = False
 
         # Client bindings
         self._web_socket_server.bind('connect', self._web_socket_connect_callback)
@@ -62,9 +62,9 @@ class DroneManager(ABC):
         except KeyError:
             can_drones_takeoff = False
 
-        if can_drones_takeoff != self._can_drones_takeoff:
-            self._can_drones_takeoff = can_drones_takeoff
-            self._web_socket_server.send_message('are-all-drones-above-minimum-battery-level', self._can_drones_takeoff)
+        if can_drones_takeoff != self._are_all_drones_charged:
+            self._are_all_drones_charged = can_drones_takeoff
+            self._web_socket_server.send_message('are-all-drones-charged', self._are_all_drones_charged)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -139,7 +139,7 @@ class DroneManager(ABC):
     def _web_socket_connect_callback(self, client_id: str):
         self._send_drone_ids(client_id)
         self._web_socket_server.send_message_to_client(client_id, 'mission-state', self._mission_state.name)
-        self._web_socket_server.send_message_to_client(client_id, 'are-all-drones-above-minimum-battery-level', self._can_drones_takeoff)
+        self._web_socket_server.send_message_to_client(client_id, 'are-all-drones-charged', self._are_all_drones_charged)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
             self._web_socket_server.send_drone_message_to_client(client_id, 'set-led', drone_id, is_led_enabled)
@@ -153,7 +153,7 @@ class DroneManager(ABC):
 
         # Deny changing mission state to Exploring if a drone is under 30% battery
         if new_mission_state == MissionState.Exploring:
-            if not self._can_drones_takeoff:
+            if not self._are_all_drones_charged:
                 self._logger.log_server_data(
                     logging.WARNING,
                     'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')

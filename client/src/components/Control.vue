@@ -91,9 +91,9 @@ export default defineComponent({
             droneCount.value = newDroneIds.length;
         });
 
-        const areAllDronesAboveMinimumBatteryLevel = ref(false);
-        socketClient.bindMessage('are-all-drones-above-minimum-battery-level', (newAreAllDronesAboveMinimumBatteryLevel: boolean) => {
-            areAllDronesAboveMinimumBatteryLevel.value = newAreAllDronesAboveMinimumBatteryLevel;
+        const areAllDronesCharged = ref(false);
+        socketClient.bindMessage('are-all-drones-charged', (newAreAllDronesCharged: boolean) => {
+            areAllDronesCharged.value = newAreAllDronesCharged;
         });
 
         const disabledMissionStartMessage = computed(() => {
@@ -109,7 +109,7 @@ export default defineComponent({
                 return 'Connect at least one drone before the mission can start';
             }
 
-            if (!areAllDronesAboveMinimumBatteryLevel.value) {
+            if (!areAllDronesCharged.value) {
                 return 'All drones must have at least 30% battery before the mission can start';
             }
 
@@ -120,7 +120,7 @@ export default defineComponent({
             return (
                 droneCount.value === 0 ||
                 missionState.value !== MissionState.Standby ||
-                !areAllDronesAboveMinimumBatteryLevel.value ||
+                !areAllDronesCharged.value ||
                 !socketClient.isConnected
             );
         });

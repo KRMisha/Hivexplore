@@ -13,6 +13,8 @@ namespace {
         {LogName::DroneStatus, "drone-status"},
         {LogName::Console, "console"},
     };
+
+    const std::string unknownLogName = "unknown";
 } // namespace
 
 const std::string& logNameToString(LogName logName) {
@@ -20,5 +22,5 @@ const std::string& logNameToString(LogName logName) {
     if (it != logNameStrings.end()) {
         return it->second;
     }
-    return "unknown";
+    return unknownLogName;
 }

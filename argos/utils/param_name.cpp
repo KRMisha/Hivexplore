@@ -6,6 +6,8 @@ namespace {
         {ParamName::MissionState, "missionState"},
         {ParamName::IsLedEnabled, "isLedEnabled"},
     };
+
+    const std::string unknownParamName = "unknown";
 } // namespace
 
 const std::string& paramNameToString(ParamName paramName) {
@@ -13,5 +15,5 @@ const std::string& paramNameToString(ParamName paramName) {
     if (it != paramNameStrings.end()) {
         return it->second;
     }
-    return "unknown";
+    return unknownParamName;
 }

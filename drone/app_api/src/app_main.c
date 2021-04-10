@@ -110,6 +110,12 @@ typedef struct {
     uint8_t sourceId;
 } P2PPacketContent;
 
+// Latest P2P packets
+#define MAX_DRONE_COUNT 256
+static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
+static uint8_t activeP2PIds[MAX_DRONE_COUNT] = {};
+static uint8_t activeP2PIdsCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
+
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
@@ -507,9 +513,21 @@ void broadcastPosition() {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    P2PPacketContent content;
-    memcpy(&content, &packet->data[0], sizeof(content));
-    // TODO: Forward P2P content to methods needing the information
+    P2PPacketContent* content = (P2PPacketContent*)packet->data;
+    latestP2PPackets[content->sourceId] = *content;
+
+    bool isAlreadyInContactWithSource = false;
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        if (activeP2PIds[i] == content->sourceId) {
+            isAlreadyInContactWithSource = true;
+            break;
+        }
+    }
+
+    if (!isAlreadyInContactWithSource) {
+        activeP2PIds[activeP2PIdsCount] = content->sourceId;
+        activeP2PIdsCount++;
+    }
 }
 
 void updateWaypoint(void) {

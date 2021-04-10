@@ -121,7 +121,8 @@ class DroneManager(ABC):
 
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
-        elif are_all_drones_drained and self._mission_state == MissionState.Exploring:
+
+        if are_all_drones_drained and self._mission_state == MissionState.Exploring:
             self._set_mission_state(MissionState.Returning.name)
 
     def _log_console_callback(self, drone_id: str, data: str):

@@ -70,6 +70,9 @@ void CCrazyflieController::ControlStep() {
 
     static constexpr std::uint8_t lowBatteryThreshold = 30;
     const std::uint8_t batteryLevelReading = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
+    if (batteryLevelReading < lowBatteryThreshold) {
+        m_isBatteryBelowMinimumThreshold = true;
+    }
 
     switch (m_missionState) {
     case MissionState::Standby:
@@ -77,10 +80,12 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (batteryLevelReading < lowBatteryThreshold) {
-            m_missionState = MissionState::Returning;
-        } else if (!AvoidObstacle()) {
-            Explore();
+        if (!AvoidObstacle()) {
+            if (m_isBatteryBelowMinimumThreshold) {
+                ReturnToBase();
+            } else {
+                Explore();
+            }
         }
         break;
     case MissionState::Returning:

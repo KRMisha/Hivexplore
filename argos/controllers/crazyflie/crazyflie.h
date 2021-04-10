@@ -145,6 +145,7 @@ private:
     CRadians m_rotationAngle;
 
     // Return to base variables
+    bool m_isBatteryBelowMinimumThreshold = false;
     bool m_isRotateToBaseCommandFinished = true;
     bool m_shouldTurnLeft = true;
     CRadians m_targetYawToBase;

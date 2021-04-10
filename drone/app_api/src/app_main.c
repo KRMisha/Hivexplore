@@ -75,9 +75,11 @@ static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isM1LedOn = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
+static bool isBatteryBelowMinimumThreshold = false;
 static bool shouldTurnLeft = true;
 
 // Readings
+static uint8_t batteryLevelReading;
 static float rollReading;
 static float pitchReading;
 static float yawReading;
@@ -89,7 +91,6 @@ static uint16_t rightSensorReading;
 static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static uint8_t rssiReading;
-static uint8_t batteryLevelReading;
 
 // Targets
 static float targetForwardVelocity;
@@ -191,16 +192,19 @@ void appMain(void) {
         }
 
         static const uint8_t lowBatteryThreshold = 30;
+        if (batteryLevelReading < lowBatteryThreshold) {
+            isBatteryBelowMinimumThreshold = true;
+        }
 
         switch (missionState) {
         case MISSION_STANDBY:
             droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
-            if (batteryLevelReading < lowBatteryThreshold) {
-                missionState = MISSION_RETURNING;
+            avoidObstacle();
+            if (isBatteryBelowMinimumThreshold) {
+                returnToBase();
             } else {
-                avoidObstacle();
                 explore();
             }
             break;

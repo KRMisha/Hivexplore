@@ -25,7 +25,7 @@ class DroneManager(ABC):
         # Client bindings
         self._web_socket_server.bind(WebSocketEvent.CONNECT, self._web_socket_connect_callback)
         self._web_socket_server.bind(WebSocketEvent.MISSION_STATE, self._set_mission_state)
-        self._web_socket_server.bind(WebSocketEvent.SET_LED, self._set_led_enabled)
+        self._web_socket_server.bind(WebSocketEvent.LED, self._set_led_enabled)
 
     @abstractmethod
     async def start(self):
@@ -132,7 +132,7 @@ class DroneManager(ABC):
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MISSION_STATE, self._mission_state.name)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
-            self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.SET_LED, drone_id, is_led_enabled)
+            self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.LED, drone_id, is_led_enabled)
 
     def _set_mission_state(self, mission_state_str: str):
         try:
@@ -175,7 +175,7 @@ class DroneManager(ABC):
         if self._is_drone_id_valid(drone_id):
             self._logger.log_server_data(logging.INFO, f'Set LED for {drone_id}: {is_enabled}')
             self._set_drone_param(f'hivexplore.{ParamName.IS_M1_LED_ON.value}', drone_id, is_enabled)
-            self._web_socket_server.send_drone_message(WebSocketEvent.SET_LED, drone_id, is_enabled)
+            self._web_socket_server.send_drone_message(WebSocketEvent.LED, drone_id, is_enabled)
             self._drone_leds[drone_id] = is_enabled
         else:
             self._logger.log_server_data(logging.ERROR, f'DroneManager error: Unknown drone ID received: {drone_id}')

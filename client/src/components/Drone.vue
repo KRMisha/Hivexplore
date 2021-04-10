@@ -61,12 +61,12 @@ export default defineComponent({
         });
 
         const isLedEnabled = ref(false);
-        webSocketClient.bindDroneMessage(WebSocketEvent.SetLed, props.droneId!, (newIsLedEnabled: boolean) => {
+        webSocketClient.bindDroneMessage(WebSocketEvent.Led, props.droneId!, (newIsLedEnabled: boolean) => {
             isLedEnabled.value = newIsLedEnabled;
         });
 
         function setLedEnabled() {
-            webSocketClient.sendDroneMessage(WebSocketEvent.SetLed, props.droneId!, isLedEnabled.value);
+            webSocketClient.sendDroneMessage(WebSocketEvent.Led, props.droneId!, isLedEnabled.value);
         }
 
         const droneStatusStyle = computed(() => {

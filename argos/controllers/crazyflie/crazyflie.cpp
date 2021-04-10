@@ -28,10 +28,6 @@ namespace {
         return value < 0 ? -1 : 1;
     }
 
-    constexpr double calculateDroneDistanceCorrection(double threshold, double distance) {
-        return getSign(distance) * (threshold - std::abs(distance));
-    }
-
 } // namespace
 
 void CCrazyflieController::Init(TConfigurationNode& t_node) {

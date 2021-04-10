@@ -1,5 +1,4 @@
 add_library(hivexplore_loop_functions MODULE
-  hivexplore_loop_functions.h
   hivexplore_loop_functions.cpp)
 
 target_compile_features(hivexplore_loop_functions PRIVATE cxx_std_17)

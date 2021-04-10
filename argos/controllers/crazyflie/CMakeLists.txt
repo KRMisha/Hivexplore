@@ -1,5 +1,4 @@
 add_library(crazyflie SHARED
-  crazyflie.h
   crazyflie.cpp)
 
 target_compile_features(crazyflie PRIVATE cxx_std_17)

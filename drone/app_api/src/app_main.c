@@ -114,7 +114,7 @@ typedef struct {
 #define MAX_DRONE_COUNT 256
 static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
 static uint8_t activeP2PIds[MAX_DRONE_COUNT];
-static uint8_t activeP2PCommunicationCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
+static uint8_t activeP2PIdsCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -510,17 +510,17 @@ void p2pReceivedCallback(P2PPacket* packet) {
     P2PPacketContent* content = (P2PPacketContent*)packet->data;
     latestP2PPackets[content->sourceId % MAX_DRONE_COUNT] = *content;
 
-    bool alreadyInContact = false;
-    for (unsigned i = 0; i < activeP2PCommunicationCount; i++) {
+    bool isAlreadyInContactWithSource = false;
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         if (activeP2PIds[i] == content->sourceId) {
-            alreadyInContact = true;
+            isAlreadyInContactWithSource = true;
             break;
         }
     }
 
-    if (!alreadyInContact) {
-        activeP2PIds[activeP2PCommunicationCount] = content->sourceId;
-        activeP2PCommunicationCount++;
+    if (!isAlreadyInContactWithSource) {
+        activeP2PIds[activeP2PIdsCount] = content->sourceId;
+        activeP2PIdsCount++;
     }
 }
 

@@ -3,9 +3,9 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
-                <div v-if="startMissionDisabledMessage !== ''" class="p-col-12 p-p-0 p-mb-5">
-                    <InlineMessage severity="info" class="p-p-2 start-mission-disabled-message">{{
-                        startMissionDisabledMessage
+                <div v-if="disabledMissionStartMessage !== ''" class="p-col-12 p-p-0 p-mb-5">
+                    <InlineMessage severity="info" class="p-p-2 disabled-mission-start-message">{{
+                        disabledMissionStartMessage
                     }}</InlineMessage>
                 </div>
 
@@ -130,7 +130,7 @@ export default defineComponent({
             };
         });
 
-        const startMissionDisabledMessage = computed(() => {
+        const disabledMissionStartMessage = computed(() => {
             if (missionState.value !== MissionState.Standby) {
                 return '';
             }
@@ -204,7 +204,7 @@ export default defineComponent({
             endMissionButtonLabel,
             endMissionButtonIcon,
             endMissionButtonClass,
-            startMissionDisabledMessage,
+            disabledMissionStartMessage,
             isStartMissionDisabled,
             onEndMissionButtonClick,
             droneCountChipClass,
@@ -245,7 +245,7 @@ div::v-deep(.p-inline-message) {
     }
 }
 
-.start-mission-disabled-message {
+.disabled-mission-start-message {
     margin-top: -0.5rem;
     width: 100%;
 }

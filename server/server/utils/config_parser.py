@@ -11,7 +11,7 @@ CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_config.json'
 
 
 def load_crazyflie_uris() -> List[str]:
-    with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
         try:
             crazyflies_config = json.load(file)
             return [crazyflie_config['uri'] for crazyflie_config in crazyflies_config]
@@ -37,7 +37,7 @@ def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
 
 
 def load_crazyflie_base_offsets() -> Dict[str, Point]:
-    with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
         try:
             crazyflies_config = json.load(file)
             return {crazyflie_config['uri']: Point(**crazyflie_config['baseOffset']) for crazyflie_config in crazyflies_config}

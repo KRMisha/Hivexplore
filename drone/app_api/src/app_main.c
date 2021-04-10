@@ -203,13 +203,13 @@ void appMain(void) {
             droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
-            avoidDrone();
-            avoidObstacle();
+            avoidDrones();
+            avoidObstacles();
             explore();
             break;
         case MISSION_RETURNING:
-            avoidDrone();
-            avoidObstacle();
+            avoidDrones();
+            avoidObstacles();
             returnToBase();
             break;
         case MISSION_EMERGENCY:
@@ -231,7 +231,7 @@ void appMain(void) {
     }
 }
 
-void avoidDrone() {
+void avoidDrones() {
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         vector_t vectorAwayFromDrone = {
             .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
@@ -259,7 +259,7 @@ void avoidDrone() {
     }
 }
 
-void avoidObstacle(void) {
+void avoidObstacles(void) {
     bool isExploringAvoidanceDisallowed =
         missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF);
     bool isReturningAvoidanceDisallowed =

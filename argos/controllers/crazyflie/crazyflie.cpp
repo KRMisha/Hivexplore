@@ -70,12 +70,12 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (!AvoidObstacle()) {
+        if (!AvoidObstaclesAndDrones()) {
             Explore();
         }
         break;
     case MissionState::Returning:
-        if (!AvoidObstacle()) {
+        if (!AvoidObstaclesAndDrones()) {
             ReturnToBase();
         }
         break;
@@ -174,7 +174,7 @@ void CCrazyflieController::SetParamData(const std::string& param, json value) {
     }
 }
 
-bool CCrazyflieController::AvoidObstacle() {
+bool CCrazyflieController::AvoidObstaclesAndDrones() {
     // The obstacle detection threshold (similar to the logic found in the drone firmware) is smaller than the map edge rotation
     // detection threshold to avoid conflicts between the obstacle/drone collision avoidance and the exploration logic
     static constexpr std::uint16_t obstacleDetectedThreshold = 300;

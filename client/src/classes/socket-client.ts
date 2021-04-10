@@ -1,4 +1,5 @@
 import { getLocalTimestamp } from '@/utils/local-timestamp';
+import { ref } from 'vue';
 
 const serverPort = 5678;
 const serverUrl = `ws://${window.location.hostname}:${serverPort}`;
@@ -10,11 +11,17 @@ export class SocketClient {
 
     private timeout = baseConnectionTimeout;
 
+    private _isConnected = ref(false);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private callbacks = new Map<string, Map<string | undefined, Array<(data: any) => void>>>();
 
     constructor() {
         this.connect();
+    }
+
+    get isConnected() {
+        return this._isConnected.value;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,6 +79,7 @@ export class SocketClient {
         this.socket.onopen = () => {
             console.log(`Connection to ${serverUrl} successful`);
             this.timeout = baseConnectionTimeout;
+            this._isConnected.value = true;
         };
 
         this.socket.onclose = () => {
@@ -79,6 +87,7 @@ export class SocketClient {
                 this.connect();
             }, this.timeout);
             this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
+            this._isConnected.value = false;
             console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds`);
         };
 

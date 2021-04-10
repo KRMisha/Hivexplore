@@ -3,8 +3,10 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
-                <div v-if="startMissionDisabledText !== ''" class="p-col-12 p-p-0 p-mb-5">
-                    <InlineMessage severity="info" class="p-p-2 start-mission-disabled-message">{{ startMissionDisabledMessage }}</InlineMessage>
+                <div v-if="startMissionDisabledMessage !== ''" class="p-col-12 p-p-0 p-mb-5">
+                    <InlineMessage severity="info" class="p-p-2 start-mission-disabled-message">{{
+                        startMissionDisabledMessage
+                    }}</InlineMessage>
                 </div>
 
                 <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-between">
@@ -133,8 +135,12 @@ export default defineComponent({
                 return '';
             }
 
+            if (!socketClient.isConnected) {
+                return 'The server must be connected before the mission can start';
+            }
+
             if (droneCount.value === 0) {
-                return 'Connect at least one drone before starting a mission';
+                return 'Connect at least one drone before the mission can start';
             }
 
             if (!areAllDronesAboveMinimumBatteryLevel.value) {
@@ -145,7 +151,12 @@ export default defineComponent({
         });
 
         const isStartMissionDisabled = computed(() => {
-            return droneCount === 0 || missionState !== MissionState.Standby || !areAllDronesAboveMinimumBatteryLevel;
+            return (
+                droneCount.value === 0 ||
+                missionState.value !== MissionState.Standby ||
+                !areAllDronesAboveMinimumBatteryLevel.value ||
+                !socketClient.isConnected
+            );
         });
 
         function onEndMissionButtonClick(event: Event) {
@@ -193,9 +204,9 @@ export default defineComponent({
             endMissionButtonLabel,
             endMissionButtonIcon,
             endMissionButtonClass,
-            startMissionDisabledText,
             startMissionDisabledMessage,
             isStartMissionDisabled,
+            onEndMissionButtonClick,
             droneCountChipClass,
             timelineMarkerClass,
             timelineContentClass,

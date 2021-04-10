@@ -58,7 +58,15 @@ void CCrazyflieController::ControlStep() {
     UpdateSensorReadings();
     UpdateVelocity();
     UpdateRssi();
-    PingOtherDrones();
+
+    const bool shouldNotBroadcastPosition = m_missionState == MissionState::Standby ||
+                                            (m_missionState == MissionState::Exploring &&
+                                             (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff)) ||
+                                            (m_missionState == MissionState::Returning && m_returningState == ReturningState::Idle) ||
+                                            (m_missionState == MissionState::Emergency && m_emergencyState == EmergencyState::Idle);
+    if (!shouldNotBroadcastPosition) {
+        PingOtherDrones();
+    }
 
     static const std::uint8_t lowBatteryThreshold = 30;
     std::uint8_t batteryLevelReading = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);

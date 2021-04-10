@@ -47,9 +47,6 @@ class CrazyflieManager(DroneManager):
             CRAZYFLIE_CONNECTION_PERIOD_S = 5
             await asyncio.sleep(CRAZYFLIE_CONNECTION_PERIOD_S)
 
-    def _get_drone_base_offset(self, drone_id: str) -> Point:
-        return self._crazyflie_base_offsets[drone_id]
-
     def _connect_crazyflies(self):
         for uri in self._crazyflie_uris:
             if uri in self._connected_crazyflies:
@@ -80,6 +77,9 @@ class CrazyflieManager(DroneManager):
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
         super()._set_drone_param(param, drone_id, value)
         self._connected_crazyflies[drone_id].param.set_value(param, value)
+
+    def _get_drone_base_offset(self, drone_id: str) -> Point:
+        return self._crazyflie_base_offsets[drone_id]
 
     # Setup
 

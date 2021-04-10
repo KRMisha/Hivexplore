@@ -30,10 +30,6 @@ class DroneManager(ABC):
         pass
 
     @abstractmethod
-    def _get_drone_base_offset(self, drone_id: str) -> Point:
-        pass
-
-    @abstractmethod
     def _get_drone_ids(self) -> List[str]:
         pass
 
@@ -44,6 +40,10 @@ class DroneManager(ABC):
     @abstractmethod
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
         self._logger.log_drone_data(logging.INFO, drone_id, f'Set {param}: {value}')
+
+    @abstractmethod
+    def _get_drone_base_offset(self, drone_id: str) -> Point:
+        pass
 
     def _send_drone_ids(self, client_id=None):
         if client_id is None:

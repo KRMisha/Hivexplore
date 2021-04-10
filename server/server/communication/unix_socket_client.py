@@ -86,27 +86,31 @@ class UnixSocketClient:
 
             try:
                 message = json.loads(message_bytes.decode('utf-8'))
+
+                try:
+                    log_name = LogName(message['logName'])
+                except ValueError:
+                    self._logger.log_server_data(logging.WARN, f'UnixSocketClient warning: Invalid log name received: {message["logName"]}')
+                    continue
+
+                if log_name in EVENT_DENYLIST:
+                    self._logger.log_server_data(logging.ERROR,
+                                                 f'UnixSocketClient error: Forbidden log name received: {message["logName"]}')
+                    continue
+
+                try:
+                    callbacks = self._callbacks[log_name]
+                except KeyError:
+                    self._logger.log_server_data(logging.WARN,
+                                                 f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
+                    continue
+
+                for callback in callbacks:
+                    callback(message['droneId'], message['variables'])
+
             except (json.JSONDecodeError, KeyError) as exc:
                 self._logger.log_server_data(logging.ERROR, f'UnixSocketClient error: Invalid message received: {exc}')
                 continue
-
-            try:
-                log_name = LogName(message['logName'])
-                callbacks = self._callbacks[log_name]
-            except ValueError:
-                self._logger.log_server_data(logging.WARN, f'UnixSocketClient warning: Invalid log name received: {message["logName"]}')
-                continue
-            except KeyError:
-                self._logger.log_server_data(logging.WARN,
-                                             f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
-                continue
-
-            if log_name in EVENT_DENYLIST:
-                self._logger.log_server_data(logging.ERROR, f'UnixSocketClient error: Forbidden event received: {message["logName"]}')
-                continue
-
-            for callback in callbacks:
-                callback(message['droneId'], message['variables'])
 
     async def _send_handler(self):
         while True:

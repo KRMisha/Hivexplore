@@ -22,7 +22,7 @@ class CrazyflieManager(DroneManager):
         self._crazyflie_base_offsets: Dict[str, Point] = {}
 
         try:
-            self._crazyflie_uris = load_crazyflie_uris_()
+            self._crazyflie_uris = load_crazyflie_uris()
         except ValueError:
             self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load URIs from file')
 

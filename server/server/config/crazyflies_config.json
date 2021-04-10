@@ -1,10 +1,10 @@
 [
     {
         "uri": "radio://0/80/2M/E7E7E7E701",
-        "initial-position": {"x": 0, "y": 0, "z": 0}
+        "baseOffset": {"x": 0, "y": 0, "z": 0}
     },
     {
-        "uri": "radio://0/80/2M/E7E7E7E702", 
-        "initial-position": {"x": 0, "y": 0, "z": 0}
+        "uri": "radio://0/80/2M/E7E7E7E702",
+        "baseOffset": {"x": 0, "y": 0, "z": 0}
     }
 ]

@@ -13,7 +13,7 @@ def load_crazyflie_base_offsets() -> Dict[str, Point]:
     with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
         try:
             crazyflies_config = json.load(file)
-            return {crazyflie_config['uri']: Point(**crazyflie_config['initial-position']) for crazyflie_config in crazyflies_config}
+            return {crazyflie_config['uri']: Point(**crazyflie_config['baseOffset']) for crazyflie_config in crazyflies_config}
         except ValueError:
             print('load_crazyflie_positions_from_file error: Could not load initial positions from file')
             raise
@@ -67,7 +67,7 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
             crazyflie_config['uri'] = new_uri
             break
     else:
-        crazyflies_config.append({'uri': new_uri, 'initial-position': {'x': 0, 'y': 0, 'z': 0}})
+        crazyflies_config.append({'uri': new_uri, 'baseOffset': {'x': 0, 'y': 0, 'z': 0}})
 
     with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as file:
         json.dump(crazyflies_config, file)

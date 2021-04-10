@@ -199,7 +199,6 @@ export default defineComponent({
             missionStates,
             setMissionState,
             droneCount,
-            areAllDronesAboveMinimumBatteryLevel,
             disabledMissionStartMessage,
             isStartMissionButtonDisabled,
             onStartMissionButtonClick,

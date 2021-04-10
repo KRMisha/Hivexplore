@@ -70,7 +70,7 @@ class DroneManager(ABC):
         self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
-        position_offset = self._get_drone_position_offset(drone_id)
+        base_offset = self._get_drone_base_offset(drone_id)
         point = Point(
             x=data['stateEstimate.x'] + position_offset.x,
             y=data['stateEstimate.y'] + position_offset.y,

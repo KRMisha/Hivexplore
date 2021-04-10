@@ -84,11 +84,7 @@ static bool isM1LedOn = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
-static point_t initialOffsetFromBase = {
-    .x = 0.0,
-    .y = 0.0,
-    .z = 0.0,
-}; // TODO: Initialize from server using param
+static point_t initialOffsetFromBase = {}; // TODO: Initialize from server using param
 
 // Readings
 static float rollReading;

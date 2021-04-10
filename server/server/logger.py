@@ -5,10 +5,10 @@ import logging
 import logging.config
 from typing import List, TYPE_CHECKING
 import yaml
+from server.communication.web_socket_event import WebSocketEvent
 from server.tuples import Point
-from server.sockets.web_socket_event import WebSocketEvent
 if TYPE_CHECKING:
-    from server.sockets.web_socket_server import WebSocketServer
+    from server.communication.web_socket_server import WebSocketServer
 
 log_filename = '' # pylint: disable=invalid-name
 

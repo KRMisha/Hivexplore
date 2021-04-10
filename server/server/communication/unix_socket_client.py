@@ -3,10 +3,10 @@ import json
 import logging
 import socket
 from typing import Any, Callable, Dict, List, Optional, Union
+from server.communication.log_name import LogName
+from server.communication.unix_socket_event import UnixSocketEvent
+from server.communication.web_socket_event import WebSocketEvent
 from server.logger import Logger
-from server.sockets.unix_socket_event import UnixSocketEvent
-from server.sockets.web_socket_event import WebSocketEvent
-from server.sockets.log_name import LogName
 
 EVENT_DENYLIST = {UnixSocketEvent.DISCONNECT}
 

@@ -7,7 +7,7 @@ import logging
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 import uuid
 import websockets
-from server.sockets.web_socket_event import WebSocketEvent
+from server.communication.web_socket_event import WebSocketEvent
 if TYPE_CHECKING:
     from server.logger import Logger
 

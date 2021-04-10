@@ -2,10 +2,10 @@ import logging
 import math
 from typing import Dict, List, Tuple
 import numpy as np
+from server.communication.web_socket_event import WebSocketEvent
+from server.communication.web_socket_server import WebSocketServer
 from server.logger import Logger
-from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Orientation, Point, Range
-from server.sockets.web_socket_event import WebSocketEvent
 
 
 class MapGenerator:

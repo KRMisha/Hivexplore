@@ -30,7 +30,7 @@ class DroneManager(ABC):
         pass
 
     @abstractmethod
-    def _get_drone_position_offset(self, drone_id: str) -> Point:
+    def _get_drone_base_offset(self, drone_id: str) -> Point:
         pass
 
     @abstractmethod

@@ -30,7 +30,7 @@ class ArgosManager(DroneManager):
 
         await self._unix_socket_client.serve()
 
-    def _get_drone_position_offset(self, _drone_id: str) -> Point:
+    def _get_drone_base_offset(self, _drone_id: str) -> Point:
         return Point(x=0, y=0, z=0)
 
     def _get_drone_ids(self) -> List[str]:

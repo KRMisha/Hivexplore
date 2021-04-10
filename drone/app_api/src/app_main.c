@@ -285,14 +285,16 @@ void explore(void) {
             DEBUG_PRINT("Going to rotate away!");
             targetYawRate = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;
+            break;
         }
-        //saveLatestP2PContents();
         if (!forward()) {
             exploringState = EXPLORING_ROTATE;
         }
         reorientationWatchdog--;
     } break;
     case EXPLORING_ROTATE_AWAY: {
+        droneStatus = STATUS_FLYING;
+
         if (rotateTowardsTargetYaw()) {
             reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
             DEBUG_PRINT("Finished rotate away!");
@@ -631,12 +633,27 @@ uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensor
 }
 
 double calculateAngleAwayFromCenterOfMass() {
-    point_t centerOfMass;
 
-    centerOfMass.x = (latestP2PContent.x + initialOffsetFromBase.x + positionReading.x) / 2;
-    centerOfMass.y = (latestP2PContent.y + initialOffsetFromBase.y + positionReading.y) / 2;
-    DEBUG_PRINT("Center of mass x: %f", centerOfMass.x);
-    DEBUG_PRINT("Center of mass y: %f", centerOfMass.y);
+    // Drone's current position
+    // centerOfMass.x = initialOffsetFromBase.x + positionReading.x;
+    // centerOfMass.y = initialOffsetFromBase.y + positionReading.y;
+    point_t centerOfMass = {
+        .x = initialOffsetFromBase.x + positionReading.x,
+        .y = initialOffsetFromBase.y + positionReading.y,
+    };
+
+    // Accumulation of other drones' positions received
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        P2PPacketContent content = latestP2PPackets[activeP2PIds[i]];
+        centerOfMass.x += content.x;
+        centerOfMass.y += content.y;
+    }
+
+    centerOfMass.x /= (activeP2PIdsCount + 1);
+    centerOfMass.y /= (activeP2PIdsCount + 1);
+
+    DEBUG_PRINT("Center of mass x: %f", (double)centerOfMass.x);
+    DEBUG_PRINT("Center of mass y: %f", (double)centerOfMass.y);
 
     vector_t vectorAway = {
         .x = (initialOffsetFromBase.x + positionReading.x) - centerOfMass.x,
@@ -646,10 +663,6 @@ double calculateAngleAwayFromCenterOfMass() {
     double angleAway = atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
     DEBUG_PRINT("Angle away: %f", angleAway);
     return angleAway;
-}
-
-float calculateVectorLength(vector_t vector) {
-    return sqrtf(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
 }
 
 LOG_GROUP_START(hivexplore)

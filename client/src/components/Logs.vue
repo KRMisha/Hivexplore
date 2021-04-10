@@ -77,14 +77,11 @@ export default defineComponent({
 
         // Log group management
         function addLogGroup(logGroup: string) {
-            // Trim URI to extract Crazyflie address
-            const trimmedLogGroup = logGroup.replace('radio://0/80/2M/', '');
-
-            if (!logs.has(trimmedLogGroup)) {
-                logs.set(trimmedLogGroup, []);
+            if (!logs.has(logGroup)) {
+                logs.set(logGroup, []);
             }
-            if (!logBuffers.has(trimmedLogGroup)) {
-                logBuffers.set(trimmedLogGroup, []);
+            if (!logBuffers.has(logGroup)) {
+                logBuffers.set(logGroup, []);
             }
         }
 
@@ -95,8 +92,11 @@ export default defineComponent({
         // Log reception
         const socketClient = inject('socketClient') as SocketClient;
         socketClient.bindMessage('log', (log: Log) => {
-            addLogGroup(log.group);
-            logBuffers.get(log.group)!.push(log.line);
+            // Trim URI to extract Crazyflie address
+            const trimmedLogGroup = log.group.replace('radio://0/80/2M/', '');
+
+            addLogGroup(trimmedLogGroup);
+            logBuffers.get(trimmedLogGroup)!.push(log.line);
         });
 
         onMounted(() => {

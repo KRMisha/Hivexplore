@@ -32,6 +32,8 @@ class CrazyflieManager(DroneManager):
             self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load base offsets from file')
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
+
+    async def start(self):
         self._web_socket_server.bind(
             'connect', lambda client_id: self._web_socket_server.send_message_to_client(
                 client_id, 'log', {
@@ -39,7 +41,6 @@ class CrazyflieManager(DroneManager):
                     'line': f'The crazyflies\' base offsets are in {CRAZYFLIES_CONFIG_FILENAME}'
                 }))
 
-    async def start(self):
         while True:
             if self._mission_state == MissionState.Standby:
                 self._connect_crazyflies()

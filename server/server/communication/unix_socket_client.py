@@ -64,7 +64,7 @@ class UnixSocketClient:
         finally:
             self._socket.close()
 
-    def bind(self, log_name: LogName, callback: Callable[[Optional[str], Any], None]):
+    def bind(self, log_name: Union[LogName, UnixSocketEvent], callback: Callable[[Optional[str], Any], None]):
         self._callbacks.setdefault(log_name, []).append(callback)
 
     def send(self, param_name: str, drone_id: str, value: Any):

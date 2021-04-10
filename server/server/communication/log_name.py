@@ -2,7 +2,7 @@ import enum
 
 
 class LogName(enum.Enum):
-    DRONE_IDS = 'drone-ids' # only used for ARGoS
+    DRONE_IDS = 'drone-ids' # Only used for ARGoS
     BATTERY_LEVEL = 'battery-level'
     ORIENTATION = 'orientation'
     POSITION = 'position'

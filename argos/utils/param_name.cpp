@@ -13,5 +13,5 @@ const std::string& paramNameToString(const ParamName& param) {
     if (it != paramNameStrings.end()) {
         return it->second;
     }
-    return "Unknown";
+    return "unknown";
 }

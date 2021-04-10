@@ -20,5 +20,5 @@ const std::string& logNameToString(const LogName& log) {
     if (it != logNameStrings.end()) {
         return it->second;
     }
-    return "Unknown";
+    return "unknown";
 }

@@ -188,11 +188,7 @@ void appMain(void) {
 
         switch (missionState) {
         case MISSION_STANDBY:
-            if (batteryLevelReading <= lowBatteryThreshold) {
-                droneStatus = STATUS_DRAINED;
-            } else {
-                droneStatus = STATUS_STANDBY;
-            }
+            droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
             if (batteryLevelReading <= lowBatteryThreshold) {
@@ -210,11 +206,7 @@ void appMain(void) {
             emergencyLand();
             break;
         case MISSION_LANDED:
-            if (batteryLevelReading <= lowBatteryThreshold) {
-                droneStatus = STATUS_DRAINED;
-            } else {
-                droneStatus = STATUS_LANDED;
-            }
+            droneStatus = STATUS_LANDED;
             break;
         }
 
@@ -306,7 +298,7 @@ void returnToBase(void) {
 
     switch (returningState) {
     case RETURNING_ROTATE_TOWARDS_BASE: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Calculate rotation angle to turn towards base
         targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
@@ -326,7 +318,7 @@ void returnToBase(void) {
         }
     } break;
     case RETURNING_RETURN: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
         if (!forward() || returnWatchdog == 0) {
@@ -345,14 +337,14 @@ void returnToBase(void) {
         }
     } break;
     case RETURNING_ROTATE: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         if (rotate()) {
             returningState = RETURNING_FORWARD;
         }
     } break;
     case RETURNING_FORWARD: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // The drone must check its right sensor when it is turning left, and its left sensor when turning right
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;

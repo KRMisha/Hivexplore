@@ -96,6 +96,35 @@ export default defineComponent({
             areAllDronesAboveMinimumBatteryLevel.value = newAreAllDronesAboveMinimumBatteryLevel;
         });
 
+        const disabledMissionStartMessage = computed(() => {
+            if (missionState.value !== MissionState.Standby) {
+                return '';
+            }
+
+            if (!socketClient.isConnected) {
+                return 'The server must be connected before the mission can start';
+            }
+
+            if (droneCount.value === 0) {
+                return 'Connect at least one drone before the mission can start';
+            }
+
+            if (!areAllDronesAboveMinimumBatteryLevel.value) {
+                return 'All drones must have at least 30% battery before the mission can start';
+            }
+
+            return '';
+        });
+
+        const isStartMissionDisabled = computed(() => {
+            return (
+                droneCount.value === 0 ||
+                missionState.value !== MissionState.Standby ||
+                !areAllDronesAboveMinimumBatteryLevel.value ||
+                !socketClient.isConnected
+            );
+        });
+
         let wasEmergencyLandingCalled = false;
 
         function onStartMissionButtonClick(event: Event) {
@@ -128,35 +157,6 @@ export default defineComponent({
             return {
                 'p-button-danger': missionState.value !== MissionState.Landed,
             };
-        });
-
-        const disabledMissionStartMessage = computed(() => {
-            if (missionState.value !== MissionState.Standby) {
-                return '';
-            }
-
-            if (!socketClient.isConnected) {
-                return 'The server must be connected before the mission can start';
-            }
-
-            if (droneCount.value === 0) {
-                return 'Connect at least one drone before the mission can start';
-            }
-
-            if (!areAllDronesAboveMinimumBatteryLevel.value) {
-                return 'All drones must have at least 30% battery before the mission can start';
-            }
-
-            return '';
-        });
-
-        const isStartMissionDisabled = computed(() => {
-            return (
-                droneCount.value === 0 ||
-                missionState.value !== MissionState.Standby ||
-                !areAllDronesAboveMinimumBatteryLevel.value ||
-                !socketClient.isConnected
-            );
         });
 
         function onEndMissionButtonClick(event: Event) {
@@ -200,12 +200,12 @@ export default defineComponent({
             setMissionState,
             droneCount,
             areAllDronesAboveMinimumBatteryLevel,
+            disabledMissionStartMessage,
+            isStartMissionDisabled,
             onStartMissionButtonClick,
             endMissionButtonLabel,
             endMissionButtonIcon,
             endMissionButtonClass,
-            disabledMissionStartMessage,
-            isStartMissionDisabled,
             onEndMissionButtonClick,
             droneCountChipClass,
             timelineMarkerClass,

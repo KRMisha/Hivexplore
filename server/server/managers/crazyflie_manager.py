@@ -38,7 +38,7 @@ class CrazyflieManager(DroneManager):
             'connect', lambda client_id: self._web_socket_server.send_message_to_client(
                 client_id, 'log', {
                     'group': 'Server',
-                    'line': f'The crazyflies\' base offsets are in {CRAZYFLIES_CONFIG_FILENAME}'
+                    'line': f'The base offsets for setting up the crazyflies can be found in {CRAZYFLIES_CONFIG_FILENAME}'
                 }))
 
         while True:

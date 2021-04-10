@@ -61,18 +61,15 @@ void CCrazyflieController::ControlStep() {
     PingOtherDrones();
 
     static const std::uint8_t lowBatteryThreshold = 30;
+    std::uint8_t batteryLevelReading = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
 
     switch (m_missionState) {
     case MissionState::Standby:
-        if (m_pcBattery->GetReading().AvailableCharge * 100 < lowBatteryThreshold) {
-            m_droneStatus = DroneStatus::Drained;
-        } else {
-            m_droneStatus = DroneStatus::Standby;
-            ResetInternalStates();
-        }
+        m_droneStatus = DroneStatus::Standby;
+        ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (m_pcBattery->GetReading().AvailableCharge * 100 <= lowBatteryThreshold) {
+        if (batteryLevelReading <= lowBatteryThreshold) {
             m_missionState = MissionState::Returning;
         } else if (!AvoidObstacle()) {
             Explore();
@@ -87,11 +84,7 @@ void CCrazyflieController::ControlStep() {
         EmergencyLand();
         break;
     case MissionState::Landed:
-        if (m_pcBattery->GetReading().AvailableCharge * 100 <= lowBatteryThreshold) {
-            m_droneStatus = DroneStatus::Drained;
-        } else {
-            m_droneStatus = DroneStatus::Landed;
-        }
+        m_droneStatus = DroneStatus::Landed;
         break;
     }
 
@@ -324,7 +317,7 @@ void CCrazyflieController::ReturnToBase() {
 
     switch (m_returningState) {
     case ReturningState::BrakeTowardsBase: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         // Brake before rotation towards base
         if (Brake()) {
@@ -333,7 +326,7 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::RotateTowardsBase: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         // Turn drone towards its base
         if (m_isRotateToBaseCommandFinished) {
@@ -378,7 +371,7 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::Return: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
         if (!Forward() || m_returnWatchdog == 0) {
@@ -397,21 +390,21 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::Brake: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         if (Brake()) {
             m_returningState = ReturningState::Rotate;
         }
     } break;
     case ReturningState::Rotate: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         if (Rotate()) {
             m_returningState = ReturningState::Forward;
         }
     } break;
     case ReturningState::Forward: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         // The drone must check its right sensor when it is turning left, and its left sensor when turning right
         static float sensorToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];

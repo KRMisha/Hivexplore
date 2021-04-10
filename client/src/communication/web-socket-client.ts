@@ -1,6 +1,6 @@
-import { getLocalTimestamp } from '@/utils/local-timestamp';
-import { WebSocketEvent } from '@/communication/web-socket-event';
 import { Message } from '@/communication/message';
+import { WebSocketEvent } from '@/communication/web-socket-event';
+import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 const serverPort = 5678;
 const serverUrl = `ws://${window.location.hostname}:${serverPort}`;

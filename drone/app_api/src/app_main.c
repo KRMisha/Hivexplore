@@ -501,11 +501,9 @@ void avoidDrone() {
         .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PContent.z,
     };
 
-    static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
-
     const float vectorLength = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
                                      vectorAwayFromDrone.z * vectorAwayFromDrone.z);
-
+    static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
     if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
         return;
     }
@@ -517,7 +515,7 @@ void avoidDrone() {
     };
     const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
     static const float COLLISION_AVOIDANCE_SCALING_FACTOR = CRUISE_VELOCITY * 1.05f;
-    // forward: X, left:Y
+    // Y: Left, -Y: Right, X: Forward, -X: Back
     targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
     targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
 }

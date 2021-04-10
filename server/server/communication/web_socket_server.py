@@ -105,7 +105,7 @@ class WebSocketServer:
                 continue
             except KeyError:
                 self._logger.log_server_local_data(logging.WARNING,
-                                                    f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
+                                                   f'WebSocketServer warning: No callbacks bound for event: {message["event"]}')
                 continue
 
             if event_name in EVENT_DENYLIST:

@@ -98,7 +98,7 @@ class UnixSocketClient:
                 continue
             except KeyError:
                 self._logger.log_server_data(logging.WARN,
-                                                f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
+                                             f'UnixSocketClient warning: No callbacks bound for log name: {message["logName"]}')
                 continue
 
             if log_name in EVENT_DENYLIST:

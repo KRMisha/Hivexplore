@@ -503,7 +503,10 @@ void avoidDrone() {
     };
 
     static const float DRONE_AVOIDANCE_THRESHOLD = 1.0;
-    const float vectorLength = calculateVectorLength(vectorAwayFromDrone);
+
+    const float vectorLength = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
+                                     vectorAwayFromDrone.z * vectorAwayFromDrone.z);
+
     if (vectorLength > DRONE_AVOIDANCE_THRESHOLD) {
         return;
     }
@@ -565,10 +568,6 @@ void updateWaypoint(void) {
 
 uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
-}
-
-float calculateVectorLength(vector_t vector) {
-    return sqrtf(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
 }
 
 LOG_GROUP_START(hivexplore)

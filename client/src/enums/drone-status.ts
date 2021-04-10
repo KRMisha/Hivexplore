@@ -5,5 +5,5 @@ export enum DroneStatus {
     Returning = 'Returning',
     Landing = 'Landing',
     Landed = 'Landed',
-    Crashed = 'Crashed'
+    Crashed = 'Crashed',
 }

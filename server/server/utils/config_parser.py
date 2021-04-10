@@ -9,7 +9,6 @@ from server.tuples import Point
 CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_config.json'
 
 
-
 def load_crazyflie_uris() -> List[str]:
     with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
         try:

@@ -7,7 +7,7 @@ class WebSocketEvent(str, enum.Enum):
     DRONE_IDS = 'drone-ids'
     MAP_POINTS = 'map-points'
     CLEAR_MAP = 'clear-map'
-    DRONE_POSITIONS = 'drone-position'
+    DRONE_POSITION = 'drone-position'
     DRONE_SENSOR_LINES = 'drone-sensor-lines'
     VELOCITY = 'velocity'
     BATTERY_LEVEL = 'battery-level'

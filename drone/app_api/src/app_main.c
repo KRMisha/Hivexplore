@@ -70,8 +70,8 @@ static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
-// Initial offset from base
-static point_t initialOffsetFromBase = {.x = 0.0f, .y = 0.0f, .z = 0.0f };
+// Base offset
+static point_t baseOffset = {.x = 0.0f, .y = 0.0f, .z = 0.0f };
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
@@ -534,7 +534,7 @@ LOG_GROUP_STOP(hivexplore)
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
 PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
-PARAM_ADD(PARAM_FLOAT, initialOffsetFromBaseX, &initialOffsetFromBase.x)
-PARAM_ADD(PARAM_FLOAT, initialOffsetFromBaseY, &initialOffsetFromBase.y)
-PARAM_ADD(PARAM_FLOAT, initialOffsetFromBaseZ, &initialOffsetFromBase.z)
+PARAM_ADD(PARAM_FLOAT, baseOffsetX, &baseOffset.x)
+PARAM_ADD(PARAM_FLOAT, baseOffsetY, &baseOffset.y)
+PARAM_ADD(PARAM_FLOAT, baseOffsetZ, &baseOffset.z)
 PARAM_GROUP_STOP(hivexplore)

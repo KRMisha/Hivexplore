@@ -86,7 +86,7 @@ static point_t initialPosition;
 static bool shouldTurnLeft = true;
 static point_t initialOffsetFromBase = {
     .x = 0.0,
-    .y = -0.3,
+    .y = 0.0,
     .z = 0.0,
 }; // TODO: Initialize from server using param
 
@@ -509,7 +509,7 @@ void avoidDrone() {
         };
 
         const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
-                                         vectorAwayFromDrone.z * vectorAwayFromDrone.z);
+                                            vectorAwayFromDrone.z * vectorAwayFromDrone.z);
         static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
         if (vectorMagnitude > DRONE_AVOIDANCE_THRESHOLD) {
             return;

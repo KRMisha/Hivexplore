@@ -18,11 +18,11 @@
 
 <script lang="ts">
 import { defineComponent, onUnmounted, provide } from 'vue';
+import { WebSocketClient } from '@/communication/web-socket-client';
 import Control from '@/components/Control.vue';
 import DroneList from '@/components/DroneList.vue';
 import Logs from '@/components/Logs.vue';
 import Map from '@/components/Map.vue';
-import { WebSocketClient } from '@/communication/web-socket-client';
 
 export default defineComponent({
     name: 'App',

@@ -20,25 +20,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { WebSocketClient } from '@/communication/web-socket-client';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
 import { WebSocketEvent } from '@/communication/web-socket-event';
-
-type Point = [number, number, number];
-type Line = [Point, Point];
-
-interface DroneInfo {
-    position: THREE.Points;
-    sensorLines: [THREE.Line, THREE.Line, THREE.Line, THREE.Line];
-}
-
-// TODO: Move this to communication folder
-interface DronePosition {
-    droneId: string;
-    position: Point;
-}
-
-interface DroneSensorLine {
-    droneId: string;
-    sensorLines: Line[];
-}
+import { DroneInfo, DronePosition, DroneSensorLine, Line, Point } from '@/communication/drone-map-info';
 
 // Source for three.js setup: https://stackoverflow.com/questions/47849626/import-and-use-three-js-library-in-vue-component
 

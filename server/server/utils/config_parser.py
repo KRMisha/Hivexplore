@@ -9,15 +9,6 @@ from server.tuples import Point
 CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_config.json'
 
 
-def load_crazyflie_base_offsets() -> Dict[str, Point]:
-    with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
-        try:
-            crazyflies_config = json.load(file)
-            return {crazyflie_config['uri']: Point(**crazyflie_config['baseOffset']) for crazyflie_config in crazyflies_config}
-        except ValueError:
-            print('load_crazyflie_base_offset error: Could not load initial positions from file')
-            raise
-
 
 def load_crazyflie_uris() -> List[str]:
     with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
@@ -43,6 +34,16 @@ def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
     eeprom.elements['radio_address'] = radio_address
 
     eeprom.write_data(lambda eeprom, addr: _data_written(crazyflie, eeprom, addr))
+
+
+def load_crazyflie_base_offsets() -> Dict[str, Point]:
+    with open(CRAZYFLIES_CONFIG_FILENAME, 'r+') as file:
+        try:
+            crazyflies_config = json.load(file)
+            return {crazyflie_config['uri']: Point(**crazyflie_config['baseOffset']) for crazyflie_config in crazyflies_config}
+        except ValueError:
+            print('load_crazyflie_base_offset error: Could not load initial positions from file')
+            raise
 
 
 def _data_written(crazyflie: Crazyflie, eeprom: I2CElement, _addr: int):

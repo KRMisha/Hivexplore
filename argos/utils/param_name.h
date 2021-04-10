@@ -8,6 +8,6 @@ enum class ParamName {
     IsM1LedOn,
 };
 
-const std::string& paramEventToString(const ParamName& param);
+const std::string& paramNameToString(const ParamName& param);
 
 #endif

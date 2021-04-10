@@ -8,7 +8,7 @@ namespace {
     };
 } // namespace
 
-const std::string& paramEventToString(const ParamName& param) {
+const std::string& paramNameToString(const ParamName& param) {
     auto it = paramNameStrings.find(param);
     if (it != paramNameStrings.end()) {
         return it->second;

@@ -38,10 +38,10 @@ typedef enum {
     STATUS_STANDBY,
     STATUS_LIFTOFF,
     STATUS_FLYING,
+    STATUS_RETURNING,
     STATUS_LANDING,
     STATUS_LANDED,
     STATUS_CRASHED,
-    STATUS_RETURNING,
 } drone_status_t;
 
 void avoidObstacle(void);

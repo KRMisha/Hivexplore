@@ -81,6 +81,10 @@ export default defineComponent({
                     color = 'var(--primary-color-text)';
                     backgroundColor = 'var(--primary-color)';
                     break;
+                case DroneStatus.Returning:
+                    color = 'var(--primary-color-text)';
+                    backgroundColor = 'var(--orange-600)';
+                    break;
                 case DroneStatus.Landing:
                     color = 'var(--primary-color-text)';
                     backgroundColor = 'var(--teal-300)';
@@ -92,10 +96,6 @@ export default defineComponent({
                 case DroneStatus.Crashed:
                     color = 'var(--primary-color-text)';
                     backgroundColor = 'var(--pink-200)';
-                    break;
-                case DroneStatus.Returning:
-                    color = 'var(--primary-color-text)';
-                    backgroundColor = 'var(--orange-600)';
                     break;
             }
 

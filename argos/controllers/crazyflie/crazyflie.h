@@ -53,10 +53,10 @@ enum class DroneStatus {
     Standby,
     Liftoff,
     Flying,
+    Returning,
     Landing,
     Landed,
     Crashed,
-    Returning,
 };
 
 class CCrazyflieController : public CCI_Controller {

@@ -216,12 +216,10 @@ bool CCrazyflieController::AvoidObstacle() {
             for (const auto& packet : m_pcRABS->GetReadings()) {
                 const double horizontalAngle = packet.HorizontalBearing.GetValue();
                 // Convert packet range from cm to mm
-                const auto vectorToDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
+                const auto vectorAwayFromDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
                 static const double droneAvoidanceSensitivity = 1.0 / 3000.0;
-                leftDistanceCorrection +=
-                    calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetX()) * droneAvoidanceSensitivity;
-                backDistanceCorrection +=
-                    calculateDroneDistanceCorrection(obstacleDetectedThreshold, vectorToDrone.GetY()) * droneAvoidanceSensitivity;
+                leftDistanceCorrection += vectorAwayFromDrone.GetX() * droneAvoidanceSensitivity;
+                backDistanceCorrection += vectorAwayFromDrone.GetY() * droneAvoidanceSensitivity;
             }
         }
 

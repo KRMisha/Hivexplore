@@ -7,7 +7,7 @@ namespace {
         {ParamName::IsLedEnabled, "isLedEnabled"},
     };
 
-    const std::string unknownParamName = "unknown";
+    const std::string unknownParamNameString = "unknown";
 } // namespace
 
 const std::string& paramNameToString(ParamName paramName) {
@@ -15,5 +15,5 @@ const std::string& paramNameToString(ParamName paramName) {
     if (it != paramNameStrings.end()) {
         return it->second;
     }
-    return unknownParamName;
+    return unknownParamNameString;
 }

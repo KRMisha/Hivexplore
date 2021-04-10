@@ -231,6 +231,34 @@ void appMain(void) {
     }
 }
 
+void avoidDrone() {
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        vector_t vectorAwayFromDrone = {
+            .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
+            .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
+            .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
+        };
+
+        const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
+                                            vectorAwayFromDrone.z * vectorAwayFromDrone.z);
+        static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
+        if (vectorMagnitude > DRONE_AVOIDANCE_THRESHOLD) {
+            return;
+        }
+
+        const vector_t unitVectorAway = {
+            .x = vectorAwayFromDrone.x / vectorMagnitude,
+            .y = vectorAwayFromDrone.y / vectorMagnitude,
+            .z = vectorAwayFromDrone.z / vectorMagnitude,
+        };
+        const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
+        static const float COLLISION_AVOIDANCE_SCALING_FACTOR = CRUISE_VELOCITY * 1.05f;
+        // Y: Left, -Y: Right, X: Forward, -X: Back
+        targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
+        targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
+    }
+}
+
 void avoidObstacle(void) {
     bool isExploringAvoidanceDisallowed =
         missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF);
@@ -498,34 +526,6 @@ bool isCrashed(void) {
     }
 
     return isCrashed;
-}
-
-void avoidDrone() {
-    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
-        vector_t vectorAwayFromDrone = {
-            .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
-            .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
-            .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
-        };
-
-        const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
-                                            vectorAwayFromDrone.z * vectorAwayFromDrone.z);
-        static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
-        if (vectorMagnitude > DRONE_AVOIDANCE_THRESHOLD) {
-            return;
-        }
-
-        const vector_t unitVectorAway = {
-            .x = vectorAwayFromDrone.x / vectorMagnitude,
-            .y = vectorAwayFromDrone.y / vectorMagnitude,
-            .z = vectorAwayFromDrone.z / vectorMagnitude,
-        };
-        const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
-        static const float COLLISION_AVOIDANCE_SCALING_FACTOR = CRUISE_VELOCITY * 1.05f;
-        // Y: Left, -Y: Right, X: Forward, -X: Back
-        targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
-        targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
-    }
 }
 
 void broadcastPosition() {

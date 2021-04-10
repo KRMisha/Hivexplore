@@ -20,7 +20,7 @@ public:
 
 private:
     void StartSocket();
-    bool Send(const LogName& logName, const json& droneId, const json& variables);
+    bool Send(LogName logName, const json& droneId, const json& variables);
     void Stop();
     void SendDroneIdsToServer();
     std::vector<std::reference_wrapper<CCrazyflieController>> GetControllers();

@@ -114,6 +114,7 @@ typedef struct {
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
+    const logVarId_t batteryLevelId = logGetVarId("pm", "batteryLevel");
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
@@ -127,7 +128,6 @@ void appMain(void) {
     const logVarId_t upSensorId = logGetVarId("range", "up");
     const logVarId_t downSensorId = logGetVarId("range", "zrange");
     const logVarId_t rssiId = logGetVarId("radio", "rssi");
-    const logVarId_t batteryLevelId = logGetVarId("pm", "batteryLevel");
 
     const paramVarId_t flowDeckModuleId = paramGetVarId("deck", "bcFlow2");
     const paramVarId_t multirangerModuleId = paramGetVarId("deck", "bcMultiranger");
@@ -154,6 +154,8 @@ void appMain(void) {
             continue;
         }
 
+        batteryLevelReading = logGetUint(batteryLevelId);
+
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
         yawReading = logGetFloat(yawId);
@@ -170,8 +172,6 @@ void appMain(void) {
         downSensorReading = logGetUint(downSensorId);
 
         rssiReading = logGetUint(rssiId);
-
-        batteryLevelReading = logGetUint(batteryLevelId);
 
         targetForwardVelocity = 0.0;
         targetLeftVelocity = 0.0;

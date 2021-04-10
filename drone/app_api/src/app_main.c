@@ -265,10 +265,10 @@ void avoidObstacles(void) {
 
     if (isAvoidanceAllowed) {
         // Distance correction required to stay out of range of any obstacle
-        uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
-        uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
-        uint16_t frontDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, frontSensorReading);
-        uint16_t backDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, backSensorReading);
+        uint16_t leftDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
+        uint16_t rightDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
+        uint16_t frontDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, frontSensorReading);
+        uint16_t backDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, backSensorReading);
 
         // Velocity required to apply distance correction
         const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;
@@ -581,7 +581,7 @@ void updateWaypoint(void) {
     setPoint.position.z = targetHeight;
 }
 
-uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
+uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 

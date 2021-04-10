@@ -10,4 +10,4 @@ class DroneStatus(IntEnum):
     Landing = 3
     Landed = 4
     Crashed = 5
-    Drained = 6
+    Returning = 6

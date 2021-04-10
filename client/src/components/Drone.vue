@@ -93,9 +93,9 @@ export default defineComponent({
                     color = 'var(--primary-color-text)';
                     backgroundColor = 'var(--pink-200)';
                     break;
-                case DroneStatus.Drained:
+                case DroneStatus.Returning:
                     color = 'var(--primary-color-text)';
-                    backgroundColor = 'var(--pink-200)';
+                    backgroundColor = 'var(--orange-600)';
                     break;
             }
 

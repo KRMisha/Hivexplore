@@ -1,5 +1,5 @@
-#include <unordered_map>
 #include "log_name.h"
+#include <unordered_map>
 
 namespace {
     const std::unordered_map<LogName, std::string> logNameStrings = {

@@ -79,16 +79,13 @@ static exploring_state_t exploringState = EXPLORING_IDLE;
 static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
-// Base offset
-static point_t baseOffset = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
-
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
-static point_t initialOffsetFromBase = {}; // TODO: Initialize from server using param
+static point_t baseOffset = {};
 
 // Readings
 static float rollReading;
@@ -241,9 +238,9 @@ void appMain(void) {
 void avoidDrones(void) {
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         vector_t vectorAwayFromDrone = {
-            .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
-            .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
-            .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
+            .x = (baseOffset.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
+            .y = (baseOffset.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
+            .z = (baseOffset.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
         };
 
         const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
@@ -557,9 +554,9 @@ void broadcastPosition(void) {
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
     P2PPacketContent content = {
-        .x = positionReading.x + initialOffsetFromBase.x,
-        .y = positionReading.y + initialOffsetFromBase.y,
-        .z = positionReading.z + initialOffsetFromBase.z,
+        .x = positionReading.x + baseOffset.x,
+        .y = positionReading.y + baseOffset.y,
+        .z = positionReading.z + baseOffset.z,
         .sourceId = id,
     };
 

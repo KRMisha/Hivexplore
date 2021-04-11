@@ -34,7 +34,10 @@ namespace {
     std::uint8_t GetRandomRotationChangeCount() {
         static std::random_device randomDevice;
         static std::default_random_engine randomEngine(randomDevice());
-        static std::uniform_int_distribution<std::uint8_t> randomDistribution(2, 6);
+
+        static constexpr minRotationCount = 2;
+        static constexpr maxRotationCount = 6;
+        static std::uniform_int_distribution<std::uint8_t> randomDistribution(minRotationCount, maxRotationCount);
 
         return randomDistribution(randomEngine);
     }

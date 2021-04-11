@@ -157,9 +157,9 @@ class CrazyflieManager(DroneManager):
     def _update_crazyflies_config(self):
         try:
             self._crazyflies_config = load_crazyflies_config()
-        except (ValueError, FileNotFoundError):
+        except (FileNotFoundError, ValueError) as exc:
             self._logger.log_server_data(logging.ERROR,
-                                         f'CrazyflieManager error: Could not load Crazyflies config from \'{CRAZYFLIES_CONFIG_FILENAME}\'')
+                                         f'CrazyflieManager error: Could not load Crazyflies config from \'{CRAZYFLIES_CONFIG_FILENAME}\': {exc}')
 
     # Connection callbacks
 

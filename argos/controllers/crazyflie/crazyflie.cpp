@@ -12,6 +12,7 @@ namespace {
     static constexpr std::uint8_t obstacleTooClose = 0;
     static constexpr std::uint16_t obstacleTooFar = 4000;
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
+    static constexpr std::uint16_t openSpaceThreshold = 600;
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
     // Return to base constants
@@ -42,6 +43,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
     } catch (CARGoSException& e) {
         THROW_ARGOSEXCEPTION_NESTED("Error initializing the Crazyflie controller for robot \"" << GetId() << "\"", e);
     }
+
+    m_initialPosition = m_pcPos->GetReading().Position;
 
     Reset();
 }
@@ -267,7 +270,6 @@ void CCrazyflieController::Explore() {
     case ExploringState::Idle: {
         m_droneStatus = DroneStatus::Standby;
 
-        m_initialPosition = m_pcPos->GetReading().Position;
         m_exploringState = ExploringState::Liftoff;
     } break;
     case ExploringState::Liftoff: {
@@ -405,10 +407,10 @@ void CCrazyflieController::ReturnToBase() {
         m_droneStatus = DroneStatus::Flying;
 
         // The drone must check its right sensor when it is turning left, and its left sensor when turning right
-        static float sensorToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
+        static float sensorReadingToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
 
         // Return to base when obstacle has been passed or explore watchdog is finished
-        if ((sensorToCheck > edgeDetectedThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
+        if ((sensorReadingToCheck > edgeDetectedThreshold + openSpaceThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
             if (m_clearObstacleCounter == 0) {
                 DebugPrint("Explore: Obstacle has been passed\n");
                 m_maximumExploreTicks = initialExploreTicks;
@@ -434,7 +436,7 @@ void CCrazyflieController::ReturnToBase() {
             m_returningState = ReturningState::Brake;
         } else {
             // Reset sensor reading counter if obstacle is detected
-            if (sensorToCheck > edgeDetectedThreshold) {
+            if (sensorReadingToCheck > edgeDetectedThreshold + openSpaceThreshold) {
                 m_clearObstacleCounter--;
             } else {
                 m_clearObstacleCounter = clearObstacleTicks;
@@ -554,7 +556,7 @@ bool CCrazyflieController::Rotate() {
 
     // Wait for rotation to finish
     if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= m_rotationAngle.GetValue()) {
-        if (m_sensorReadings["front"] > edgeDetectedThreshold) {
+        if (m_sensorReadings["front"] > edgeDetectedThreshold + openSpaceThreshold) {
             m_isRotateCommandFinished = true;
             return true;
         }
@@ -610,12 +612,13 @@ void CCrazyflieController::ResetInternalStates() {
     m_isForwardCommandFinished = true;
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
+    m_isRotateToBaseCommandFinished = true;
 
     m_shouldTurnLeft = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_maximumExploreTicks = initialExploreTicks;
-    m_exploreWatchdog = m_maximumExploreTicks;
+    m_exploreWatchdog = initialExploreTicks;
     m_clearObstacleCounter = clearObstacleTicks;
 }
 

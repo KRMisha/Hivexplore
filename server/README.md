@@ -62,17 +62,6 @@ make run
 
 > Note: the Crazyradio PA must be connected to the computer.
 
-### Set the Crazyflie's offsets from the base
-
-When starting a mission, the Crazyflie's offset from base when taking off must be known. You can change each Crazyflie's offset, in meters, by modifying `server/config/crazyflies_config.json`.
-
-The axes system is the following:
-- x: Forward
-- y: Left
-- z: Up
-
-All drones must be facing forward on mission start.
-
 ### Assign a Crazyflie's address
 ```
 python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/<current address> <new address>
@@ -84,6 +73,20 @@ python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7
 ```
 
 > Note: all drone addresses should start with `E7E7E7E7`, with the form `E7E7E7E7##`. The are no restrictions on the last two bytes; this allows for a maximum of 256 possible addresses.
+
+### Set a Crazyflie's offset relative to the base
+
+When starting a mission, the Crazyflies' offsets relative to the base must be known before takeoff.
+You can change each Crazyflie's offset, in meters, by editing `server/config/crazyflies_config.json`.
+
+The coordinate system is the following:
+- X: Forward
+- Y: Left
+- Z: Up
+
+All drones must be facing the same direction on mission start.
+
+> Note: these offsets can be updated as long as the mission state is in "Standby".
 
 ### Run program to connect with the ARGoS simulation
 ```

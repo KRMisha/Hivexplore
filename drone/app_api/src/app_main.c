@@ -62,7 +62,7 @@ typedef struct {
 } P2PPacketContent;
 
 // Reference voltages
-const static float referenceVoltages[] = {
+const static float REFERENCE_VOLTAGES[] = {
     3.27, 3.61, 3.69, 3.71, 3.73, 3.75, 3.77, 3.79, 3.80, 3.82, 3.84, 3.85, 3.87, 3.91, 3.95, 3.98, 4.02, 4.08, 4.11, 4.15, 4.20,
 };
 
@@ -557,25 +557,25 @@ void resetInternalStates(void) {
 }
 
 void updateBatteryLevel(void) {
-    if (batteryVoltageReading <= referenceVoltages[0]) {
+    if (batteryVoltageReading <= REFERENCE_VOLTAGES[0]) {
         batteryLevel = 0;
         return;
     }
 
-    if (batteryVoltageReading >= referenceVoltages[20]) {
+    if (batteryVoltageReading >= REFERENCE_VOLTAGES[20]) {
         batteryLevel = 100;
         return;
     }
 
     uint8_t referenceVoltageIndex = 0;
-    while (batteryVoltageReading > referenceVoltages[referenceVoltageIndex]) {
+    while (batteryVoltageReading > REFERENCE_VOLTAGES[referenceVoltageIndex]) {
         referenceVoltageIndex++;
     }
 
     static const uint8_t PERCENTAGE_DELTA = 5;
-    float voltageDelta = (referenceVoltages[referenceVoltageIndex] - referenceVoltages[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
+    float voltageDelta = (REFERENCE_VOLTAGES[referenceVoltageIndex] - REFERENCE_VOLTAGES[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
     batteryLevel =
-        referenceVoltageIndex * PERCENTAGE_DELTA - (referenceVoltages[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
+        referenceVoltageIndex * PERCENTAGE_DELTA - (REFERENCE_VOLTAGES[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
 }
 
 void broadcastPosition(void) {

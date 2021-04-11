@@ -114,7 +114,7 @@ static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuc
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
 
 // Watchdogs (exploring)
-static uint8_t rotationChangeWatchdog;
+static uint8_t rotationChangeWatchdog = getRandomRotationChangeCount();
 
 // Latest P2P packets
 #define MAX_DRONE_COUNT 256

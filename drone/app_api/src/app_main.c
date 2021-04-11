@@ -579,6 +579,7 @@ void resetInternalStates(void) {
     emergencyState = EMERGENCY_LAND;
 
     shouldTurnLeft = true;
+    reorientationWatchdog = INITIAL_REORIENTATION_TICKS;
     returnWatchdog = MAXIMUM_RETURN_TICKS;
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
     exploreWatchdog = INITIAL_EXPLORE_TICKS;

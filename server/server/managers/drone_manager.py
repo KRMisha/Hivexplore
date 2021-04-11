@@ -127,7 +127,7 @@ class DroneManager(ABC):
         try:
             are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
             # Set mission state to returning if all drones are under 30% battery
-            are_all_drones_drained = all(self._drone_battery_levels[id] < 30 for id in self._get_drone_ids())
+            are_all_drones_discharged = all(self._drone_battery_levels[id] < 30 for id in self._get_drone_ids())
         except KeyError:
             self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
             are_all_drones_landed = False
@@ -135,7 +135,7 @@ class DroneManager(ABC):
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
-        if are_all_drones_drained and self._mission_state == MissionState.Exploring:
+        if are_all_drones_discharged and self._mission_state == MissionState.Exploring:
             self._set_mission_state(MissionState.Returning.name)
 
     def _log_console_callback(self, drone_id: str, data: str):

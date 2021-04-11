@@ -3,7 +3,7 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
-                <div v-if="warningMessage !== ''" class="p-col-12 p-p-0 p-mb-5">
+                <div v-if="warningMessage !== ''" class="p-col-12 p-p-0 p-mb-4">
                     <InlineMessage severity="info" class="p-p-2 warning-message">{{ warningMessage }}</InlineMessage>
                 </div>
 
@@ -261,6 +261,7 @@ div::v-deep(.p-inline-message) {
 .warning-message {
     width: 100%;
     margin-top: -0.5rem;
+    border-radius: 0.875rem;
 }
 
 .label {

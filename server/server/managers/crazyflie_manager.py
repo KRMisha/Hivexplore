@@ -18,18 +18,14 @@ class CrazyflieManager(DroneManager):
         super().__init__(web_socket_server, logger, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
-        self._crazyflie_uris: List[str] = []
+        self._crazyflie_uris_to_connect: List[str] = []
         self._crazyflie_base_offsets: Dict[str, Point] = {}
 
         try:
-            self._crazyflie_uris = load_crazyflie_uris()
-        except ValueError:
-            self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load URIs from file')
-
-        try:
+            self._crazyflie_uris_to_connect = load_crazyflie_uris()
             self._crazyflie_base_offsets = load_crazyflie_base_offsets()
         except ValueError:
-            self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load base offsets from file')
+            self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load crazyflies config')
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
@@ -38,7 +34,7 @@ class CrazyflieManager(DroneManager):
             'connect', lambda client_id: self._web_socket_server.send_message_to_client(
                 client_id, 'log', {
                     'group': 'Server',
-                    'line': f'The base offsets for setting up the crazyflies can be found in {CRAZYFLIES_CONFIG_FILENAME}'
+                    'line': f'The base offsets to position the Crazyflies can be found in \'{CRAZYFLIES_CONFIG_FILENAME}\''
                 }))
 
         while True:
@@ -49,7 +45,7 @@ class CrazyflieManager(DroneManager):
             await asyncio.sleep(CRAZYFLIE_CONNECTION_PERIOD_S)
 
     def _connect_crazyflies(self):
-        for uri in self._crazyflie_uris:
+        for uri in self._crazyflie_uris_to_connect:
             if uri in self._connected_crazyflies:
                 continue
 
@@ -208,18 +204,22 @@ class CrazyflieManager(DroneManager):
     # Client callbacks
 
     def _set_mission_state(self, mission_state_str: str):
-        super()._set_mission_state(mission_state_str)
+        try:
+            new_mission_state = MissionState[mission_state_str]
+        except KeyError:
+            self._logger.log_server_data(logging.ERROR, f'Crazyflie Manager error: Unknown mission state received: {mission_state_str}')
+            return
 
-        if self._mission_state == MissionState.Exploring:
+        if new_mission_state == MissionState.Exploring:
             try:
                 self._crazyflie_base_offsets = load_crazyflie_base_offsets()
             except ValueError:
-                self._logger.log_server_data(logging.ERROR, "Crazyflie Manager error: Could not load offsets from base")
-                self._logger.log_server_data(logging.INFO, "Crazyflie Manager: Changing mission state back to Standby")
-                super()._set_mission_state(MissionState.Standby.name)
+                self._logger.log_server_data(logging.ERROR, 'CrazyflieManager warning: Could not load base offsets from file')
                 return
 
             for drone_id, base_offset in self._crazyflie_base_offsets.items():
                 self._set_drone_param('hivexplore.baseOffsetX', drone_id, base_offset.x)
                 self._set_drone_param('hivexplore.baseOffsetY', drone_id, base_offset.y)
                 self._set_drone_param('hivexplore.baseOffsetZ', drone_id, base_offset.z)
+
+        super()._set_mission_state(mission_state_str)

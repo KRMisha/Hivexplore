@@ -238,9 +238,9 @@ void appMain(void) {
 void avoidDrones(void) {
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         vector_t vectorAwayFromDrone = {
-            .x = (baseOffset.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
-            .y = (baseOffset.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
-            .z = (baseOffset.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
+            .x = (positionReading.x + baseOffset.x) - latestP2PPackets[activeP2PIds[i]].x,
+            .y = (positionReading.y + baseOffset.y) - latestP2PPackets[activeP2PIds[i]].y,
+            .z = (positionReading.z + baseOffset.z) - latestP2PPackets[activeP2PIds[i]].z,
         };
 
         const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +

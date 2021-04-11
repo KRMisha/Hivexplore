@@ -109,7 +109,7 @@ static float targetForwardVelocity;
 static float targetLeftVelocity;
 static float targetHeight;
 static float targetYawRate;
-static float targetYawToBase;
+static float targetYaw;
 
 // Watchdogs
 static uint16_t reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS; // To reorient drone away from the swarm's center of mass
@@ -187,7 +187,7 @@ void appMain(void) {
         targetLeftVelocity = 0.0;
         targetHeight = 0.0;
         targetYawRate = 0.0;
-        targetYawToBase = 0.0;
+        targetYaw = 0.0;
 
         const bool shouldNotBroadcastPosition =
             missionState == MISSION_STANDBY ||
@@ -283,7 +283,7 @@ void explore(void) {
 
         if (reorientationWatchdog == 0 ) {
             DEBUG_PRINT("Going to rotate away!");
-            targetYawRate = calculateAngleAwayFromCenterOfMass();
+            targetYaw = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;
             break;
         }
@@ -329,11 +329,11 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         // Calculate rotation angle to turn towards base
-        //targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+        //targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
         // // If the drone is towards its base
         // static const double yawEpsilon = 5.0;
-        // double yawDifference = fabs(targetYawToBase - yawReading);
+        // double yawDifference = fabs(targetYaw - yawReading);
         // if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
         //     DEBUG_PRINT("Return: Finished rotating towards base\n");
         //     returningState = RETURNING_RETURN;
@@ -342,12 +342,12 @@ void returnToBase(void) {
         //     targetHeight += EXPLORATION_HEIGHT;
         //     updateWaypoint();
         //     setPoint.mode.yaw = modeAbs;
-        //     setPoint.attitude.yaw = targetYawToBase;
+        //     setPoint.attitude.yaw = targetYaw;
         // }
         // // Calculate rotation angle to turn towards base
-        // targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+        // targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
-        targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+        targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
         if (rotateTowardsTargetYaw()) {
             returningState = RETURNING_RETURN;
@@ -490,7 +490,7 @@ bool rotate(void) {
 bool rotateTowardsTargetYaw() {
     // If the drone is towards its target yaw
     static const double yawEpsilon = 5.0;
-    double yawDifference = fabs(targetYawToBase - yawReading);
+    double yawDifference = fabs(targetYaw - yawReading);
     if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
         DEBUG_PRINT("Return: Finished rotating towards target yaw\n");
         return true;
@@ -499,7 +499,7 @@ bool rotateTowardsTargetYaw() {
         targetHeight += EXPLORATION_HEIGHT;
         updateWaypoint();
         setPoint.mode.yaw = modeAbs;
-        setPoint.attitude.yaw = targetYawToBase;
+        setPoint.attitude.yaw = targetYaw;
         return false;
     }
 }

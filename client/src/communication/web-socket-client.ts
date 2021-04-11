@@ -80,16 +80,16 @@ export class WebSocketClient {
 
         this.socket.onopen = () => {
             console.log(`Connection to ${serverUrl} successful`);
-            this.timeout = baseConnectionTimeout;
             this._isConnected.value = true;
+            this.timeout = baseConnectionTimeout;
         };
 
         this.socket.onclose = () => {
+            this._isConnected.value = false;
             setTimeout(() => {
                 this.connect();
             }, this.timeout);
             this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
-            this._isConnected.value = false;
             console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds`);
         };
 

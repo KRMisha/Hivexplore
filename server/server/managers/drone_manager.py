@@ -23,6 +23,8 @@ class DroneManager(ABC):
         self._drone_battery_levels: Dict[str, int] = {}
         self._are_all_drones_charged = False
 
+        self._LOW_BATTERY_TRESHOLD = 30
+
         # Client bindings
         self._web_socket_server.bind(WebSocketEvent.CONNECT, self._web_socket_connect_callback)
         self._web_socket_server.bind(WebSocketEvent.MISSION_STATE, self._set_mission_state)
@@ -59,8 +61,7 @@ class DroneManager(ABC):
         self._web_socket_server.send_drone_message(WebSocketEvent.BATTERY_LEVEL, drone_id, battery_level)
 
         try:
-            MINIMUM_BATTERY_LEVEL = 30
-            are_all_drones_charged = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
+            are_all_drones_charged = all(self._drone_battery_levels[id] >= self._LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
         except KeyError:
             are_all_drones_charged = False
 
@@ -127,7 +128,7 @@ class DroneManager(ABC):
         try:
             are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
             # Set mission state to returning if all drones are under 30% battery
-            are_all_drones_discharged = all(self._drone_battery_levels[id] < 30 for id in self._get_drone_ids())
+            are_all_drones_discharged = all(self._drone_battery_levels[id] < self._LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
         except KeyError:
             self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
             are_all_drones_landed = False

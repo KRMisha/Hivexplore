@@ -28,7 +28,7 @@ class CrazyflieManager(DroneManager):
             self._crazyflie_uris_to_connect = load_crazyflie_uris()
             self._crazyflie_base_offsets = load_crazyflie_base_offsets()
         except ValueError:
-            self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load crazyflies config')
+            self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load Crazyflies config')
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
@@ -37,7 +37,7 @@ class CrazyflieManager(DroneManager):
             WebSocketEvent.CONNECT, lambda client_id: self._web_socket_server.send_message_to_client(
                 client_id, 'log', {
                     'group': 'Server',
-                    'line': f'The base offsets to position the Crazyflies can be found in \'{CRAZYFLIES_CONFIG_FILENAME}\''
+                    'line': f'The base offsets to position the Crazyflies can be found in \'{CRAZYFLIES_CONFIG_FILENAME}\'',
                 }))
 
         while True:
@@ -211,7 +211,7 @@ class CrazyflieManager(DroneManager):
         try:
             new_mission_state = MissionState[mission_state_str]
         except KeyError:
-            self._logger.log_server_data(logging.ERROR, f'Crazyflie Manager error: Unknown mission state received: {mission_state_str}')
+            self._logger.log_server_data(logging.ERROR, f'CrazyflieManager error: Unknown mission state received: {mission_state_str}')
             self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
             return
 

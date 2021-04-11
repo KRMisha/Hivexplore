@@ -69,7 +69,8 @@ static const float EXPLORATION_HEIGHT = 0.3f;
 static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
-static const uint64_t MAXIMUM_REORIENTATION_TICKS = 1500;
+static const uint64_t INITIAL_REORIENTATION_TICKS = 100;
+static const uint64_t MAXIMUM_REORIENTATION_TICKS = 600;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
 static const uint64_t INITIAL_EXPLORE_TICKS = 600;
 static const uint16_t CLEAR_OBSTACLE_TICKS = 100;
@@ -109,7 +110,7 @@ static float targetYawRate;
 static float targetYaw;
 
 // Watchdogs
-static uint16_t reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS; // To reorient drone away from the swarm's center of mass
+static uint16_t reorientationWatchdog = INITIAL_REORIENTATION_TICKS; // To reorient drone away from the swarm's center of mass
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically

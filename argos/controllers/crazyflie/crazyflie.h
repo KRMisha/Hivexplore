@@ -151,7 +151,7 @@ private:
     CRadians m_rotationAngle;
     bool m_isRotateTowardsTargetCommandFinished = true;
     CRadians m_targetYaw;
-    std::uint16_t m_stabilizeRotationCounter; // Ensure drone is oriented towards the base before resuming
+    std::uint16_t m_stabilizeRotationCounter; // Ensure drone is oriented towards the target yaw before resuming
 
     // Return to base variables
     bool m_shouldTurnLeft = true;

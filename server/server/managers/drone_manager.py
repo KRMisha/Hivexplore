@@ -131,8 +131,8 @@ class DroneManager(ABC):
 
         try:
             are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
-        except KeyError:
-            self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
+        except KeyError as exc:
+            self._logger.log_server_data(logging.WARNING, f'DroneManager warning: Unknown drone status: {exc}')
             are_all_drones_landed = False
 
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):

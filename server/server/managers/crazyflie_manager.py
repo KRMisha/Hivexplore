@@ -79,7 +79,7 @@ class CrazyflieManager(DroneManager):
         self._connected_crazyflies[drone_id].param.set_value(param, value)
 
     def _get_drone_base_offset(self, drone_id: str) -> Point:
-        return self._crazyflie_base_offsets[drone_id]
+        return self._crazyflie_base_offsets.get(drone_id, Point(x=0, y=0, z=0))
 
     # Setup
 
@@ -208,24 +208,17 @@ class CrazyflieManager(DroneManager):
     # Client callbacks
 
     def _set_mission_state(self, mission_state_str: str):
-        try:
-            new_mission_state = MissionState[mission_state_str]
-        except KeyError:
-            self._logger.log_server_data(logging.ERROR, f'CrazyflieManager error: Unknown mission state received: {mission_state_str}')
-            self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
-            return
+        super()._set_mission_state(mission_state_str)
 
-        if new_mission_state == MissionState.Exploring:
+        if self._mission_state == MissionState.Exploring:
             try:
                 self._crazyflie_base_offsets = load_crazyflie_base_offsets()
             except ValueError:
-                self._logger.log_server_data(logging.ERROR, 'CrazyflieManager warning: Could not load base offsets from file')
-                self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
-                return
+                self._logger.log_server_data(
+                    logging.WARNING, 'CrazyflieManager warning: Could not load Crazyflie config, defaulting all base offsets to (0, 0, 0)')
 
-            for drone_id, base_offset in self._crazyflie_base_offsets.items():
+            for drone_id in self._get_drone_ids():
+                base_offset = self._get_drone_base_offset(drone_id)
                 self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_X.value}', drone_id, base_offset.x)
                 self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_Y.value}', drone_id, base_offset.y)
                 self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_Z.value}', drone_id, base_offset.z)
-
-        super()._set_mission_state(mission_state_str)

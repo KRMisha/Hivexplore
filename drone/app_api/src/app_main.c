@@ -73,7 +73,7 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
-static bool isM1LedOn = false;
+static bool isLedEnabled = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
@@ -110,6 +110,12 @@ typedef struct {
     float z;
     uint8_t sourceId;
 } P2PPacketContent;
+
+// Latest P2P packets
+#define MAX_DRONE_COUNT 256
+static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
+static uint8_t activeP2PIds[MAX_DRONE_COUNT] = {};
+static uint8_t activeP2PIdsCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -152,7 +158,7 @@ void appMain(void) {
     while (true) {
         vTaskDelay(M2T(10));
 
-        ledSet(LED_GREEN_R, isM1LedOn);
+        ledSet(LED_GREEN_R, isLedEnabled);
 
         if (isOutOfService) {
             ledSet(LED_RED_R, true);
@@ -182,8 +188,14 @@ void appMain(void) {
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
 
+        const bool shouldNotBroadcastPosition =
+            missionState == MISSION_STANDBY ||
+            (missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF)) ||
+            (missionState == MISSION_RETURNING && returningState == RETURNING_IDLE) ||
+            (missionState == MISSION_EMERGENCY && emergencyState == EMERGENCY_IDLE);
+
         static const uint8_t broadcastProbabilityPercentage = 5;
-        if ((rand() % 100) < broadcastProbabilityPercentage) {
+        if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
 
@@ -520,9 +532,21 @@ void broadcastPosition() {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    P2PPacketContent content;
-    memcpy(&content, &packet->data[0], sizeof(content));
-    // TODO: Forward P2P content to methods needing the information
+    P2PPacketContent* content = (P2PPacketContent*)packet->data;
+    latestP2PPackets[content->sourceId] = *content;
+
+    bool isAlreadyInContactWithSource = false;
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        if (activeP2PIds[i] == content->sourceId) {
+            isAlreadyInContactWithSource = true;
+            break;
+        }
+    }
+
+    if (!isAlreadyInContactWithSource) {
+        activeP2PIds[activeP2PIdsCount] = content->sourceId;
+        activeP2PIdsCount++;
+    }
 }
 
 void updateWaypoint(void) {
@@ -549,5 +573,5 @@ LOG_GROUP_STOP(hivexplore)
 
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
-PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
+PARAM_ADD(PARAM_UINT8, isLedEnabled, &isLedEnabled)
 PARAM_GROUP_STOP(hivexplore)

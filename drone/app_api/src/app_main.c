@@ -313,7 +313,7 @@ void explore(void) {
         droneStatus = STATUS_FLYING;
 
         if (reorientationWatchdog == 0 ) {
-            DEBUG_PRINT("Going to rotate away!");
+            DEBUG_PRINT("Reorienting!/n");
             targetYaw = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;
             break;
@@ -328,7 +328,7 @@ void explore(void) {
 
         if (rotateTowardsTargetYaw()) {
             reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
-            DEBUG_PRINT("Finished rotate away!");
+            DEBUG_PRINT("Finished reorienting!/n");
             exploringState = EXPLORING_EXPLORE;
         }
     }
@@ -648,14 +648,12 @@ uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_
 }
 
 double calculateAngleAwayFromCenterOfMass() {
-
     // Drone's current position
-    // centerOfMass.x = initialOffsetFromBase.x + positionReading.x;
-    // centerOfMass.y = initialOffsetFromBase.y + positionReading.y;
-    point_t centerOfMass = {
+    point_t currentPosition = {
         .x = initialOffsetFromBase.x + positionReading.x,
         .y = initialOffsetFromBase.y + positionReading.y,
     };
+    point_t centerOfMass = currentPosition;
 
     // Accumulation of other drones' positions received
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
@@ -667,17 +665,12 @@ double calculateAngleAwayFromCenterOfMass() {
     centerOfMass.x /= (activeP2PIdsCount + 1);
     centerOfMass.y /= (activeP2PIdsCount + 1);
 
-    DEBUG_PRINT("Center of mass x: %f", (double)centerOfMass.x);
-    DEBUG_PRINT("Center of mass y: %f", (double)centerOfMass.y);
-
     vector_t vectorAway = {
-        .x = (initialOffsetFromBase.x + positionReading.x) - centerOfMass.x,
-        .y = (initialOffsetFromBase.y + positionReading.y) - centerOfMass.y,
+        .x = currentPosition.x - centerOfMass.x,
+        .y = currentPosition.y - centerOfMass.y,
     };
 
-    double angleAway = atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
-    DEBUG_PRINT("Angle away: %f", angleAway);
-    return angleAway;
+    return atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
 }
 
 LOG_GROUP_START(hivexplore)

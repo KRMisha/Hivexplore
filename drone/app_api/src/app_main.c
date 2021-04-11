@@ -429,6 +429,7 @@ void returnToBase(void) {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
+            DEBUG_PRINT("Landed\n");
             returningState = RETURNING_IDLE;
         }
     } break;
@@ -446,8 +447,7 @@ void emergencyLand(void) {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
-            DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
-            DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
+            DEBUG_PRINT("Landed\n");
             emergencyState = EMERGENCY_IDLE;
         }
     } break;

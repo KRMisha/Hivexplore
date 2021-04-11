@@ -328,8 +328,8 @@ void explore(void) {
         droneStatus = STATUS_FLYING;
 
         if (rotateTowardsTargetYaw()) {
-            reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
             DEBUG_PRINT("Finished reorienting!/n");
+            reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
             exploringState = EXPLORING_EXPLORE;
         }
     }
@@ -627,10 +627,6 @@ void updateWaypoint(void) {
     setPoint.position.z = targetHeight;
 }
 
-uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
-    return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
-}
-
 double calculateAngleAwayFromCenterOfMass() {
     // Drone's current position
     point_t currentPosition = {
@@ -655,6 +651,10 @@ double calculateAngleAwayFromCenterOfMass() {
     };
 
     return atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
+}
+
+uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
+    return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
 LOG_GROUP_START(hivexplore)

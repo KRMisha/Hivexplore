@@ -562,7 +562,7 @@ void updateBatteryLevel(void) {
         return;
     }
 
-    if (batteryVoltageReading >= REFERENCE_VOLTAGES[20]) {
+    if (batteryVoltageReading >= REFERENCE_VOLTAGES[sizeof(REFERENCE_VOLTAGES) / sizeof(REFERENCE_VOLTAGES[0])]) {
         batteryLevel = 100;
         return;
     }

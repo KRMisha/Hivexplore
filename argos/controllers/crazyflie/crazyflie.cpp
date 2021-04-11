@@ -13,8 +13,10 @@ namespace {
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
-    // Return to base constants
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
+    static constexpr std::uint16_t maximumReorientationTicks = 200;
+
+    // Return to base constants
     static constexpr std::uint16_t maximumReturnTicks = 800;
     static constexpr std::uint64_t initialExploreTicks = 600;
     static constexpr std::uint16_t clearObstacleTicks = 120;
@@ -220,10 +222,10 @@ bool CCrazyflieController::AvoidObstacle() {
             for (const auto& packet : m_pcRABS->GetReadings()) {
                 const double horizontalAngle = packet.HorizontalBearing.GetValue();
                 // Convert packet range from cm to mm
-                const auto vectorAwayFromDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
+                const auto vectorToDrone = packet.Range * 10 * CVector3(std::cos(horizontalAngle), std::sin(horizontalAngle), 0.0);
                 static const double droneAvoidanceSensitivity = 1.0 / 3000.0;
-                leftDistanceCorrection += vectorAwayFromDrone.GetX() * droneAvoidanceSensitivity;
-                backDistanceCorrection += vectorAwayFromDrone.GetY() * droneAvoidanceSensitivity;
+                leftDistanceCorrection += vectorToDrone.GetX() * droneAvoidanceSensitivity;
+                backDistanceCorrection += vectorToDrone.GetY() * droneAvoidanceSensitivity;
             }
         }
 
@@ -278,9 +280,31 @@ void CCrazyflieController::Explore() {
     } break;
     case ExploringState::Explore: {
         m_droneStatus = DroneStatus::Flying;
-
+        if (m_reorientationWatchdog == 0) {
+            DebugPrint("Reorienting!/n");
+            m_exploringState = ExploringState::BrakeAway;
+            break;
+        }
         if (!Forward()) {
             m_exploringState = ExploringState::Brake;
+        }
+        m_reorientationWatchdog--;
+    } break;
+    case ExploringState::BrakeAway: {
+        m_droneStatus = DroneStatus::Flying;
+
+        if (Brake()) {
+            m_targetYaw = CalculateAngleAwayFromCenterOfMass();
+            m_exploringState = ExploringState::RotateAway;
+        }
+    } break;
+    case ExploringState::RotateAway: {
+        m_droneStatus = DroneStatus::Flying;
+
+        if (RotateTowardsTargetYaw()) {
+            DebugPrint("Finished eorienting!/n");
+            m_reorientationWatchdog = maximumReorientationTicks;
+            m_exploringState = ExploringState::Explore;
         }
     } break;
     case ExploringState::Brake: {
@@ -319,52 +343,60 @@ void CCrazyflieController::ReturnToBase() {
         // Brake before rotation towards base
         if (Brake()) {
             DebugPrint("Return: Braking towards base finished\n");
+            m_targetYaw = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
+                                                    m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
+                                CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
+
             m_returningState = ReturningState::RotateTowardsBase;
         }
     } break;
     case ReturningState::RotateTowardsBase: {
         m_droneStatus = DroneStatus::Flying;
 
-        // Turn drone towards its base
-        if (m_isRotateToBaseCommandFinished) {
-            DebugPrint("Return: Rotating towards base\n");
 
-            // Calculate rotation angle to turn towards base
-            m_targetYawToBase = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
-                                                    m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
-                                CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
+        // // Turn drone towards its base
+        // if (m_isRotateToBaseCommandFinished) {
+        //     DebugPrint("Return: Rotating towards base\n");
 
-            m_pcPropellers->SetAbsoluteYaw(m_targetYawToBase);
-            m_isRotateToBaseCommandFinished = false;
-        }
+        //     // Calculate rotation angle to turn towards base
+        //     m_targetYawToBase = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
+        //                                             m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
+        //                         CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
 
-        // Get current absolute yaw
-        CRadians angleRadians;
-        CVector3 angleUnitVector;
-        m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
-        CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
+        //     m_pcPropellers->SetAbsoluteYaw(m_targetYawToBase);
+        //     m_isRotateToBaseCommandFinished = false;
+        // }
 
-        // If the drone is towards its base, decrease stabilize rotation counter
-        static const CRadians yawEpsilon = CRadians::PI / 64;
-        CRadians yawDifference = currentAbsoluteYaw - m_targetYawToBase;
+        // // Get current absolute yaw
+        // CRadians angleRadians;
+        // CVector3 angleUnitVector;
+        // m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
+        // CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
 
-        bool isYawTowardsBase =
-            (((yawDifference <= yawEpsilon) && (yawDifference >= -yawEpsilon)) ||
-             ((yawDifference <= (CRadians::PI * 2 + yawEpsilon)) && (yawDifference >= (CRadians::PI * 2 - yawEpsilon))));
+        // // If the drone is towards its base, decrease stabilize rotation counter
+        // static const CRadians yawEpsilon = CRadians::PI / 64;
+        // CRadians yawDifference = currentAbsoluteYaw - m_targetYawToBase;
 
-        if (!m_isRotateToBaseCommandFinished && m_stabilizeRotationCounter != 0 && isYawTowardsBase) {
-            m_stabilizeRotationCounter--;
-        }
+        // bool isYawTowardsBase =
+        //     (((yawDifference <= yawEpsilon) && (yawDifference >= -yawEpsilon)) ||
+        //      ((yawDifference <= (CRadians::PI * 2 + yawEpsilon)) && (yawDifference >= (CRadians::PI * 2 - yawEpsilon))));
 
-        // If the drone orientation is towards its base and is stable
-        if (m_stabilizeRotationCounter == 0) {
-            m_isRotateToBaseCommandFinished = true;
+        // if (!m_isRotateToBaseCommandFinished && m_stabilizeRotationCounter != 0 && isYawTowardsBase) {
+        //     m_stabilizeRotationCounter--;
+        // }
 
-            // Reset counter
-            m_stabilizeRotationCounter = stabilizeRotationTicks;
+        // // If the drone orientation is towards its base and is stable
+        // if (m_stabilizeRotationCounter == 0) {
+        //     m_isRotateToBaseCommandFinished = true;
 
-            DebugPrint("Return: Finished rotating towards base\n");
-            m_returningState = ReturningState::Return;
+        //     // Reset counter
+        //     m_stabilizeRotationCounter = stabilizeRotationTicks;
+
+        //     DebugPrint("Return: Finished rotating towards base\n");
+        //     m_returningState = ReturningState::Return;
+        // }
+        if (RotateTowardsTargetYaw()){
+             m_returningState = ReturningState::Return;
         }
     } break;
     case ReturningState::Return: {
@@ -563,6 +595,46 @@ bool CCrazyflieController::Rotate() {
     return false;
 }
 
+bool CCrazyflieController::RotateTowardsTargetYaw() {
+
+    // Turn drone towards its target yaw
+    if (m_isRotateTowardsTargetCommandFinished) {
+        DebugPrint("Rotating towards target yaw\n");
+        m_pcPropellers->SetAbsoluteYaw(m_targetYaw);
+        m_isRotateTowardsTargetCommandFinished = false;
+    }
+
+    // Get current absolute yaw
+    CRadians angleRadians;
+    CVector3 angleUnitVector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
+    CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
+
+    // If the drone is towards its target yaw, decrease stabilize rotation counter
+    static const CRadians yawEpsilon = CRadians::PI / 64;
+    CRadians yawDifference = currentAbsoluteYaw - m_targetYaw;
+
+    bool isYawTowardsTargetYaw =
+        (((yawDifference <= yawEpsilon) && (yawDifference >= -yawEpsilon)) ||
+            ((yawDifference <= (CRadians::PI * 2 + yawEpsilon)) && (yawDifference >= (CRadians::PI * 2 - yawEpsilon))));
+
+    if (!m_isRotateTowardsTargetCommandFinished && m_stabilizeRotationCounter != 0 && isYawTowardsTargetYaw) {
+        m_stabilizeRotationCounter--;
+    }
+
+    // If the drone orientation is towards its target yaw and is stable
+    if (m_stabilizeRotationCounter == 0) {
+        m_isRotateTowardsTargetCommandFinished = true;
+
+        // Reset counter
+        m_stabilizeRotationCounter = stabilizeRotationTicks;
+
+        DebugPrint("Finished rotating towards target yaw\n");
+        return true;
+    }
+    return false;
+}
+
 // Returns true when the action is finished
 bool CCrazyflieController::Land() {
     static constexpr double targetDroneLandHeight = 0.09;
@@ -612,6 +684,7 @@ void CCrazyflieController::ResetInternalStates() {
 
     m_shouldTurnLeft = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
+    m_reorientationWatchdog = maximumReorientationTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_maximumExploreTicks = initialExploreTicks;
     m_exploreWatchdog = m_maximumExploreTicks;
@@ -639,6 +712,27 @@ void CCrazyflieController::UpdateRssi() {
 void CCrazyflieController::PingOtherDrones() {
     static constexpr std::uint8_t pingData = 0;
     m_pcRABA->SetData(sizeof(pingData), pingData);
+}
+
+CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
+
+    CVector2 currentPosition = CVector2(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY());
+    CVector2 centerOfMass = currentPosition;
+
+    std::uint16_t nDronesDetected = 0;
+    for (const auto& packet : m_pcRABS->GetReadings()) {
+        const double horizontalAngle = packet.HorizontalBearing.GetValue();
+        // Convert packet range from cm to mm
+        const auto vectorToDrone = packet.Range * 10 * CVector2(std::cos(horizontalAngle), std::sin(horizontalAngle));
+        centerOfMass = CVector2(centerOfMass.GetX() + currentPosition.GetX() + vectorToDrone.GetX(),
+                                centerOfMass.GetY() + currentPosition.GetY() + vectorToDrone.GetY());
+        nDronesDetected++;
+    }
+
+    centerOfMass = CVector2(centerOfMass.GetX() / (nDronesDetected + 1), centerOfMass.GetY() / (nDronesDetected + 1));
+    const auto vectorAway = CVector2(currentPosition.GetX() - centerOfMass.GetX(), currentPosition.GetY() - centerOfMass.GetY());
+    return (CRadians(std::atan2(vectorAway.GetY(), vectorAway.GetX())) + CRadians::PI / 2); // Add PI / 2 because a zero degree yaw is along negative y;
+
 }
 
 void CCrazyflieController::DebugPrint(const std::string& text) {

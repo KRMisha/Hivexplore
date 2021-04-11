@@ -224,8 +224,8 @@ class CrazyflieManager(DroneManager):
                 return
 
             for drone_id, base_offset in self._crazyflie_base_offsets.items():
-                self._set_drone_param('hivexplore.baseOffsetX', drone_id, base_offset.x)
-                self._set_drone_param('hivexplore.baseOffsetY', drone_id, base_offset.y)
-                self._set_drone_param('hivexplore.baseOffsetZ', drone_id, base_offset.z)
+                self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_X.value}', drone_id, base_offset.x)
+                self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_Y.value}', drone_id, base_offset.y)
+                self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_Z.value}', drone_id, base_offset.z)
 
         super()._set_mission_state(mission_state_str)

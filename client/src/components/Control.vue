@@ -117,10 +117,10 @@ export default defineComponent({
 
         const isStartMissionButtonDisabled = computed(() => {
             return (
+                !webSocketClient.isConnected ||
                 droneCount.value === 0 ||
-                missionState.value !== MissionState.Standby ||
                 !areAllDronesCharged.value ||
-                !webSocketClient.isConnected
+                missionState.value !== MissionState.Standby
             );
         });
 

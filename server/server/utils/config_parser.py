@@ -53,8 +53,7 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
         return
 
     try:
-        crazyflies_config[new_uri] = crazyflies_config[old_uri]
-        del crazyflies_config[old_uri]
+        crazyflies_config[new_uri] = crazyflies_config.pop(old_uri)
     except KeyError:
         crazyflies_config[new_uri] = {
             'baseOffset': {

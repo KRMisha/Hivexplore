@@ -22,6 +22,7 @@ class DroneManager(ABC):
         self._drone_leds: Dict[str, bool] = {}
         self._drone_battery_levels: Dict[str, int] = {}
         self._are_all_drones_charged = False
+        self._are_all_drones_discharged = False
 
         self._LOW_BATTERY_TRESHOLD = 30
 
@@ -62,12 +63,17 @@ class DroneManager(ABC):
 
         try:
             are_all_drones_charged = all(self._drone_battery_levels[id] >= self._LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
+            are_all_drones_discharged = all(self._drone_battery_levels[id] < self._LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
         except KeyError:
             are_all_drones_charged = False
+            are_all_drones_discharged = False
 
         if are_all_drones_charged != self._are_all_drones_charged:
             self._are_all_drones_charged = are_all_drones_charged
             self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
+
+        if are_all_drones_discharged != self._are_all_drones_discharged:
+            self._are_all_drones_discharged = are_all_drones_discharged
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -127,8 +133,6 @@ class DroneManager(ABC):
 
         try:
             are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
-            # Set mission state to returning if all drones are under 30% battery
-            are_all_drones_discharged = all(self._drone_battery_levels[id] < self._LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
         except KeyError:
             self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
             are_all_drones_landed = False
@@ -136,7 +140,8 @@ class DroneManager(ABC):
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
-        if are_all_drones_discharged and self._mission_state == MissionState.Exploring:
+        # Set mission state to returning if all drones are under 30% battery
+        if self._are_all_drones_discharged and self._mission_state == MissionState.Exploring:
             self._set_mission_state(MissionState.Returning.name)
 
     def _log_console_callback(self, drone_id: str, data: str):

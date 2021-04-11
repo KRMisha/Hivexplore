@@ -1,22 +1,16 @@
 import json
-from typing import Dict, List
+from typing import Any, Dict
 from cflib.crazyflie.mem import MemoryElement
 from cflib.crazyflie.mem.i2c_element import I2CElement
 from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
-from server.tuples import Point
 
 CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_config.json'
 
 
-def load_crazyflie_uris() -> List[str]:
+def load_crazyflies_config() -> Dict[str, Dict[str, Any]]:
     with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
-        try:
-            crazyflies_config = json.load(file)
-            return [crazyflie_config['uri'] for crazyflie_config in crazyflies_config]
-        except ValueError:
-            print(f'load_crazyflie_uris error: Could not load URIs from \'{CRAZYFLIES_CONFIG_FILENAME}\'')
-            raise
+        return json.load(file)
 
 
 def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
@@ -35,39 +29,34 @@ def set_crazyflie_radio_address(crazyflie: Crazyflie, radio_address: int):
     eeprom.write_data(lambda eeprom, addr: _data_written(crazyflie, eeprom, addr))
 
 
-def load_crazyflie_base_offsets() -> Dict[str, Point]:
-    with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
-        try:
-            crazyflies_config = json.load(file)
-            return {crazyflie_config['uri']: Point(**crazyflie_config['baseOffset']) for crazyflie_config in crazyflies_config}
-        except ValueError:
-            print(f'load_crazyflie_base_offsets error: Could not load base offsets from \'{CRAZYFLIES_CONFIG_FILENAME}\'')
-            raise
-
-
 def _data_written(crazyflie: Crazyflie, eeprom: I2CElement, _addr: int):
     eeprom.update(lambda eeprom: _data_updated(crazyflie, eeprom))
 
 
 def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
-    old_address = crazyflie.link_uri.split('/')[-1]
+    old_uri = crazyflie.link_uri
+    old_address = old_uri.split('/')[-1]
     new_address = format(eeprom.elements['radio_address'], 'X')
-    new_uri = crazyflie.link_uri.replace(old_address, new_address)
+    new_uri = old_uri.replace(old_address, new_address)
 
-    print(f'Changed URI of drone {crazyflie.link_uri} to {new_uri}')
+    print(f'Changed URI of drone {old_uri} to {new_uri}')
     print('Restarting drone...')
 
-    PowerSwitch(crazyflie.link_uri).stm_power_cycle()
+    PowerSwitch(old_uri).stm_power_cycle()
 
     with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
         crazyflies_config = json.load(file)
 
-    for crazyflie_config in crazyflies_config:
-        if crazyflie_config['uri'] == crazyflie.link_uri:
-            crazyflie_config['uri'] = new_uri
-            break
-    else:
-        crazyflies_config.append({'uri': new_uri, 'baseOffset': {'x': 0, 'y': 0, 'z': 0}})
+    try:
+        crazyflies_config[new_uri] = crazyflies_config[old_uri]
+    except KeyError:
+        crazyflies_config[new_uri] = {
+            'baseOffset': {
+                'x': 0,
+                'y': 0,
+                'z': 0,
+            },
+        }
 
     with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as file:
         json.dump(crazyflies_config, file)

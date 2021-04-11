@@ -140,8 +140,8 @@ class DroneManager(ABC):
 
     def _web_socket_connect_callback(self, client_id: str):
         self._send_drone_ids(client_id)
-        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MISSION_STATE, self._mission_state.name)
+        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
             self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.LED, drone_id, is_led_enabled)
@@ -151,7 +151,7 @@ class DroneManager(ABC):
             new_mission_state = MissionState[mission_state_str]
         except KeyError:
             self._logger.log_server_data(logging.ERROR, f'DroneManager error: Unknown mission state received: {mission_state_str}')
-            self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
+            self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
             return
 
         if new_mission_state == MissionState.Exploring:
@@ -160,14 +160,13 @@ class DroneManager(ABC):
                 self._logger.log_server_data(
                     logging.WARNING,
                     'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
-                self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
+                self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
                 return
 
             # Deny changing mission state to Exploring if no drones are connected
             if len(self._get_drone_ids()) == 0:
-                self._logger.log_server_data(logging.WARNING,
-                                             'Dronemanager warning: Could not start mission since no drones are connected')
-                self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
+                self._logger.log_server_data(logging.WARNING, 'Dronemanager warning: Could not start mission since no drones are connected')
+                self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
                 return
 
         self._mission_state = new_mission_state

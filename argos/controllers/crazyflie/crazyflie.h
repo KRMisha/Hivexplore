@@ -75,7 +75,7 @@ public:
     void SetParamData(const std::string& param, json value);
 
 private:
-    bool AvoidObstacle();
+    bool AvoidObstaclesAndDrones();
     void Explore();
     void ReturnToBase();
     void EmergencyLand();

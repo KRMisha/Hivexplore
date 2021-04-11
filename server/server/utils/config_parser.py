@@ -64,4 +64,4 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
         }
 
     with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as file:
-        json.dump(crazyflies_config, file, sort_keys=True, indent=4)
+        json.dump(crazyflies_config, file, indent=4, sort_keys=True)

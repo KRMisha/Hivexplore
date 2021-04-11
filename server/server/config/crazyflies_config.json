@@ -1,8 +1,16 @@
 {
     "radio://0/80/2M/E7E7E7E701": {
-        "baseOffset": { "x": 0, "y": 0, "z": 0 }
+        "baseOffset": {
+            "x": 0,
+            "y": 0.3,
+            "z": 0
+        }
     },
     "radio://0/80/2M/E7E7E7E702": {
-        "baseOffset": { "x": 0, "y": 0, "z": 0 }
+        "baseOffset": {
+            "x": 0,
+            "y": -0.3,
+            "z": 0
+        }
     }
 }

@@ -48,9 +48,9 @@ The virtual environment must be activated once per shell session before running 
 source ../.venv/bin/activate
 ```
 
-To install new packages for the server, add them to `requirements.txt` and run the following command (with the venv activated):
+To install new packages for the server, add them to one of the files in the `requirements` directory and run the following command (with the venv activated):
 ```
-pip install -r requirements.txt
+pip install -r requirements/dev.txt
 ```
 
 ## Usage

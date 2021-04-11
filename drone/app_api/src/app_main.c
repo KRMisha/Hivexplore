@@ -85,11 +85,11 @@ static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
+static point_t initialPosition;
+static setpoint_t setPoint;
 static uint8_t batteryLevel = 0;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
-static setpoint_t setPoint;
-static point_t initialPosition;
 static bool shouldTurnLeft = true;
 static point_t initialOffsetFromBase = {}; // TODO: Initialize from server using param
 

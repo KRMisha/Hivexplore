@@ -162,7 +162,7 @@ class DroneManager(ABC):
             # Deny changing mission state to Exploring no drones are connected
             if len(self._get_drone_ids()) == 0:
                 self._logger.log_server_data(logging.WARNING,
-                                             'Dronemanager warning: Could not start mission since at least one drone must be connected')
+                                             'Dronemanager warning: Could not start mission since no drones are connected')
                 return
 
         self._mission_state = new_mission_state

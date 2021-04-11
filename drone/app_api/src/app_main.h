@@ -43,6 +43,8 @@ typedef enum {
     STATUS_CRASHED,
 } drone_status_t;
 
+uint8_t calculateBatteryLevel(void);
+
 void avoidDrones(void);
 void avoidObstacles(void);
 void explore(void);

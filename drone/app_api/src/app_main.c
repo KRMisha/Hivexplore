@@ -61,6 +61,31 @@ typedef struct {
     uint8_t sourceId;
 } P2PPacketContent;
 
+// Voltage References
+const static float voltageReferences[21] = {
+    3.27,
+    3.61,
+    3.69,
+    3.71,
+    3.73,
+    3.75,
+    3.77,
+    3.79,
+    3.80,
+    3.82,
+    3.84,
+    3.85,
+    3.87,
+    3.91,
+    3.95,
+    3.98,
+    4.02,
+    4.08,
+    4.11,
+    4.15,
+    4.20,
+};
+
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -88,6 +113,7 @@ static bool shouldTurnLeft = true;
 static point_t initialOffsetFromBase = {}; // TODO: Initialize from server using param
 
 // Readings
+static float batteryVoltageReading;
 static float rollReading;
 static float pitchReading;
 static float yawReading;
@@ -122,6 +148,7 @@ static uint8_t activeP2PIdsCount = 0;
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
+    const logVarId_t batteryVoltageId = logGetVarId("pm", "vbat");
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
@@ -167,6 +194,8 @@ void appMain(void) {
             continue;
         }
 
+        batteryVoltageReading = logGetFloat(batteryVoltageId);
+
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
         yawReading = logGetFloat(yawId);
@@ -201,6 +230,9 @@ void appMain(void) {
             broadcastPosition();
         }
 
+        // TODO: Use this batteryLevel (30% return to base)
+        static uint8_t batteryLevel = calculateBatteryLevel();
+
         switch (missionState) {
         case MISSION_STANDBY:
             droneStatus = STATUS_STANDBY;
@@ -233,6 +265,30 @@ void appMain(void) {
         static const uint8_t TASK_PRIORITY = 3;
         commanderSetSetpoint(&setPoint, TASK_PRIORITY);
     }
+}
+
+uint8_t calculateBatteryLevel(void) {
+    uint8_t voltageReferenceIndex = 0;
+    uint8_t batteryLevel = 0;
+    static const uint8_t PERCENTAGE_DELTA = 5;
+
+    if (batteryVoltageReading <= voltageReferences[0]) {
+        return 0;
+    }
+
+    if (batteryVoltageReading >= voltageReferences[20]) {
+        return 100;
+    }
+
+    while (batteryVoltageReading > voltageReferences[voltageReferenceIndex]) {
+        voltageReferenceIndex++;
+    }
+
+    float voltageDelta = (voltageReferences[voltageReferenceIndex] - voltageReferences[voltageReferenceIndex - 1]) / PERCENTAGE_DELTA;
+    batteryLevel = voltageReferenceIndex * PERCENTAGE_DELTA;
+    batteryLevel -= (voltageReferences[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
+
+    return batteryLevel;
 }
 
 void avoidDrones(void) {

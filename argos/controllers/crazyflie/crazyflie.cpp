@@ -15,8 +15,10 @@ namespace {
     static constexpr std::uint16_t openSpaceThreshold = 600;
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
+    // Explore constants
+    static constexpr std::uint16_t maximumReorientationTicks = 600;
+    static constexpr std::uint16_t initialReorientationTicks = 20;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
-    static constexpr std::uint16_t maximumReorientationTicks = 300;
 
     // Return to base constants
     static constexpr std::uint16_t maximumReturnTicks = 800;
@@ -686,8 +688,8 @@ void CCrazyflieController::ResetInternalStates() {
     m_isRotateTowardsTargetCommandFinished = true;
 
     m_shouldTurnLeft = true;
+    m_reorientationWatchdog = initialReorientationTicks;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
-    m_reorientationWatchdog = maximumReorientationTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_maximumExploreTicks = initialExploreTicks;
     m_exploreWatchdog = initialExploreTicks;
@@ -718,23 +720,32 @@ void CCrazyflieController::PingOtherDrones() {
 }
 
 CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
-    // Drone's current position
+
+    //Drone's current yaw
+    CRadians angleRadians;
+    CVector3 angleUnitVector;
+    m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
+    CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
+    CRadians currentYawAdjustment =  currentAbsoluteYaw - CRadians::PI / 2;
+
+    //Drone's current position
     CVector2 currentPosition = CVector2(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY());
     CVector2 centerOfMass = currentPosition;
 
     // Accumulation of other drones' positions received
     std::uint16_t nDronesDetected = 0;
     for (const auto& packet : m_pcRABS->GetReadings()) {
-        const double horizontalAngle = packet.HorizontalBearing.GetValue();
-        // Convert packet range from cm to mm
-        const auto vectorToDrone = packet.Range * 10 * CVector2(std::cos(horizontalAngle), std::sin(horizontalAngle));
-        centerOfMass = CVector2(centerOfMass.GetX() + currentPosition.GetX() + vectorToDrone.GetX(),
-                                centerOfMass.GetY() + currentPosition.GetY() + vectorToDrone.GetY());
+        const double horizontalAngle = packet.HorizontalBearing.GetValue() + currentYawAdjustment.GetValue();
+        // Convert packet range from cm to m
+        const auto vectorToDrone = packet.Range * 0.01 * CVector2(std::cos(horizontalAngle), std::sin(horizontalAngle));
+
+        CVector2 otherDronePosition = CVector2(currentPosition.GetX() - vectorToDrone.GetY(), currentPosition.GetY() + vectorToDrone.GetX());
+        centerOfMass = CVector2(centerOfMass.GetX() + otherDronePosition.GetX(),
+                                centerOfMass.GetY() + otherDronePosition.GetY());
         nDronesDetected++;
     }
 
     centerOfMass = CVector2(centerOfMass.GetX() / (nDronesDetected + 1), centerOfMass.GetY() / (nDronesDetected + 1));
-
     const auto vectorAway = CVector2(currentPosition.GetX() - centerOfMass.GetX(), currentPosition.GetY() - centerOfMass.GetY());
 
     return (CRadians(std::atan2(vectorAway.GetY(), vectorAway.GetX())) +

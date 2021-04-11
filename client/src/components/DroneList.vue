@@ -20,7 +20,8 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
 import Drone from '@/components/Drone.vue';
-import { SocketClient } from '@/classes/socket-client';
+import { WebSocketClient } from '@/communication/web-socket-client';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 
 export default defineComponent({
     name: 'DroneList',
@@ -28,10 +29,10 @@ export default defineComponent({
         Drone,
     },
     setup() {
-        const socketClient = inject('socketClient') as SocketClient;
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
 
         const droneIds = ref<string[]>([]);
-        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        webSocketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             droneIds.value = newDroneIds;
         });
 

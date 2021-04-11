@@ -57,23 +57,24 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
-import { SocketClient } from '@/classes/socket-client';
+import { WebSocketClient } from '@/communication/web-socket-client';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 import { MissionState } from '@/enums/mission-state';
 
 export default defineComponent({
     name: 'Control',
     setup() {
         const confirm = useConfirm();
-        const socketClient = inject('socketClient') as SocketClient;
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
 
         const missionState = ref(MissionState.Standby);
 
-        socketClient.bindMessage('mission-state', (newMissionState: MissionState) => {
+        webSocketClient.bindMessage(WebSocketEvent.MissionState, (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
 
         function setMissionState(missionState: MissionState) {
-            socketClient.sendMessage('mission-state', missionState);
+            webSocketClient.sendMessage(WebSocketEvent.MissionState, missionState);
         }
 
         const missionStates = computed(() => {
@@ -87,17 +88,17 @@ export default defineComponent({
         });
 
         const droneCount = ref(0);
-        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        webSocketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             droneCount.value = newDroneIds.length;
         });
 
         const areAllDronesCharged = ref(false);
-        socketClient.bindMessage('are-all-drones-charged', (newAreAllDronesCharged: boolean) => {
+        webSocketClient.bindMessage(WebSocketEvent.AreAllDronesCharged, (newAreAllDronesCharged: boolean) => {
             areAllDronesCharged.value = newAreAllDronesCharged;
         });
 
         const warningMessage = computed(() => {
-            if (!socketClient.isConnected) {
+            if (!webSocketClient.isConnected) {
                 return 'The server is not connected';
             }
 
@@ -121,7 +122,7 @@ export default defineComponent({
                 droneCount.value === 0 ||
                 missionState.value !== MissionState.Standby ||
                 !areAllDronesCharged.value ||
-                !socketClient.isConnected
+                !webSocketClient.isConnected
             );
         });
 
@@ -168,7 +169,7 @@ export default defineComponent({
                 droneCount.value === 0 ||
                 missionState.value === MissionState.Standby ||
                 missionState.value === MissionState.Emergency ||
-                !socketClient.isConnected
+                !webSocketClient.isConnected
             );
         });
 

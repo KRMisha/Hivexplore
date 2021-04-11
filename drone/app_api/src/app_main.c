@@ -53,6 +53,14 @@
 // Min helper macro
 #define MIN(a, b) ((a < b) ? a : b)
 
+// Structs
+typedef struct {
+    float x;
+    float y;
+    float z;
+    uint8_t sourceId;
+} P2PPacketContent;
+
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -72,10 +80,11 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
-static bool isM1LedOn = false;
+static bool isLedEnabled = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
+static point_t initialOffsetFromBase = {}; // TODO: Initialize from server using param
 
 // Readings
 static float rollReading;
@@ -103,12 +112,11 @@ static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
 
-typedef struct {
-    float x;
-    float y;
-    float z;
-    uint8_t sourceId;
-} P2PPacketContent;
+// Latest P2P packets
+#define MAX_DRONE_COUNT 256
+static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
+static uint8_t activeP2PIds[MAX_DRONE_COUNT] = {};
+static uint8_t activeP2PIdsCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -145,7 +153,7 @@ void appMain(void) {
     while (true) {
         vTaskDelay(M2T(10));
 
-        ledSet(LED_GREEN_R, isM1LedOn);
+        ledSet(LED_GREEN_R, isLedEnabled);
 
         if (isOutOfService) {
             ledSet(LED_RED_R, true);
@@ -175,8 +183,14 @@ void appMain(void) {
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
 
+        const bool shouldNotBroadcastPosition =
+            missionState == MISSION_STANDBY ||
+            (missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF)) ||
+            (missionState == MISSION_RETURNING && returningState == RETURNING_IDLE) ||
+            (missionState == MISSION_EMERGENCY && emergencyState == EMERGENCY_IDLE);
+
         static const uint8_t broadcastProbabilityPercentage = 5;
-        if ((rand() % 100) < broadcastProbabilityPercentage) {
+        if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
 
@@ -185,11 +199,13 @@ void appMain(void) {
             droneStatus = STATUS_STANDBY;
             break;
         case MISSION_EXPLORING:
-            avoidObstacle();
+            avoidDrones();
+            avoidObstacles();
             explore();
             break;
         case MISSION_RETURNING:
-            avoidObstacle();
+            avoidDrones();
+            avoidObstacles();
             returnToBase();
             break;
         case MISSION_EMERGENCY:
@@ -211,7 +227,35 @@ void appMain(void) {
     }
 }
 
-void avoidObstacle(void) {
+void avoidDrones(void) {
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        vector_t vectorAwayFromDrone = {
+            .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
+            .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
+            .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
+        };
+
+        const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
+                                            vectorAwayFromDrone.z * vectorAwayFromDrone.z);
+        static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
+        if (vectorMagnitude > DRONE_AVOIDANCE_THRESHOLD) {
+            return;
+        }
+
+        const vector_t unitVectorAway = {
+            .x = vectorAwayFromDrone.x / vectorMagnitude,
+            .y = vectorAwayFromDrone.y / vectorMagnitude,
+            .z = vectorAwayFromDrone.z / vectorMagnitude,
+        };
+        const float vectorAngle = atan2f(vectorAwayFromDrone.y, vectorAwayFromDrone.x);
+        static const float COLLISION_AVOIDANCE_SCALING_FACTOR = CRUISE_VELOCITY * 1.05f;
+        // Y: Left, -Y: Right, X: Forward, -X: Back
+        targetForwardVelocity += ((float)fabs(unitVectorAway.x) * cosf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
+        targetLeftVelocity += ((float)fabs(unitVectorAway.y) * sinf(vectorAngle - yawReading)) * COLLISION_AVOIDANCE_SCALING_FACTOR;
+    }
+}
+
+void avoidObstacles(void) {
     bool isExploringAvoidanceDisallowed =
         missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF);
     bool isReturningAvoidanceDisallowed =
@@ -221,10 +265,10 @@ void avoidObstacle(void) {
 
     if (isAvoidanceAllowed) {
         // Distance correction required to stay out of range of any obstacle
-        uint16_t leftDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
-        uint16_t rightDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
-        uint16_t frontDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, frontSensorReading);
-        uint16_t backDistanceCorrection = calculateDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, backSensorReading);
+        uint16_t leftDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, leftSensorReading);
+        uint16_t rightDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, rightSensorReading);
+        uint16_t frontDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, frontSensorReading);
+        uint16_t backDistanceCorrection = calculateObstacleDistanceCorrection(OBSTACLE_DETECTED_THRESHOLD, backSensorReading);
 
         // Velocity required to apply distance correction
         const float AVOIDANCE_SENSITIVITY = MAXIMUM_VELOCITY / OBSTACLE_DETECTED_THRESHOLD;
@@ -480,7 +524,7 @@ bool isCrashed(void) {
     return isCrashed;
 }
 
-void broadcastPosition() {
+void broadcastPosition(void) {
     // Avoid causing drone reset due to the content size
     if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
         DEBUG_PRINT("P2PPacketContent size too big\n");
@@ -490,7 +534,12 @@ void broadcastPosition() {
     uint64_t radioAddress = configblockGetRadioAddress();
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
-    P2PPacketContent content = {.sourceId = id, .x = positionReading.x, .y = positionReading.y, .z = positionReading.z};
+    P2PPacketContent content = {
+        .x = positionReading.x + initialOffsetFromBase.x,
+        .y = positionReading.y + initialOffsetFromBase.y,
+        .z = positionReading.z + initialOffsetFromBase.z,
+        .sourceId = id,
+    };
 
     P2PPacket packet = {.port = 0x00, .size = sizeof(content)};
 
@@ -501,9 +550,21 @@ void broadcastPosition() {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    P2PPacketContent content;
-    memcpy(&content, &packet->data[0], sizeof(content));
-    // TODO: Forward P2P content to methods needing the information
+    P2PPacketContent* content = (P2PPacketContent*)packet->data;
+    latestP2PPackets[content->sourceId] = *content;
+
+    bool isAlreadyInContactWithSource = false;
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        if (activeP2PIds[i] == content->sourceId) {
+            isAlreadyInContactWithSource = true;
+            break;
+        }
+    }
+
+    if (!isAlreadyInContactWithSource) {
+        activeP2PIds[activeP2PIdsCount] = content->sourceId;
+        activeP2PIdsCount++;
+    }
 }
 
 void updateWaypoint(void) {
@@ -520,7 +581,7 @@ void updateWaypoint(void) {
     setPoint.position.z = targetHeight;
 }
 
-uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
+uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
@@ -530,5 +591,5 @@ LOG_GROUP_STOP(hivexplore)
 
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
-PARAM_ADD(PARAM_UINT8, isM1LedOn, &isM1LedOn)
+PARAM_ADD(PARAM_UINT8, isLedEnabled, &isLedEnabled)
 PARAM_GROUP_STOP(hivexplore)

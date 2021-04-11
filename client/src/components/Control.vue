@@ -3,7 +3,7 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
-                <div v-if="warningMessage !== ''" class="p-col-12 p-p-0 p-mb-4">
+                <div v-if="warningMessage !== ''" class="p-col-12 p-mb-4 p-p-0">
                     <InlineMessage severity="info" class="p-p-2 warning-message">{{ warningMessage }}</InlineMessage>
                 </div>
 
@@ -32,7 +32,7 @@
                             @click="onEndMissionButtonClick($event)"
                         />
                     </div>
-                    <div class="p-mt-4 p-d-flex p-jc-between p-ai-center">
+                    <div class="p-d-flex p-jc-between p-ai-center p-mt-4">
                         <span class="label">Drone count</span>
                         <Chip :label="droneCount.toString()" :class="droneCountChipClass" />
                     </div>

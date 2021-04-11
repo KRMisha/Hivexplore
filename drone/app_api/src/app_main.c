@@ -85,7 +85,7 @@ static bool isLedEnabled = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
 static bool shouldTurnLeft = true;
-static point_t initialOffsetFromBase = {}; // TODO: Initialize from server using param
+static point_t baseOffset = {};
 
 // Readings
 static float rollReading;
@@ -238,9 +238,9 @@ void appMain(void) {
 void avoidDrones(void) {
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         vector_t vectorAwayFromDrone = {
-            .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
-            .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
-            .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
+            .x = (positionReading.x + baseOffset.x) - latestP2PPackets[activeP2PIds[i]].x,
+            .y = (positionReading.y + baseOffset.y) - latestP2PPackets[activeP2PIds[i]].y,
+            .z = (positionReading.z + baseOffset.z) - latestP2PPackets[activeP2PIds[i]].z,
         };
 
         const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
@@ -554,9 +554,9 @@ void broadcastPosition(void) {
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
     P2PPacketContent content = {
-        .x = positionReading.x + initialOffsetFromBase.x,
-        .y = positionReading.y + initialOffsetFromBase.y,
-        .z = positionReading.z + initialOffsetFromBase.z,
+        .x = positionReading.x + baseOffset.x,
+        .y = positionReading.y + baseOffset.y,
+        .z = positionReading.z + baseOffset.z,
         .sourceId = id,
     };
 
@@ -611,4 +611,7 @@ LOG_GROUP_STOP(hivexplore)
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
 PARAM_ADD(PARAM_UINT8, isLedEnabled, &isLedEnabled)
+PARAM_ADD(PARAM_FLOAT, baseOffsetX, &baseOffset.x)
+PARAM_ADD(PARAM_FLOAT, baseOffsetY, &baseOffset.y)
+PARAM_ADD(PARAM_FLOAT, baseOffsetZ, &baseOffset.z)
 PARAM_GROUP_STOP(hivexplore)

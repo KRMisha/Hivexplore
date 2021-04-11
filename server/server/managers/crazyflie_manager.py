@@ -6,12 +6,14 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from server.communication.log_name import LogName
 from server.communication.param_name import ParamName
+from server.communication.web_socket_event import WebSocketEvent
 from server.communication.web_socket_server import WebSocketServer
 from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
-from server.utils.uri import load_crazyflie_uris_from_file
+from server.tuples import Point
+from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflies_config
 
 
 class CrazyflieManager(DroneManager):
@@ -19,16 +21,20 @@ class CrazyflieManager(DroneManager):
         super().__init__(web_socket_server, logger, map_generator)
         self._connected_crazyflies: Dict[str, Crazyflie] = {}
         self._pending_crazyflies: Dict[str, Crazyflie] = {}
-        self._crazyflie_uris: List[str] = []
-
-        try:
-            self._crazyflie_uris = load_crazyflie_uris_from_file()
-        except ValueError:
-            self._logger.log_server_data(logging.WARN, 'CrazyflieManager warning: Could not load URIs from file')
+        self._crazyflies_config: Dict[str, Dict[str, Any]] = {}
 
         cflib.crtp.init_drivers(enable_debug_driver=enable_debug_driver)
 
     async def start(self):
+        self._update_crazyflies_config()
+
+        self._web_socket_server.bind(
+            WebSocketEvent.CONNECT, lambda client_id: self._web_socket_server.send_message_to_client(
+                client_id, 'log', {
+                    'group': 'Server',
+                    'line': f'The base offsets to position the Crazyflies can be found in \'{CRAZYFLIES_CONFIG_FILENAME}\'',
+                }))
+
         while True:
             if self._mission_state == MissionState.Standby:
                 self._connect_crazyflies()
@@ -37,7 +43,9 @@ class CrazyflieManager(DroneManager):
             await asyncio.sleep(CRAZYFLIE_CONNECTION_PERIOD_S)
 
     def _connect_crazyflies(self):
-        for uri in self._crazyflie_uris:
+        self._update_crazyflies_config()
+
+        for uri in self._crazyflies_config:
             if uri in self._connected_crazyflies:
                 continue
 
@@ -58,7 +66,7 @@ class CrazyflieManager(DroneManager):
             self._pending_crazyflies[uri] = crazyflie
 
     def _get_drone_ids(self) -> List[str]:
-        return list(self._connected_crazyflies.keys())
+        return list(self._connected_crazyflies)
 
     def _is_drone_id_valid(self, drone_id: str) -> bool:
         return drone_id in self._connected_crazyflies
@@ -66,6 +74,12 @@ class CrazyflieManager(DroneManager):
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
         super()._set_drone_param(param, drone_id, value)
         self._connected_crazyflies[drone_id].param.set_value(param, value)
+
+    def _get_drone_base_offset(self, drone_id: str) -> Point:
+        try:
+            return Point(**self._crazyflies_config[drone_id]['baseOffset'])
+        except KeyError:
+            return Point(x=0, y=0, z=0)
 
     # Setup
 
@@ -138,6 +152,15 @@ class CrazyflieManager(DroneManager):
         crazyflie.param.add_update_callback(group='hivexplore', name=ParamName.MISSION_STATE.value, cb=self._param_update_callback)
         crazyflie.param.add_update_callback(group='hivexplore', name=ParamName.IS_LED_ENABLED.value, cb=self._param_update_callback)
 
+    # Crazyflies config
+
+    def _update_crazyflies_config(self):
+        try:
+            self._crazyflies_config = load_crazyflies_config()
+        except (FileNotFoundError, ValueError) as exc:
+            self._logger.log_server_data(
+                logging.ERROR, f'CrazyflieManager error: Could not load Crazyflies config from \'{CRAZYFLIES_CONFIG_FILENAME}\': {exc}')
+
     # Connection callbacks
 
     def _connected(self, link_uri: str):
@@ -190,3 +213,17 @@ class CrazyflieManager(DroneManager):
 
     def _param_update_callback(self, name, value):
         self._logger.log_server_data(logging.INFO, f'Param readback: {name}={value}')
+
+    # Client callbacks
+
+    def _set_mission_state(self, mission_state_str: str):
+        super()._set_mission_state(mission_state_str)
+
+        if self._mission_state == MissionState.Exploring:
+            self._update_crazyflies_config()
+
+            for drone_id in self._get_drone_ids():
+                base_offset = self._get_drone_base_offset(drone_id)
+                self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_X.value}', drone_id, base_offset.x)
+                self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_Y.value}', drone_id, base_offset.y)
+                self._set_drone_param(f'hivexplore.{ParamName.BASE_OFFSET_Z.value}', drone_id, base_offset.z)

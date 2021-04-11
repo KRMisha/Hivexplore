@@ -113,6 +113,9 @@ static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
 
+// Watchdogs (exploring)
+static uint8_t rotationChangeWatchdog;
+
 // Latest P2P packets
 #define MAX_DRONE_COUNT 256
 static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
@@ -319,6 +322,12 @@ void explore(void) {
 
         if (rotate()) {
             exploringState = EXPLORING_EXPLORE;
+
+            rotationChangeWatchdog--;
+            if (rotationChangeWatchdog == 0) {
+                shouldTurnLeft = !m_shouldTurnLeft;
+                rotationChangeWatchdog = getRandomRotationChangeCount();
+            }
         }
     } break;
     }
@@ -534,6 +543,8 @@ void resetInternalStates(void) {
     returningState = RETURNING_ROTATE_TOWARDS_BASE;
     emergencyState = EMERGENCY_LAND;
 
+    rotationChangeWatchdog = getRandomRotationChangeCount();
+
     shouldTurnLeft = true;
     returnWatchdog = MAXIMUM_RETURN_TICKS;
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
@@ -541,6 +552,12 @@ void resetInternalStates(void) {
     clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
 
     activeP2PIdsCount = 0;
+}
+
+uint8_t getRandomRotationChangeCount() {
+    static const minRotationCount = 2;
+    static const maxRotationCount = 6;
+    return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;
 }
 
 void broadcastPosition(void) {

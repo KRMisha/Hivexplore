@@ -56,6 +56,8 @@ bool isCrashed(void);
 
 void resetInternalStates(void);
 
+uint8_t getRandomRotationChangeCount();
+
 void broadcastPosition(void);
 void p2pReceivedCallback(P2PPacket* packet);
 

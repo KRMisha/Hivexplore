@@ -1,11 +1,13 @@
 import logging
 from typing import Any, Optional, Set, List
+from server.communication.log_name import LogName
+from server.communication.unix_socket_client import UnixSocketClient
+from server.communication.unix_socket_event import UnixSocketEvent
+from server.communication.web_socket_server import WebSocketServer
 from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
-from server.sockets.unix_socket_client import UnixSocketClient
-from server.sockets.web_socket_server import WebSocketServer
 
 
 class ArgosManager(DroneManager):
@@ -16,16 +18,16 @@ class ArgosManager(DroneManager):
 
     async def start(self):
         # ARGoS bindings
-        self._unix_socket_client.bind('disconnect', self._unix_socket_disconnect_callback)
-        self._unix_socket_client.bind('drone-ids', self._get_drone_ids_callback)
-        self._unix_socket_client.bind('battery-level', self._log_battery_callback)
-        self._unix_socket_client.bind('orientation', self._log_orientation_callback)
-        self._unix_socket_client.bind('position', self._log_position_callback)
-        self._unix_socket_client.bind('velocity', self._log_velocity_callback)
-        self._unix_socket_client.bind('range', self._log_range_callback)
-        self._unix_socket_client.bind('rssi', self._log_rssi_callback)
-        self._unix_socket_client.bind('drone-status', self._log_drone_status_callback)
-        self._unix_socket_client.bind('console', self._log_console_callback)
+        self._unix_socket_client.bind(UnixSocketEvent.DISCONNECT, self._unix_socket_disconnect_callback)
+        self._unix_socket_client.bind(LogName.DRONE_IDS, self._get_drone_ids_callback)
+        self._unix_socket_client.bind(LogName.BATTERY_LEVEL, self._log_battery_callback)
+        self._unix_socket_client.bind(LogName.ORIENTATION, self._log_orientation_callback)
+        self._unix_socket_client.bind(LogName.POSITION, self._log_position_callback)
+        self._unix_socket_client.bind(LogName.VELOCITY, self._log_velocity_callback)
+        self._unix_socket_client.bind(LogName.RANGE, self._log_range_callback)
+        self._unix_socket_client.bind(LogName.RSSI, self._log_rssi_callback)
+        self._unix_socket_client.bind(LogName.DRONE_STATUS, self._log_drone_status_callback)
+        self._unix_socket_client.bind(LogName.CONSOLE, self._log_console_callback)
 
         await self._unix_socket_client.serve()
 

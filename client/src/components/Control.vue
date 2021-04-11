@@ -3,20 +3,24 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
+                <div v-if="warningMessage !== ''" class="p-col-12 p-mb-4 p-p-0">
+                    <InlineMessage severity="info" class="p-p-2 warning-message">{{ warningMessage }}</InlineMessage>
+                </div>
+
                 <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-evenly">
                     <div class="p-d-flex p-flex-column">
                         <Button
                             label="Start mission"
                             icon="pi pi-send"
                             class="p-my-1"
-                            :disabled="droneCount === 0 || missionState !== MissionState.Standby"
+                            :disabled="isStartMissionButtonDisabled"
                             @click="onStartMissionButtonClick($event)"
                         />
                         <Button
                             label="Return to base"
                             icon="pi pi-home"
                             class="p-my-1"
-                            :disabled="droneCount === 0 || missionState !== MissionState.Exploring"
+                            :disabled="isReturnToBaseButtonDisabled"
                             @click="setMissionState(MissionState.Returning)"
                         />
                         <Button
@@ -24,11 +28,11 @@
                             :icon="endMissionButtonIcon"
                             class="p-my-1"
                             :class="endMissionButtonClass"
-                            :disabled="droneCount === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
+                            :disabled="isEndMissionButtonDisabled"
                             @click="onEndMissionButtonClick($event)"
                         />
                     </div>
-                    <div class="p-d-flex p-jc-between p-ai-center">
+                    <div class="p-d-flex p-jc-between p-ai-center p-mt-4">
                         <span class="label">Drone count</span>
                         <Chip :label="droneCount.toString()" :class="droneCountChipClass" />
                     </div>
@@ -51,23 +55,24 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
-import { SocketClient } from '@/classes/socket-client';
+import { WebSocketClient } from '@/communication/web-socket-client';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 import { MissionState } from '@/enums/mission-state';
 
 export default defineComponent({
     name: 'Control',
     setup() {
         const confirm = useConfirm();
-        const socketClient = inject('socketClient') as SocketClient;
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
 
         const missionState = ref(MissionState.Standby);
 
-        socketClient.bindMessage('mission-state', (newMissionState: MissionState) => {
+        webSocketClient.bindMessage(WebSocketEvent.MissionState, (newMissionState: MissionState) => {
             missionState.value = newMissionState;
         });
 
         function setMissionState(missionState: MissionState) {
-            socketClient.sendMessage('mission-state', missionState);
+            webSocketClient.sendMessage(WebSocketEvent.MissionState, missionState);
         }
 
         const missionStates = computed(() => {
@@ -81,8 +86,42 @@ export default defineComponent({
         });
 
         const droneCount = ref(0);
-        socketClient.bindMessage('drone-ids', (newDroneIds: string[]) => {
+        webSocketClient.bindMessage(WebSocketEvent.DroneIds, (newDroneIds: string[]) => {
             droneCount.value = newDroneIds.length;
+        });
+
+        const areAllDronesCharged = ref(false);
+        webSocketClient.bindMessage(WebSocketEvent.AreAllDronesCharged, (newAreAllDronesCharged: boolean) => {
+            areAllDronesCharged.value = newAreAllDronesCharged;
+        });
+
+        const warningMessage = computed(() => {
+            if (!webSocketClient.isConnected) {
+                return 'The server is not connected';
+            }
+
+            if (missionState.value !== MissionState.Standby) {
+                return '';
+            }
+
+            if (droneCount.value === 0) {
+                return 'Connect at least one drone before the mission can start';
+            }
+
+            if (!areAllDronesCharged.value) {
+                return 'All drones must have at least 30% battery before the mission can start';
+            }
+
+            return '';
+        });
+
+        const isStartMissionButtonDisabled = computed(() => {
+            return (
+                !webSocketClient.isConnected ||
+                droneCount.value === 0 ||
+                !areAllDronesCharged.value ||
+                missionState.value !== MissionState.Standby
+            );
         });
 
         let wasEmergencyLandingCalled = false;
@@ -105,6 +144,10 @@ export default defineComponent({
             }
         }
 
+        const isReturnToBaseButtonDisabled = computed(() => {
+            return !webSocketClient.isConnected || droneCount.value === 0 || missionState.value !== MissionState.Exploring;
+        });
+
         const endMissionButtonLabel = computed(() => {
             return missionState.value === MissionState.Landed ? 'End mission' : 'Emergency land';
         });
@@ -117,6 +160,15 @@ export default defineComponent({
             return {
                 'p-button-danger': missionState.value !== MissionState.Landed,
             };
+        });
+
+        const isEndMissionButtonDisabled = computed(() => {
+            return (
+                !webSocketClient.isConnected ||
+                droneCount.value === 0 ||
+                missionState.value === MissionState.Standby ||
+                missionState.value === MissionState.Emergency
+            );
         });
 
         function onEndMissionButtonClick(event: Event) {
@@ -159,10 +211,14 @@ export default defineComponent({
             missionStates,
             setMissionState,
             droneCount,
+            warningMessage,
+            isStartMissionButtonDisabled,
             onStartMissionButtonClick,
+            isReturnToBaseButtonDisabled,
             endMissionButtonLabel,
             endMissionButtonIcon,
             endMissionButtonClass,
+            isEndMissionButtonDisabled,
             onEndMissionButtonClick,
             droneCountChipClass,
             timelineMarkerClass,
@@ -191,6 +247,21 @@ export default defineComponent({
             height: 100%;
         }
     }
+}
+
+div::v-deep(.p-inline-message) {
+    color: var(--primary-color-text);
+    background-color: var(--primary-color);
+
+    .p-inline-message-icon {
+        color: var(--primary-color-text);
+    }
+}
+
+.warning-message {
+    width: 100%;
+    margin-top: -0.5rem;
+    border-radius: 0.875rem;
 }
 
 .label {
@@ -223,6 +294,13 @@ export default defineComponent({
 @media (max-width: 400px) {
     .p-component {
         font-size: 0.875rem;
+    }
+
+    ::v-deep(.p-inline-message) {
+        .p-inline-message-icon,
+        .p-inline-message-text {
+            font-size: 0.875rem;
+        }
     }
 }
 

@@ -20,12 +20,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, inject, nextTick, onMounted, reactive, ref } from 'vue';
-import { SocketClient } from '@/classes/socket-client';
-
-interface Log {
-    group: string;
-    line: string;
-}
+import { Log } from '@/communication/log';
+import { WebSocketClient } from '@/communication/web-socket-client';
+import { WebSocketEvent } from '@/communication/web-socket-event';
 
 export default defineComponent({
     name: 'Logs',
@@ -77,14 +74,11 @@ export default defineComponent({
 
         // Log group management
         function addLogGroup(logGroup: string) {
-            // Trim URI to extract Crazyflie address
-            const trimmedLogGroup = logGroup.replace('radio://0/80/2M/', '');
-
-            if (!logs.has(trimmedLogGroup)) {
-                logs.set(trimmedLogGroup, []);
+            if (!logs.has(logGroup)) {
+                logs.set(logGroup, []);
             }
-            if (!logBuffers.has(trimmedLogGroup)) {
-                logBuffers.set(trimmedLogGroup, []);
+            if (!logBuffers.has(logGroup)) {
+                logBuffers.set(logGroup, []);
             }
         }
 
@@ -93,10 +87,13 @@ export default defineComponent({
         }
 
         // Log reception
-        const socketClient = inject('socketClient') as SocketClient;
-        socketClient.bindMessage('log', (log: Log) => {
-            addLogGroup(log.group);
-            logBuffers.get(log.group)!.push(log.line);
+        const webSocketClient = inject('webSocketClient') as WebSocketClient;
+        webSocketClient.bindMessage(WebSocketEvent.Log, (log: Log) => {
+            // Trim URI to extract Crazyflie address
+            const trimmedLogGroup = log.group.replace('radio://0/80/2M/', '');
+
+            addLogGroup(trimmedLogGroup);
+            logBuffers.get(trimmedLogGroup)!.push(log.line);
         });
 
         onMounted(() => {

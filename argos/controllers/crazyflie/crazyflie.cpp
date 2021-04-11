@@ -4,13 +4,15 @@
 #include <cmath>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
-#include "experiments/constants.h"
+#include "utils/constants.h"
+#include "utils/param_name.h"
 
 namespace {
     // Sensor reading constants
     static constexpr std::uint8_t obstacleTooClose = 0;
     static constexpr std::uint16_t obstacleTooFar = 4000;
     static constexpr std::uint16_t edgeDetectedThreshold = 1200;
+    static constexpr std::uint16_t openSpaceThreshold = 600;
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
@@ -44,6 +46,8 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
         THROW_ARGOSEXCEPTION_NESTED("Error initializing the Crazyflie controller for robot \"" << GetId() << "\"", e);
     }
 
+    m_initialPosition = m_pcPos->GetReading().Position;
+
     Reset();
 }
 
@@ -72,12 +76,12 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (!AvoidObstacle()) {
+        if (!AvoidObstaclesAndDrones()) {
             Explore();
         }
         break;
     case MissionState::Returning:
-        if (!AvoidObstacle()) {
+        if (!AvoidObstaclesAndDrones()) {
             ReturnToBase();
         }
         break;
@@ -112,7 +116,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     // Battery level group
     LogVariableMap batteryLevelLog;
     batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
-    logDataMap.emplace_back("battery-level", batteryLevelLog);
+    logDataMap.emplace_back(LogName::BatteryLevel, batteryLevelLog);
 
     // Orientation group
     CRadians angleRadians;
@@ -124,7 +128,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * angleUnitVector.GetY()));
     // Rotate the drone 90 degrees clockwise to make a yaw of 0 face forward
     orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * angleUnitVector.GetZ() - 90.0));
-    logDataMap.emplace_back("orientation", orientationLog);
+    logDataMap.emplace_back(LogName::Orientation, orientationLog);
 
     // Position group
     CVector3 position = m_pcPos->GetReading().Position;
@@ -132,30 +136,30 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     positionLog.emplace("stateEstimate.x", static_cast<float>(position.GetX()));
     positionLog.emplace("stateEstimate.y", static_cast<float>(position.GetY()));
     positionLog.emplace("stateEstimate.z", static_cast<float>(position.GetZ()));
-    logDataMap.emplace_back("position", positionLog);
+    logDataMap.emplace_back(LogName::Position, positionLog);
 
     // Velocity group
     LogVariableMap velocityLog;
     velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocity.GetX()));
     velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocity.GetY()));
     velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocity.GetZ()));
-    logDataMap.emplace_back("velocity", velocityLog);
+    logDataMap.emplace_back(LogName::Velocity, velocityLog);
 
     // Range group - must be added after orientation and position
     static const std::array<std::string, 6> rangeLogNames =
         {"range.front", "range.left", "range.back", "range.right", "range.up", "range.zrange"};
     LogVariableMap rangeLog = GetSensorReadings<std::uint16_t, LogVariableMap::mapped_type>(rangeLogNames);
-    logDataMap.emplace_back("range", rangeLog);
+    logDataMap.emplace_back(LogName::Range, rangeLog);
 
     // RSSI group
     LogVariableMap rssiLog;
     rssiLog.emplace("radio.rssi", m_rssiReading);
-    logDataMap.emplace_back("rssi", rssiLog);
+    logDataMap.emplace_back(LogName::Rssi, rssiLog);
 
     // Drone status group
     LogVariableMap droneStatusLog;
     droneStatusLog.emplace("hivexplore.droneStatus", static_cast<std::uint8_t>(m_droneStatus));
-    logDataMap.emplace_back("drone-status", droneStatusLog);
+    logDataMap.emplace_back(LogName::DroneStatus, droneStatusLog);
 
     return logDataMap;
 }
@@ -165,10 +169,10 @@ const std::string& CCrazyflieController::GetDebugPrint() const {
 }
 
 void CCrazyflieController::SetParamData(const std::string& param, json value) {
-    if (param == "hivexplore.missionState") {
+    if (param == "hivexplore." + paramNameToString(ParamName::MissionState)) {
         m_missionState = static_cast<MissionState>(value.get<std::uint8_t>());
         RLOG << "Set mission state: " << static_cast<std::uint8_t>(m_missionState) << '\n';
-    } else if (param == "hivexplore.isM1LedOn") {
+    } else if (param == "hivexplore." + paramNameToString(ParamName::IsLedEnabled)) {
         // Print LED state since simulated Crazyflie doesn't have LEDs
         RLOG << "Set LED state: " << value.get<bool>() << '\n';
     } else {
@@ -176,7 +180,7 @@ void CCrazyflieController::SetParamData(const std::string& param, json value) {
     }
 }
 
-bool CCrazyflieController::AvoidObstacle() {
+bool CCrazyflieController::AvoidObstaclesAndDrones() {
     // The obstacle detection threshold (similar to the logic found in the drone firmware) is smaller than the map edge rotation
     // detection threshold to avoid conflicts between the obstacle/drone collision avoidance and the exploration logic
     static constexpr std::uint16_t obstacleDetectedThreshold = 300;
@@ -268,7 +272,6 @@ void CCrazyflieController::Explore() {
     case ExploringState::Idle: {
         m_droneStatus = DroneStatus::Standby;
 
-        m_initialPosition = m_pcPos->GetReading().Position;
         m_exploringState = ExploringState::Liftoff;
     } break;
     case ExploringState::Liftoff: {
@@ -436,10 +439,10 @@ void CCrazyflieController::ReturnToBase() {
         m_droneStatus = DroneStatus::Flying;
 
         // The drone must check its right sensor when it is turning left, and its left sensor when turning right
-        static float sensorToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
+        static float sensorReadingToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
 
         // Return to base when obstacle has been passed or explore watchdog is finished
-        if ((sensorToCheck > edgeDetectedThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
+        if ((sensorReadingToCheck > edgeDetectedThreshold + openSpaceThreshold && m_clearObstacleCounter == 0) || m_exploreWatchdog == 0) {
             if (m_clearObstacleCounter == 0) {
                 DebugPrint("Explore: Obstacle has been passed\n");
                 m_maximumExploreTicks = initialExploreTicks;
@@ -465,7 +468,7 @@ void CCrazyflieController::ReturnToBase() {
             m_returningState = ReturningState::Brake;
         } else {
             // Reset sensor reading counter if obstacle is detected
-            if (sensorToCheck > edgeDetectedThreshold) {
+            if (sensorReadingToCheck > edgeDetectedThreshold + openSpaceThreshold) {
                 m_clearObstacleCounter--;
             } else {
                 m_clearObstacleCounter = clearObstacleTicks;
@@ -585,7 +588,7 @@ bool CCrazyflieController::Rotate() {
 
     // Wait for rotation to finish
     if (std::abs((currentYaw - m_lastReferenceYaw).GetValue()) >= m_rotationAngle.GetValue()) {
-        if (m_sensorReadings["front"] > edgeDetectedThreshold) {
+        if (m_sensorReadings["front"] > edgeDetectedThreshold + openSpaceThreshold) {
             m_isRotateCommandFinished = true;
             return true;
         }
@@ -681,13 +684,14 @@ void CCrazyflieController::ResetInternalStates() {
     m_isForwardCommandFinished = true;
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
+    m_isRotateToBaseCommandFinished = true;
 
     m_shouldTurnLeft = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_reorientationWatchdog = maximumReorientationTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_maximumExploreTicks = initialExploreTicks;
-    m_exploreWatchdog = m_maximumExploreTicks;
+    m_exploreWatchdog = initialExploreTicks;
     m_clearObstacleCounter = clearObstacleTicks;
 }
 

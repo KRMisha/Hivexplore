@@ -7,7 +7,7 @@
                     <InlineMessage severity="info" class="p-p-2 warning-message">{{ warningMessage }}</InlineMessage>
                 </div>
 
-                <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-between">
+                <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-evenly">
                     <div class="p-d-flex p-flex-column">
                         <Button
                             label="Start mission"
@@ -32,7 +32,7 @@
                             @click="onEndMissionButtonClick($event)"
                         />
                     </div>
-                    <div class="p-d-flex p-jc-between p-ai-center">
+                    <div class="p-mt-4 p-d-flex p-jc-between p-ai-center">
                         <span class="label">Drone count</span>
                         <Chip :label="droneCount.toString()" :class="droneCountChipClass" />
                     </div>

@@ -151,7 +151,6 @@ class DroneManager(ABC):
             new_mission_state = MissionState[mission_state_str]
         except KeyError:
             self._logger.log_server_data(logging.ERROR, f'DroneManager error: Unknown mission state received: {mission_state_str}')
-            self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
             return
 
         if new_mission_state == MissionState.Exploring:

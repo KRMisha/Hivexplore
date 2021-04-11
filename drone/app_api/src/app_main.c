@@ -64,6 +64,7 @@ typedef struct {
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
+static const uint16_t OPEN_SPACE_THRESHOLD = 300;
 static const float EXPLORATION_HEIGHT = 0.3f;
 static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
@@ -116,7 +117,7 @@ static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles
 #define MAX_DRONE_COUNT 256
 static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
 static uint8_t activeP2PIds[MAX_DRONE_COUNT] = {};
-static uint8_t activeP2PIdsCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
+static uint8_t activeP2PIdsCount = 0;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -149,6 +150,12 @@ void appMain(void) {
     }
 
     p2pRegisterCB(p2pReceivedCallback);
+
+    initialPosition.x = logGetFloat(positionXId);
+    initialPosition.y = logGetFloat(positionYId);
+    initialPosition.z = logGetFloat(positionZId);
+
+    DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
 
     while (true) {
         vTaskDelay(M2T(10));
@@ -197,6 +204,7 @@ void appMain(void) {
         switch (missionState) {
         case MISSION_STANDBY:
             droneStatus = STATUS_STANDBY;
+            resetInternalStates();
             break;
         case MISSION_EXPLORING:
             avoidDrones();
@@ -288,7 +296,6 @@ void explore(void) {
         // Check if any obstacle is in the way before taking off
         if (upSensorReading > EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
             DEBUG_PRINT("Liftoff\n");
-            initialPosition = positionReading;
             shouldTurnLeft = true;
             exploringState = EXPLORING_LIFTOFF;
         }
@@ -384,7 +391,6 @@ void returnToBase(void) {
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;
 
         // Return to base when obstacle has been passed or explore watchdog is finished
-        static const uint16_t OPEN_SPACE_THRESHOLD = 300;
         if ((sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD && clearObstacleCounter == 0) || exploreWatchdog == 0) {
             if (clearObstacleCounter == 0) {
                 DEBUG_PRINT("Explore: Obstacle has been cleared\n");
@@ -411,7 +417,7 @@ void returnToBase(void) {
             returningState = RETURNING_ROTATE;
         } else {
             // Reset sensor reading counter if obstacle is detected
-            if (sensorReadingToCheck > EDGE_DETECTED_THRESHOLD) {
+            if (sensorReadingToCheck > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD) {
                 clearObstacleCounter--;
             } else {
                 clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
@@ -423,6 +429,7 @@ void returnToBase(void) {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
+            DEBUG_PRINT("Landed\n");
             returningState = RETURNING_IDLE;
         }
     } break;
@@ -434,14 +441,13 @@ void returnToBase(void) {
     }
 }
 
-// TODO: Add a reset internal state function to reaffect all the values (like in the ARGoS controller)
-
 void emergencyLand(void) {
     switch (emergencyState) {
     case EMERGENCY_LAND: {
         droneStatus = STATUS_LANDING;
 
         if (land()) {
+            DEBUG_PRINT("Landed\n");
             emergencyState = EMERGENCY_IDLE;
         }
     } break;
@@ -477,7 +483,6 @@ bool forward(void) {
 
 // Returns true when the action is finished
 bool rotate(void) {
-    static const uint16_t OPEN_SPACE_THRESHOLD = 300;
     targetHeight += EXPLORATION_HEIGHT;
     targetYawRate = (shouldTurnLeft ? 1 : -1) * 50;
     updateWaypoint();
@@ -522,6 +527,20 @@ bool isCrashed(void) {
     }
 
     return isCrashed;
+}
+
+void resetInternalStates(void) {
+    exploringState = EXPLORING_IDLE;
+    returningState = RETURNING_ROTATE_TOWARDS_BASE;
+    emergencyState = EMERGENCY_LAND;
+
+    shouldTurnLeft = true;
+    returnWatchdog = MAXIMUM_RETURN_TICKS;
+    maximumExploreTicks = INITIAL_EXPLORE_TICKS;
+    exploreWatchdog = INITIAL_EXPLORE_TICKS;
+    clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
+
+    activeP2PIdsCount = 0;
 }
 
 void broadcastPosition(void) {

@@ -640,7 +640,7 @@ uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_
 }
 
 LOG_GROUP_START(hivexplore)
-LOG_ADD(LOG_FLOAT, batteryLevel, &batteryLevel)
+LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevel)
 LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)
 

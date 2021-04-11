@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <random>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "utils/constants.h"
@@ -28,6 +29,14 @@ namespace {
     template<typename T>
     constexpr std::int8_t getSign(T value) {
         return value < 0 ? -1 : 1;
+    }
+
+    std::uint8_t getRandomRotationChangeCount() {
+        static std::random_device randomDevice;
+        static std::default_random_engine randomEngine(randomDevice());
+        static std::uniform_int_distribution<std::uint8_t> randomDistribution(2, 6);
+
+        return randomDistribution(randomEngine);
     }
 
 } // namespace
@@ -298,6 +307,12 @@ void CCrazyflieController::Explore() {
 
         if (Rotate()) {
             m_exploringState = ExploringState::Explore;
+
+            m_rotationChangeWatchdog--;
+            if (m_rotationChangeWatchdog == 0) {
+                m_shouldTurnLeft = !m_shouldTurnLeft;
+                m_rotationChangeWatchdog = getRandomRotationChangeCount();
+            }
         }
     } break;
     }
@@ -612,6 +627,7 @@ void CCrazyflieController::ResetInternalStates() {
     m_isForwardCommandFinished = true;
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
+    m_rotationChangeWatchdog = getRandomRotationChangeCount();
     m_isRotateToBaseCommandFinished = true;
 
     m_shouldTurnLeft = true;

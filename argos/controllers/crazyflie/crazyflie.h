@@ -143,6 +143,7 @@ private:
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
     CRadians m_rotationAngle;
+    std::uint8_t m_rotationChangeWatchdog;
 
     // Return to base variables
     bool m_isRotateToBaseCommandFinished = true;

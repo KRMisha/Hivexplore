@@ -110,7 +110,7 @@ static float targetYawToBase;
 // Watchdogs (return to base)
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
-static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
+static uint64_t exploreWatchdog = maximumExploreTicks; // Prevent staying stuck in forward state by attempting to beeline periodically
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
 
 // Latest P2P packets
@@ -537,7 +537,7 @@ void resetInternalStates(void) {
     shouldTurnLeft = true;
     returnWatchdog = MAXIMUM_RETURN_TICKS;
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
-    exploreWatchdog = INITIAL_EXPLORE_TICKS;
+    exploreWatchdog = maximumExploreTicks;
     clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
 
     activeP2PIdsCount = 0;

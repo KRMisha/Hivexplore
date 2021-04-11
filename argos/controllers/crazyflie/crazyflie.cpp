@@ -618,7 +618,7 @@ void CCrazyflieController::ResetInternalStates() {
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_maximumExploreTicks = initialExploreTicks;
-    m_exploreWatchdog = initialExploreTicks;
+    m_exploreWatchdog = maximumReturnTicks;
     m_clearObstacleCounter = clearObstacleTicks;
 }
 

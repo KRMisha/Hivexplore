@@ -58,12 +58,12 @@ class DroneManager(ABC):
 
         try:
             MINIMUM_BATTERY_LEVEL = 30
-            can_drones_takeoff = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
+            are_all_drones_charged = all(self._drone_battery_levels[id] >= MINIMUM_BATTERY_LEVEL for id in self._get_drone_ids())
         except KeyError:
-            can_drones_takeoff = False
+            are_all_drones_charged = False
 
-        if can_drones_takeoff != self._are_all_drones_charged:
-            self._are_all_drones_charged = can_drones_takeoff
+        if are_all_drones_charged != self._are_all_drones_charged:
+            self._are_all_drones_charged = are_all_drones_charged
             self._web_socket_server.send_message('are-all-drones-charged', self._are_all_drones_charged)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):

@@ -12,7 +12,7 @@ def main():
     try:
         if sys.argv[1] not in load_crazyflies_config():
             print('Assigned URI not in \'{CRAZYFLIES_CONFIG_FILENAME}\', adding automatically (with a default base offset of (0, 0, 0))')
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         print(f'assign_crazyflie_address error: Could not load Crazyflies config from \'{CRAZYFLIES_CONFIG_FILENAME}\'')
         sys.exit(1)
 

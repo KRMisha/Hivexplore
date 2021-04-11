@@ -16,8 +16,8 @@ namespace {
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
     // Explore constants
-    static constexpr std::uint16_t maximumReorientationTicks = 600;
     static constexpr std::uint16_t initialReorientationTicks = 20;
+    static constexpr std::uint16_t maximumReorientationTicks = 600;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
 
     // Return to base constants

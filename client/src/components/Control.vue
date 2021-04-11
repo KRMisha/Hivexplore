@@ -295,6 +295,13 @@ div::v-deep(.p-inline-message) {
     .p-component {
         font-size: 0.875rem;
     }
+
+    ::v-deep(.p-inline-message) {
+        .p-inline-message-icon,
+        .p-inline-message-text {
+            font-size: 0.875rem;
+        }
+    }
 }
 
 .p-timeline-event-marker.selected-marker {

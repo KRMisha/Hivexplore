@@ -62,7 +62,7 @@ typedef struct {
 } P2PPacketContent;
 
 // Voltage References
-const static float voltageReferences[21] = {
+const static float referenceVoltages[21] = {
     3.27, 3.61, 3.69, 3.71, 3.73, 3.75, 3.77, 3.79, 3.80, 3.82, 3.84, 3.85, 3.87, 3.91, 3.95, 3.98, 4.02, 4.08, 4.11, 4.15, 4.20,
 };
 
@@ -85,8 +85,8 @@ static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
-static drone_status_t droneStatus = STATUS_STANDBY;
 static uint8_t batteryLevel = 0;
+static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
@@ -253,21 +253,21 @@ uint8_t calculateBatteryLevel(void) {
     uint8_t batteryLevel = 0;
     static const uint8_t PERCENTAGE_DELTA = 5;
 
-    if (batteryVoltageReading <= voltageReferences[0]) {
+    if (batteryVoltageReading <= referenceVoltages[0]) {
         return 0;
     }
 
-    if (batteryVoltageReading >= voltageReferences[20]) {
+    if (batteryVoltageReading >= referenceVoltages[20]) {
         return 100;
     }
 
-    while (batteryVoltageReading > voltageReferences[voltageReferenceIndex]) {
+    while (batteryVoltageReading > referenceVoltages[voltageReferenceIndex]) {
         voltageReferenceIndex++;
     }
 
-    float voltageDelta = (voltageReferences[voltageReferenceIndex] - voltageReferences[voltageReferenceIndex - 1]) / PERCENTAGE_DELTA;
+    float voltageDelta = (referenceVoltages[voltageReferenceIndex] - referenceVoltages[voltageReferenceIndex - 1]) / PERCENTAGE_DELTA;
     batteryLevel = voltageReferenceIndex * PERCENTAGE_DELTA;
-    batteryLevel -= (voltageReferences[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
+    batteryLevel -= (referenceVoltages[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
 
     return batteryLevel;
 }

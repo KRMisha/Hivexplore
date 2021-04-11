@@ -325,7 +325,7 @@ void explore(void) {
 
             rotationChangeWatchdog--;
             if (rotationChangeWatchdog == 0) {
-                shouldTurnLeft = !m_shouldTurnLeft;
+                shouldTurnLeft = !shouldTurnLeft;
                 rotationChangeWatchdog = getRandomRotationChangeCount();
             }
         }

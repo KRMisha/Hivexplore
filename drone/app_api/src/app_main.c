@@ -115,7 +115,7 @@ typedef struct {
 #define MAX_DRONE_COUNT 256
 static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
 static uint8_t activeP2PIds[MAX_DRONE_COUNT] = {};
-static uint8_t activeP2PIdsCount = 0; // TODO: reset to 0 on resetInternalStates (future MR)
+static uint8_t activeP2PIdsCount = 0;
 
 void appMain(void) {
     vTaskDelay(M2T(3000));
@@ -408,8 +408,6 @@ void returnToBase(void) {
     }
 }
 
-// TODO: Add a reset internal state function to reaffect all the values (like in the ARGoS controller)
-
 void emergencyLand(void) {
     switch (emergencyState) {
     case EMERGENCY_LAND: {
@@ -509,6 +507,8 @@ void resetInternalStates(void) {
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
     exploreWatchdog = INITIAL_EXPLORE_TICKS;
     clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
+
+    activeP2PIdsCount = 0;
 }
 
 void broadcastPosition() {

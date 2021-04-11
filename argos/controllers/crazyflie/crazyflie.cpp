@@ -720,15 +720,14 @@ void CCrazyflieController::PingOtherDrones() {
 }
 
 CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
-
-    //Drone's current yaw
+    // Drone's current yaw
     CRadians angleRadians;
     CVector3 angleUnitVector;
     m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
     CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
-    CRadians currentYawAdjustment =  currentAbsoluteYaw - CRadians::PI / 2;
+    CRadians currentYawAdjustment = currentAbsoluteYaw - CRadians::PI / 2;
 
-    //Drone's current position
+    // Drone's current position
     CVector2 currentPosition = CVector2(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY());
     CVector2 centerOfMass = currentPosition;
 
@@ -739,9 +738,9 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
         // Convert packet range from cm to m
         const auto vectorToDrone = packet.Range * 0.01 * CVector2(std::cos(horizontalAngle), std::sin(horizontalAngle));
 
-        CVector2 otherDronePosition = CVector2(currentPosition.GetX() - vectorToDrone.GetY(), currentPosition.GetY() + vectorToDrone.GetX());
-        centerOfMass = CVector2(centerOfMass.GetX() + otherDronePosition.GetX(),
-                                centerOfMass.GetY() + otherDronePosition.GetY());
+        CVector2 otherDronePosition =
+            CVector2(currentPosition.GetX() - vectorToDrone.GetY(), currentPosition.GetY() + vectorToDrone.GetX());
+        centerOfMass = CVector2(centerOfMass.GetX() + otherDronePosition.GetX(), centerOfMass.GetY() + otherDronePosition.GetY());
         nDronesDetected++;
     }
 

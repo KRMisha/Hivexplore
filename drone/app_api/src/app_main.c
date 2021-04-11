@@ -313,7 +313,7 @@ void explore(void) {
     case EXPLORING_EXPLORE: {
         droneStatus = STATUS_FLYING;
 
-        if (reorientationWatchdog == 0 ) {
+        if (reorientationWatchdog == 0) {
             DEBUG_PRINT("Reorienting!/n");
             targetYaw = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;
@@ -361,7 +361,7 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         // Calculate rotation angle to turn towards base
-        //targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+        // targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
         // // If the drone is towards its base
         // static const double yawEpsilon = 5.0;

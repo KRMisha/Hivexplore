@@ -149,6 +149,7 @@ class DroneManager(ABC):
             new_mission_state = MissionState[mission_state_str]
         except KeyError:
             self._logger.log_server_data(logging.ERROR, f'DroneManager error: Unknown mission state received: {mission_state_str}')
+            self._web_socket_server.send_message('mission-state', self._mission_state.name)
             return
 
         if new_mission_state == MissionState.Exploring:
@@ -157,12 +158,14 @@ class DroneManager(ABC):
                 self._logger.log_server_data(
                     logging.WARNING,
                     'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
+                self._web_socket_server.send_message('mission-state', self._mission_state.name)
                 return
 
             # Deny changing mission state to Exploring no drones are connected
             if len(self._get_drone_ids()) == 0:
                 self._logger.log_server_data(logging.WARNING,
                                              'Dronemanager warning: Could not start mission since no drones are connected')
+                self._web_socket_server.send_message('mission-state', self._mission_state.name)
                 return
 
         self._mission_state = new_mission_state

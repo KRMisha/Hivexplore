@@ -138,9 +138,9 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Velocity group
     LogVariableMap velocityLog;
-    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocity.GetX()));
-    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocity.GetY()));
-    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocity.GetZ()));
+    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocityReading.GetX()));
+    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocityReading.GetY()));
+    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocityReading.GetZ()));
     logDataMap.emplace_back(LogName::Velocity, velocityLog);
 
     // Range group - must be added after orientation and position
@@ -628,7 +628,7 @@ void CCrazyflieController::UpdateSensorReadings() {
 }
 
 void CCrazyflieController::UpdateVelocity() {
-    m_velocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
+    m_velocityReading = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
 
 void CCrazyflieController::UpdateRssi() {

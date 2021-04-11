@@ -113,7 +113,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Battery level group
     LogVariableMap batteryLevelLog;
-    batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
+    batteryLevelLog.emplace("hivexplore.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
     logDataMap.emplace_back(LogName::BatteryLevel, batteryLevelLog);
 
     // Orientation group

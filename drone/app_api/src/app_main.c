@@ -106,6 +106,7 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
 static drone_status_t droneStatus = STATUS_STANDBY;
+static uint8_t batteryLevel = 0;
 static bool isLedEnabled = false;
 static setpoint_t setPoint;
 static point_t initialPosition;
@@ -231,7 +232,7 @@ void appMain(void) {
         }
 
         // TODO: Use this batteryLevel (30% return to base)
-        static uint8_t batteryLevel = calculateBatteryLevel();
+        batteryLevel = calculateBatteryLevel();
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -661,6 +662,7 @@ uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_
 }
 
 LOG_GROUP_START(hivexplore)
+LOG_ADD(LOG_FLOAT, batteryLevel, &batteryLevel)
 LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)
 

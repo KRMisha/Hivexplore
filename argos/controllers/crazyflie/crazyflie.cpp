@@ -349,6 +349,8 @@ void CCrazyflieController::ReturnToBase() {
         // Brake before rotation towards base
         if (Brake()) {
             DebugPrint("Return: Braking towards base finished\n");
+
+            // Calculate rotation angle to turn towards base
             m_targetYaw = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
                                               m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
                           CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
@@ -359,47 +361,6 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::RotateTowardsBase: {
         m_droneStatus = DroneStatus::Flying;
 
-        // // Turn drone towards its base
-        // if (m_isRotateToBaseCommandFinished) {
-        //     DebugPrint("Return: Rotating towards base\n");
-
-        //     // Calculate rotation angle to turn towards base
-        //     m_targetYawToBase = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
-        //                                             m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
-        //                         CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
-
-        //     m_pcPropellers->SetAbsoluteYaw(m_targetYawToBase);
-        //     m_isRotateToBaseCommandFinished = false;
-        // }
-
-        // // Get current absolute yaw
-        // CRadians angleRadians;
-        // CVector3 angleUnitVector;
-        // m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
-        // CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
-
-        // // If the drone is towards its base, decrease stabilize rotation counter
-        // static const CRadians yawEpsilon = CRadians::PI / 64;
-        // CRadians yawDifference = currentAbsoluteYaw - m_targetYawToBase;
-
-        // bool isYawTowardsBase =
-        //     (((yawDifference <= yawEpsilon) && (yawDifference >= -yawEpsilon)) ||
-        //      ((yawDifference <= (CRadians::PI * 2 + yawEpsilon)) && (yawDifference >= (CRadians::PI * 2 - yawEpsilon))));
-
-        // if (!m_isRotateToBaseCommandFinished && m_stabilizeRotationCounter != 0 && isYawTowardsBase) {
-        //     m_stabilizeRotationCounter--;
-        // }
-
-        // // If the drone orientation is towards its base and is stable
-        // if (m_stabilizeRotationCounter == 0) {
-        //     m_isRotateToBaseCommandFinished = true;
-
-        //     // Reset counter
-        //     m_stabilizeRotationCounter = stabilizeRotationTicks;
-
-        //     DebugPrint("Return: Finished rotating towards base\n");
-        //     m_returningState = ReturningState::Return;
-        // }
         if (RotateTowardsTargetYaw()) {
             m_returningState = ReturningState::Return;
         }

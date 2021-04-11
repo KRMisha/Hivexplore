@@ -361,24 +361,6 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         // Calculate rotation angle to turn towards base
-        // targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
-
-        // // If the drone is towards its base
-        // static const double yawEpsilon = 5.0;
-        // double yawDifference = fabs(targetYaw - yawReading);
-        // if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
-        //     DEBUG_PRINT("Return: Finished rotating towards base\n");
-        //     returningState = RETURNING_RETURN;
-        // } else {
-        //     // Keep turning drone towards its base
-        //     targetHeight += EXPLORATION_HEIGHT;
-        //     updateWaypoint();
-        //     setPoint.mode.yaw = modeAbs;
-        //     setPoint.attitude.yaw = targetYaw;
-        // }
-        // // Calculate rotation angle to turn towards base
-        // targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
-
         targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
         if (rotateTowardsTargetYaw()) {

@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import { Message } from '@/communication/message';
 import { WebSocketEvent } from '@/communication/web-socket-event';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
@@ -10,6 +11,8 @@ const maxConnectionTimeout = 8000; // Milliseconds
 export class WebSocketClient {
     private socket!: WebSocket;
 
+    private _isConnected = ref(false);
+
     private timeout = baseConnectionTimeout;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +20,10 @@ export class WebSocketClient {
 
     constructor() {
         this.connect();
+    }
+
+    get isConnected() {
+        return this._isConnected.value;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,10 +80,12 @@ export class WebSocketClient {
 
         this.socket.onopen = () => {
             console.log(`Connection to ${serverUrl} successful`);
+            this._isConnected.value = true;
             this.timeout = baseConnectionTimeout;
         };
 
         this.socket.onclose = () => {
+            this._isConnected.value = false;
             setTimeout(() => {
                 this.connect();
             }, this.timeout);

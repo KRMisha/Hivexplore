@@ -64,7 +64,14 @@ make run
 
 ### Set the Crazyflie's offsets from the base
 
-When starting a mission, the crazyflie's offset from base when taking off must be accurate. You can change their offsets, in meters, by modifying server/config/crazyflies_config.json.
+When starting a mission, the Crazyflie's offset from base when taking off must be known. You can change each Crazyflie's offset, in meters, by modifying `server/config/crazyflies_config.json`.
+
+The axes system is the following:
+- x: Forward
+- y: Left
+- z: Up
+
+All drones must be facing forward on mission start.
 
 ### Assign a Crazyflie's address
 ```

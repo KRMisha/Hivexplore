@@ -576,7 +576,8 @@ void updateBatteryLevel(void) {
     }
 
     float voltageDelta = (referenceVoltages[voltageReferenceIndex] - referenceVoltages[voltageReferenceIndex - 1]) / PERCENTAGE_DELTA;
-    batteryLevel = voltageReferenceIndex * PERCENTAGE_DELTA - (referenceVoltages[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
+    batteryLevel =
+        voltageReferenceIndex * PERCENTAGE_DELTA - (referenceVoltages[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
 }
 
 void broadcastPosition(void) {

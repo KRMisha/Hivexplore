@@ -54,6 +54,7 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
 
     try:
         crazyflies_config[new_uri] = crazyflies_config[old_uri]
+        del crazyflies_config[old_uri]
     except KeyError:
         crazyflies_config[new_uri] = {
             'baseOffset': {
@@ -64,4 +65,4 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
         }
 
     with open(CRAZYFLIES_CONFIG_FILENAME, 'w') as file:
-        json.dump(crazyflies_config, file)
+        json.dump(crazyflies_config, file, sort_keys=True, indent=4)

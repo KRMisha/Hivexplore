@@ -3,9 +3,9 @@
         <ConfirmPopup />
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
-                <div v-if="disabledMissionStartMessage !== ''" class="p-col-12 p-p-0 p-mb-5">
-                    <InlineMessage severity="info" class="p-p-2 disabled-mission-start-message">{{
-                        disabledMissionStartMessage
+                <div v-if="warningMessage !== ''" class="p-col-12 p-p-0 p-mb-5">
+                    <InlineMessage severity="info" class="p-p-2 warning-message">{{
+                        warningMessage
                     }}</InlineMessage>
                 </div>
 
@@ -22,7 +22,7 @@
                             label="Return to base"
                             icon="pi pi-home"
                             class="p-my-1"
-                            :disabled="droneCount === 0 || missionState !== MissionState.Exploring"
+                            :disabled="isReturnToBaseButtonDisabled"
                             @click="setMissionState(MissionState.Returning)"
                         />
                         <Button
@@ -30,7 +30,7 @@
                             :icon="endMissionButtonIcon"
                             class="p-my-1"
                             :class="endMissionButtonClass"
-                            :disabled="droneCount === 0 || missionState === MissionState.Standby || missionState === MissionState.Emergency"
+                            :disabled="isEndMissionButtonDisabled"
                             @click="onEndMissionButtonClick($event)"
                         />
                     </div>
@@ -96,13 +96,13 @@ export default defineComponent({
             areAllDronesCharged.value = newAreAllDronesCharged;
         });
 
-        const disabledMissionStartMessage = computed(() => {
-            if (missionState.value !== MissionState.Standby) {
-                return '';
+        const warningMessage = computed(() => {
+            if (!socketClient.isConnected) {
+                return 'The server is not connected';
             }
 
-            if (!socketClient.isConnected) {
-                return 'The server must be connected before the mission can start';
+            if (missionState.value !== MissionState.Standby) {
+                return '';
             }
 
             if (droneCount.value === 0) {
@@ -145,6 +145,10 @@ export default defineComponent({
             }
         }
 
+        const isReturnToBaseButtonDisabled = computed(() => {
+            return droneCount.value === 0 || missionState.value !== MissionState.Exploring || !socketClient.isConnected;
+        });
+
         const endMissionButtonLabel = computed(() => {
             return missionState.value === MissionState.Landed ? 'End mission' : 'Emergency land';
         });
@@ -157,6 +161,15 @@ export default defineComponent({
             return {
                 'p-button-danger': missionState.value !== MissionState.Landed,
             };
+        });
+
+        const isEndMissionButtonDisabled = computed(() => {
+            return (
+                droneCount.value === 0 ||
+                missionState.value === MissionState.Standby ||
+                missionState.value === MissionState.Emergency ||
+                !socketClient.isConnected
+            );
         });
 
         function onEndMissionButtonClick(event: Event) {
@@ -199,12 +212,14 @@ export default defineComponent({
             missionStates,
             setMissionState,
             droneCount,
-            disabledMissionStartMessage,
+            warningMessage,
             isStartMissionButtonDisabled,
             onStartMissionButtonClick,
+            isReturnToBaseButtonDisabled,
             endMissionButtonLabel,
             endMissionButtonIcon,
             endMissionButtonClass,
+            isEndMissionButtonDisabled,
             onEndMissionButtonClick,
             droneCountChipClass,
             timelineMarkerClass,
@@ -244,7 +259,7 @@ div::v-deep(.p-inline-message) {
     }
 }
 
-.disabled-mission-start-message {
+.warning-message {
     width: 100%;
     margin-top: -0.5rem;
 }

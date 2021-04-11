@@ -158,6 +158,7 @@ class DroneManager(ABC):
                     logging.WARNING,
                     'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
                 return
+
             if len(self._get_drone_ids()) == 0:
                 self._logger.log_server_data(logging.WARNING,
                                              'Dronemanager warning: Could not start mission since at least one drone must be connected')

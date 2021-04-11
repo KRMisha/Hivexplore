@@ -39,13 +39,18 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
     new_address = format(eeprom.elements['radio_address'], 'X')
     new_uri = old_uri.replace(old_address, new_address)
 
-    print(f'Changed URI of drone {old_uri} to {new_uri}')
-    print('Restarting drone...')
+    print(f'Changed URI of Crazyflie {old_uri} to {new_uri}')
+    print('Restarting Crazyflie...')
 
     PowerSwitch(old_uri).stm_power_cycle()
 
-    with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
-        crazyflies_config = json.load(file)
+    try:
+        with open(CRAZYFLIES_CONFIG_FILENAME, 'r') as file:
+            crazyflies_config = json.load(file)
+    except ValueError as exc:
+        print(f'config_parser error: Could not load Crazyflies config from \'{CRAZYFLIES_CONFIG_FILENAME}\': {exc}\n' +
+              'The new URI will not be saved. Please manually save the Crazyflie\'s new URI to \'{CRAZYFLIES_CONFIG_FILENAME}\'')
+        return
 
     try:
         crazyflies_config[new_uri] = crazyflies_config[old_uri]

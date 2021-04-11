@@ -11,7 +11,7 @@ def main():
 
     try:
         if sys.argv[1] not in load_crazyflie_uris():
-            print('Warning: URI of drone not in config file')
+            print('Assigned URI not in \'{CRAZYFLIES_CONFIG_FILENAME}\', adding automatically')
     except ValueError:
         sys.exit(1)
 

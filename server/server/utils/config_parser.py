@@ -15,7 +15,7 @@ def load_crazyflie_uris() -> List[str]:
             crazyflies_config = json.load(file)
             return [crazyflie_config['uri'] for crazyflie_config in crazyflies_config]
         except ValueError:
-            print('load_crazyflie_uris error: Could not load URIs from file')
+            print(f'load_crazyflie_uris error: Could not load URIs from \'{CRAZYFLIES_CONFIG_FILENAME}\'')
             raise
 
 
@@ -41,7 +41,7 @@ def load_crazyflie_base_offsets() -> Dict[str, Point]:
             crazyflies_config = json.load(file)
             return {crazyflie_config['uri']: Point(**crazyflie_config['baseOffset']) for crazyflie_config in crazyflies_config}
         except ValueError:
-            print('load_crazyflie_base_offset error: Could not load initial positions from file')
+            print(f'load_crazyflie_base_offsets error: Could not load base offsets from \'{CRAZYFLIES_CONFIG_FILENAME}\'')
             raise
 
 

@@ -1,7 +1,7 @@
+import { ref } from 'vue';
 import { Message } from '@/communication/message';
 import { WebSocketEvent } from '@/communication/web-socket-event';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
-import { ref } from 'vue';
 
 const serverPort = 5678;
 const serverUrl = `ws://${window.location.hostname}:${serverPort}`;

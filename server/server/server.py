@@ -1,9 +1,9 @@
 import asyncio
+from server.communication.web_socket_server import WebSocketServer
 from server.logger import Logger
 from server.managers.crazyflie_manager import CrazyflieManager
 from server.managers.argos_manager import ArgosManager
 from server.map_generator import MapGenerator
-from server.sockets.web_socket_server import WebSocketServer
 
 
 class Server:

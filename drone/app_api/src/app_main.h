@@ -43,7 +43,8 @@ typedef enum {
     STATUS_CRASHED,
 } drone_status_t;
 
-void avoidObstacle(void);
+void avoidDrones(void);
+void avoidObstacles(void);
 void explore(void);
 void returnToBase(void);
 void emergencyLand(void);
@@ -53,10 +54,12 @@ bool rotate(void);
 bool land(void);
 bool isCrashed(void);
 
-void broadcastPosition();
+void resetInternalStates(void);
+
+void broadcastPosition(void);
 void p2pReceivedCallback(P2PPacket* packet);
 
 void updateWaypoint(void);
-uint16_t calculateDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);
+uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);
 
 #endif

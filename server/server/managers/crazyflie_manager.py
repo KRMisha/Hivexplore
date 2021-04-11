@@ -4,11 +4,14 @@ from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
+from server.communication.log_name import LogName
+from server.communication.param_name import ParamName
+from server.communication.web_socket_event import WebSocketEvent
+from server.communication.web_socket_server import WebSocketServer
 from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
-from server.sockets.web_socket_server import WebSocketServer
 from server.tuples import Point
 from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflie_base_offsets, load_crazyflie_uris
 
@@ -31,7 +34,7 @@ class CrazyflieManager(DroneManager):
 
     async def start(self):
         self._web_socket_server.bind(
-            'connect', lambda client_id: self._web_socket_server.send_message_to_client(
+            WebSocketEvent.CONNECT, lambda client_id: self._web_socket_server.send_message_to_client(
                 client_id, 'log', {
                     'group': 'Server',
                     'line': f'The base offsets to position the Crazyflies can be found in \'{CRAZYFLIES_CONFIG_FILENAME}\''
@@ -86,43 +89,44 @@ class CrazyflieManager(DroneManager):
 
         log_configs = [
             {
-                'log_config': LogConfig(name='battery-level', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name=LogName.BATTERY_LEVEL.value, period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['pm.batteryLevel'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_battery_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='orientation', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name=LogName.ORIENTATION.value, period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.roll', 'stateEstimate.pitch', 'stateEstimate.yaw'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_orientation_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='position', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name=LogName.POSITION.value, period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.x', 'stateEstimate.y', 'stateEstimate.z'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_position_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='velocity', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name=LogName.VELOCITY.value, period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['stateEstimate.vx', 'stateEstimate.vy', 'stateEstimate.vz'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_velocity_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='range', period_in_ms=POLLING_PERIOD_MS), # Must be added after orientation and position
+                'log_config': LogConfig(name=LogName.RANGE.value,
+                                        period_in_ms=POLLING_PERIOD_MS), # Must be added after orientation and position
                 'variables': ['range.front', 'range.left', 'range.back', 'range.right', 'range.up', 'range.zrange'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_range_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='rssi', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name=LogName.RSSI.value, period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['radio.rssi'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_rssi_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },
             {
-                'log_config': LogConfig(name='drone-status', period_in_ms=POLLING_PERIOD_MS),
+                'log_config': LogConfig(name=LogName.DRONE_STATUS.value, period_in_ms=POLLING_PERIOD_MS),
                 'variables': ['hivexplore.droneStatus'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_drone_status_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
@@ -145,8 +149,8 @@ class CrazyflieManager(DroneManager):
                 self._logger.log_server_data(logging.ERROR, f'CrazyflieManager error: Could not add log configuration: {exc}')
 
     def _setup_param(self, crazyflie: Crazyflie):
-        crazyflie.param.add_update_callback(group='hivexplore', name='missionState', cb=self._param_update_callback)
-        crazyflie.param.add_update_callback(group='hivexplore', name='isM1LedOn', cb=self._param_update_callback)
+        crazyflie.param.add_update_callback(group='hivexplore', name=ParamName.MISSION_STATE.value, cb=self._param_update_callback)
+        crazyflie.param.add_update_callback(group='hivexplore', name=ParamName.IS_LED_ENABLED.value, cb=self._param_update_callback)
 
     # Connection callbacks
 
@@ -208,6 +212,7 @@ class CrazyflieManager(DroneManager):
             new_mission_state = MissionState[mission_state_str]
         except KeyError:
             self._logger.log_server_data(logging.ERROR, f'Crazyflie Manager error: Unknown mission state received: {mission_state_str}')
+            self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
             return
 
         if new_mission_state == MissionState.Exploring:
@@ -215,6 +220,7 @@ class CrazyflieManager(DroneManager):
                 self._crazyflie_base_offsets = load_crazyflie_base_offsets()
             except ValueError:
                 self._logger.log_server_data(logging.ERROR, 'CrazyflieManager warning: Could not load base offsets from file')
+                self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
                 return
 
             for drone_id, base_offset in self._crazyflie_base_offsets.items():

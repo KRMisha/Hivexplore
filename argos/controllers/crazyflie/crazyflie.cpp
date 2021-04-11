@@ -55,8 +55,8 @@ void CCrazyflieController::ControlStep() {
         m_debugPrint.clear();
     }
 
-    UpdateSensorReadings();
     UpdateVelocity();
+    UpdateSensorReadings();
     UpdateRssi();
 
     const bool shouldNotBroadcastPosition = m_missionState == MissionState::Standby ||
@@ -622,13 +622,13 @@ void CCrazyflieController::ResetInternalStates() {
     m_clearObstacleCounter = clearObstacleTicks;
 }
 
+void CCrazyflieController::UpdateVelocity() {
+    m_velocityReading = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
+}
+
 void CCrazyflieController::UpdateSensorReadings() {
     static const std::array<std::string, 6> sensorDirections = {"front", "left", "back", "right", "up", "down"};
     m_sensorReadings = GetSensorReadings<float>(sensorDirections);
-}
-
-void CCrazyflieController::UpdateVelocity() {
-    m_velocityReading = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
 
 void CCrazyflieController::UpdateRssi() {

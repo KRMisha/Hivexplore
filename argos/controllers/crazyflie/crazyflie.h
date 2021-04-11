@@ -88,8 +88,8 @@ private:
 
     void ResetInternalStates();
 
-    void UpdateSensorReadings();
     void UpdateVelocity();
+    void UpdateSensorReadings();
     void UpdateRssi();
 
     void PingOtherDrones();

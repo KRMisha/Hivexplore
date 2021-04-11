@@ -118,6 +118,7 @@ private:
     CVector3 m_velocity;
     std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
+    bool m_isOutOfService = false;
     DroneStatus m_droneStatus = DroneStatus::Standby;
     std::string m_debugPrint;
 

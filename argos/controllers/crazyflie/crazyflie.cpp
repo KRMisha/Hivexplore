@@ -50,6 +50,10 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
+    if (m_isOutOfService) {
+        return;
+    }
+
     // Clear the debug print only if it has been flushed (with '\n') in the previous step
     if (m_debugPrint.find('\n') != std::string::npos) {
         m_debugPrint.clear();
@@ -92,7 +96,10 @@ void CCrazyflieController::ControlStep() {
     }
 
     if (IsCrashed()) {
+        m_isOutOfService = true;
         m_droneStatus = DroneStatus::Crashed;
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        m_pcPropellers->SetRelativeYaw(CRadians(0.0));
     }
 
     m_previousPosition = m_pcPos->GetReading().Position;

@@ -145,7 +145,7 @@ export default defineComponent({
         }
 
         const isReturnToBaseButtonDisabled = computed(() => {
-            return droneCount.value === 0 || missionState.value !== MissionState.Exploring || !webSocketClient.isConnected;
+            return !webSocketClient.isConnected || droneCount.value === 0 || missionState.value !== MissionState.Exploring;
         });
 
         const endMissionButtonLabel = computed(() => {
@@ -164,10 +164,10 @@ export default defineComponent({
 
         const isEndMissionButtonDisabled = computed(() => {
             return (
+                !webSocketClient.isConnected ||
                 droneCount.value === 0 ||
                 missionState.value === MissionState.Standby ||
-                missionState.value === MissionState.Emergency ||
-                !webSocketClient.isConnected
+                missionState.value === MissionState.Emergency
             );
         });
 

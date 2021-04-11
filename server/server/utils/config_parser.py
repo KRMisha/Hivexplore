@@ -49,7 +49,7 @@ def _data_updated(crazyflie: Crazyflie, eeprom: I2CElement):
             crazyflies_config = json.load(file)
     except (ValueError, FileNotFoundError) as exc:
         print(f'config_parser error: Could not load Crazyflies config from \'{CRAZYFLIES_CONFIG_FILENAME}\': {exc}\n' +
-              'The new URI will not be saved. Please manually save the Crazyflie\'s new URI to \'{CRAZYFLIES_CONFIG_FILENAME}\'')
+              f'The new URI will not be saved. Please manually save the Crazyflie\'s new URI to \'{CRAZYFLIES_CONFIG_FILENAME}\'')
         return
 
     try:

@@ -163,7 +163,7 @@ class DroneManager(ABC):
                 self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
                 return
 
-            # Deny changing mission state to Exploring no drones are connected
+            # Deny changing mission state to Exploring if no drones are connected
             if len(self._get_drone_ids()) == 0:
                 self._logger.log_server_data(logging.WARNING,
                                              'Dronemanager warning: Could not start mission since no drones are connected')

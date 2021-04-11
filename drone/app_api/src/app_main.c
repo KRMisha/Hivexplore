@@ -557,10 +557,6 @@ void resetInternalStates(void) {
 }
 
 void updateBatteryLevel(void) {
-    uint8_t voltageReferenceIndex = 0;
-    uint8_t batteryLevel = 0;
-    static const uint8_t PERCENTAGE_DELTA = 5;
-
     if (batteryVoltageReading <= referenceVoltages[0]) {
         batteryLevel = 0;
         return;
@@ -571,13 +567,15 @@ void updateBatteryLevel(void) {
         return;
     }
 
-    while (batteryVoltageReading > referenceVoltages[voltageReferenceIndex]) {
-        voltageReferenceIndex++;
+    uint8_t referenceVoltageIndex = 0;
+    while (batteryVoltageReading > referenceVoltages[referenceVoltageIndex]) {
+        referenceVoltageIndex++;
     }
 
-    float voltageDelta = (referenceVoltages[voltageReferenceIndex] - referenceVoltages[voltageReferenceIndex - 1]) / PERCENTAGE_DELTA;
+    static const uint8_t PERCENTAGE_DELTA = 5;
+    float voltageDelta = (referenceVoltages[referenceVoltageIndex] - referenceVoltages[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
     batteryLevel =
-        voltageReferenceIndex * PERCENTAGE_DELTA - (referenceVoltages[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
+        referenceVoltageIndex * PERCENTAGE_DELTA - (referenceVoltages[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
 }
 
 void broadcastPosition(void) {

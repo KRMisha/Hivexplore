@@ -121,13 +121,6 @@ static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles
 // TODO: remove (to simulate low battery)
 static uint64_t batterySimulation = INITIAL_BATTERY_TICKS;
 
-typedef struct {
-    float x;
-    float y;
-    float z;
-    uint8_t sourceId;
-} P2PPacketContent;
-
 // Latest P2P packets
 #define MAX_DRONE_COUNT 256
 static P2PPacketContent latestP2PPackets[MAX_DRONE_COUNT];
@@ -237,7 +230,7 @@ void appMain(void) {
             break;
         case MISSION_EXPLORING:
             avoidDrones();
-            avoidObstacle();
+            avoidObstacles();
             if (isBatteryBelowMinimumThreshold) {
                 returnToBase();
             } else {

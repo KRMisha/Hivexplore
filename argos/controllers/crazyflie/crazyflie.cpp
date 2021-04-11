@@ -80,7 +80,7 @@ void CCrazyflieController::ControlStep() {
         ResetInternalStates();
         break;
     case MissionState::Exploring:
-        if (!AvoidObstacle()) {
+        if (!AvoidObstaclesAndDrones()) {
             if (m_isBatteryBelowMinimumThreshold) {
                 ReturnToBase();
             } else {

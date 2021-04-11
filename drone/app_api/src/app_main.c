@@ -211,8 +211,8 @@ void appMain(void) {
             broadcastPosition();
         }
 
-        // TODO: Use this batteryLevel (30% return to base)
-        batteryLevel = calculateBatteryLevel();
+        // TODO: Use new batteryLevel (30% return to base)
+        updateBatteryLevel();
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -246,30 +246,6 @@ void appMain(void) {
         static const uint8_t TASK_PRIORITY = 3;
         commanderSetSetpoint(&setPoint, TASK_PRIORITY);
     }
-}
-
-uint8_t calculateBatteryLevel(void) {
-    uint8_t voltageReferenceIndex = 0;
-    uint8_t batteryLevel = 0;
-    static const uint8_t PERCENTAGE_DELTA = 5;
-
-    if (batteryVoltageReading <= referenceVoltages[0]) {
-        return 0;
-    }
-
-    if (batteryVoltageReading >= referenceVoltages[20]) {
-        return 100;
-    }
-
-    while (batteryVoltageReading > referenceVoltages[voltageReferenceIndex]) {
-        voltageReferenceIndex++;
-    }
-
-    float voltageDelta = (referenceVoltages[voltageReferenceIndex] - referenceVoltages[voltageReferenceIndex - 1]) / PERCENTAGE_DELTA;
-    batteryLevel = voltageReferenceIndex * PERCENTAGE_DELTA;
-    batteryLevel -= (referenceVoltages[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
-
-    return batteryLevel;
 }
 
 void avoidDrones(void) {
@@ -578,6 +554,29 @@ void resetInternalStates(void) {
     clearObstacleCounter = CLEAR_OBSTACLE_TICKS;
 
     activeP2PIdsCount = 0;
+}
+
+void updateBatteryLevel(void) {
+    uint8_t voltageReferenceIndex = 0;
+    uint8_t batteryLevel = 0;
+    static const uint8_t PERCENTAGE_DELTA = 5;
+
+    if (batteryVoltageReading <= referenceVoltages[0]) {
+        batteryLevel = 0;
+        return;
+    }
+
+    if (batteryVoltageReading >= referenceVoltages[20]) {
+        batteryLevel = 100;
+        return;
+    }
+
+    while (batteryVoltageReading > referenceVoltages[voltageReferenceIndex]) {
+        voltageReferenceIndex++;
+    }
+
+    float voltageDelta = (referenceVoltages[voltageReferenceIndex] - referenceVoltages[voltageReferenceIndex - 1]) / PERCENTAGE_DELTA;
+    batteryLevel = voltageReferenceIndex * PERCENTAGE_DELTA - (referenceVoltages[voltageReferenceIndex] - batteryVoltageReading) / voltageDelta;
 }
 
 void broadcastPosition(void) {

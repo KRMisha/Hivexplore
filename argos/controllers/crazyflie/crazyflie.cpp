@@ -693,7 +693,7 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
     CVector2 centerOfMass = currentPosition;
 
     // Accumulation of other drones' positions received
-    std::uint16_t nDronesDetected = 0;
+    std::uint16_t detectedDroneCount = 0;
     for (const auto& packet : m_pcRABS->GetReadings()) {
         const double horizontalAngle = packet.HorizontalBearing.GetValue() + currentYawAdjustment.GetValue();
         // Convert packet range from cm to m
@@ -702,10 +702,10 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
         CVector2 otherDronePosition =
             CVector2(currentPosition.GetX() - vectorToDrone.GetY(), currentPosition.GetY() + vectorToDrone.GetX());
         centerOfMass = CVector2(centerOfMass.GetX() + otherDronePosition.GetX(), centerOfMass.GetY() + otherDronePosition.GetY());
-        nDronesDetected++;
+        detectedDroneCount++;
     }
 
-    centerOfMass = CVector2(centerOfMass.GetX() / (nDronesDetected + 1), centerOfMass.GetY() / (nDronesDetected + 1));
+    centerOfMass = CVector2(centerOfMass.GetX() / (detectedDroneCount + 1), centerOfMass.GetY() / (detectedDroneCount + 1));
     const auto vectorAway = CVector2(currentPosition.GetX() - centerOfMass.GetX(), currentPosition.GetY() - centerOfMass.GetY());
 
     return (CRadians(std::atan2(vectorAway.GetY(), vectorAway.GetX())) +

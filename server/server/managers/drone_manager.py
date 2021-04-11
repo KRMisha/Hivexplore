@@ -66,7 +66,7 @@ class DroneManager(ABC):
 
         if are_all_drones_charged != self._are_all_drones_charged:
             self._are_all_drones_charged = are_all_drones_charged
-            self._web_socket_server.send_message('are-all-drones-charged', self._are_all_drones_charged)
+            self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -151,7 +151,7 @@ class DroneManager(ABC):
             new_mission_state = MissionState[mission_state_str]
         except KeyError:
             self._logger.log_server_data(logging.ERROR, f'DroneManager error: Unknown mission state received: {mission_state_str}')
-            self._web_socket_server.send_message('mission-state', self._mission_state.name)
+            self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
             return
 
         if new_mission_state == MissionState.Exploring:
@@ -160,14 +160,14 @@ class DroneManager(ABC):
                 self._logger.log_server_data(
                     logging.WARNING,
                     'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
-                self._web_socket_server.send_message('mission-state', self._mission_state.name)
+                self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
                 return
 
             # Deny changing mission state to Exploring no drones are connected
             if len(self._get_drone_ids()) == 0:
                 self._logger.log_server_data(logging.WARNING,
                                              'Dronemanager warning: Could not start mission since no drones are connected')
-                self._web_socket_server.send_message('mission-state', self._mission_state.name)
+                self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
                 return
 
         self._mission_state = new_mission_state

@@ -4,9 +4,7 @@
         <Panel header="Mission control" class="stretched">
             <div class="p-grid p-m-0 p-ai-stretch stretched">
                 <div v-if="warningMessage !== ''" class="p-col-12 p-p-0 p-mb-5">
-                    <InlineMessage severity="info" class="p-p-2 warning-message">{{
-                        warningMessage
-                    }}</InlineMessage>
+                    <InlineMessage severity="info" class="p-p-2 warning-message">{{ warningMessage }}</InlineMessage>
                 </div>
 
                 <div class="p-col p-p-0 p-d-flex p-flex-column p-jc-between">
@@ -147,7 +145,7 @@ export default defineComponent({
         }
 
         const isReturnToBaseButtonDisabled = computed(() => {
-            return droneCount.value === 0 || missionState.value !== MissionState.Exploring || !socketClient.isConnected;
+            return droneCount.value === 0 || missionState.value !== MissionState.Exploring || !webSocketClient.isConnected;
         });
 
         const endMissionButtonLabel = computed(() => {

@@ -195,8 +195,8 @@ class CrazyflieManager(DroneManager):
         self._drone_battery_levels.pop(link_uri, None)
 
         if len(self._connected_crazyflies) == 0:
-            self._logger.log_server_data(logging.INFO, 'No drones are connected: setting mission state to \'Landed\'')
-            self._set_mission_state(MissionState.Landed.name)
+            self._logger.log_server_data(logging.INFO, 'Mission ended because all drones disconnected')
+            self._set_mission_state(MissionState.Standby.name)
 
     def _connection_failed(self, link_uri: str, msg: str):
         self._logger.log_server_data(logging.WARN, f'Connection to {link_uri} failed: {msg}')

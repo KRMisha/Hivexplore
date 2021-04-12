@@ -95,9 +95,9 @@ export default defineComponent({
             areAllDronesCharged.value = newAreAllDronesCharged;
         });
 
-        const areAllDronesReadyForMission = ref(false);
-        webSocketClient.bindMessage(WebSocketEvent.AreAllDronesReadyForMission, (newAreAllDronesReadyForMission: boolean) => {
-            areAllDronesReadyForMission.value = newAreAllDronesReadyForMission;
+        const areAllDronesOperational = ref(false);
+        webSocketClient.bindMessage(WebSocketEvent.AreAllDronesOperational, (newareAllDronesOperational: boolean) => {
+            areAllDronesOperational.value = newareAllDronesOperational;
         });
 
         const warningMessage = computed(() => {
@@ -117,7 +117,7 @@ export default defineComponent({
                 return 'All drones must have at least 30% battery before the mission can start';
             }
 
-            if (!areAllDronesReadyForMission.value) {
+            if (!areAllDronesOperational.value) {
                 return 'No drones must be crashed before the mission can start';
             }
 
@@ -129,7 +129,7 @@ export default defineComponent({
                 !webSocketClient.isConnected ||
                 droneCount.value === 0 ||
                 !areAllDronesCharged.value ||
-                !areAllDronesReadyForMission.value ||
+                !areAllDronesOperational.value ||
                 missionState.value !== MissionState.Standby
             );
         });

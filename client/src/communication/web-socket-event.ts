@@ -9,7 +9,7 @@ export enum WebSocketEvent {
     BatteryLevel = 'battery-level',
     Velocity = 'velocity',
     DroneStatus = 'drone-status',
-    AreAllDronesReadyForMission = 'are-all-drones-ready-for-mission',
+    AreAllDronesOperational = 'are-all-drones-operational',
     Led = 'led',
     Log = 'log',
 }

@@ -144,7 +144,7 @@ class DroneManager(ABC):
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
-        # Set mission state to returning if all drones are under 30% battery
+        # Set mission state to Returning if all drones are under 30% battery
         if self._are_all_drones_discharged and self._mission_state == MissionState.Exploring:
             self._set_mission_state(MissionState.Returning.name)
 

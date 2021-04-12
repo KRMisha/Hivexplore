@@ -61,6 +61,11 @@ typedef struct {
     uint8_t sourceId;
 } P2PPacketContent;
 
+// Reference voltages - voltages for battery levels from 0% to 100% in 5% increments
+const static float REFERENCE_VOLTAGES[] = {
+    3.27, 3.61, 3.69, 3.71, 3.73, 3.75, 3.77, 3.79, 3.80, 3.82, 3.84, 3.85, 3.87, 3.91, 3.95, 3.98, 4.02, 4.08, 4.11, 4.15, 4.20,
+};
+
 // Constants
 static const uint16_t OBSTACLE_DETECTED_THRESHOLD = 300;
 static const uint16_t EDGE_DETECTED_THRESHOLD = 400;
@@ -82,14 +87,16 @@ static returning_state_t returningState = RETURNING_ROTATE_TOWARDS_BASE;
 static emergency_state_t emergencyState = EMERGENCY_LAND;
 
 // Data
+static point_t initialPosition;
+static setpoint_t setPoint;
+static uint8_t batteryLevel = 0;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
-static setpoint_t setPoint;
-static point_t initialPosition;
 static bool shouldTurnLeft = true;
-static point_t initialOffsetFromBase = {}; // TODO: Initialize from server using param
+static point_t baseOffset = {};
 
 // Readings
+static float batteryVoltageReading;
 static float rollReading;
 static float pitchReading;
 static float yawReading;
@@ -125,6 +132,7 @@ static uint8_t activeP2PIdsCount = 0;
 void appMain(void) {
     vTaskDelay(M2T(3000));
 
+    const logVarId_t batteryVoltageId = logGetVarId("pm", "vbat");
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
@@ -170,6 +178,8 @@ void appMain(void) {
             continue;
         }
 
+        batteryVoltageReading = logGetFloat(batteryVoltageId);
+
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
         yawReading = logGetFloat(yawId);
@@ -203,6 +213,9 @@ void appMain(void) {
         if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
+
+        // TODO: Use new batteryLevel (30% return to base)
+        updateBatteryLevel();
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -241,9 +254,9 @@ void appMain(void) {
 void avoidDrones(void) {
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         vector_t vectorAwayFromDrone = {
-            .x = (initialOffsetFromBase.x + positionReading.x) - latestP2PPackets[activeP2PIds[i]].x,
-            .y = (initialOffsetFromBase.y + positionReading.y) - latestP2PPackets[activeP2PIds[i]].y,
-            .z = (initialOffsetFromBase.z + positionReading.z) - latestP2PPackets[activeP2PIds[i]].z,
+            .x = (positionReading.x + baseOffset.x) - latestP2PPackets[activeP2PIds[i]].x,
+            .y = (positionReading.y + baseOffset.y) - latestP2PPackets[activeP2PIds[i]].y,
+            .z = (positionReading.z + baseOffset.z) - latestP2PPackets[activeP2PIds[i]].z,
         };
 
         const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
@@ -570,6 +583,28 @@ void resetInternalStates(void) {
     activeP2PIdsCount = 0;
 }
 
+void updateBatteryLevel(void) {
+    if (batteryVoltageReading <= REFERENCE_VOLTAGES[0]) {
+        batteryLevel = 0;
+        return;
+    }
+
+    if (batteryVoltageReading >= REFERENCE_VOLTAGES[sizeof(REFERENCE_VOLTAGES) / sizeof(REFERENCE_VOLTAGES[0]) - 1]) {
+        batteryLevel = 100;
+        return;
+    }
+
+    uint8_t referenceVoltageIndex = 0;
+    while (batteryVoltageReading > REFERENCE_VOLTAGES[referenceVoltageIndex]) {
+        referenceVoltageIndex++;
+    }
+
+    static const uint8_t PERCENTAGE_DELTA = 5;
+    float voltageDelta = (REFERENCE_VOLTAGES[referenceVoltageIndex] - REFERENCE_VOLTAGES[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
+    batteryLevel =
+        referenceVoltageIndex * PERCENTAGE_DELTA - (REFERENCE_VOLTAGES[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
+}
+
 void broadcastPosition(void) {
     // Avoid causing drone reset due to the content size
     if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
@@ -581,9 +616,9 @@ void broadcastPosition(void) {
     uint8_t id = (uint8_t)(radioAddress & 0x00000000ff);
 
     P2PPacketContent content = {
-        .x = positionReading.x + initialOffsetFromBase.x,
-        .y = positionReading.y + initialOffsetFromBase.y,
-        .z = positionReading.z + initialOffsetFromBase.z,
+        .x = positionReading.x + baseOffset.x,
+        .y = positionReading.y + baseOffset.y,
+        .z = positionReading.z + baseOffset.z,
         .sourceId = id,
     };
 
@@ -658,10 +693,14 @@ uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_
 }
 
 LOG_GROUP_START(hivexplore)
+LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevel)
 LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)
 
 PARAM_GROUP_START(hivexplore)
 PARAM_ADD(PARAM_UINT8, missionState, &missionState)
 PARAM_ADD(PARAM_UINT8, isLedEnabled, &isLedEnabled)
+PARAM_ADD(PARAM_FLOAT, baseOffsetX, &baseOffset.x)
+PARAM_ADD(PARAM_FLOAT, baseOffsetY, &baseOffset.y)
+PARAM_ADD(PARAM_FLOAT, baseOffsetZ, &baseOffset.z)
 PARAM_GROUP_STOP(hivexplore)

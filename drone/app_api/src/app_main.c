@@ -518,7 +518,7 @@ bool rotate(void) {
     return frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD;
 }
 
-bool rotateToTargetYaw() {
+bool rotateToTargetYaw(void) {
     targetHeight = EXPLORATION_HEIGHT;
     updateWaypoint();
     // If the drone has reached its target yaw

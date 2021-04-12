@@ -90,7 +90,7 @@ class CrazyflieManager(DroneManager):
         log_configs = [
             {
                 'log_config': LogConfig(name=LogName.BATTERY_LEVEL.value, period_in_ms=POLLING_PERIOD_MS),
-                'variables': ['pm.batteryLevel'],
+                'variables': ['hivexplore.batteryLevel'],
                 'data_callback': lambda _timestamp, data, logconf: self._log_battery_callback(logconf.cf.link_uri, data),
                 'error_callback': self._log_error_callback,
             },

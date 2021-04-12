@@ -15,6 +15,7 @@ function exit_handler {
 }
 
 must_cleanup_x11docker=false
+
 trap exit_handler EXIT
 
 function print_usage {

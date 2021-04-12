@@ -24,8 +24,6 @@ class DroneManager(ABC):
         self._are_all_drones_charged = False
         self._are_all_drones_discharged = False
 
-        self._LOW_BATTERY_TRESHOLD = 30
-
         # Client bindings
         self._web_socket_server.bind(WebSocketEvent.CONNECT, self._web_socket_connect_callback)
         self._web_socket_server.bind(WebSocketEvent.MISSION_STATE, self._set_mission_state)
@@ -61,9 +59,10 @@ class DroneManager(ABC):
         self._logger.log_drone_data(logging.INFO, drone_id, f'Battery level: {battery_level}')
         self._web_socket_server.send_drone_message(WebSocketEvent.BATTERY_LEVEL, drone_id, battery_level)
 
+        LOW_BATTERY_TRESHOLD = 30
         try:
-            are_all_drones_charged = all(self._drone_battery_levels[id] >= self._LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
-            are_all_drones_discharged = all(self._drone_battery_levels[id] < self._LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
+            are_all_drones_charged = all(self._drone_battery_levels[id] >= LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
+            are_all_drones_discharged = all(self._drone_battery_levels[id] < LOW_BATTERY_TRESHOLD for id in self._get_drone_ids())
         except KeyError:
             are_all_drones_charged = False
             are_all_drones_discharged = False

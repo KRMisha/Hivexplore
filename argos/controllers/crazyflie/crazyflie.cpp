@@ -62,6 +62,7 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateSensorReadings();
     UpdateRssi();
+    UpdateDetectedDroneCount();
 
     const bool shouldNotBroadcastPosition = m_missionState == MissionState::Standby ||
                                             (m_missionState == MissionState::Exploring &&
@@ -286,14 +287,17 @@ void CCrazyflieController::Explore() {
     case ExploringState::Explore: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (m_reorientationWatchdog == 0) {
-            m_exploringState = ExploringState::BrakeAway;
-            break;
+        if (m_detectedDroneCount > 0) {
+            if (m_reorientationWatchdog == 0) {
+                m_exploringState = ExploringState::BrakeAway;
+                break;
+            }
+            m_reorientationWatchdog--;
         }
+
         if (!Forward()) {
             m_exploringState = ExploringState::Brake;
         }
-        m_reorientationWatchdog--;
     } break;
     case ExploringState::BrakeAway: {
         m_droneStatus = DroneStatus::Flying;
@@ -650,6 +654,7 @@ void CCrazyflieController::ResetInternalStates() {
 
     m_shouldTurnLeft = true;
     m_reorientationWatchdog = initialReorientationTicks;
+    m_detectedDroneCount = 0;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_maximumExploreTicks = initialExploreTicks;
@@ -675,6 +680,13 @@ void CCrazyflieController::UpdateRssi() {
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 }
 
+void CCrazyflieController::UpdateDetectedDroneCount() {
+    m_detectedDroneCount = 0;
+    for (const auto& packet : m_pcRABS->GetReadings()) {
+       m_detectedDroneCount++;
+    }
+}
+
 void CCrazyflieController::PingOtherDrones() {
     static constexpr std::uint8_t pingData = 0;
     m_pcRABA->SetData(sizeof(pingData), pingData);
@@ -693,7 +705,7 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
     CVector2 centerOfMass = currentPosition;
 
     // Accumulation of other drones' positions received
-    std::uint16_t detectedDroneCount = 0;
+    m_detectedDroneCount = 0;
     for (const auto& packet : m_pcRABS->GetReadings()) {
         const double horizontalAngle = packet.HorizontalBearing.GetValue() + currentYawAdjustment.GetValue();
         // Convert packet range from cm to m
@@ -702,10 +714,10 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
         CVector2 otherDronePosition =
             CVector2(currentPosition.GetX() - vectorToDrone.GetY(), currentPosition.GetY() + vectorToDrone.GetX());
         centerOfMass = CVector2(centerOfMass.GetX() + otherDronePosition.GetX(), centerOfMass.GetY() + otherDronePosition.GetY());
-        detectedDroneCount++;
+        m_detectedDroneCount++;
     }
 
-    centerOfMass = CVector2(centerOfMass.GetX() / (detectedDroneCount + 1), centerOfMass.GetY() / (detectedDroneCount + 1));
+    centerOfMass = CVector2(centerOfMass.GetX() / (m_detectedDroneCount + 1), centerOfMass.GetY() / (m_detectedDroneCount + 1));
     const auto vectorAway = CVector2(currentPosition.GetX() - centerOfMass.GetX(), currentPosition.GetY() - centerOfMass.GetY());
 
     return (CRadians(std::atan2(vectorAway.GetY(), vectorAway.GetX())) +

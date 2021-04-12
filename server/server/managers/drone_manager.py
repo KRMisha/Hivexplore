@@ -131,8 +131,7 @@ class DroneManager(ABC):
         self._web_socket_server.send_drone_message(WebSocketEvent.DRONE_STATUS, drone_id, drone_status.name)
 
         try:
-            is_mission_ended = all(self._drone_statuses[id] in (DroneStatus.Landed, DroneStatus.Crashed)
-                                        for id in self._get_drone_ids())
+            is_mission_ended = all(self._drone_statuses[id] in (DroneStatus.Landed, DroneStatus.Crashed) for id in self._get_drone_ids())
             are_all_drones_operational = all(self._drone_statuses[id] != DroneStatus.Crashed for id in self._get_drone_ids())
         except KeyError as exc:
             self._logger.log_server_data(logging.WARNING, f'DroneManager warning: Unknown drone status: {exc}')
@@ -155,7 +154,8 @@ class DroneManager(ABC):
         self._send_drone_ids(client_id)
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MISSION_STATE, self._mission_state.name)
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
-        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_OPERATIONAL, self._are_all_drones_operational)
+        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_OPERATIONAL,
+                                                       self._are_all_drones_operational)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
             self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.LED, drone_id, is_led_enabled)

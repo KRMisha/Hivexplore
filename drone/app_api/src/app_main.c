@@ -338,6 +338,7 @@ void explore(void) {
             }
             reorientationWatchdog--;
         }
+
         if (!forward()) {
             exploringState = EXPLORING_ROTATE;
         }

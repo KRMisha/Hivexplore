@@ -1,10 +1,10 @@
 import argparse
 import asyncio
-from typing import Union
 from server.communication.web_socket_server import WebSocketServer
 from server.logger import Logger
-from server.managers.crazyflie_manager import CrazyflieManager
 from server.managers.argos_manager import ArgosManager
+from server.managers.crazyflie_manager import CrazyflieManager
+from server.managers.drone_manager import DroneManager
 from server.map_generator import MapGenerator
 
 
@@ -15,7 +15,7 @@ class Server:
         self._logger.set_web_socket_server(self._web_socket_server)
         self._map_generator = MapGenerator(self._web_socket_server, self._logger)
 
-        self._drone_manager: Union[CrazyflieManager, ArgosManager]
+        self._drone_manager: DroneManager
         if args.mode == 'drone':
             self._drone_manager = CrazyflieManager(self._web_socket_server, self._logger, self._map_generator, args.debug)
         elif args.mode == 'argos':

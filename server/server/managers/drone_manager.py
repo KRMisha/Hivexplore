@@ -131,7 +131,7 @@ class DroneManager(ABC):
         self._web_socket_server.send_drone_message(WebSocketEvent.DRONE_STATUS, drone_id, drone_status.name)
 
         try:
-            are_all_drones_landed = all(self._drone_statuses[id] in {DroneStatus.Landed, DroneStatus.Crashed}
+            are_all_drones_landed = all(self._drone_statuses[id] in (DroneStatus.Landed, DroneStatus.Crashed)
                                         for id in self._get_drone_ids())
             are_all_drones_operational = all(self._drone_statuses[id] != DroneStatus.Crashed for id in self._get_drone_ids())
         except KeyError as exc:

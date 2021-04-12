@@ -142,7 +142,7 @@ class DroneManager(ABC):
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
-        if are_all_drones_ready_for_mission != self._are_all_drones_ready_for_mission: #and (self._mission_state == MissionState.Landed or self._mission_state == MissionState.Standby):
+        if are_all_drones_ready_for_mission != self._are_all_drones_ready_for_mission:
             self._are_all_drones_ready_for_mission = are_all_drones_ready_for_mission
             self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_READY_FOR_MISSION, self._are_all_drones_ready_for_mission)
 

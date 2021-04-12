@@ -140,9 +140,9 @@ private:
     CVector3 m_brakingReferencePosition;
 
     // Rotation variables
+    bool m_isRotateCommandFinished = true;
     bool m_shouldTurnLeft = true;
     std::uint8_t m_rotationChangeWatchdog;
-    bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
     CRadians m_rotationAngle;
 

@@ -629,9 +629,9 @@ void CCrazyflieController::ResetInternalStates() {
 
     m_isForwardCommandFinished = true;
     m_isBrakeCommandFinished = true;
+    m_isRotateCommandFinished = true;
     m_shouldTurnLeft = true;
     m_rotationChangeWatchdog = GetRandomRotationChangeCount();
-    m_isRotateCommandFinished = true;
 
     m_isRotateToBaseCommandFinished = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;

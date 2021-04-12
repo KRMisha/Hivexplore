@@ -618,7 +618,7 @@ uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_
 }
 
 uint8_t getRandomRotationChangeCount(void) {
-    static const uint8_t minRotationCount = 2;
+    static const uint8_t minRotationCount = 3;
     static const uint8_t maxRotationCount = 6;
     return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;
 }

@@ -35,7 +35,7 @@ namespace {
         static std::random_device randomDevice;
         static std::default_random_engine randomEngine(randomDevice());
 
-        static constexpr std::uint8_t minRotationCount = 2;
+        static constexpr std::uint8_t minRotationCount = 3;
         static constexpr std::uint8_t maxRotationCount = 6;
         static std::uniform_int_distribution<std::uint8_t> randomDistribution(minRotationCount, maxRotationCount);
 

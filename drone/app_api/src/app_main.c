@@ -555,8 +555,8 @@ void resetInternalStates(void) {
 }
 
 uint8_t getRandomRotationChangeCount() {
-    static const minRotationCount = 2;
-    static const maxRotationCount = 6;
+    static const uint8_t minRotationCount = 2;
+    static const uint8_t maxRotationCount = 6;
     return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;
 }
 

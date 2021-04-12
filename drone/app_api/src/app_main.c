@@ -326,7 +326,7 @@ void explore(void) {
     case EXPLORING_EXPLORE: {
         droneStatus = STATUS_FLYING;
 
-        if (reorientationWatchdog == 0) {
+        if (reorientationWatchdog == 0 && activeP2PIdsCount > 0) {
             DEBUG_PRINT("Reorienting\n");
             targetYaw = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;

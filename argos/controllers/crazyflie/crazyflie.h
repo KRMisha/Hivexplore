@@ -140,14 +140,14 @@ private:
     CVector3 m_brakingReferencePosition;
 
     // Rotation variables
+    bool m_shouldTurnLeft = true;
+    std::uint8_t m_rotationChangeWatchdog;
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
     CRadians m_rotationAngle;
-    std::uint8_t m_rotationChangeWatchdog;
 
     // Return to base variables
     bool m_isRotateToBaseCommandFinished = true;
-    bool m_shouldTurnLeft = true;
     CRadians m_targetYawToBase;
     std::uint16_t m_stabilizeRotationCounter; // Ensure drone is oriented towards the base before resuming
     std::uint16_t m_returnWatchdog; // Prevent staying stuck in return state by exploring periodically

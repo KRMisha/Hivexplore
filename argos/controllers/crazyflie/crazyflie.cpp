@@ -71,6 +71,10 @@ void CCrazyflieController::ControlStep() {
     UpdateSensorReadings();
     UpdateRssi();
 
+    if (m_isOutOfService) {
+        return;
+    }
+
     const bool shouldNotBroadcastPosition = m_missionState == MissionState::Standby ||
                                             (m_missionState == MissionState::Exploring &&
                                              (m_exploringState == ExploringState::Idle || m_exploringState == ExploringState::Liftoff)) ||
@@ -104,7 +108,10 @@ void CCrazyflieController::ControlStep() {
     }
 
     if (IsCrashed()) {
+        m_isOutOfService = true;
         m_droneStatus = DroneStatus::Crashed;
+        m_pcPropellers->SetRelativePosition(CVector3(0.0, 0.0, 0.0));
+        m_pcPropellers->SetRelativeYaw(CRadians(0.0));
     }
 
     m_previousPosition = m_pcPos->GetReading().Position;

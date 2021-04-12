@@ -6,6 +6,7 @@ class WebSocketEvent(str, enum.Enum):
     MISSION_STATE = 'mission-state'
     DRONE_IDS = 'drone-ids'
     ARE_ALL_DRONES_CHARGED = 'are-all-drones-charged'
+    ARE_ALL_DRONES_OPERATIONAL = 'are-all-drones-operational'
     MAP_POINTS = 'map-points'
     CLEAR_MAP = 'clear-map'
     DRONE_POSITION = 'drone-position'

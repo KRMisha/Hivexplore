@@ -64,7 +64,7 @@ void broadcastPosition(void);
 void p2pReceivedCallback(P2PPacket* packet);
 
 void updateWaypoint(void);
-double calculateAngleAwayFromCenterOfMass();
+double calculateAngleAwayFromCenterOfMass(void);
 uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);
 
 #endif

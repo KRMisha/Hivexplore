@@ -668,7 +668,7 @@ void updateWaypoint(void) {
     setPoint.position.z = targetHeight;
 }
 
-double calculateAngleAwayFromCenterOfMass() {
+double calculateAngleAwayFromCenterOfMass(void) {
     // Drone's current position
     point_t currentPosition = {
         .x = baseOffset.x + positionReading.x,

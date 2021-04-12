@@ -114,7 +114,7 @@ static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuc
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
 
 // Watchdogs (exploring)
-static uint8_t rotationChangeWatchdog = getRandomRotationChangeCount();
+static uint8_t rotationChangeWatchdog;
 
 // Latest P2P packets
 #define MAX_DRONE_COUNT 256
@@ -159,6 +159,8 @@ void appMain(void) {
     initialPosition.z = logGetFloat(positionZId);
 
     DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
+
+    rotationChangeWatchdog = getRandomRotationChangeCount()
 
     while (true) {
         vTaskDelay(M2T(10));
@@ -554,7 +556,7 @@ void resetInternalStates(void) {
     activeP2PIdsCount = 0;
 }
 
-uint8_t getRandomRotationChangeCount() {
+uint8_t getRandomRotationChangeCount(void) {
     static const uint8_t minRotationCount = 2;
     static const uint8_t maxRotationCount = 6;
     return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;

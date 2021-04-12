@@ -168,17 +168,17 @@ class DroneManager(ABC):
             return
 
         if new_mission_state == MissionState.Exploring:
+            # Deny changing mission state to Exploring if no drones are connected
+            if len(self._get_drone_ids()) == 0:
+                self._logger.log_server_data(logging.WARNING, 'DroneManager warning: Could not start mission since no drones are connected')
+                self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
+                return
+
             # Deny changing mission state to Exploring if a drone is under 30% battery
             if not self._are_all_drones_charged:
                 self._logger.log_server_data(
                     logging.WARNING,
                     'DroneManager warning: Could not start mission since not all drones have a minimum battery level of 30%')
-                self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
-                return
-
-            # Deny changing mission state to Exploring if no drones are connected
-            if len(self._get_drone_ids()) == 0:
-                self._logger.log_server_data(logging.WARNING, 'DroneManager warning: Could not start mission since no drones are connected')
                 self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
                 return
 

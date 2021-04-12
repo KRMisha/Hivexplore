@@ -33,7 +33,11 @@ function print_help {
 }
 
 if [ "$#" -ne 1 ]; then
-    echo "Incorrect number of arguments"
+    if [ "$#" -eq 0 ]; then
+        echo "Missing command argument"
+    else
+        echo "Too many arguments"
+    fi
     print_usage
     exit 1
 fi

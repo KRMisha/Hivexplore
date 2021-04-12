@@ -87,7 +87,6 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 // Data
 static point_t initialPosition;
 static setpoint_t setPoint;
-static uint8_t batteryLevelReading = 0;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
 static bool shouldTurnLeft = true;
@@ -95,6 +94,7 @@ static point_t baseOffset = {};
 
 // Readings
 static float batteryVoltageReading;
+static uint8_t batteryLevelReading = 0;
 static float rollReading;
 static float pitchReading;
 static float yawReading;

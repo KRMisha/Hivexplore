@@ -223,6 +223,7 @@ void appMain(void) {
             broadcastPosition();
         }
 
+        updateBatteryLevel();
         static const uint8_t lowBatteryThreshold = 30;
         if (batteryLevel < lowBatteryThreshold) {
             isBatteryBelowMinimumThreshold = true;
@@ -233,8 +234,6 @@ void appMain(void) {
         //     isBatteryBelowMinimumThreshold = true;
         // }
         // TODO: Use new batteryLevel (30% return to base)
-
-        updateBatteryLevel();
 
         switch (missionState) {
         case MISSION_STANDBY:

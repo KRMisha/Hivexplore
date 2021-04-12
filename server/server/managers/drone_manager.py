@@ -126,7 +126,8 @@ class DroneManager(ABC):
         self._web_socket_server.send_drone_message(WebSocketEvent.DRONE_STATUS, drone_id, drone_status.name)
 
         try:
-            are_all_drones_landed = all(self._drone_statuses[id] in {DroneStatus.Landed, DroneStatus.Crashed} for id in self._get_drone_ids())
+            are_all_drones_landed = all(self._drone_statuses[id] in {DroneStatus.Landed, DroneStatus.Crashed}
+                                        for id in self._get_drone_ids())
             are_all_drones_ready_for_mission = all(self._drone_statuses[id] != DroneStatus.Crashed for id in self._get_drone_ids())
         except KeyError:
             self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
@@ -149,7 +150,8 @@ class DroneManager(ABC):
         self._send_drone_ids(client_id)
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MISSION_STATE, self._mission_state.name)
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
-        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_READY_FOR_MISSION, self._are_all_drones_ready_for_mission)
+        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_READY_FOR_MISSION,
+                                                       self._are_all_drones_ready_for_mission)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
             self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.LED, drone_id, is_led_enabled)
@@ -178,9 +180,8 @@ class DroneManager(ABC):
 
             # Deny changing mission state to Exploring if a drone is crashed
             if not self._are_all_drones_ready_for_mission:
-                self._logger.log_server_data(
-                    logging.WARNING,
-                    'DroneManager warning: Could not start mission since at least one drone is crashed')
+                self._logger.log_server_data(logging.WARNING,
+                                             'DroneManager warning: Could not start mission since at least one drone is crashed')
                 self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
                 return
 

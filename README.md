@@ -20,7 +20,7 @@ Or, if you already cloned the repo but forgot the `--recurse-submodules` option,
 git submodule update --init --recursive
 ```
 
-## Production - single command startup
+## Production - single-command startup
 
 ### Prerequisites
 

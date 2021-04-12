@@ -326,6 +326,7 @@ void explore(void) {
     case EXPLORING_EXPLORE: {
         droneStatus = STATUS_FLYING;
 
+        // Drones only reorient away from the center of mass when they detect other drones
         if (activeP2PIdsCount > 0) {
             if (reorientationWatchdog == 0) {
                 DEBUG_PRINT("Reorienting\n");

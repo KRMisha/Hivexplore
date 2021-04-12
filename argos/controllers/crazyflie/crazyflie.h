@@ -117,6 +117,7 @@ private:
     // Data
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
+    bool m_isBatteryBelowMinimumThreshold = false;
     DroneStatus m_droneStatus = DroneStatus::Standby;
     std::string m_debugPrint;
 
@@ -151,7 +152,6 @@ private:
     CRadians m_rotationAngle;
 
     // Return to base variables
-    bool m_isBatteryBelowMinimumThreshold = false;
     bool m_isRotateToBaseCommandFinished = true;
     CRadians m_targetYawToBase;
     std::uint16_t m_stabilizeRotationCounter; // Ensure drone is oriented towards the base before resuming

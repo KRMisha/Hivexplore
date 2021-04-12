@@ -13,10 +13,9 @@ services:
         ports:
             - 5678:5678
         volumes:
-            - logs:/hivexplore/logs # TODO: Change server code to use different directory (env variable maybe?)
+            - logs:/hivexplore/logs
 
 volumes:
     logs:
-    # TODO: Rename volumes?
-    # TODO: Fix permission issue, maybe this link: https://stackoverflow.com/questions/24288616/permission-denied-on-accessing-host-directory-in-docker
+
 

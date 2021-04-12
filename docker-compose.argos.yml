@@ -4,7 +4,7 @@ services:
     server:
         command: argos
         volumes:
-            - socket:/tmp/hivexplore # TODO: Document this directory # TODO: Check if /tmp/ is conventional for socket location inside container
+            - socket:/tmp/hivexplore # TODO: Document this directory
 
     argos:
         build: ./argos
@@ -12,7 +12,7 @@ services:
         volumes:
             - $XSOCKET:$XSOCKET
             - $XAUTHORITY:$XAUTHORITY
-            - socket:/tmp/hivexplore # TODO: Document this directory
+            - socket:/tmp/hivexplore # TODO: Document this directory (in ARGoS README for make start commands)
         environment:
             DISPLAY: $DISPLAY
             XAUTHORITY: $XAUTHORITY

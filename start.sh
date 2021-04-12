@@ -18,3 +18,4 @@ echo "Running Docker Compose"
 docker-compose -f docker-compose.yml -f docker-compose.argos.yml up
 
 # TODO: Arguments
+# TODO: Add build option

@@ -329,6 +329,8 @@ void explore(void) {
         // Drones only reorient away from the center of mass when they detect other drones
         if (activeP2PIdsCount > 0) {
             if (reorientationWatchdog == 0) {
+                targetHeight += EXPLORATION_HEIGHT;
+                updateWaypoint();
                 DEBUG_PRINT("Reorienting\n");
                 targetYaw = calculateAngleAwayFromCenterOfMass();
                 exploringState = EXPLORING_ROTATE_AWAY;
@@ -516,6 +518,8 @@ bool rotate(void) {
 }
 
 bool rotateTowardsTargetYaw() {
+    targetHeight += EXPLORATION_HEIGHT;
+    updateWaypoint();
     // If the drone is towards its target yaw
     static const double yawEpsilon = 5.0;
     double yawDifference = fabs(targetYaw - yawReading);
@@ -524,8 +528,6 @@ bool rotateTowardsTargetYaw() {
         return true;
     } else {
         // Keep turning drone towards its target yaw
-        targetHeight += EXPLORATION_HEIGHT;
-        updateWaypoint();
         setPoint.mode.yaw = modeAbs;
         setPoint.attitude.yaw = targetYaw;
         return false;

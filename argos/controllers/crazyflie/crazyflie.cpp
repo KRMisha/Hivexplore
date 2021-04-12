@@ -651,8 +651,8 @@ void CCrazyflieController::ResetInternalStates() {
     m_isRotateCommandFinished = true;
     m_isRotateToTargetYawCommandFinished = true;
 
-    m_shouldTurnLeft = true;
     m_reorientationWatchdog = initialReorientationTicks;
+    m_shouldTurnLeft = true;
     m_detectedDroneCount = 0;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_returnWatchdog = maximumReturnTicks;

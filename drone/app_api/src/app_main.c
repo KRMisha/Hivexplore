@@ -527,12 +527,12 @@ bool rotateToTargetYaw() {
     if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
         DEBUG_PRINT("Return: Finished rotating to target yaw\n");
         return true;
-    } else {
-        // Keep turning drone to its target yaw
-        setPoint.mode.yaw = modeAbs;
-        setPoint.attitude.yaw = targetYaw;
-        return false;
     }
+
+    // Keep turning drone to its target yaw
+    setPoint.mode.yaw = modeAbs;
+    setPoint.attitude.yaw = targetYaw;
+    return false;
 }
 
 // Returns true when the action is finished

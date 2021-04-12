@@ -74,7 +74,7 @@ static const uint64_t INITIAL_EXPLORE_TICKS = 600;
 static const uint16_t CLEAR_OBSTACLE_TICKS = 100;
 
 // TODO: remove (to simulate low battery)
-static const uint16_t INITIAL_BATTERY_TICKS = 3500;
+// static const uint16_t INITIAL_BATTERY_TICKS = 3500;
 
 // States
 static mission_state_t missionState = MISSION_STANDBY;
@@ -119,7 +119,7 @@ static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuc
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
 
 // TODO: remove (to simulate low battery)
-static uint64_t batterySimulation = INITIAL_BATTERY_TICKS;
+// static uint64_t batterySimulation = INITIAL_BATTERY_TICKS;
 
 // Latest P2P packets
 #define MAX_DRONE_COUNT 256
@@ -212,16 +212,15 @@ void appMain(void) {
             broadcastPosition();
         }
 
-        // TODO: uncomment (to simulate low battery)
-        // static const uint8_t lowBatteryThreshold = 30;
-        // if (batteryLevelReading < lowBatteryThreshold) {
-        //     isBatteryBelowMinimumThreshold = true;
-        // }
-
-        // TODO: remove (to simulate low battery)
-        if (batterySimulation == 0) {
+        static const uint8_t lowBatteryThreshold = 30;
+        if (batteryLevelReading < lowBatteryThreshold) {
             isBatteryBelowMinimumThreshold = true;
         }
+
+        // TODO: remove (to simulate low battery)
+        // if (batterySimulation == 0) {
+        //     isBatteryBelowMinimumThreshold = true;
+        // }
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -340,7 +339,7 @@ void explore(void) {
             exploringState = EXPLORING_ROTATE;
         }
         // TODO: remove (to simulate low battery)
-        batterySimulation--;
+        // batterySimulation--;
     } break;
     case EXPLORING_ROTATE: {
         droneStatus = STATUS_FLYING;

@@ -107,14 +107,14 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYawToBase;
 
+// Watchdogs (explore)
+static uint8_t rotationChangeWatchdog;
+
 // Watchdogs (return to base)
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
 static uint16_t clearObstacleCounter = CLEAR_OBSTACLE_TICKS; // Ensure obstacles are sufficiently cleared before resuming
-
-// Watchdogs (exploring)
-static uint8_t rotationChangeWatchdog;
 
 // Latest P2P packets
 #define MAX_DRONE_COUNT 256
@@ -556,12 +556,6 @@ void resetInternalStates(void) {
     activeP2PIdsCount = 0;
 }
 
-uint8_t getRandomRotationChangeCount(void) {
-    static const uint8_t minRotationCount = 2;
-    static const uint8_t maxRotationCount = 6;
-    return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;
-}
-
 void broadcastPosition(void) {
     // Avoid causing drone reset due to the content size
     if (sizeof(P2PPacketContent) > P2P_MAX_DATA_SIZE) {
@@ -621,6 +615,12 @@ void updateWaypoint(void) {
 
 uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
+}
+
+uint8_t getRandomRotationChangeCount(void) {
+    static const uint8_t minRotationCount = 2;
+    static const uint8_t maxRotationCount = 6;
+    return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;
 }
 
 LOG_GROUP_START(hivexplore)

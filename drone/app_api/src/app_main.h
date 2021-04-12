@@ -57,6 +57,8 @@ bool isCrashed(void);
 
 void resetInternalStates(void);
 
+void updateBatteryLevel(void);
+
 void broadcastPosition(void);
 void p2pReceivedCallback(P2PPacket* packet);
 

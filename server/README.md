@@ -48,9 +48,9 @@ The virtual environment must be activated once per shell session before running 
 source ../.venv/bin/activate
 ```
 
-To install new packages for the server, add them to `requirements.txt` and run the following command (with the venv activated):
+To install new packages for the server, add them to one of the files in the `requirements` directory and run the following command (with the venv activated):
 ```
-pip install -r requirements.txt
+pip install -r requirements/dev.txt
 ```
 
 ## Usage
@@ -73,6 +73,20 @@ python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7
 ```
 
 > Note: all drone addresses should start with `E7E7E7E7`, with the form `E7E7E7E7##`. The are no restrictions on the last two bytes; this allows for a maximum of 256 possible addresses.
+
+### Set a Crazyflie's offset relative to the base
+
+When starting a mission, the Crazyflies' offsets relative to the base must be known before takeoff.
+You can change each Crazyflie's offset, in meters, by editing `server/config/crazyflies_config.json`.
+
+The coordinate system is the following:
+- X: Forward
+- Y: Left
+- Z: Up
+
+All drones must be facing the same direction on mission start.
+
+> Note: these offsets can be updated as long as the mission state is in "Standby".
 
 ### Run program to connect with the ARGoS simulation
 ```

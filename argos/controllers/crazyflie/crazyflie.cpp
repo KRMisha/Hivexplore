@@ -55,8 +55,8 @@ void CCrazyflieController::ControlStep() {
         m_debugPrint.clear();
     }
 
-    UpdateSensorReadings();
     UpdateVelocity();
+    UpdateSensorReadings();
     UpdateRssi();
 
     const bool shouldNotBroadcastPosition = m_missionState == MissionState::Standby ||
@@ -123,7 +123,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Battery level group
     LogVariableMap batteryLevelLog;
-    batteryLevelLog.emplace("pm.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
+    batteryLevelLog.emplace("hivexplore.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
     logDataMap.emplace_back(LogName::BatteryLevel, batteryLevelLog);
 
     // Orientation group
@@ -148,9 +148,9 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Velocity group
     LogVariableMap velocityLog;
-    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocity.GetX()));
-    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocity.GetY()));
-    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocity.GetZ()));
+    velocityLog.emplace("stateEstimate.vx", static_cast<float>(m_velocityReading.GetX()));
+    velocityLog.emplace("stateEstimate.vy", static_cast<float>(m_velocityReading.GetY()));
+    velocityLog.emplace("stateEstimate.vz", static_cast<float>(m_velocityReading.GetZ()));
     logDataMap.emplace_back(LogName::Velocity, velocityLog);
 
     // Range group - must be added after orientation and position
@@ -632,13 +632,13 @@ void CCrazyflieController::ResetInternalStates() {
     m_clearObstacleCounter = clearObstacleTicks;
 }
 
+void CCrazyflieController::UpdateVelocity() {
+    m_velocityReading = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
+}
+
 void CCrazyflieController::UpdateSensorReadings() {
     static const std::array<std::string, 6> sensorDirections = {"front", "left", "back", "right", "up", "down"};
     m_sensorReadings = GetSensorReadings<float>(sensorDirections);
-}
-
-void CCrazyflieController::UpdateVelocity() {
-    m_velocity = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
 
 void CCrazyflieController::UpdateRssi() {

@@ -45,6 +45,10 @@ class DroneManager(ABC):
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
         self._logger.log_drone_data(logging.INFO, drone_id, f'Set {param}: {value}')
 
+    @abstractmethod
+    def _get_drone_base_offset(self, drone_id: str) -> Point:
+        pass
+
     def _send_drone_ids(self, client_id=None):
         if client_id is None:
             self._web_socket_server.send_message(WebSocketEvent.DRONE_IDS, self._get_drone_ids())
@@ -54,7 +58,7 @@ class DroneManager(ABC):
     # Drone callbacks
 
     def _log_battery_callback(self, drone_id: str, data: Dict[str, int]):
-        battery_level = data['pm.batteryLevel']
+        battery_level = data['hivexplore.batteryLevel']
         self._drone_battery_levels[drone_id] = battery_level
         self._logger.log_drone_data(logging.INFO, drone_id, f'Battery level: {battery_level}')
         self._web_socket_server.send_drone_message(WebSocketEvent.BATTERY_LEVEL, drone_id, battery_level)
@@ -85,10 +89,11 @@ class DroneManager(ABC):
         self._map_generator.set_orientation(drone_id, orientation)
 
     def _log_position_callback(self, drone_id: str, data: Dict[str, float]):
+        base_offset = self._get_drone_base_offset(drone_id)
         point = Point(
-            x=data['stateEstimate.x'],
-            y=data['stateEstimate.y'],
-            z=data['stateEstimate.z'],
+            x=data['stateEstimate.x'] + base_offset.x,
+            y=data['stateEstimate.y'] + base_offset.y,
+            z=data['stateEstimate.z'] + base_offset.z,
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Position: {point}')
@@ -132,8 +137,8 @@ class DroneManager(ABC):
 
         try:
             are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
-        except KeyError:
-            self._logger.log_server_data(logging.WARNING, 'DroneManager warning: At least one drone\'s status is unknown')
+        except KeyError as exc:
+            self._logger.log_server_data(logging.WARNING, f'DroneManager warning: Unknown drone status: {exc}')
             are_all_drones_landed = False
 
         if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):

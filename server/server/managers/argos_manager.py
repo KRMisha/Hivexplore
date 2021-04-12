@@ -8,6 +8,7 @@ from server.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator
+from server.tuples import Point
 
 
 class ArgosManager(DroneManager):
@@ -40,6 +41,9 @@ class ArgosManager(DroneManager):
     def _set_drone_param(self, param: str, drone_id: str, value: Any):
         super()._set_drone_param(param, drone_id, value)
         self._unix_socket_client.send(param, drone_id, value)
+
+    def _get_drone_base_offset(self, _drone_id: str) -> Point:
+        return Point(x=0, y=0, z=0)
 
     def _unix_socket_disconnect_callback(self):
         self._drone_ids = []

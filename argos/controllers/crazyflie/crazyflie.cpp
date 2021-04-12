@@ -81,8 +81,8 @@ void CCrazyflieController::ControlStep() {
     }
 
     static constexpr std::uint8_t lowBatteryThreshold = 30;
-    const std::uint8_t batteryLevelReading = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
-    if (batteryLevelReading < lowBatteryThreshold) {
+    const std::uint8_t batteryLevel = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
+    if (batteryLevel < lowBatteryThreshold) {
         m_isBatteryBelowMinimumThreshold = true;
     }
 

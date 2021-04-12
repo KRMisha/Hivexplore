@@ -170,11 +170,6 @@ void appMain(void) {
 
         ledSet(LED_GREEN_R, isLedEnabled);
 
-        if (isOutOfService) {
-            ledSet(LED_RED_R, true);
-            continue;
-        }
-
         batteryVoltageReading = logGetFloat(batteryVoltageId);
 
         rollReading = logGetFloat(rollId);
@@ -199,6 +194,11 @@ void appMain(void) {
         targetHeight = 0.0;
         targetYawRate = 0.0;
         targetYawToBase = 0.0;
+
+        if (isOutOfService) {
+            ledSet(LED_RED_R, true);
+            continue;
+        }
 
         const bool shouldNotBroadcastPosition =
             missionState == MISSION_STANDBY ||

@@ -50,10 +50,6 @@ void CCrazyflieController::Init(TConfigurationNode& t_node) {
 }
 
 void CCrazyflieController::ControlStep() {
-    if (m_isOutOfService) {
-        return;
-    }
-
     // Clear the debug print only if it has been flushed (with '\n') in the previous step
     if (m_debugPrint.find('\n') != std::string::npos) {
         m_debugPrint.clear();
@@ -62,6 +58,10 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateSensorReadings();
     UpdateRssi();
+
+    if (m_isOutOfService) {
+        return;
+    }
 
     const bool shouldNotBroadcastPosition = m_missionState == MissionState::Standby ||
                                             (m_missionState == MissionState::Exploring &&

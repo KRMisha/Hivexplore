@@ -56,8 +56,6 @@ function initialize_x11docker {
     export $x_env
 }
 
-echo "Running Docker Compose"
-
 readonly BASE_FILE="docker-compose.yml"
 readonly DRONE_OVERRIDE_FILE="docker-compose.drone.yml"
 readonly ARGOS_OVERRIDE_FILE="docker-compose.argos.yml"

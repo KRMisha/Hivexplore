@@ -329,7 +329,7 @@ void explore(void) {
         // Drones only reorient away from the center of mass when they detect other drones
         if (activeP2PIdsCount > 0) {
             if (reorientationWatchdog == 0) {
-                targetHeight += EXPLORATION_HEIGHT;
+                targetHeight = EXPLORATION_HEIGHT;
                 updateWaypoint();
                 DEBUG_PRINT("Reorienting\n");
                 targetYaw = calculateAngleAwayFromCenterOfMass();
@@ -488,7 +488,7 @@ void emergencyLand(void) {
 
 // Returns true when the action is finished
 bool liftoff(void) {
-    targetHeight += EXPLORATION_HEIGHT;
+    targetHeight = EXPLORATION_HEIGHT;
     updateWaypoint();
     if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
         DEBUG_PRINT("Liftoff finished\n");
@@ -501,7 +501,7 @@ bool liftoff(void) {
 // Returns true as long as the path forward is clear
 // Returns false when the path forward is obstructed by an obstacle
 bool forward(void) {
-    targetHeight += EXPLORATION_HEIGHT;
+    targetHeight = EXPLORATION_HEIGHT;
     targetForwardVelocity += CRUISE_VELOCITY;
     updateWaypoint();
 
@@ -510,7 +510,7 @@ bool forward(void) {
 
 // Returns true when the action is finished
 bool rotate(void) {
-    targetHeight += EXPLORATION_HEIGHT;
+    targetHeight = EXPLORATION_HEIGHT;
     targetYawRate = (shouldTurnLeft ? 1 : -1) * 50;
     updateWaypoint();
 
@@ -518,7 +518,7 @@ bool rotate(void) {
 }
 
 bool rotateTowardsTargetYaw() {
-    targetHeight += EXPLORATION_HEIGHT;
+    targetHeight = EXPLORATION_HEIGHT;
     updateWaypoint();
     // If the drone is towards its target yaw
     static const double yawEpsilon = 5.0;

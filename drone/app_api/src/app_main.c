@@ -314,7 +314,7 @@ void explore(void) {
         droneStatus = STATUS_FLYING;
 
         if (reorientationWatchdog == 0) {
-            DEBUG_PRINT("Reorienting!/n");
+            DEBUG_PRINT("Reorienting\n");
             targetYaw = calculateAngleAwayFromCenterOfMass();
             exploringState = EXPLORING_ROTATE_AWAY;
             break;
@@ -328,7 +328,7 @@ void explore(void) {
         droneStatus = STATUS_FLYING;
 
         if (rotateTowardsTargetYaw()) {
-            DEBUG_PRINT("Finished reorienting!/n");
+            DEBUG_PRINT("Finished reorienting\n");
             reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
             exploringState = EXPLORING_EXPLORE;
         }

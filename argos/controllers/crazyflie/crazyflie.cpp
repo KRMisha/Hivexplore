@@ -299,7 +299,7 @@ void CCrazyflieController::Explore() {
         m_droneStatus = DroneStatus::Flying;
 
         if (Brake()) {
-            DebugPrint("Reorienting!/n");
+            DebugPrint("Reorienting\n");
             m_targetYaw = CalculateAngleAwayFromCenterOfMass();
             m_exploringState = ExploringState::RotateAway;
         }
@@ -308,7 +308,7 @@ void CCrazyflieController::Explore() {
         m_droneStatus = DroneStatus::Flying;
 
         if (RotateTowardsTargetYaw()) {
-            DebugPrint("Finished reorienting!/n");
+            DebugPrint("Finished reorienting\n");
             m_reorientationWatchdog = maximumReorientationTicks;
             m_exploringState = ExploringState::Explore;
         }

@@ -219,7 +219,7 @@ void appMain(void) {
         }
 
         static const uint8_t lowBatteryThreshold = 30;
-        if (batteryVoltageReading < lowBatteryThreshold) {
+        if (batteryLevel < lowBatteryThreshold) {
             isBatteryBelowMinimumThreshold = true;
         }
 

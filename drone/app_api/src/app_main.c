@@ -665,8 +665,8 @@ void updateWaypoint(void) {
 double calculateAngleAwayFromCenterOfMass() {
     // Drone's current position
     point_t currentPosition = {
-        .x = initialOffsetFromBase.x + positionReading.x,
-        .y = initialOffsetFromBase.y + positionReading.y,
+        .x = baseOffset.x + positionReading.x,
+        .y = baseOffset.y + positionReading.y,
     };
     point_t centerOfMass = currentPosition;
 

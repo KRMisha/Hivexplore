@@ -545,9 +545,8 @@ void resetInternalStates(void) {
     returningState = RETURNING_ROTATE_TOWARDS_BASE;
     emergencyState = EMERGENCY_LAND;
 
-    rotationChangeWatchdog = getRandomRotationChangeCount();
-
     shouldTurnLeft = true;
+    rotationChangeWatchdog = getRandomRotationChangeCount();
     returnWatchdog = MAXIMUM_RETURN_TICKS;
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
     exploreWatchdog = INITIAL_EXPLORE_TICKS;

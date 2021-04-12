@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <random>
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include "utils/constants.h"
@@ -21,13 +22,24 @@ namespace {
     static constexpr std::uint64_t initialExploreTicks = 600;
     static constexpr std::uint16_t clearObstacleTicks = 120;
 
-    constexpr double calculateObstacleDistanceCorrection(double threshold, double reading) {
+    constexpr double CalculateObstacleDistanceCorrection(double threshold, double reading) {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
     }
 
     template<typename T>
-    constexpr std::int8_t getSign(T value) {
+    constexpr std::int8_t GetSign(T value) {
         return value < 0 ? -1 : 1;
+    }
+
+    std::uint8_t GetRandomRotationChangeCount() {
+        static std::random_device randomDevice;
+        static std::default_random_engine randomEngine(randomDevice());
+
+        static constexpr std::uint8_t minRotationCount = 3;
+        static constexpr std::uint8_t maxRotationCount = 6;
+        static std::uniform_int_distribution<std::uint8_t> randomDistribution(minRotationCount, maxRotationCount);
+
+        return randomDistribution(randomEngine);
     }
 
 } // namespace
@@ -217,13 +229,13 @@ bool CCrazyflieController::AvoidObstaclesAndDrones() {
         // Obstacle collision avoidance
         if (isObstacleDetected) {
             leftDistanceCorrection +=
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
+                CalculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["left"]) * avoidanceSensitivity;
             rightDistanceCorrection +=
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
+                CalculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["right"]) * avoidanceSensitivity;
             frontDistanceCorrection +=
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
+                CalculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["front"]) * avoidanceSensitivity;
             backDistanceCorrection +=
-                calculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
+                CalculateObstacleDistanceCorrection(obstacleDetectedThreshold, m_sensorReadings["back"]) * avoidanceSensitivity;
         }
 
         // Drone collision avoidance
@@ -305,6 +317,12 @@ void CCrazyflieController::Explore() {
 
         if (Rotate()) {
             m_exploringState = ExploringState::Explore;
+
+            m_rotationChangeWatchdog--;
+            if (m_rotationChangeWatchdog == 0) {
+                m_shouldTurnLeft = !m_shouldTurnLeft;
+                m_rotationChangeWatchdog = GetRandomRotationChangeCount();
+            }
         }
     } break;
     }
@@ -619,9 +637,10 @@ void CCrazyflieController::ResetInternalStates() {
     m_isForwardCommandFinished = true;
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
-    m_isRotateToBaseCommandFinished = true;
-
     m_shouldTurnLeft = true;
+    m_rotationChangeWatchdog = GetRandomRotationChangeCount();
+
+    m_isRotateToBaseCommandFinished = true;
     m_stabilizeRotationCounter = stabilizeRotationTicks;
     m_returnWatchdog = maximumReturnTicks;
     m_maximumExploreTicks = initialExploreTicks;

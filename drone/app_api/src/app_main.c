@@ -114,6 +114,9 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYawToBase;
 
+// Watchdogs (explore)
+static uint8_t rotationChangeWatchdog;
+
 // Watchdogs (return to base)
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
@@ -164,6 +167,8 @@ void appMain(void) {
     initialPosition.z = logGetFloat(positionZId);
 
     DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
+
+    rotationChangeWatchdog = getRandomRotationChangeCount();
 
     while (true) {
         vTaskDelay(M2T(10));
@@ -331,6 +336,12 @@ void explore(void) {
 
         if (rotate()) {
             exploringState = EXPLORING_EXPLORE;
+
+            rotationChangeWatchdog--;
+            if (rotationChangeWatchdog == 0) {
+                shouldTurnLeft = !shouldTurnLeft;
+                rotationChangeWatchdog = getRandomRotationChangeCount();
+            }
         }
     } break;
     }
@@ -547,6 +558,7 @@ void resetInternalStates(void) {
     emergencyState = EMERGENCY_LAND;
 
     shouldTurnLeft = true;
+    rotationChangeWatchdog = getRandomRotationChangeCount();
     returnWatchdog = MAXIMUM_RETURN_TICKS;
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
     exploreWatchdog = INITIAL_EXPLORE_TICKS;
@@ -636,6 +648,12 @@ void updateWaypoint(void) {
 
 uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
+}
+
+uint8_t getRandomRotationChangeCount(void) {
+    static const uint8_t minRotationCount = 3;
+    static const uint8_t maxRotationCount = 6;
+    return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;
 }
 
 LOG_GROUP_START(hivexplore)

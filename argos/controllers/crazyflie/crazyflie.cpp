@@ -683,7 +683,7 @@ void CCrazyflieController::UpdateRssi() {
 void CCrazyflieController::UpdateDetectedDroneCount() {
     m_detectedDroneCount = 0;
     for (const auto& packet : m_pcRABS->GetReadings()) {
-       m_detectedDroneCount++;
+        m_detectedDroneCount++;
     }
 }
 

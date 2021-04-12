@@ -13,5 +13,6 @@ class WebSocketEvent(str, enum.Enum):
     BATTERY_LEVEL = 'battery-level'
     VELOCITY = 'velocity'
     DRONE_STATUS = 'drone-status'
+    ARE_ALL_DRONES_READY_FOR_MISSION = 'are-all-drones-ready-for-mission'
     LED = 'led'
     LOG = 'log'

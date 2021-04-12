@@ -171,7 +171,7 @@ void appMain(void) {
         ledSet(LED_GREEN_R, isLedEnabled);
 
         batteryVoltageReading = logGetFloat(batteryVoltageId);
-         // TODO: Use new batteryLevelReading (30% return to base)
+        // TODO: Use new batteryLevelReading (30% return to base)
         updateBatteryLevel();
 
         rollReading = logGetFloat(rollId);

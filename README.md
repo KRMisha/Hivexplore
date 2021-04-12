@@ -1,9 +1,11 @@
 # Hivexplore
 
+Mapping rooms with drone swarms!
+
 The repo is structured as 4 subprojects:
 - `client`: the web front-end
 - `server`: the back-end server used to communicate with the drone swarm
-- `drone`: the drone firmware
+- `drone`: the Crazyflie drone firmware
 - `argos`: the ARGoS simulation used to test the drones
 
 ## Setup
@@ -18,12 +20,27 @@ Or, if you already cloned the repo but forgot the `--recurse-submodules` option,
 git submodule update --init --recursive
 ```
 
-## Usage
+## Production - single command startup
 
-To open the repo in VS Code, use the multi-root workspace:
+### Prerequisites
+
+- Linux
+- Bash
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [x11docker](https://github.com/mviereck/x11docker)
+
+## Development
+
+
+### Usage
+
+To open the project in VS Code, use the multi-root workspace for best results:
 ```
 code Hivexplore.code-workspace
 ```
+
+This lets you take advantage of integration with extensions, language support, debugging, formatting, linting, and settings directly within VS Code.
 
 Alternatively, you can double-click on the `Hivexplore.code-workspace` file in your file explorer.
 

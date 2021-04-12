@@ -58,7 +58,7 @@ class DroneManager(ABC):
     # Drone callbacks
 
     def _log_battery_callback(self, drone_id: str, data: Dict[str, int]):
-        battery_level = data['pm.batteryLevel']
+        battery_level = data['hivexplore.batteryLevel']
         self._drone_battery_levels[drone_id] = battery_level
         self._logger.log_drone_data(logging.INFO, drone_id, f'Battery level: {battery_level}')
         self._web_socket_server.send_drone_message(WebSocketEvent.BATTERY_LEVEL, drone_id, battery_level)

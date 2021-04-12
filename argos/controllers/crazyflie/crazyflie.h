@@ -88,9 +88,10 @@ private:
 
     void ResetInternalStates();
 
-    void UpdateSensorReadings();
     void UpdateVelocity();
+    void UpdateSensorReadings();
     void UpdateRssi();
+
     void PingOtherDrones();
 
     void DebugPrint(const std::string& text);
@@ -115,12 +116,14 @@ private:
     // Data
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
-    CVector3 m_velocity;
-    std::unordered_map<std::string, float> m_sensorReadings;
-    std::uint8_t m_rssiReading = 0;
     bool m_isOutOfService = false;
     DroneStatus m_droneStatus = DroneStatus::Standby;
     std::string m_debugPrint;
+
+    // Readings
+    CVector3 m_velocityReading;
+    std::unordered_map<std::string, float> m_sensorReadings;
+    std::uint8_t m_rssiReading = 0;
 
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;

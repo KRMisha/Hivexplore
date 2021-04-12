@@ -52,7 +52,7 @@ void emergencyLand(void);
 bool liftoff(void);
 bool forward(void);
 bool rotate(void);
-bool rotateTowardsTargetYaw(void);
+bool rotateToTargetYaw(void);
 bool land(void);
 bool isCrashed(void);
 

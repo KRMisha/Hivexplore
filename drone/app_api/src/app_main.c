@@ -346,7 +346,7 @@ void explore(void) {
     case EXPLORING_ROTATE_AWAY: {
         droneStatus = STATUS_FLYING;
 
-        if (rotateTowardsTargetYaw()) {
+        if (rotateToTargetYaw()) {
             DEBUG_PRINT("Finished reorienting\n");
             reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
             exploringState = EXPLORING_EXPLORE;
@@ -382,7 +382,7 @@ void returnToBase(void) {
         // Calculate rotation angle to turn towards base
         targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
 
-        if (rotateTowardsTargetYaw()) {
+        if (rotateToTargetYaw()) {
             returningState = RETURNING_RETURN;
         }
     } break;
@@ -518,17 +518,17 @@ bool rotate(void) {
     return frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD;
 }
 
-bool rotateTowardsTargetYaw() {
+bool rotateToTargetYaw() {
     targetHeight = EXPLORATION_HEIGHT;
     updateWaypoint();
-    // If the drone is towards its target yaw
+    // If the drone has reached its target yaw
     static const double yawEpsilon = 5.0;
     double yawDifference = fabs(targetYaw - yawReading);
     if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
-        DEBUG_PRINT("Return: Finished rotating towards target yaw\n");
+        DEBUG_PRINT("Return: Finished rotating to target yaw\n");
         return true;
     } else {
-        // Keep turning drone towards its target yaw
+        // Keep turning drone to its target yaw
         setPoint.mode.yaw = modeAbs;
         setPoint.attitude.yaw = targetYaw;
         return false;

@@ -57,7 +57,7 @@ pip install -r requirements/dev.txt
 
 ### Run program to connect with Crazyflies
 ```
-make run
+make run-drone
 ```
 
 > Note: the Crazyradio PA must be connected to the computer.

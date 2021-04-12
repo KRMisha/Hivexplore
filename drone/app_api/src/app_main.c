@@ -160,7 +160,7 @@ void appMain(void) {
 
     DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
 
-    rotationChangeWatchdog = getRandomRotationChangeCount()
+    rotationChangeWatchdog = getRandomRotationChangeCount();
 
     while (true) {
         vTaskDelay(M2T(10));

@@ -76,11 +76,11 @@ export default defineComponent({
             switch (droneStatus.value) {
                 case DroneStatus.Liftoff:
                     color = 'var(--primary-color-text)';
-                    backgroundColor = 'var(--yellow-500)';
+                    backgroundColor = 'var(--blue-300)';
                     break;
                 case DroneStatus.Flying:
                     color = 'var(--primary-color-text)';
-                    backgroundColor = 'var(--blue-300)';
+                    backgroundColor = 'var(--primary-color)';
                     break;
                 case DroneStatus.Returning:
                     color = 'var(--primary-color-text)';

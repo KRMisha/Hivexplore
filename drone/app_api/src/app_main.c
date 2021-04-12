@@ -631,19 +631,19 @@ void broadcastPosition(void) {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    P2PPacketContent* content = (P2PPacketContent*)packet->data;
-    latestP2PPackets[content->sourceId] = *content;
-
+    P2PPacketContent content;
+    memcpy(&content, packet->data, sizeof(P2PPacketContent));
+    latestP2PPackets[content.sourceId] = content;
     bool isAlreadyInContactWithSource = false;
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
-        if (activeP2PIds[i] == content->sourceId) {
+        if (activeP2PIds[i] == content.sourceId) {
             isAlreadyInContactWithSource = true;
             break;
         }
     }
 
     if (!isAlreadyInContactWithSource) {
-        activeP2PIds[activeP2PIdsCount] = content->sourceId;
+        activeP2PIds[activeP2PIdsCount] = content.sourceId;
         activeP2PIdsCount++;
     }
 }

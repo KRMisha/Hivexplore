@@ -85,7 +85,7 @@ private:
     bool Forward();
     bool Brake();
     bool Rotate();
-    bool RotateTowardsTargetYaw();
+    bool RotateToTargetYaw();
     bool Land();
     bool IsCrashed();
 
@@ -153,9 +153,9 @@ private:
     bool m_isRotateCommandFinished = true;
     CRadians m_lastReferenceYaw;
     CRadians m_rotationAngle;
-    bool m_isRotateTowardsTargetCommandFinished = true;
+    bool m_isRotateToTargetYawCommandFinished = true;
     CRadians m_targetYaw;
-    std::uint16_t m_stabilizeRotationCounter; // Ensure drone is oriented towards the target yaw before resuming
+    std::uint16_t m_stabilizeRotationCounter; // Ensure drone has reached the target yaw before resuming
 
     // Return to base variables
     bool m_shouldTurnLeft = true;

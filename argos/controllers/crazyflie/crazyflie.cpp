@@ -311,7 +311,7 @@ void CCrazyflieController::Explore() {
     case ExploringState::RotateAway: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (RotateTowardsTargetYaw()) {
+        if (RotateToTargetYaw()) {
             DebugPrint("Finished reorienting\n");
             m_reorientationWatchdog = maximumReorientationTicks;
             m_exploringState = ExploringState::Explore;
@@ -365,7 +365,7 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::RotateTowardsBase: {
         m_droneStatus = DroneStatus::Flying;
 
-        if (RotateTowardsTargetYaw()) {
+        if (RotateToTargetYaw()) {
             m_returningState = ReturningState::Return;
         }
     } break;
@@ -565,12 +565,12 @@ bool CCrazyflieController::Rotate() {
     return false;
 }
 
-bool CCrazyflieController::RotateTowardsTargetYaw() {
-    // Turn drone towards its target yaw
-    if (m_isRotateTowardsTargetCommandFinished) {
-        DebugPrint("Rotating towards target yaw\n");
+bool CCrazyflieController::RotateToTargetYaw() {
+    // Turn drone to its target yaw
+    if (m_isRotateToTargetYawCommandFinished) {
+        DebugPrint("Rotating to target yaw\n");
         m_pcPropellers->SetAbsoluteYaw(m_targetYaw);
-        m_isRotateTowardsTargetCommandFinished = false;
+        m_isRotateToTargetYawCommandFinished = false;
     }
 
     // Get current absolute yaw
@@ -579,26 +579,25 @@ bool CCrazyflieController::RotateTowardsTargetYaw() {
     m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
     CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
 
-    // If the drone is towards its target yaw, decrease stabilize rotation counter
+    // If the drone has reached its target yaw, decrease stabilize rotation counter
     static const CRadians yawEpsilon = CRadians::PI / 64;
     CRadians yawDifference = currentAbsoluteYaw - m_targetYaw;
 
-    bool isYawTowardsTargetYaw =
-        (((yawDifference <= yawEpsilon) && (yawDifference >= -yawEpsilon)) ||
-         ((yawDifference <= (CRadians::PI * 2 + yawEpsilon)) && (yawDifference >= (CRadians::PI * 2 - yawEpsilon))));
+    bool isTargetYawReached = (((yawDifference <= yawEpsilon) && (yawDifference >= -yawEpsilon)) ||
+                               ((yawDifference <= (CRadians::PI * 2 + yawEpsilon)) && (yawDifference >= (CRadians::PI * 2 - yawEpsilon))));
 
-    if (!m_isRotateTowardsTargetCommandFinished && m_stabilizeRotationCounter != 0 && isYawTowardsTargetYaw) {
+    if (!m_isRotateToTargetYawCommandFinished && m_stabilizeRotationCounter != 0 && isTargetYawReached) {
         m_stabilizeRotationCounter--;
     }
 
-    // If the drone orientation is towards its target yaw and is stable
+    // If the drone has reached its target yaw and is stable
     if (m_stabilizeRotationCounter == 0) {
-        m_isRotateTowardsTargetCommandFinished = true;
+        m_isRotateToTargetYawCommandFinished = true;
 
         // Reset counter
         m_stabilizeRotationCounter = stabilizeRotationTicks;
 
-        DebugPrint("Finished rotating towards target yaw\n");
+        DebugPrint("Finished rotating to target yaw\n");
         return true;
     }
     return false;
@@ -650,7 +649,7 @@ void CCrazyflieController::ResetInternalStates() {
     m_isForwardCommandFinished = true;
     m_isBrakeCommandFinished = true;
     m_isRotateCommandFinished = true;
-    m_isRotateTowardsTargetCommandFinished = true;
+    m_isRotateToTargetYawCommandFinished = true;
 
     m_shouldTurnLeft = true;
     m_reorientationWatchdog = initialReorientationTicks;

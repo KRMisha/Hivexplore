@@ -34,7 +34,7 @@ git submodule update --init --recursive
 
 #### Crazyflie-specific startup steps
 
-1. Setup
+1. Setup:
 
     1. Make sure the [USB permissions are correct](server/README.md#usb-radio) for the Crazyradio to function properly
     2. Plug in the Crazyradio PA USB dongle
@@ -62,7 +62,7 @@ git submodule update --init --recursive
 
 3. Open the web client by heading to `localhost:3995` in your browser's address bar
 
-4. Using another device on the LAN (including a mobile device)
+4. Using another device on the LAN (including a mobile device):
 
     1. Find your host machine's local network IP address with the following command:
 

@@ -131,15 +131,15 @@ class DroneManager(ABC):
         self._web_socket_server.send_drone_message(WebSocketEvent.DRONE_STATUS, drone_id, drone_status.name)
 
         try:
-            are_all_drones_landed = all(self._drone_statuses[id] in (DroneStatus.Landed, DroneStatus.Crashed)
+            is_mission_ended = all(self._drone_statuses[id] in (DroneStatus.Landed, DroneStatus.Crashed)
                                         for id in self._get_drone_ids())
             are_all_drones_operational = all(self._drone_statuses[id] != DroneStatus.Crashed for id in self._get_drone_ids())
         except KeyError as exc:
             self._logger.log_server_data(logging.WARNING, f'DroneManager warning: Unknown drone status: {exc}')
-            are_all_drones_landed = False
+            is_mission_ended = False
             are_all_drones_operational = False
 
-        if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
+        if is_mission_ended and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
         if are_all_drones_operational != self._are_all_drones_operational:

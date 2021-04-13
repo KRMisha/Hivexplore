@@ -94,7 +94,7 @@ private:
     void UpdateVelocity();
     void UpdateSensorReadings();
     void UpdateRssi();
-    void UpdateDetectedDroneCount();
+    void UpdateActiveP2PIdsCount();
     void PingOtherDrones();
 
     CRadians CalculateAngleAwayFromCenterOfMass();
@@ -129,7 +129,7 @@ private:
     CVector3 m_velocityReading;
     std::unordered_map<std::string, float> m_sensorReadings;
     std::uint8_t m_rssiReading = 0;
-    std::uint16_t m_detectedDroneCount;
+    std::uint16_t m_activeP2PIdsCount;
 
     // Obstacle avoidance variables
     bool m_isAvoidingObstacle = false;

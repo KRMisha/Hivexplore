@@ -1,13 +1,13 @@
 VENV := ../.venv
 
-.PHONY: venv run run-argos test lint typecheck format help
+.PHONY: venv run-drone run-argos test lint typecheck format help
 
 venv:
 	python3 -m venv $(VENV)
 	$(VENV)/bin/pip install -r requirements/dev.txt
 
-run:
-	python3 -m server.main
+run-drone:
+	python3 -m server.main drone
 
 run-argos:
 	python3 -m server.main argos
@@ -30,7 +30,8 @@ help:
 	\n\
 	Targets:\n\
 	  venv         Create a new virtual environment\n\
-	  run          Run program\n\
+	  run-drone    Run program to connect with Crazyflies\n\
+	  run-argos    Run program to connect with ARGoS\n\
 	  test         Test program\n\
 	  lint         Lint code with pylint\n\
 	  typecheck    Type-check code with mypy\n\

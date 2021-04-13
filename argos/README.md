@@ -6,7 +6,31 @@
 - [x11docker](https://github.com/mviereck/x11docker)
 - Make
 
+## Production
+
+This section details how to simply run the simulation without making changes. If you want to set up the project for development to easily modify the code in a dev container, see the [development](#development) section below.
+
+### Setup
+
+Build the Docker image for production:
+```
+make image
+```
+
+### Usage
+```
+make start
+```
+
+> ARGoS will not show a window until the server is running and has connected to it. Once it has, the simulator window will appear.
+
+This creates a bind mount to the host machine's `/tmp/hivexplore` directory where a Unix domain socket can be created. In this way, the containerized ARGoS simulation can communicate with the server running on the host.
+
+This is intended to be used alongside local development commands on the host to run the server and client, rather than for *true* production. For true production, using the `start.sh` script at the root of the project is simpler, and uses a named volume (`hivexplore_socket`) rather than a bind mount.
+
 ## Development
+
+This section details how to set up the project for rapid iteration and modification in a dev container. If you simply want to start the container to try it out without making changes, see the [production](#production) section above.
 
 ### Setup
 
@@ -34,6 +58,8 @@
     make start-dev
     ```
 
+    In a similar fashion to the production-like `make start` command, a bind mount to `/tmp/hivexplore` is created in order to communicate with the server running on the host.
+
 2. [Attach VS Code to the running container](https://code.visualstudio.com/docs/remote/attach-container). A new VS Code window should now appear with the project already mounted in the container.
 
 3. Once in the container, you can make your changes and re-run the simulation:
@@ -42,7 +68,9 @@
     make run
     ```
 
-    The simulation will start. ARGoS will not show a window until the server is running and has connected to it. Once it has, the simulator window will appear.
+    The simulation will start.
+
+    > ARGoS will not show a window until the server is running and has connected to it. Once it has, the simulator window will appear.
 
 4. When done making changes, simply close the VS Code window with the container and stop x11docker with `Ctrl+C`.
 
@@ -75,17 +103,3 @@ make help
 ```
 
 > Note that some commands are meant to be ran outside a container, and some once inside the development container. See the output of `make help` for more information.
-
-## Production
-
-### Setup
-
-Build the Docker image for production:
-```
-make image
-```
-
-### Usage
-```
-make start
-```

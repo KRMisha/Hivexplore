@@ -94,6 +94,7 @@ private:
     void UpdateVelocity();
     void UpdateSensorReadings();
     void UpdateRssi();
+
     void UpdateActiveP2PIdsCount();
     void PingOtherDrones();
 

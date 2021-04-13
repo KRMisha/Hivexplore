@@ -107,11 +107,6 @@ static uint16_t upSensorReading;
 static uint16_t downSensorReading;
 static uint8_t rssiReading;
 
-// Test
-static float extVbatReading;
-static float extCurrReading;
-static float chargeCurrentReading;
-
 // Targets
 static float targetForwardVelocity;
 static float targetLeftVelocity;
@@ -138,11 +133,6 @@ void appMain(void) {
     vTaskDelay(M2T(3000));
 
     const logVarId_t batteryVoltageId = logGetVarId("pm", "vbat");
-
-    const logVarId_t extVbatId = logGetVarId("pm", "extVbat");
-    const logVarId_t extCurrId = logGetVarId("pm", "extCurr");
-    const logVarId_t chargeCurrentId = logGetVarId("pm", "chargeCurrent");
-
     const logVarId_t rollId = logGetVarId("stateEstimate", "roll");
     const logVarId_t pitchId = logGetVarId("stateEstimate", "pitch");
     const logVarId_t yawId = logGetVarId("stateEstimate", "yaw");
@@ -188,16 +178,6 @@ void appMain(void) {
         batteryVoltageReading = logGetFloat(batteryVoltageId);
         // TODO: Use new batteryLevelReading (30% return to base)
         updateBatteryLevel();
-
-        // Test
-        extVbatReading = logGetFloat(extVbatId);
-        extCurrReading = logGetFloat(extCurrId);
-        chargeCurrentReading = logGetFloat(chargeCurrentId);
-
-        DEBUG_PRINT("vbat: %f\n", (double)batteryVoltageReading);
-        DEBUG_PRINT("ext vbat: %f\n", (double)extVbatReading);
-        DEBUG_PRINT("ext curr: %f\n", (double)extCurrReading);
-        DEBUG_PRINT("charge current: %f\n", (double)chargeCurrentReading);
 
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);

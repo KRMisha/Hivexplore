@@ -148,7 +148,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
     LogVariableMap orientationLog;
     orientationLog.emplace("stateEstimate.roll", static_cast<float>(angleDegrees * angleUnitVector.GetX()));
     orientationLog.emplace("stateEstimate.pitch", static_cast<float>(angleDegrees * angleUnitVector.GetY()));
-    // Rotate the drone 90 degrees clockwise to make a yaw of 0 face forward
+    // Rotate 90 degrees clockwise to make a yaw of 0 face forward
     orientationLog.emplace("stateEstimate.yaw", static_cast<float>(angleDegrees * angleUnitVector.GetZ() - 90.0));
     logDataMap.emplace_back(LogName::Orientation, orientationLog);
 
@@ -306,6 +306,7 @@ void CCrazyflieController::Explore() {
     case ExploringState::Explore: {
         m_droneStatus = DroneStatus::Flying;
 
+        // Only reorient away from the center of mass when other drones are detected
         if (m_activeP2PIdsCount > 0) {
             if (m_reorientationWatchdog == 0) {
                 m_exploringState = ExploringState::BrakeAway;
@@ -397,7 +398,7 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Return: {
         m_droneStatus = DroneStatus::Flying;
 
-        // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
+        // Go to explore algorithm when a wall is detected in front or return watchdog is finished
         if (!Forward() || m_returnWatchdog == 0) {
             if (m_returnWatchdog == 0) {
                 DebugPrint("Return: Return watchdog finished\n");
@@ -430,7 +431,7 @@ void CCrazyflieController::ReturnToBase() {
     case ReturningState::Forward: {
         m_droneStatus = DroneStatus::Flying;
 
-        // The drone must check its right sensor when it is turning left, and its left sensor when turning right
+        // Check right sensor when turning left, and left sensor when turning right
         static float sensorReadingToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
 
         // Return to base when obstacle has been passed or explore watchdog is finished
@@ -516,7 +517,7 @@ bool CCrazyflieController::Liftoff() {
 // Returns true as long as the path forward is clear
 // Returns false when the path forward is obstructed by an obstacle
 bool CCrazyflieController::Forward() {
-    // Change state when a wall is detected in front of the drone
+    // Change state when a wall is detected in front
     static constexpr double distanceToTravelEpsilon = 0.005;
     if (m_sensorReadings["front"] <= edgeDetectedThreshold) {
         m_isForwardCommandFinished = true;
@@ -591,7 +592,7 @@ bool CCrazyflieController::Rotate() {
 }
 
 bool CCrazyflieController::RotateToTargetYaw() {
-    // Turn drone to its target yaw
+    // Rotate to target yaw
     if (m_isRotateToTargetYawCommandFinished) {
         DebugPrint("Rotating to target yaw\n");
         m_pcPropellers->SetAbsoluteYaw(m_targetYaw);
@@ -604,7 +605,7 @@ bool CCrazyflieController::RotateToTargetYaw() {
     m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
     CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
 
-    // If the drone has reached its target yaw, decrease stabilize rotation counter
+    // If target yaw has been reached, decrease stabilize rotation counter
     static const CRadians yawEpsilon = CRadians::PI / 64;
     CRadians yawDifference = currentAbsoluteYaw - m_targetYaw;
 
@@ -615,7 +616,7 @@ bool CCrazyflieController::RotateToTargetYaw() {
         m_stabilizeRotationCounter--;
     }
 
-    // If the drone has reached its target yaw and is stable
+    // If target yaw been reached and the drone is stable
     if (m_stabilizeRotationCounter == 0) {
         m_isRotateToTargetYawCommandFinished = true;
 
@@ -720,18 +721,18 @@ void CCrazyflieController::PingOtherDrones() {
 }
 
 CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
-    // Drone's current yaw
+    // Current yaw
     CRadians angleRadians;
     CVector3 angleUnitVector;
     m_pcPos->GetReading().Orientation.ToAngleAxis(angleRadians, angleUnitVector);
     CRadians currentAbsoluteYaw = angleRadians * angleUnitVector.GetZ();
     CRadians currentYawAdjustment = currentAbsoluteYaw - CRadians::PI / 2;
 
-    // Drone's current position
+    // Current position
     CVector2 currentPosition = CVector2(m_pcPos->GetReading().Position.GetX(), m_pcPos->GetReading().Position.GetY());
     CVector2 centerOfMass = currentPosition;
 
-    // Accumulation of other drones' positions received
+    // Sum of other drones' received positions
     m_activeP2PIdsCount = 0;
     for (const auto& packet : m_pcRABS->GetReadings()) {
         const double horizontalAngle = packet.HorizontalBearing.GetValue() + currentYawAdjustment.GetValue();
@@ -748,7 +749,7 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
     const auto vectorAway = CVector2(currentPosition.GetX() - centerOfMass.GetX(), currentPosition.GetY() - centerOfMass.GetY());
 
     return (CRadians(std::atan2(vectorAway.GetY(), vectorAway.GetX())) +
-            CRadians::PI / 2); // Add PI / 2 because a zero degree yaw is along negative y;
+            CRadians::PI / 2); // Add PI / 2 because a zero degree yaw is along negative Y
 }
 
 void CCrazyflieController::DebugPrint(const std::string& text) {

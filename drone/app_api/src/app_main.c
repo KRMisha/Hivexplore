@@ -330,7 +330,7 @@ void explore(void) {
     case EXPLORING_EXPLORE: {
         droneStatus = STATUS_FLYING;
 
-        // Drones only reorient away from the center of mass when they detect other drones
+        // Only reorient away from the center of mass when other drones are detected
         if (activeP2PIdsCount > 0) {
             if (reorientationWatchdog == 0) {
                 targetHeight = EXPLORATION_HEIGHT;
@@ -399,7 +399,7 @@ void returnToBase(void) {
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
 
-        // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
+        // Go to explore algorithm when a wall is detected in front or return watchdog is finished
         if (!forward() || returnWatchdog == 0) {
             if (returnWatchdog == 0) {
                 DEBUG_PRINT("Return: Return watchdog finished\n");
@@ -425,7 +425,7 @@ void returnToBase(void) {
     case RETURNING_FORWARD: {
         droneStatus = STATUS_FLYING;
 
-        // The drone must check its right sensor when it is turning left, and its left sensor when turning right
+        // Check right sensor when turning left, and left sensor when turning right
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;
 
         // Return to base when obstacle has been passed or explore watchdog is finished
@@ -531,7 +531,8 @@ bool rotate(void) {
 bool rotateToTargetYaw(void) {
     targetHeight = EXPLORATION_HEIGHT;
     updateWaypoint();
-    // If the drone has reached its target yaw
+
+    // If target yaw has been reached
     static const double yawEpsilon = 5.0;
     double yawDifference = fabs(targetYaw - yawReading);
     if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
@@ -539,7 +540,7 @@ bool rotateToTargetYaw(void) {
         return true;
     }
 
-    // Keep turning drone to its target yaw
+    // Keep rotating to target yaw
     setPoint.mode.yaw = modeAbs;
     setPoint.attitude.yaw = targetYaw;
     return false;
@@ -668,14 +669,14 @@ void p2pReceivedCallback(P2PPacket* packet) {
 }
 
 double calculateAngleAwayFromCenterOfMass(void) {
-    // Drone's current position
+    // Current position
     point_t currentPosition = {
         .x = positionReading.x + baseOffset.x,
         .y = positionReading.y + baseOffset.y,
     };
     point_t centerOfMass = currentPosition;
 
-    // Accumulation of other drones' positions received
+    // Sum of other drones' received positions
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
         P2PPacketContent content = latestP2PPackets[activeP2PIds[i]];
         centerOfMass.x += content.x;

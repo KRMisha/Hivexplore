@@ -1,6 +1,7 @@
 # Base stage
 FROM python:3.8-slim AS base
 WORKDIR /hivexplore
+RUN apt-get update && apt-get install -y libusb-1.0-0
 COPY requirements requirements
 RUN pip3 install -r requirements/common.txt
 

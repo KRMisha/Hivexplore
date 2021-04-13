@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+    client:
+        build: ./client
+        image: hivexplore/client
+        ports:
+            - 3995:80
+
+    server:
+        build: ./server
+        image: hivexplore/server
+        ports:
+            - 5678:5678
+        volumes:
+            - logs:/hivexplore/logs
+
+volumes:
+    logs:

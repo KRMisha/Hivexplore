@@ -73,13 +73,35 @@ make
     1. Press and hold the power button
     2. When the blue LED M2 starts blinking, release the power button
     3. The blue LED M3 should now start blinking as well
-4. Flash the drone using the wireless bootloader
+4. Flash the drone using the wireless bootloader:
 
     ```
     make cload
     ```
 
 > You can also flash any one of the pre-made examples contained from one of the projects in the `examples` directory.
+
+#### Flashing with Docker
+
+Alternatively, you can use the Docker image to flash the drone with the `app_api` firmware. This is useful if you do not want to run all the setup instructions on your computer.
+
+1. `cd` into the `drone` directory.
+2. Build the Docker image:
+
+    ```
+    docker build -t hivexplore/drone .
+    ```
+
+3. Plug in the Crazyradio PA USB dongle
+4. Put the Crazyflie in bootloader mode:
+    1. Press and hold the power button
+    2. When the blue LED M2 starts blinking, release the power button
+    3. The blue LED M3 should now start blinking as well
+5. Flash the drone using the containerized wireless bootloader:
+
+    ```
+    docker run --rm --device=/dev/bus/usb hivexplore/drone
+    ```
 
 ### Make targets
 

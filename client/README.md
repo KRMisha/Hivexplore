@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - [Node.js >= 12](https://nodejs.org/en/)
-- [npm](https://www.npmjs.com/)
+- [npm >= 7](https://www.npmjs.com/)
 - [Vue CLI](https://cli.vuejs.org/):
 
     ```
@@ -37,13 +37,13 @@ npm run test:unit
 npm run lint
 ```
 
+> Note: this will also format files automatically.
+
 ### Use the Vue CLI UI
 ```
 vue ui
 ```
 
-> Note: this will also format files automatically.
+### Customize the Vue CLI project configuration
 
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).
+See the [configuration reference](https://cli.vuejs.org/config/).

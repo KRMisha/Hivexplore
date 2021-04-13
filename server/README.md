@@ -57,7 +57,7 @@ pip install -r requirements/dev.txt
 
 ### Run program to connect with Crazyflies
 ```
-make run
+make run-drone
 ```
 
 > Note: the Crazyradio PA must be connected to the computer.
@@ -79,14 +79,14 @@ python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7
 When starting a mission, the Crazyflies' offsets relative to the base must be known before takeoff.
 You can change each Crazyflie's offset, in meters, by editing `server/config/crazyflies_config.json`.
 
-The coordinate system is the following:
+The coordinate system is as follows:
 - X: Forward
 - Y: Left
 - Z: Up
 
 All drones must be facing the same direction on mission start.
 
-> Note: these offsets can be updated as long as the mission state is in "Standby".
+> Note: these offsets can be updated at runtime while the mission state is in "Standby".
 
 ### Run program to connect with the ARGoS simulation
 ```

@@ -383,7 +383,7 @@ void CCrazyflieController::ReturnToBase() {
             // Calculate rotation angle to turn towards base
             m_targetYaw = CRadians(std::atan2(m_initialPosition.GetY() - m_pcPos->GetReading().Position.GetY(),
                                               m_initialPosition.GetX() - m_pcPos->GetReading().Position.GetX())) +
-                          CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative y
+                          CRadians::PI / 2; // Add PI / 2 because a zero degree yaw is along negative Y
 
             m_returningState = ReturningState::RotateTowardsBase;
         }

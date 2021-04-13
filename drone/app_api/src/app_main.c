@@ -390,7 +390,8 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         // Calculate rotation angle to turn towards base
-        targetYaw = (float)atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0f / (2.0f * (float)M_PI);
+        targetYaw =
+            (float)atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0f / (2.0f * (float)M_PI);
 
         if (rotateToTargetYaw()) {
             returningState = RETURNING_RETURN;

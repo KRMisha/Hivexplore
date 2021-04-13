@@ -89,7 +89,6 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 // Data
 static point_t initialPosition;
 static setpoint_t setPoint;
-static uint8_t batteryLevel = 0;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
 static bool shouldTurnLeft = true;
@@ -97,6 +96,7 @@ static point_t baseOffset = {};
 
 // Readings
 static float batteryVoltageReading;
+static uint8_t batteryLevelReading = 0;
 static float rollReading;
 static float pitchReading;
 static float yawReading;
@@ -116,8 +116,11 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYaw;
 
-// Watchdogs
+// Watchdogs (explore)
 static uint16_t reorientationWatchdog = INITIAL_REORIENTATION_TICKS; // To reorient drone away from the swarm's center of mass
+static uint8_t rotationChangeWatchdog; // To randomly change exploration rotation direction
+
+// Watchdogs (return to base)
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically
@@ -168,17 +171,16 @@ void appMain(void) {
 
     DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
 
+    rotationChangeWatchdog = getRandomRotationChangeCount();
+
     while (true) {
         vTaskDelay(M2T(10));
 
         ledSet(LED_GREEN_R, isLedEnabled);
 
-        if (isOutOfService) {
-            ledSet(LED_RED_R, true);
-            continue;
-        }
-
         batteryVoltageReading = logGetFloat(batteryVoltageId);
+        // TODO: Use new batteryLevelReading (30% return to base)
+        updateBatteryLevel();
 
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
@@ -203,6 +205,11 @@ void appMain(void) {
         targetYawRate = 0.0;
         targetYaw = 0.0;
 
+        if (isOutOfService) {
+            ledSet(LED_RED_R, true);
+            continue;
+        }
+
         const bool shouldNotBroadcastPosition =
             missionState == MISSION_STANDBY ||
             (missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF)) ||
@@ -213,9 +220,6 @@ void appMain(void) {
         if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
-
-        // TODO: Use new batteryLevel (30% return to base)
-        updateBatteryLevel();
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -357,6 +361,12 @@ void explore(void) {
 
         if (rotate()) {
             exploringState = EXPLORING_EXPLORE;
+
+            rotationChangeWatchdog--;
+            if (rotationChangeWatchdog == 0) {
+                shouldTurnLeft = !shouldTurnLeft;
+                rotationChangeWatchdog = getRandomRotationChangeCount();
+            }
         }
     } break;
     }
@@ -579,8 +589,11 @@ void resetInternalStates(void) {
     returningState = RETURNING_ROTATE_TOWARDS_BASE;
     emergencyState = EMERGENCY_LAND;
 
-    shouldTurnLeft = true;
     reorientationWatchdog = INITIAL_REORIENTATION_TICKS;
+
+    shouldTurnLeft = true;
+    rotationChangeWatchdog = getRandomRotationChangeCount();
+
     returnWatchdog = MAXIMUM_RETURN_TICKS;
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
     exploreWatchdog = INITIAL_EXPLORE_TICKS;
@@ -591,12 +604,12 @@ void resetInternalStates(void) {
 
 void updateBatteryLevel(void) {
     if (batteryVoltageReading <= REFERENCE_VOLTAGES[0]) {
-        batteryLevel = 0;
+        batteryLevelReading = 0;
         return;
     }
 
     if (batteryVoltageReading >= REFERENCE_VOLTAGES[sizeof(REFERENCE_VOLTAGES) / sizeof(REFERENCE_VOLTAGES[0]) - 1]) {
-        batteryLevel = 100;
+        batteryLevelReading = 100;
         return;
     }
 
@@ -607,7 +620,7 @@ void updateBatteryLevel(void) {
 
     static const uint8_t PERCENTAGE_DELTA = 5;
     float voltageDelta = (REFERENCE_VOLTAGES[referenceVoltageIndex] - REFERENCE_VOLTAGES[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
-    batteryLevel =
+    batteryLevelReading =
         referenceVoltageIndex * PERCENTAGE_DELTA - (REFERENCE_VOLTAGES[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
 }
 
@@ -698,8 +711,14 @@ uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_
     return obstacleThreshold - MIN(sensorReading, obstacleThreshold);
 }
 
+uint8_t getRandomRotationChangeCount(void) {
+    static const uint8_t minRotationCount = 3;
+    static const uint8_t maxRotationCount = 6;
+    return rand() % (maxRotationCount - minRotationCount + 1) + minRotationCount;
+}
+
 LOG_GROUP_START(hivexplore)
-LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevel)
+LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevelReading)
 LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)
 

@@ -121,6 +121,7 @@ private:
     // Data
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
+    bool m_isOutOfService = false;
     DroneStatus m_droneStatus = DroneStatus::Standby;
     std::string m_debugPrint;
 
@@ -143,7 +144,7 @@ private:
     // Exploration variables
     bool m_isForwardCommandFinished = true;
     CVector3 m_forwardCommandReferencePosition;
-    std::uint16_t m_reorientationWatchdog;
+    std::uint16_t m_reorientationWatchdog; // To reorient drone away from the swarm's center of mass
 
     // Braking variables
     bool m_isBrakeCommandFinished = true;
@@ -151,6 +152,8 @@ private:
 
     // Rotation variables
     bool m_isRotateCommandFinished = true;
+    bool m_shouldTurnLeft = true;
+    std::uint8_t m_rotationChangeWatchdog; // To randomly change exploration rotation direction
     CRadians m_lastReferenceYaw;
     CRadians m_rotationAngle;
     bool m_isRotateToTargetYawCommandFinished = true;
@@ -158,7 +161,6 @@ private:
     std::uint16_t m_stabilizeRotationCounter; // Ensure drone has reached the target yaw before resuming
 
     // Return to base variables
-    bool m_shouldTurnLeft = true;
     std::uint16_t m_returnWatchdog; // Prevent staying stuck in return state by exploring periodically
     std::uint64_t m_maximumExploreTicks;
     std::uint64_t m_exploreWatchdog; // Prevent staying stuck in forward state by attempting to beeline periodically

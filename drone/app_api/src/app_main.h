@@ -66,5 +66,6 @@ void p2pReceivedCallback(P2PPacket* packet);
 void updateWaypoint(void);
 double calculateAngleAwayFromCenterOfMass(void);
 uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);
+uint8_t getRandomRotationChangeCount(void);
 
 #endif

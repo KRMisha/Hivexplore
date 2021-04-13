@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+    server:
+        command: argos
+        volumes:
+            - socket:/tmp/hivexplore
+
+    argos:
+        build: ./argos
+        image: hivexplore/argos
+        volumes:
+            - $XSOCKET:$XSOCKET
+            - $XAUTHORITY:$XAUTHORITY
+            - socket:/tmp/hivexplore
+        environment:
+            DISPLAY: $DISPLAY
+            XAUTHORITY: $XAUTHORITY
+
+volumes:
+    socket:

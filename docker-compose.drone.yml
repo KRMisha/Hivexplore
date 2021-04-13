@@ -1,0 +1,7 @@
+version: "3.8"
+
+services:
+    server:
+        command: drone
+        devices:
+            - /dev/bus/usb

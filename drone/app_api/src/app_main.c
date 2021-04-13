@@ -88,6 +88,8 @@ static const float EXPLORATION_HEIGHT = 0.3f;
 static const float CRUISE_VELOCITY = 0.2f;
 static const float MAXIMUM_VELOCITY = 0.4f;
 static const uint16_t METER_TO_MILLIMETER_FACTOR = 1000;
+static const uint64_t INITIAL_REORIENTATION_TICKS = 100;
+static const uint64_t MAXIMUM_REORIENTATION_TICKS = 600;
 static const uint16_t MAXIMUM_RETURN_TICKS = 800;
 static const uint64_t INITIAL_EXPLORE_TICKS = 600;
 static const uint16_t CLEAR_OBSTACLE_TICKS = 100;
@@ -126,10 +128,11 @@ static float targetForwardVelocity;
 static float targetLeftVelocity;
 static float targetHeight;
 static float targetYawRate;
-static float targetYawToBase;
+static float targetYaw;
 
 // Watchdogs (explore)
-static uint8_t rotationChangeWatchdog;
+static uint16_t reorientationWatchdog = INITIAL_REORIENTATION_TICKS; // To reorient drone away from the swarm's center of mass
+static uint8_t rotationChangeWatchdog; // To randomly change exploration rotation direction
 
 // Watchdogs (return to base)
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
@@ -214,7 +217,7 @@ void appMain(void) {
         targetLeftVelocity = 0.0;
         targetHeight = 0.0;
         targetYawRate = 0.0;
-        targetYawToBase = 0.0;
+        targetYaw = 0.0;
 
         if (isOutOfService) {
             ledSet(LED_RED_R, true);
@@ -341,10 +344,32 @@ void explore(void) {
     case EXPLORING_EXPLORE: {
         droneStatus = STATUS_FLYING;
 
+        // Only reorient away from the center of mass when other drones are detected
+        if (activeP2PIdsCount > 0) {
+            if (reorientationWatchdog == 0) {
+                targetHeight = EXPLORATION_HEIGHT;
+                updateWaypoint();
+                DEBUG_PRINT("Reorienting\n");
+                targetYaw = calculateAngleAwayFromCenterOfMass();
+                exploringState = EXPLORING_ROTATE_AWAY;
+                break;
+            }
+            reorientationWatchdog--;
+        }
+
         if (!forward()) {
             exploringState = EXPLORING_ROTATE;
         }
     } break;
+    case EXPLORING_ROTATE_AWAY: {
+        droneStatus = STATUS_FLYING;
+
+        if (rotateToTargetYaw()) {
+            DEBUG_PRINT("Finished reorienting\n");
+            reorientationWatchdog = MAXIMUM_REORIENTATION_TICKS;
+            exploringState = EXPLORING_EXPLORE;
+        }
+    }
     case EXPLORING_ROTATE: {
         droneStatus = STATUS_FLYING;
 
@@ -363,11 +388,11 @@ void explore(void) {
 
 void returnToBase(void) {
     // If returned to base, land
-    static const double distanceToReturnEpsilon = 0.3;
+    static const float distanceToReturnEpsilon = 0.3f;
     static const uint8_t rssiLandingThreshold = 60;
     if (returningState != RETURNING_LAND && returningState != RETURNING_IDLE && rssiReading <= rssiLandingThreshold &&
-        fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
-        fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
+        (float)fabs(initialPosition.x - positionReading.x) < distanceToReturnEpsilon &&
+        (float)fabs(initialPosition.y - positionReading.y) < distanceToReturnEpsilon) {
         DEBUG_PRINT("Found the base\n");
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
         DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
@@ -379,26 +404,17 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         // Calculate rotation angle to turn towards base
-        targetYawToBase = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+        targetYaw =
+            (float)atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0f / (2.0f * (float)M_PI);
 
-        // If the drone is towards its base
-        static const double yawEpsilon = 5.0;
-        double yawDifference = fabs(targetYawToBase - yawReading);
-        if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
-            DEBUG_PRINT("Return: Finished rotating towards base\n");
+        if (rotateToTargetYaw()) {
             returningState = RETURNING_RETURN;
-        } else {
-            // Keep turning drone towards its base
-            targetHeight += EXPLORATION_HEIGHT;
-            updateWaypoint();
-            setPoint.mode.yaw = modeAbs;
-            setPoint.attitude.yaw = targetYawToBase;
         }
     } break;
     case RETURNING_RETURN: {
         droneStatus = STATUS_FLYING;
 
-        // Go to explore algorithm when a wall is detected in front of the drone or return watchdog is finished
+        // Go to explore algorithm when a wall is detected in front or return watchdog is finished
         if (!forward() || returnWatchdog == 0) {
             if (returnWatchdog == 0) {
                 DEBUG_PRINT("Return: Return watchdog finished\n");
@@ -424,7 +440,7 @@ void returnToBase(void) {
     case RETURNING_FORWARD: {
         droneStatus = STATUS_FLYING;
 
-        // The drone must check its right sensor when it is turning left, and its left sensor when turning right
+        // Check right sensor when turning left, and left sensor when turning right
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;
 
         // Return to base when obstacle has been passed or explore watchdog is finished
@@ -498,7 +514,7 @@ void emergencyLand(void) {
 
 // Returns true when the action is finished
 bool liftoff(void) {
-    targetHeight += EXPLORATION_HEIGHT;
+    targetHeight = EXPLORATION_HEIGHT;
     updateWaypoint();
     if (downSensorReading >= EXPLORATION_HEIGHT * METER_TO_MILLIMETER_FACTOR) {
         DEBUG_PRINT("Liftoff finished\n");
@@ -511,7 +527,7 @@ bool liftoff(void) {
 // Returns true as long as the path forward is clear
 // Returns false when the path forward is obstructed by an obstacle
 bool forward(void) {
-    targetHeight += EXPLORATION_HEIGHT;
+    targetHeight = EXPLORATION_HEIGHT;
     targetForwardVelocity += CRUISE_VELOCITY;
     updateWaypoint();
 
@@ -520,11 +536,29 @@ bool forward(void) {
 
 // Returns true when the action is finished
 bool rotate(void) {
-    targetHeight += EXPLORATION_HEIGHT;
+    targetHeight = EXPLORATION_HEIGHT;
     targetYawRate = (shouldTurnLeft ? 1 : -1) * 50;
     updateWaypoint();
 
     return frontSensorReading > EDGE_DETECTED_THRESHOLD + OPEN_SPACE_THRESHOLD;
+}
+
+bool rotateToTargetYaw(void) {
+    targetHeight = EXPLORATION_HEIGHT;
+    updateWaypoint();
+
+    // If target yaw has been reached
+    static const float yawEpsilon = 5.0f;
+    float yawDifference = fabs(targetYaw - yawReading);
+    if (yawDifference < yawEpsilon || yawDifference > (360.0f - yawEpsilon)) {
+        DEBUG_PRINT("Return: Finished rotating to target yaw\n");
+        return true;
+    }
+
+    // Keep rotating to target yaw
+    setPoint.mode.yaw = modeAbs;
+    setPoint.attitude.yaw = targetYaw;
+    return false;
 }
 
 // Returns true when the action is finished
@@ -571,8 +605,11 @@ void resetInternalStates(void) {
     returningState = RETURNING_ROTATE_TOWARDS_BASE;
     emergencyState = EMERGENCY_LAND;
 
+    reorientationWatchdog = INITIAL_REORIENTATION_TICKS;
+
     shouldTurnLeft = true;
     rotationChangeWatchdog = getRandomRotationChangeCount();
+
     returnWatchdog = MAXIMUM_RETURN_TICKS;
     maximumExploreTicks = INITIAL_EXPLORE_TICKS;
     exploreWatchdog = INITIAL_EXPLORE_TICKS;
@@ -638,21 +675,47 @@ void broadcastPosition(void) {
 }
 
 void p2pReceivedCallback(P2PPacket* packet) {
-    P2PPacketContent* content = (P2PPacketContent*)packet->data;
-    latestP2PPackets[content->sourceId] = *content;
-
+    P2PPacketContent content;
+    memcpy(&content, packet->data, sizeof(P2PPacketContent));
+    latestP2PPackets[content.sourceId] = content;
     bool isAlreadyInContactWithSource = false;
     for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
-        if (activeP2PIds[i] == content->sourceId) {
+        if (activeP2PIds[i] == content.sourceId) {
             isAlreadyInContactWithSource = true;
             break;
         }
     }
 
     if (!isAlreadyInContactWithSource) {
-        activeP2PIds[activeP2PIdsCount] = content->sourceId;
+        activeP2PIds[activeP2PIdsCount] = content.sourceId;
         activeP2PIdsCount++;
     }
+}
+
+float calculateAngleAwayFromCenterOfMass(void) {
+    // Current position
+    point_t currentPosition = {
+        .x = positionReading.x + baseOffset.x,
+        .y = positionReading.y + baseOffset.y,
+    };
+    point_t centerOfMass = currentPosition;
+
+    // Sum of other drones' received positions
+    for (uint8_t i = 0; i < activeP2PIdsCount; i++) {
+        P2PPacketContent content = latestP2PPackets[activeP2PIds[i]];
+        centerOfMass.x += content.x;
+        centerOfMass.y += content.y;
+    }
+
+    centerOfMass.x /= (activeP2PIdsCount + 1);
+    centerOfMass.y /= (activeP2PIdsCount + 1);
+
+    vector_t vectorAway = {
+        .x = currentPosition.x - centerOfMass.x,
+        .y = currentPosition.y - centerOfMass.y,
+    };
+
+    return (float)atan2(vectorAway.y, vectorAway.x) * 360.0f / (2.0f * (float)M_PI);
 }
 
 void updateWaypoint(void) {

@@ -67,6 +67,7 @@ void CCrazyflieController::ControlStep() {
         m_debugPrint.clear();
     }
 
+    UpdateBatteryLevel();
     UpdateVelocity();
     UpdateSensorReadings();
     UpdateRssi();
@@ -85,8 +86,7 @@ void CCrazyflieController::ControlStep() {
     }
 
     static constexpr std::uint8_t lowBatteryThreshold = 30;
-    const std::uint8_t batteryLevel = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
-    if (batteryLevel < lowBatteryThreshold) {
+    if (m_batteryLevel < lowBatteryThreshold) {
         m_isBatteryBelowMinimumThreshold = true;
     }
 
@@ -142,7 +142,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Battery level group
     LogVariableMap batteryLevelLog;
-    batteryLevelLog.emplace("hivexplore.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
+    batteryLevelLog.emplace("hivexplore.batteryLevel", m_batteryLevel);
     logDataMap.emplace_back(LogName::BatteryLevel, batteryLevelLog);
 
     // Orientation group
@@ -656,6 +656,10 @@ void CCrazyflieController::ResetInternalStates() {
     m_maximumExploreTicks = initialExploreTicks;
     m_exploreWatchdog = initialExploreTicks;
     m_clearObstacleCounter = clearObstacleTicks;
+}
+
+void CCrazyflieController::UpdateBatteryLevel() {
+    m_batteryLevel = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
 }
 
 void CCrazyflieController::UpdateVelocity() {

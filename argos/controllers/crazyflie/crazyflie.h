@@ -89,6 +89,7 @@ private:
 
     void ResetInternalStates();
 
+    void UpdateBatteryLevel();
     void UpdateVelocity();
     void UpdateSensorReadings();
     void UpdateRssi();
@@ -117,6 +118,7 @@ private:
     // Data
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
+    std::uint8_t m_batteryLevel;
     bool m_isBatteryBelowMinimumThreshold = false;
     bool m_isOutOfService = false;
     DroneStatus m_droneStatus = DroneStatus::Standby;

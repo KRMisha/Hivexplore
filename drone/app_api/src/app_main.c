@@ -667,20 +667,6 @@ void p2pReceivedCallback(P2PPacket* packet) {
     }
 }
 
-void updateWaypoint(void) {
-    setPoint.velocity_body = true;
-    setPoint.mode.x = modeVelocity;
-    setPoint.mode.y = modeVelocity;
-    setPoint.velocity.x = targetForwardVelocity;
-    setPoint.velocity.y = targetLeftVelocity;
-
-    setPoint.mode.yaw = modeVelocity;
-    setPoint.attitudeRate.yaw = targetYawRate;
-
-    setPoint.mode.z = modeAbs;
-    setPoint.position.z = targetHeight;
-}
-
 double calculateAngleAwayFromCenterOfMass(void) {
     // Drone's current position
     point_t currentPosition = {
@@ -705,6 +691,20 @@ double calculateAngleAwayFromCenterOfMass(void) {
     };
 
     return atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
+}
+
+void updateWaypoint(void) {
+    setPoint.velocity_body = true;
+    setPoint.mode.x = modeVelocity;
+    setPoint.mode.y = modeVelocity;
+    setPoint.velocity.x = targetForwardVelocity;
+    setPoint.velocity.y = targetLeftVelocity;
+
+    setPoint.mode.yaw = modeVelocity;
+    setPoint.attitudeRate.yaw = targetYawRate;
+
+    setPoint.mode.z = modeAbs;
+    setPoint.position.z = targetHeight;
 }
 
 uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading) {

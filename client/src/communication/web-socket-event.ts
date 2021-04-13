@@ -2,6 +2,7 @@ export enum WebSocketEvent {
     MissionState = 'mission-state',
     DroneIds = 'drone-ids',
     AreAllDronesCharged = 'are-all-drones-charged',
+    AreAllDronesOperational = 'are-all-drones-operational',
     MapPoints = 'map-points',
     ClearMap = 'clear-map',
     DronePosition = 'drone-position',

@@ -118,6 +118,7 @@ private:
     CVector3 m_initialPosition;
     CVector3 m_previousPosition;
     bool m_isBatteryBelowMinimumThreshold = false;
+    bool m_isOutOfService = false;
     DroneStatus m_droneStatus = DroneStatus::Standby;
     std::string m_debugPrint;
 

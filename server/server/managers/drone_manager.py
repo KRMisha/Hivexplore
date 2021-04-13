@@ -22,7 +22,7 @@ class DroneManager(ABC):
         self._drone_leds: Dict[str, bool] = {}
         self._drone_battery_levels: Dict[str, int] = {}
         self._are_all_drones_charged = False
-        self._are_all_drones_discharged = False
+        self._are_all_drones_operational = False
 
         # Client bindings
         self._web_socket_server.bind(WebSocketEvent.CONNECT, self._web_socket_connect_callback)
@@ -75,8 +75,9 @@ class DroneManager(ABC):
             self._are_all_drones_charged = are_all_drones_charged
             self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
 
-        if are_all_drones_discharged != self._are_all_drones_discharged:
-            self._are_all_drones_discharged = are_all_drones_discharged
+        # Set mission state to Returning if all drones are under 30% battery
+        if are_all_drones_discharged and self._mission_state == MissionState.Exploring:
+            self._set_mission_state(MissionState.Returning.name)
 
     def _log_orientation_callback(self, drone_id, data: Dict[str, float]):
         orientation = Orientation(
@@ -136,17 +137,19 @@ class DroneManager(ABC):
         self._web_socket_server.send_drone_message(WebSocketEvent.DRONE_STATUS, drone_id, drone_status.name)
 
         try:
-            are_all_drones_landed = all(self._drone_statuses[id] == DroneStatus.Landed for id in self._get_drone_ids())
+            is_mission_ended = all(self._drone_statuses[id] in (DroneStatus.Landed, DroneStatus.Crashed) for id in self._get_drone_ids())
+            are_all_drones_operational = all(self._drone_statuses[id] != DroneStatus.Crashed for id in self._get_drone_ids())
         except KeyError as exc:
             self._logger.log_server_data(logging.WARNING, f'DroneManager warning: Unknown drone status: {exc}')
-            are_all_drones_landed = False
+            is_mission_ended = False
+            are_all_drones_operational = False
 
-        if are_all_drones_landed and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
+        if is_mission_ended and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
             self._set_mission_state(MissionState.Landed.name)
 
-        # Set mission state to Returning if all drones are under 30% battery
-        if self._are_all_drones_discharged and self._mission_state == MissionState.Exploring:
-            self._set_mission_state(MissionState.Returning.name)
+        if are_all_drones_operational != self._are_all_drones_operational:
+            self._are_all_drones_operational = are_all_drones_operational
+            self._web_socket_server.send_message(WebSocketEvent.ARE_ALL_DRONES_OPERATIONAL, self._are_all_drones_operational)
 
     def _log_console_callback(self, drone_id: str, data: str):
         self._logger.log_drone_data(logging.INFO, drone_id, f'Debug print: {data}')
@@ -157,6 +160,8 @@ class DroneManager(ABC):
         self._send_drone_ids(client_id)
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.MISSION_STATE, self._mission_state.name)
         self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_CHARGED, self._are_all_drones_charged)
+        self._web_socket_server.send_message_to_client(client_id, WebSocketEvent.ARE_ALL_DRONES_OPERATIONAL,
+                                                       self._are_all_drones_operational)
 
         for drone_id, is_led_enabled in self._drone_leds.items():
             self._web_socket_server.send_drone_message_to_client(client_id, WebSocketEvent.LED, drone_id, is_led_enabled)
@@ -169,6 +174,12 @@ class DroneManager(ABC):
             return
 
         if new_mission_state == MissionState.Exploring:
+            # Deny changing mission state to Exploring if no drones are connected
+            if len(self._get_drone_ids()) == 0:
+                self._logger.log_server_data(logging.WARNING, 'DroneManager warning: Could not start mission since no drones are connected')
+                self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
+                return
+
             # Deny changing mission state to Exploring if a drone is under 30% battery
             if not self._are_all_drones_charged:
                 self._logger.log_server_data(
@@ -177,9 +188,10 @@ class DroneManager(ABC):
                 self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
                 return
 
-            # Deny changing mission state to Exploring if no drones are connected
-            if len(self._get_drone_ids()) == 0:
-                self._logger.log_server_data(logging.WARNING, 'DroneManager warning: Could not start mission since no drones are connected')
+            # Deny changing mission state to Exploring if a drone is crashed
+            if not self._are_all_drones_operational:
+                self._logger.log_server_data(logging.WARNING,
+                                             'DroneManager warning: Could not start mission since at least one drone is crashed')
                 self._web_socket_server.send_message(WebSocketEvent.MISSION_STATE, self._mission_state.name)
                 return
 

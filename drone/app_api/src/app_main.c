@@ -670,8 +670,8 @@ void p2pReceivedCallback(P2PPacket* packet) {
 double calculateAngleAwayFromCenterOfMass(void) {
     // Drone's current position
     point_t currentPosition = {
-        .x = baseOffset.x + positionReading.x,
-        .y = baseOffset.y + positionReading.y,
+        .x = positionReading.x + baseOffset.x,
+        .y = positionReading.y + baseOffset.y,
     };
     point_t centerOfMass = currentPosition;
 

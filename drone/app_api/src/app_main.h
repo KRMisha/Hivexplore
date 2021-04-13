@@ -63,7 +63,7 @@ void updateBatteryLevel(void);
 void broadcastPosition(void);
 void p2pReceivedCallback(P2PPacket* packet);
 
-double calculateAngleAwayFromCenterOfMass(void);
+float calculateAngleAwayFromCenterOfMass(void);
 
 void updateWaypoint(void);
 

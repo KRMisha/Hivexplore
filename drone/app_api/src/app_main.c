@@ -374,11 +374,11 @@ void explore(void) {
 
 void returnToBase(void) {
     // If returned to base, land
-    static const double distanceToReturnEpsilon = 0.3;
+    static const float distanceToReturnEpsilon = 0.3f;
     static const uint8_t rssiLandingThreshold = 60;
     if (returningState != RETURNING_LAND && returningState != RETURNING_IDLE && rssiReading <= rssiLandingThreshold &&
-        fabs((double)initialPosition.x - (double)positionReading.x) < distanceToReturnEpsilon &&
-        fabs((double)initialPosition.y - (double)positionReading.y) < distanceToReturnEpsilon) {
+        (float)fabs(initialPosition.x - positionReading.x) < distanceToReturnEpsilon &&
+        (float)fabs(initialPosition.y - positionReading.y) < distanceToReturnEpsilon) {
         DEBUG_PRINT("Found the base\n");
         DEBUG_PRINT("Initial position: %f, %f\n", (double)initialPosition.x, (double)initialPosition.y);
         DEBUG_PRINT("Current position: %f, %f\n", (double)positionReading.x, (double)positionReading.y);
@@ -390,7 +390,7 @@ void returnToBase(void) {
         droneStatus = STATUS_FLYING;
 
         // Calculate rotation angle to turn towards base
-        targetYaw = atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0 / (2.0 * M_PI);
+        targetYaw = (float)atan2(initialPosition.y - positionReading.y, initialPosition.x - positionReading.x) * 360.0f / (2.0f * (float)M_PI);
 
         if (rotateToTargetYaw()) {
             returningState = RETURNING_RETURN;
@@ -533,9 +533,9 @@ bool rotateToTargetYaw(void) {
     updateWaypoint();
 
     // If target yaw has been reached
-    static const double yawEpsilon = 5.0;
-    double yawDifference = fabs(targetYaw - yawReading);
-    if (yawDifference < yawEpsilon || yawDifference > (360.0 - yawEpsilon)) {
+    static const float yawEpsilon = 5.0f;
+    float yawDifference = fabs(targetYaw - yawReading);
+    if (yawDifference < yawEpsilon || yawDifference > (360.0f - yawEpsilon)) {
         DEBUG_PRINT("Return: Finished rotating to target yaw\n");
         return true;
     }
@@ -668,7 +668,7 @@ void p2pReceivedCallback(P2PPacket* packet) {
     }
 }
 
-double calculateAngleAwayFromCenterOfMass(void) {
+float calculateAngleAwayFromCenterOfMass(void) {
     // Current position
     point_t currentPosition = {
         .x = positionReading.x + baseOffset.x,
@@ -691,7 +691,7 @@ double calculateAngleAwayFromCenterOfMass(void) {
         .y = currentPosition.y - centerOfMass.y,
     };
 
-    return atan2(vectorAway.y, vectorAway.x) * 360.0 / (2.0 * M_PI);
+    return (float)atan2(vectorAway.y, vectorAway.x) * 360.0f / (2.0f * (float)M_PI);
 }
 
 void updateWaypoint(void) {

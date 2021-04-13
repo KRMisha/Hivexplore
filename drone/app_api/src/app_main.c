@@ -90,6 +90,7 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 // Data
 static point_t initialPosition;
 static setpoint_t setPoint;
+static uint8_t batteryLevel = 0;
 static bool isBatteryBelowMinimumThreshold = false;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
@@ -98,7 +99,6 @@ static point_t baseOffset = {};
 
 // Readings
 static float batteryVoltageReading;
-static uint8_t batteryLevelReading = 0;
 static float rollReading;
 static float pitchReading;
 static float yawReading;
@@ -183,7 +183,7 @@ void appMain(void) {
         ledSet(LED_GREEN_R, isLedEnabled);
 
         batteryVoltageReading = logGetFloat(batteryVoltageId);
-        updateBatteryLevel(); // TODO: Use new batteryLevelReading (30% return to base)
+        updateBatteryLevel();
 
         rollReading = logGetFloat(rollId);
         pitchReading = logGetFloat(pitchId);
@@ -233,7 +233,6 @@ void appMain(void) {
         // if (batterySimulation == 0) {
         //     isBatteryBelowMinimumThreshold = true;
         // }
-        // TODO: Use new batteryLevel (30% return to base)
 
         switch (missionState) {
         case MISSION_STANDBY:
@@ -592,12 +591,12 @@ void resetInternalStates(void) {
 
 void updateBatteryLevel(void) {
     if (batteryVoltageReading <= REFERENCE_VOLTAGES[0]) {
-        batteryLevelReading = 0;
+        batteryLevel = 0;
         return;
     }
 
     if (batteryVoltageReading >= REFERENCE_VOLTAGES[sizeof(REFERENCE_VOLTAGES) / sizeof(REFERENCE_VOLTAGES[0]) - 1]) {
-        batteryLevelReading = 100;
+        batteryLevel = 100;
         return;
     }
 
@@ -608,7 +607,7 @@ void updateBatteryLevel(void) {
 
     static const uint8_t PERCENTAGE_DELTA = 5;
     float voltageDelta = (REFERENCE_VOLTAGES[referenceVoltageIndex] - REFERENCE_VOLTAGES[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
-    batteryLevelReading =
+    batteryLevel =
         referenceVoltageIndex * PERCENTAGE_DELTA - (REFERENCE_VOLTAGES[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
 }
 
@@ -680,7 +679,7 @@ uint8_t getRandomRotationChangeCount(void) {
 }
 
 LOG_GROUP_START(hivexplore)
-LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevelReading)
+LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevel)
 LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)
 

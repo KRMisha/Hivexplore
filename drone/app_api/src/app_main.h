@@ -56,6 +56,7 @@ bool isCrashed(void);
 
 void resetInternalStates(void);
 
+uint8_t calculateBatteryLevel(const float referenceVoltages[21][21], size_t referenceVoltagesSize);
 void updateBatteryLevel(void);
 
 void broadcastPosition(void);

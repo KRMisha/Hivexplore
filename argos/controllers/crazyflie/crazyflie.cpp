@@ -706,9 +706,9 @@ std::unordered_map<std::string, U> CCrazyflieController::GetSensorReadings(const
         sensorReadings.emplace(sensorNames[index], static_cast<T>(rangeData));
     }
 
-    // TODO: Find sensor to get range.up value
+    // Future work: Write sensor to get range.up value
     sensorReadings.emplace(sensorNames[4], static_cast<T>(obstacleTooFar));
-    // TODO: Find sensor to get range.zrange value
+    // Future work: Write sensor to get range.zrange value
     sensorReadings.emplace(sensorNames[5], static_cast<T>(m_pcPos->GetReading().Position.GetZ() * meterToMillimeterFactor));
 
     return sensorReadings;

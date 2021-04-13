@@ -74,7 +74,6 @@ void CCrazyflieController::ControlStep() {
     UpdateVelocity();
     UpdateSensorReadings();
     UpdateRssi();
-    UpdateActiveP2PIdsCount();
 
     if (m_isOutOfService) {
         return;
@@ -307,7 +306,8 @@ void CCrazyflieController::Explore() {
         m_droneStatus = DroneStatus::Flying;
 
         // Only reorient away from the center of mass when other drones are detected
-        if (m_activeP2PIdsCount > 0) {
+        const std::uint8_t activeP2PIdsCount = m_pcRABS->GetReadings().size();
+        if (activeP2PIdsCount > 0) {
             if (m_reorientationWatchdog == 0) {
                 m_exploringState = ExploringState::BrakeAway;
                 break;
@@ -686,8 +686,6 @@ void CCrazyflieController::ResetInternalStates() {
     m_maximumExploreTicks = initialExploreTicks;
     m_exploreWatchdog = initialExploreTicks;
     m_clearObstacleCounter = clearObstacleTicks;
-
-    m_activeP2PIdsCount = 0;
 }
 
 void CCrazyflieController::UpdateVelocity() {
@@ -708,13 +706,6 @@ void CCrazyflieController::UpdateRssi() {
     m_rssiReading = static_cast<std::uint8_t>(distanceToBase * distanceToRssiMultiplier);
 }
 
-void CCrazyflieController::UpdateActiveP2PIdsCount() {
-    m_activeP2PIdsCount = 0;
-    for (const auto& packet : m_pcRABS->GetReadings()) {
-        m_activeP2PIdsCount++;
-    }
-}
-
 void CCrazyflieController::PingOtherDrones() {
     static constexpr std::uint8_t pingData = 0;
     m_pcRABA->SetData(sizeof(pingData), pingData);
@@ -733,7 +724,6 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
     CVector2 centerOfMass = currentPosition;
 
     // Sum of other drones' received positions
-    m_activeP2PIdsCount = 0;
     for (const auto& packet : m_pcRABS->GetReadings()) {
         const double horizontalAngle = packet.HorizontalBearing.GetValue() + currentYawAdjustment.GetValue();
         // Convert packet range from cm to m
@@ -742,10 +732,10 @@ CRadians CCrazyflieController::CalculateAngleAwayFromCenterOfMass() {
         CVector2 otherDronePosition =
             CVector2(currentPosition.GetX() - vectorToDrone.GetY(), currentPosition.GetY() + vectorToDrone.GetX());
         centerOfMass = CVector2(centerOfMass.GetX() + otherDronePosition.GetX(), centerOfMass.GetY() + otherDronePosition.GetY());
-        m_activeP2PIdsCount++;
     }
 
-    centerOfMass = CVector2(centerOfMass.GetX() / (m_activeP2PIdsCount + 1), centerOfMass.GetY() / (m_activeP2PIdsCount + 1));
+    const std::uint8_t activeP2PIdsCount = m_pcRABS->GetReadings().size();
+    centerOfMass = CVector2(centerOfMass.GetX() / (activeP2PIdsCount + 1), centerOfMass.GetY() / (activeP2PIdsCount + 1));
     const auto vectorAway = CVector2(currentPosition.GetX() - centerOfMass.GetX(), currentPosition.GetY() - centerOfMass.GetY());
 
     return (CRadians(std::atan2(vectorAway.GetY(), vectorAway.GetX())) +

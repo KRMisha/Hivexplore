@@ -112,7 +112,7 @@ export default defineComponent({
                 const dronePositionPoint = new THREE.Points(droneGeometry, droneMaterial);
 
                 // Drone sensor lines
-                const sensorLinesPerDrone = 4;
+                const sensorLinesPerDrone = 6;
                 const droneSensorLineGeometry = new THREE.BufferGeometry();
                 const droneSensorLinePositions = new Float32Array(2 * sensorLinesPerDrone * 3);
                 droneSensorLineGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLinePositions, 3));
@@ -130,7 +130,7 @@ export default defineComponent({
                 droneGroup.add(droneSensorLineGroup);
                 droneInfos.set(newDroneId, {
                     position: dronePositionPoint,
-                    sensorLines: droneSensorLines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line],
+                    sensorLines: droneSensorLines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line, THREE.Line, THREE.Line],
                 });
 
                 droneGroups.add(droneGroup);

@@ -71,6 +71,7 @@ void CCrazyflieController::ControlStep() {
         m_debugPrint.clear();
     }
 
+    UpdateBatteryLevel();
     UpdateVelocity();
     UpdateSensorReadings();
     UpdateRssi();
@@ -88,6 +89,11 @@ void CCrazyflieController::ControlStep() {
         PingOtherDrones();
     }
 
+    static constexpr std::uint8_t lowBatteryThreshold = 30;
+    if (m_batteryLevel < lowBatteryThreshold) {
+        m_isBatteryBelowMinimumThreshold = true;
+    }
+
     switch (m_missionState) {
     case MissionState::Standby:
         m_droneStatus = DroneStatus::Standby;
@@ -95,7 +101,11 @@ void CCrazyflieController::ControlStep() {
         break;
     case MissionState::Exploring:
         if (!AvoidObstaclesAndDrones()) {
-            Explore();
+            if (m_isBatteryBelowMinimumThreshold) {
+                ReturnToBase();
+            } else {
+                Explore();
+            }
         }
         break;
     case MissionState::Returning:
@@ -136,7 +146,7 @@ CCrazyflieController::LogConfigs CCrazyflieController::GetLogData() const {
 
     // Battery level group
     LogVariableMap batteryLevelLog;
-    batteryLevelLog.emplace("hivexplore.batteryLevel", static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100));
+    batteryLevelLog.emplace("hivexplore.batteryLevel", m_batteryLevel);
     logDataMap.emplace_back(LogName::BatteryLevel, batteryLevelLog);
 
     // Orientation group
@@ -374,7 +384,7 @@ void CCrazyflieController::ReturnToBase() {
 
     switch (m_returningState) {
     case ReturningState::BrakeTowardsBase: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         // Brake before rotation towards base
         if (Brake()) {
@@ -389,14 +399,14 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::RotateTowardsBase: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         if (RotateToTargetYaw()) {
             m_returningState = ReturningState::Return;
         }
     } break;
     case ReturningState::Return: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         // Go to explore algorithm when a wall is detected in front or return watchdog is finished
         if (!Forward() || m_returnWatchdog == 0) {
@@ -415,21 +425,21 @@ void CCrazyflieController::ReturnToBase() {
         }
     } break;
     case ReturningState::Brake: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         if (Brake()) {
             m_returningState = ReturningState::Rotate;
         }
     } break;
     case ReturningState::Rotate: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         if (Rotate()) {
             m_returningState = ReturningState::Forward;
         }
     } break;
     case ReturningState::Forward: {
-        m_droneStatus = DroneStatus::Flying;
+        m_droneStatus = DroneStatus::Returning;
 
         // Check right sensor when turning left, and left sensor when turning right
         static float sensorReadingToCheck = m_shouldTurnLeft ? m_sensorReadings["right"] : m_sensorReadings["left"];
@@ -688,6 +698,10 @@ void CCrazyflieController::ResetInternalStates() {
     m_clearObstacleCounter = clearObstacleTicks;
 }
 
+void CCrazyflieController::UpdateBatteryLevel() {
+    m_batteryLevel = static_cast<std::uint8_t>(m_pcBattery->GetReading().AvailableCharge * 100);
+}
+
 void CCrazyflieController::UpdateVelocity() {
     m_velocityReading = (m_pcPos->GetReading().Position - m_previousPosition) / Constants::secondsPerTick;
 }
@@ -767,9 +781,9 @@ std::unordered_map<std::string, U> CCrazyflieController::GetSensorReadings(const
         sensorReadings.emplace(sensorNames[index], static_cast<T>(rangeData));
     }
 
-    // TODO: Find sensor to get range.up value
+    // Future work: Write sensor to get range.up value
     sensorReadings.emplace(sensorNames[4], static_cast<T>(obstacleTooFar));
-    // TODO: Find sensor to get range.zrange value
+    // Future work: Write sensor to get range.zrange value
     sensorReadings.emplace(sensorNames[5], static_cast<T>(m_pcPos->GetReading().Position.GetZ() * meterToMillimeterFactor));
 
     return sensorReadings;

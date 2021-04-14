@@ -38,6 +38,7 @@ typedef enum {
     STATUS_STANDBY,
     STATUS_LIFTOFF,
     STATUS_FLYING,
+    STATUS_RETURNING,
     STATUS_LANDING,
     STATUS_LANDED,
     STATUS_CRASHED,
@@ -57,6 +58,7 @@ bool isCrashed(void);
 
 void resetInternalStates(void);
 
+uint8_t calculateBatteryLevel(const float referenceVoltages[], size_t referenceVoltagesSize);
 void updateBatteryLevel(void);
 
 void broadcastPosition(void);

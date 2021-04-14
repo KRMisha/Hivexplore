@@ -56,9 +56,15 @@ typedef struct {
     uint8_t sourceId;
 } P2PPacketContent;
 
-// Reference voltages - voltages for battery levels from 0% to 100% in 5% increments
-const static float REFERENCE_VOLTAGES[] = {
+// Reference voltages - voltages for battery levels from 0% to 100% in 5% increment
+// Voltages for battery levels when idle, landed or crashed
+static const float IDLE_REFERENCE_VOLTAGES[] = {
     3.27, 3.61, 3.69, 3.71, 3.73, 3.75, 3.77, 3.79, 3.80, 3.82, 3.84, 3.85, 3.87, 3.91, 3.95, 3.98, 4.02, 4.08, 4.11, 4.15, 4.20,
+};
+// Voltages for battery levels during flight
+static const float FLYING_REFERENCE_VOLTAGES[] = {
+    2.350, 3.113, 3.299, 3.324, 3.345, 3.360, 3.380, 3.416, 3.433, 3.452, 3.464,
+    3.481, 3.500, 3.539, 3.571, 3.599, 3.653, 3.716, 3.783, 3.844, 3.910,
 };
 
 // Constants
@@ -84,6 +90,8 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 // Data
 static point_t initialPosition;
 static setpoint_t setPoint;
+static uint8_t batteryLevel = 0;
+static bool isBatteryBelowMinimumThreshold = false;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
 static bool shouldTurnLeft = true;
@@ -91,7 +99,6 @@ static point_t baseOffset = {};
 
 // Readings
 static float batteryVoltageReading;
-static uint8_t batteryLevelReading = 0;
 static float rollReading;
 static float pitchReading;
 static float yawReading;
@@ -174,7 +181,6 @@ void appMain(void) {
         ledSet(LED_GREEN_R, isLedEnabled);
 
         batteryVoltageReading = logGetFloat(batteryVoltageId);
-        // TODO: Use new batteryLevelReading (30% return to base)
         updateBatteryLevel();
 
         rollReading = logGetFloat(rollId);
@@ -216,6 +222,11 @@ void appMain(void) {
             broadcastPosition();
         }
 
+        static const uint8_t lowBatteryThreshold = 30;
+        if (batteryLevel < lowBatteryThreshold) {
+            isBatteryBelowMinimumThreshold = true;
+        }
+
         switch (missionState) {
         case MISSION_STANDBY:
             droneStatus = STATUS_STANDBY;
@@ -224,7 +235,11 @@ void appMain(void) {
         case MISSION_EXPLORING:
             avoidDrones();
             avoidObstacles();
-            explore();
+            if (isBatteryBelowMinimumThreshold) {
+                returnToBase();
+            } else {
+                explore();
+            }
             break;
         case MISSION_RETURNING:
             avoidDrones();
@@ -382,7 +397,7 @@ void returnToBase(void) {
 
     switch (returningState) {
     case RETURNING_ROTATE_TOWARDS_BASE: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Calculate rotation angle to turn towards base
         targetYaw =
@@ -393,7 +408,7 @@ void returnToBase(void) {
         }
     } break;
     case RETURNING_RETURN: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Go to explore algorithm when a wall is detected in front or return watchdog is finished
         if (!forward() || returnWatchdog == 0) {
@@ -412,14 +427,14 @@ void returnToBase(void) {
         }
     } break;
     case RETURNING_ROTATE: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         if (rotate()) {
             returningState = RETURNING_FORWARD;
         }
     } break;
     case RETURNING_FORWARD: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Check right sensor when turning left, and left sensor when turning right
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;
@@ -599,26 +614,32 @@ void resetInternalStates(void) {
     activeP2PIdsCount = 0;
 }
 
-void updateBatteryLevel(void) {
-    if (batteryVoltageReading <= REFERENCE_VOLTAGES[0]) {
-        batteryLevelReading = 0;
-        return;
+uint8_t calculateBatteryLevel(const float referenceVoltages[], size_t referenceVoltagesSize) {
+    if (batteryVoltageReading <= referenceVoltages[0]) {
+        return 0;
     }
 
-    if (batteryVoltageReading >= REFERENCE_VOLTAGES[sizeof(REFERENCE_VOLTAGES) / sizeof(REFERENCE_VOLTAGES[0]) - 1]) {
-        batteryLevelReading = 100;
-        return;
+    if (batteryVoltageReading >= referenceVoltages[referenceVoltagesSize - 1]) {
+        return 100;
     }
 
     uint8_t referenceVoltageIndex = 0;
-    while (batteryVoltageReading > REFERENCE_VOLTAGES[referenceVoltageIndex]) {
+    while (batteryVoltageReading > referenceVoltages[referenceVoltageIndex]) {
         referenceVoltageIndex++;
     }
 
     static const uint8_t PERCENTAGE_DELTA = 5;
-    float voltageDelta = (REFERENCE_VOLTAGES[referenceVoltageIndex] - REFERENCE_VOLTAGES[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
-    batteryLevelReading =
-        referenceVoltageIndex * PERCENTAGE_DELTA - (REFERENCE_VOLTAGES[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
+    float voltageDelta = (referenceVoltages[referenceVoltageIndex] - referenceVoltages[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
+    return referenceVoltageIndex * PERCENTAGE_DELTA - (referenceVoltages[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
+}
+
+void updateBatteryLevel(void) {
+    if (droneStatus == STATUS_STANDBY || droneStatus == STATUS_LANDED || droneStatus == STATUS_CRASHED) {
+        batteryLevel = calculateBatteryLevel(IDLE_REFERENCE_VOLTAGES, sizeof(IDLE_REFERENCE_VOLTAGES) / sizeof(IDLE_REFERENCE_VOLTAGES[0]));
+    } else {
+        batteryLevel =
+            calculateBatteryLevel(FLYING_REFERENCE_VOLTAGES, sizeof(FLYING_REFERENCE_VOLTAGES) / sizeof(FLYING_REFERENCE_VOLTAGES[0]));
+    }
 }
 
 void broadcastPosition(void) {
@@ -715,7 +736,7 @@ uint8_t getRandomRotationChangeCount(void) {
 }
 
 LOG_GROUP_START(hivexplore)
-LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevelReading)
+LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevel)
 LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)
 

@@ -17,6 +17,7 @@ typedef enum {
     EXPLORING_IDLE,
     EXPLORING_LIFTOFF,
     EXPLORING_EXPLORE,
+    EXPLORING_ROTATE_AWAY,
     EXPLORING_ROTATE,
 } exploring_state_t;
 
@@ -52,17 +53,22 @@ void emergencyLand(void);
 bool liftoff(void);
 bool forward(void);
 bool rotate(void);
+bool rotateToTargetYaw(void);
 bool land(void);
 bool isCrashed(void);
 
 void resetInternalStates(void);
 
+uint8_t calculateBatteryLevel(const float referenceVoltages[], size_t referenceVoltagesSize);
 void updateBatteryLevel(void);
 
 void broadcastPosition(void);
 void p2pReceivedCallback(P2PPacket* packet);
 
+float calculateAngleAwayFromCenterOfMass(void);
+
 void updateWaypoint(void);
+
 uint16_t calculateObstacleDistanceCorrection(uint16_t obstacleThreshold, uint16_t sensorReading);
 uint8_t getRandomRotationChangeCount(void);
 

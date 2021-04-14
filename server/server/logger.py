@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 import logging
 import logging.config
+from pathlib import Path
 from typing import List, TYPE_CHECKING
 import yaml
 from server.communication.web_socket_event import WebSocketEvent
@@ -10,6 +11,7 @@ from server.tuples import Point
 if TYPE_CHECKING:
     from server.communication.web_socket_server import WebSocketServer
 
+LOGS_DIRECTORY = Path('logs')
 log_filename = '' # pylint: disable=invalid-name
 
 
@@ -22,11 +24,12 @@ class DebugInfoFilter(logging.Filter):
 class Logger:
     def __init__(self):
         self._web_socket_server: WebSocketServer
-        self.setup_logging() # Sets the logger for the first mission
+        LOGS_DIRECTORY.mkdir(exist_ok=True)
+        self.setup_logging() # Setup logging for the first mission
 
     def setup_logging(self):
         global log_filename # pylint: disable=global-statement, invalid-name
-        log_filename = f'logs/hivexplore_{datetime.now().isoformat().replace(":", "")}.log'
+        log_filename = LOGS_DIRECTORY / f'hivexplore_{datetime.now().isoformat().replace(":", "")}.log'
         with open('server/logging_config.yml', 'r') as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
             logging.config.dictConfig(config)

@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref } from 'vue';
+import { computed, defineComponent, inject, onUnmounted, ref } from 'vue';
 import { WebSocketClient } from '@/communication/web-socket-client';
 import { WebSocketEvent } from '@/communication/web-socket-event';
 import { DroneStatus } from '@/enums/drone-status';
@@ -46,27 +46,31 @@ export default defineComponent({
         const webSocketClient = inject('webSocketClient') as WebSocketClient;
 
         const velocity = ref(0);
-        webSocketClient.bindDroneMessage(WebSocketEvent.Velocity, props.droneId!, (newVelocity: number) => {
+        const newVelocityCallback = (newVelocity: number) => {
             velocity.value = newVelocity;
-        });
+        };
+        webSocketClient.bindDroneMessage(WebSocketEvent.Velocity, props.droneId, newVelocityCallback);
 
         const batteryLevel = ref(0);
-        webSocketClient.bindDroneMessage(WebSocketEvent.BatteryLevel, props.droneId!, (newBatteryLevel: number) => {
+        const newBatteryLevelCallback = (newBatteryLevel: number) => {
             batteryLevel.value = newBatteryLevel;
-        });
+        };
+        webSocketClient.bindDroneMessage(WebSocketEvent.BatteryLevel, props.droneId, newBatteryLevelCallback);
 
         const droneStatus = ref(DroneStatus.Standby);
-        webSocketClient.bindDroneMessage(WebSocketEvent.DroneStatus, props.droneId!, (newDroneStatus: DroneStatus) => {
+        const newDroneStatusCallback = (newDroneStatus: DroneStatus) => {
             droneStatus.value = newDroneStatus;
-        });
+        };
+        webSocketClient.bindDroneMessage(WebSocketEvent.DroneStatus, props.droneId, newDroneStatusCallback);
 
         const isLedEnabled = ref(false);
-        webSocketClient.bindDroneMessage(WebSocketEvent.Led, props.droneId!, (newIsLedEnabled: boolean) => {
+        const newIsLedEnabledCallback = (newIsLedEnabled: boolean) => {
             isLedEnabled.value = newIsLedEnabled;
-        });
+        };
+        webSocketClient.bindDroneMessage(WebSocketEvent.Led, props.droneId, newIsLedEnabledCallback);
 
         function setLedEnabled() {
-            webSocketClient.sendDroneMessage(WebSocketEvent.Led, props.droneId!, isLedEnabled.value);
+            webSocketClient.sendDroneMessage(WebSocketEvent.Led, props.droneId, isLedEnabled.value);
         }
 
         const droneStatusStyle = computed(() => {
@@ -104,6 +108,13 @@ export default defineComponent({
                 color: color,
                 'background-color': backgroundColor,
             };
+        });
+
+        onUnmounted(() => {
+            webSocketClient.unbindDroneMessage(WebSocketEvent.Velocity, props.droneId, newVelocityCallback);
+            webSocketClient.unbindDroneMessage(WebSocketEvent.BatteryLevel, props.droneId, newBatteryLevelCallback);
+            webSocketClient.unbindDroneMessage(WebSocketEvent.DroneStatus, props.droneId, newDroneStatusCallback);
+            webSocketClient.unbindDroneMessage(WebSocketEvent.Led, props.droneId, newIsLedEnabledCallback);
         });
 
         return {

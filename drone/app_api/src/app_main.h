@@ -2,7 +2,6 @@
 #define APP_MAIN_H
 
 #include <stdbool.h>
-
 #include "radiolink.h"
 
 typedef enum {

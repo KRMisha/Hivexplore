@@ -619,14 +619,14 @@ uint8_t calculateBatteryLevel(const float referenceVoltages[], size_t referenceV
         return 100;
     }
 
-    uint8_t referenceVoltagesIndex = 0;
-    while (batteryVoltageReading > referenceVoltages[referenceVoltagesIndex]) {
-        referenceVoltagesIndex++;
+    uint8_t referenceVoltageIndex = 0;
+    while (batteryVoltageReading > referenceVoltages[referenceVoltageIndex]) {
+        referenceVoltageIndex++;
     }
 
     static const uint8_t PERCENTAGE_DELTA = 5;
-    float voltageDelta = (referenceVoltages[referenceVoltagesIndex] - referenceVoltages[referenceVoltagesIndex - 1]) / PERCENTAGE_DELTA;
-    return referenceVoltagesIndex * PERCENTAGE_DELTA - (referenceVoltages[referenceVoltagesIndex] - batteryVoltageReading) / voltageDelta;
+    float voltageDelta = (referenceVoltages[referenceVoltageIndex] - referenceVoltages[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
+    return referenceVoltageIndex * PERCENTAGE_DELTA - (referenceVoltages[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
 }
 
 void updateBatteryLevel(void) {

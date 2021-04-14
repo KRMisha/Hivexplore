@@ -185,7 +185,7 @@ export default defineComponent({
             }
 
             let index = 0;
-            for (let i = 0; i < newDroneSensorLines.length; i++) {
+            for (let i = 0; i < droneInfo.sensorLines.length; i++) {
                 droneInfo.sensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][0]);
                 droneInfo.sensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][1]);
                 droneInfo.sensorLines[i].geometry.attributes.position.needsUpdate = true;

@@ -28,14 +28,10 @@
 
 #include <math.h>
 #include <stdlib.h>
-
 #include "app.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
-
 #include "debug.h"
-
 #include "ledseq.h"
 #include "crtp_commander_high_level.h"
 #include "log.h"
@@ -45,7 +41,6 @@
 #include "commander.h"
 #include "configblock.h"
 #include "sitaw.h"
-
 #include "app_main.h"
 
 #define DEBUG_MODULE "APPAPI"

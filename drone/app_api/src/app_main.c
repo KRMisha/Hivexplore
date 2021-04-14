@@ -640,8 +640,7 @@ uint8_t calculateBatteryLevel(const float referenceVoltages[], size_t referenceV
 
 void updateBatteryLevel(void) {
     if (droneStatus == STATUS_STANDBY || droneStatus == STATUS_LANDED || droneStatus == STATUS_CRASHED) {
-        batteryLevel =
-            calculateBatteryLevel(IDLE_REFERENCE_VOLTAGES, sizeof(IDLE_REFERENCE_VOLTAGES) / sizeof(IDLE_REFERENCE_VOLTAGES[0]));
+        batteryLevel = calculateBatteryLevel(IDLE_REFERENCE_VOLTAGES, sizeof(IDLE_REFERENCE_VOLTAGES) / sizeof(IDLE_REFERENCE_VOLTAGES[0]));
     } else {
         batteryLevel =
             calculateBatteryLevel(FLYING_REFERENCE_VOLTAGES, sizeof(FLYING_REFERENCE_VOLTAGES) / sizeof(FLYING_REFERENCE_VOLTAGES[0]));

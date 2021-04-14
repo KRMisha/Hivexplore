@@ -118,7 +118,7 @@ export default defineComponent({
             }
 
             if (!areAllDronesOperational.value) {
-                return 'No drones should be crashed before the mission can start';
+                return 'No drones can be crashed before the mission can start';
             }
 
             return '';

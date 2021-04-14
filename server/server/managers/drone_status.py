@@ -7,6 +7,7 @@ class DroneStatus(IntEnum):
     Standby = 0
     Liftoff = 1
     Flying = 2
-    Landing = 3
-    Landed = 4
-    Crashed = 5
+    Returning = 3
+    Landing = 4
+    Landed = 5
+    Crashed = 6

@@ -95,6 +95,8 @@ static emergency_state_t emergencyState = EMERGENCY_LAND;
 // Data
 static point_t initialPosition;
 static setpoint_t setPoint;
+static uint8_t batteryLevel = 0;
+static bool isBatteryBelowMinimumThreshold = false;
 static drone_status_t droneStatus = STATUS_STANDBY;
 static bool isLedEnabled = false;
 static bool shouldTurnLeft = true;
@@ -102,7 +104,6 @@ static point_t baseOffset = {};
 
 // Readings
 static float batteryVoltageReading;
-static uint8_t batteryLevelReading = 0;
 static float rollReading;
 static float pitchReading;
 static float yawReading;
@@ -185,7 +186,6 @@ void appMain(void) {
         ledSet(LED_GREEN_R, isLedEnabled);
 
         batteryVoltageReading = logGetFloat(batteryVoltageId);
-        // TODO: Use new batteryLevelReading (30% return to base)
         updateBatteryLevel();
 
         rollReading = logGetFloat(rollId);
@@ -227,6 +227,11 @@ void appMain(void) {
             broadcastPosition();
         }
 
+        static const uint8_t lowBatteryThreshold = 30;
+        if (batteryLevel < lowBatteryThreshold) {
+            isBatteryBelowMinimumThreshold = true;
+        }
+
         switch (missionState) {
         case MISSION_STANDBY:
             droneStatus = STATUS_STANDBY;
@@ -235,7 +240,11 @@ void appMain(void) {
         case MISSION_EXPLORING:
             avoidDrones();
             avoidObstacles();
-            explore();
+            if (isBatteryBelowMinimumThreshold) {
+                returnToBase();
+            } else {
+                explore();
+            }
             break;
         case MISSION_RETURNING:
             avoidDrones();
@@ -393,7 +402,7 @@ void returnToBase(void) {
 
     switch (returningState) {
     case RETURNING_ROTATE_TOWARDS_BASE: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Calculate rotation angle to turn towards base
         targetYaw =
@@ -404,7 +413,7 @@ void returnToBase(void) {
         }
     } break;
     case RETURNING_RETURN: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Go to explore algorithm when a wall is detected in front or return watchdog is finished
         if (!forward() || returnWatchdog == 0) {
@@ -423,14 +432,14 @@ void returnToBase(void) {
         }
     } break;
     case RETURNING_ROTATE: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         if (rotate()) {
             returningState = RETURNING_FORWARD;
         }
     } break;
     case RETURNING_FORWARD: {
-        droneStatus = STATUS_FLYING;
+        droneStatus = STATUS_RETURNING;
 
         // Check right sensor when turning left, and left sensor when turning right
         uint16_t sensorReadingToCheck = shouldTurnLeft ? rightSensorReading : leftSensorReading;
@@ -631,10 +640,9 @@ uint8_t calculateBatteryLevel(const float referenceVoltages[], size_t referenceV
 
 void updateBatteryLevel(void) {
     if (droneStatus == STATUS_STANDBY || droneStatus == STATUS_LANDED || droneStatus == STATUS_CRASHED) {
-        batteryLevelReading =
-            calculateBatteryLevel(IDLE_REFERENCE_VOLTAGES, sizeof(IDLE_REFERENCE_VOLTAGES) / sizeof(IDLE_REFERENCE_VOLTAGES[0]));
+        batteryLevel = calculateBatteryLevel(IDLE_REFERENCE_VOLTAGES, sizeof(IDLE_REFERENCE_VOLTAGES) / sizeof(IDLE_REFERENCE_VOLTAGES[0]));
     } else {
-        batteryLevelReading =
+        batteryLevel =
             calculateBatteryLevel(FLYING_REFERENCE_VOLTAGES, sizeof(FLYING_REFERENCE_VOLTAGES) / sizeof(FLYING_REFERENCE_VOLTAGES[0]));
     }
 }
@@ -733,7 +741,7 @@ uint8_t getRandomRotationChangeCount(void) {
 }
 
 LOG_GROUP_START(hivexplore)
-LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevelReading)
+LOG_ADD(LOG_UINT8, batteryLevel, &batteryLevel)
 LOG_ADD(LOG_UINT8, droneStatus, &droneStatus)
 LOG_GROUP_STOP(hivexplore)
 

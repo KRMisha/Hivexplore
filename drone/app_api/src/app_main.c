@@ -17,8 +17,6 @@
 
 #define DEBUG_MODULE "APPAPI"
 
-#define DISABLE_FLIGHT true
-
 // Min helper macro
 #define MIN(a, b) ((a < b) ? a : b)
 
@@ -234,10 +232,8 @@ void appMain(void) {
             memset(&setPoint, 0, sizeof(setpoint_t));
         }
 
-        #if !DISABLE_FLIGHT
-            static const uint8_t TASK_PRIORITY = 3;
-            commanderSetSetpoint(&setPoint, TASK_PRIORITY);
-        #endif
+        static const uint8_t TASK_PRIORITY = 3;
+        commanderSetSetpoint(&setPoint, TASK_PRIORITY);
     }
 }
 

@@ -61,9 +61,15 @@ typedef struct {
     uint8_t sourceId;
 } P2PPacketContent;
 
-// Reference voltages - voltages for battery levels from 0% to 100% in 5% increments
-const static float REFERENCE_VOLTAGES[] = {
+// Reference voltages - voltages for battery levels from 0% to 100% in 5% increment
+// Voltages for battery levels when idle, landed or crashed
+static const float IDLE_REFERENCE_VOLTAGES[] = {
     3.27, 3.61, 3.69, 3.71, 3.73, 3.75, 3.77, 3.79, 3.80, 3.82, 3.84, 3.85, 3.87, 3.91, 3.95, 3.98, 4.02, 4.08, 4.11, 4.15, 4.20,
+};
+// Voltages for battery levels during flight
+static const float FLYING_REFERENCE_VOLTAGES[] = {
+    2.350, 3.113, 3.299, 3.324, 3.345, 3.360, 3.380, 3.416, 3.433, 3.452, 3.464,
+    3.481, 3.500, 3.539, 3.571, 3.599, 3.653, 3.716, 3.783, 3.844, 3.910,
 };
 
 // Constants
@@ -604,26 +610,33 @@ void resetInternalStates(void) {
     activeP2PIdsCount = 0;
 }
 
-void updateBatteryLevel(void) {
-    if (batteryVoltageReading <= REFERENCE_VOLTAGES[0]) {
-        batteryLevelReading = 0;
-        return;
+uint8_t calculateBatteryLevel(const float referenceVoltages[], size_t referenceVoltagesSize) {
+    if (batteryVoltageReading <= referenceVoltages[0]) {
+        return 0;
     }
 
-    if (batteryVoltageReading >= REFERENCE_VOLTAGES[sizeof(REFERENCE_VOLTAGES) / sizeof(REFERENCE_VOLTAGES[0]) - 1]) {
-        batteryLevelReading = 100;
-        return;
+    if (batteryVoltageReading >= referenceVoltages[referenceVoltagesSize - 1]) {
+        return 100;
     }
 
     uint8_t referenceVoltageIndex = 0;
-    while (batteryVoltageReading > REFERENCE_VOLTAGES[referenceVoltageIndex]) {
+    while (batteryVoltageReading > referenceVoltages[referenceVoltageIndex]) {
         referenceVoltageIndex++;
     }
 
     static const uint8_t PERCENTAGE_DELTA = 5;
-    float voltageDelta = (REFERENCE_VOLTAGES[referenceVoltageIndex] - REFERENCE_VOLTAGES[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
-    batteryLevelReading =
-        referenceVoltageIndex * PERCENTAGE_DELTA - (REFERENCE_VOLTAGES[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
+    float voltageDelta = (referenceVoltages[referenceVoltageIndex] - referenceVoltages[referenceVoltageIndex - 1]) / PERCENTAGE_DELTA;
+    return referenceVoltageIndex * PERCENTAGE_DELTA - (referenceVoltages[referenceVoltageIndex] - batteryVoltageReading) / voltageDelta;
+}
+
+void updateBatteryLevel(void) {
+    if (droneStatus == STATUS_STANDBY || droneStatus == STATUS_LANDED || droneStatus == STATUS_CRASHED) {
+        batteryLevelReading =
+            calculateBatteryLevel(IDLE_REFERENCE_VOLTAGES, sizeof(IDLE_REFERENCE_VOLTAGES) / sizeof(IDLE_REFERENCE_VOLTAGES[0]));
+    } else {
+        batteryLevelReading =
+            calculateBatteryLevel(FLYING_REFERENCE_VOLTAGES, sizeof(FLYING_REFERENCE_VOLTAGES) / sizeof(FLYING_REFERENCE_VOLTAGES[0]));
+    }
 }
 
 void broadcastPosition(void) {

@@ -145,7 +145,7 @@ class DroneManager(ABC):
             are_all_drones_grounded = False
             are_all_drones_operational = False
 
-        if are_all_drones_grounded and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
+        if are_all_drones_grounded and (self._mission_state in (MissionState.Returning, MissionState.Emergency)):
             self._set_mission_state(MissionState.Landed.name)
 
         if are_all_drones_operational != self._are_all_drones_operational:

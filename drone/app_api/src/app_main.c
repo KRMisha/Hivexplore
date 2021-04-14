@@ -61,7 +61,7 @@ typedef struct {
     uint8_t sourceId;
 } P2PPacketContent;
 
-// Reference voltages - voltages for Battery bevels from 0% to 100% in 5% increment
+// Reference voltages - voltages for battery levels from 0% to 100% in 5% increment
 // Voltages for battery levels when idle, landed or crashed
 static const float IDLE_REFERENCE_VOLTAGES[] = {
     3.27, 3.61, 3.69, 3.71, 3.73, 3.75, 3.77, 3.79, 3.80, 3.82, 3.84, 3.85, 3.87, 3.91, 3.95, 3.98, 4.02, 4.08, 4.11, 4.15, 4.20,

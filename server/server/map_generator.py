@@ -136,8 +136,9 @@ class MapGenerator:
         for point in points:
             drone_sensor_lines.append((last_position, point))
 
-        while len(drone_sensor_lines) < 4:
-            drone_sensor_lines.append((last_position, last_position)) # Add blank line
+        DRONE_SENSOR_LINE_COUNT = 6
+        while len(drone_sensor_lines) < DRONE_SENSOR_LINE_COUNT:
+            drone_sensor_lines.append((last_position, last_position)) # Hide line by making start point = end point
 
         return drone_sensor_lines
 

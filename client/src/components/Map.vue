@@ -21,6 +21,7 @@ import { DronePosition } from '@/communication/drone-position';
 import { DroneSensorLine } from '@/communication/drone-sensor-line';
 import { WebSocketClient } from '@/communication/web-socket-client';
 import { WebSocketEvent } from '@/communication/web-socket-event';
+import { MissionState } from '@/enums/mission-state';
 import { DroneInfo } from '@/interfaces/drone-info';
 import { Line, Point } from '@/interfaces/map-types';
 import { getLocalTimestamp } from '@/utils/local-timestamp';
@@ -112,7 +113,7 @@ export default defineComponent({
                 const dronePositionPoint = new THREE.Points(droneGeometry, droneMaterial);
 
                 // Drone sensor lines
-                const sensorLinesPerDrone = 4;
+                const sensorLinesPerDrone = 6;
                 const droneSensorLineGeometry = new THREE.BufferGeometry();
                 const droneSensorLinePositions = new Float32Array(2 * sensorLinesPerDrone * 3);
                 droneSensorLineGeometry.setAttribute('position', new THREE.BufferAttribute(droneSensorLinePositions, 3));
@@ -130,7 +131,7 @@ export default defineComponent({
                 droneGroup.add(droneSensorLineGroup);
                 droneInfos.set(newDroneId, {
                     position: dronePositionPoint,
-                    sensorLines: droneSensorLines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line],
+                    sensorLines: droneSensorLines as [THREE.Line, THREE.Line, THREE.Line, THREE.Line, THREE.Line, THREE.Line],
                 });
 
                 droneGroups.add(droneGroup);
@@ -185,7 +186,7 @@ export default defineComponent({
             }
 
             let index = 0;
-            for (let i = 0; i < newDroneSensorLines.length; i++) {
+            for (let i = 0; i < droneInfo.sensorLines.length; i++) {
                 droneInfo.sensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][0]);
                 droneInfo.sensorLines[i].geometry.attributes.position.setXYZ(index++, ...newDroneSensorLines[i][1]);
                 droneInfo.sensorLines[i].geometry.attributes.position.needsUpdate = true;
@@ -197,6 +198,32 @@ export default defineComponent({
                 return [convertServerPointCoords(line[0]), convertServerPointCoords(line[1])];
             });
             setDroneSensorLines(newDroneSensorLines.droneId, droneSensorLines);
+        });
+
+        webSocketClient.bindMessage(WebSocketEvent.MissionState, (newMissionState: MissionState) => {
+            // Clear all drone sensor lines if mission state is Standby or Landed
+            if (newMissionState === MissionState.Standby || newMissionState === MissionState.Landed) {
+                for (const droneInfo of droneInfos.values()) {
+                    const dronePosition = droneInfo.position.geometry.attributes.position;
+
+                    let index = 0;
+                    for (const sensorLine of droneInfo.sensorLines) {
+                        sensorLine.geometry.attributes.position.setXYZ(
+                            index++,
+                            dronePosition.getX(0),
+                            dronePosition.getY(0),
+                            dronePosition.getZ(0)
+                        );
+                        sensorLine.geometry.attributes.position.setXYZ(
+                            index++,
+                            dronePosition.getX(0),
+                            dronePosition.getY(0),
+                            dronePosition.getZ(0)
+                        );
+                        sensorLine.geometry.attributes.position.needsUpdate = true;
+                    }
+                }
+            }
         });
 
         function saveAsImage() {

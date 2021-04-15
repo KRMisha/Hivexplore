@@ -122,7 +122,7 @@ class DroneManager(ABC):
         )
 
         self._logger.log_drone_data(logging.INFO, drone_id, f'Range reading: {range_reading}')
-        if self._mission_state != MissionState.Standby:
+        if self._mission_state not in (MissionState.Standby, MissionState.Landed):
             self._map_generator.add_range_reading(drone_id, range_reading)
 
     def _log_rssi_callback(self, drone_id: str, data: Dict[str, float]):
@@ -145,7 +145,7 @@ class DroneManager(ABC):
             are_all_drones_grounded = False
             are_all_drones_operational = False
 
-        if are_all_drones_grounded and (self._mission_state == MissionState.Returning or self._mission_state == MissionState.Emergency):
+        if are_all_drones_grounded and (self._mission_state in (MissionState.Returning, MissionState.Emergency)):
             self._set_mission_state(MissionState.Landed.name)
 
         if are_all_drones_operational != self._are_all_drones_operational:

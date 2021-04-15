@@ -188,11 +188,12 @@ class CrazyflieManager(DroneManager):
         self._logger.log_drone_data(logging.INFO, link_uri, 'Disconnected')
         self._connected_crazyflies.pop(link_uri, None)
         self._pending_crazyflies.pop(link_uri, None) # Pop in case a drone gets disconnected while attempting to connect
-        self._send_drone_ids()
 
         self._drone_statuses.pop(link_uri, None)
         self._drone_leds.pop(link_uri, None)
         self._drone_battery_levels.pop(link_uri, None)
+
+        self._send_drone_ids()
 
         if len(self._connected_crazyflies) == 0:
             self._logger.log_server_data(logging.INFO, 'Mission ended because all drones disconnected')

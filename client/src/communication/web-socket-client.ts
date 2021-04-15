@@ -33,8 +33,19 @@ export class WebSocketClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    unbindMessage(event: WebSocketEvent, callback: (data: any) => void): boolean {
+        // undefined represents an event not related to a specific drone
+        return this.unbind(event, undefined, callback);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bindDroneMessage(event: WebSocketEvent, droneId: string, callback: (data: any) => void) {
         this.bind(event, droneId, callback);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    unbindDroneMessage(event: WebSocketEvent, droneId: string, callback: (data: any) => void): boolean {
+        return this.unbind(event, droneId, callback);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,6 +124,28 @@ export class WebSocketClient {
             .get(event)!
             .get(droneId)!
             .push(callback);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private unbind(event: WebSocketEvent, droneId: string | undefined, callback: (data: any) => void): boolean {
+        const droneCallbacks = this.callbacks.get(event)?.get(droneId);
+
+        if (droneCallbacks === undefined) {
+            return false;
+        }
+
+        const index = droneCallbacks.indexOf(callback);
+        if (index === -1) {
+            return false;
+        }
+
+        droneCallbacks.splice(index, 1);
+
+        if (droneCallbacks.length === 0) {
+            this.callbacks.get(event)?.delete(droneId);
+        }
+
+        return true;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

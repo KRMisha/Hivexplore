@@ -8,7 +8,7 @@
             :responsiveOptions="responsiveOptions"
         >
             <template #item="slotProps">
-                <Drone :droneId="slotProps.data" />
+                <Drone :droneId="slotProps.data" :key="slotProps.data" />
             </template>
         </Carousel>
         <div v-else class="p-text-center p-pb-3 no-drones-text">

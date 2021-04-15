@@ -30,11 +30,6 @@ namespace {
         return reading == obstacleTooFar ? 0.0 : threshold - std::min(threshold, reading);
     }
 
-    template<typename T>
-    constexpr std::int8_t GetSign(T value) {
-        return value < 0 ? -1 : 1;
-    }
-
     std::uint8_t GetRandomRotationChangeCount() {
         static std::random_device randomDevice;
         static std::default_random_engine randomEngine(randomDevice());

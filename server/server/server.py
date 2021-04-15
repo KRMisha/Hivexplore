@@ -5,7 +5,7 @@ from server.logger.logger import Logger
 from server.managers.argos_manager import ArgosManager
 from server.managers.crazyflie_manager import CrazyflieManager
 from server.managers.drone_manager import DroneManager
-from server.map_generator import MapGenerator
+from server.managers.map_generator import MapGenerator
 
 
 class Server:

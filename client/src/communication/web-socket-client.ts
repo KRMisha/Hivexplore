@@ -5,15 +5,15 @@ import { getLocalTimestamp } from '@/utils/local-timestamp';
 
 const serverPort = 5678;
 const serverUrl = `ws://${window.location.hostname}:${serverPort}`;
-const baseConnectionTimeout = 2000; // Milliseconds
-const maxConnectionTimeout = 8000; // Milliseconds
+const baseConnectionTimeoutMs = 2000;
+const maxConnectionTimeoutMs = 8000;
 
 export class WebSocketClient {
     private socket!: WebSocket;
 
     private _isConnected = ref(false);
 
-    private timeout = baseConnectionTimeout;
+    private timeout = baseConnectionTimeoutMs;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private callbacks = new Map<WebSocketEvent, Map<string | undefined, Array<(data: any) => void>>>();
@@ -92,7 +92,7 @@ export class WebSocketClient {
         this.socket.onopen = () => {
             console.log(`Connection to ${serverUrl} successful`);
             this._isConnected.value = true;
-            this.timeout = baseConnectionTimeout;
+            this.timeout = baseConnectionTimeoutMs;
         };
 
         this.socket.onclose = () => {
@@ -101,7 +101,7 @@ export class WebSocketClient {
                 this.connect();
             }, this.timeout);
             console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds`);
-            this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
+            this.timeout = Math.min(this.timeout * 2, maxConnectionTimeoutMs);
         };
 
         this.socket.onerror = (event: Event) => {

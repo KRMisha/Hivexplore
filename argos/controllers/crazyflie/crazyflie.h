@@ -147,7 +147,7 @@ private:
     // Exploration variables
     bool m_isForwardCommandFinished = true;
     CVector3 m_forwardCommandReferencePosition;
-    std::uint16_t m_reorientationWatchdog; // To reorient drone away from the swarm's center of mass
+    std::uint16_t m_reorientationWatchdog; // To reorient away from the swarm's center of mass
 
     // Braking variables
     bool m_isBrakeCommandFinished = true;

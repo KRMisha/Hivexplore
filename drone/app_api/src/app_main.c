@@ -90,11 +90,11 @@ static float targetHeight;
 static float targetYawRate;
 static float targetYaw;
 
-// Watchdogs (explore)
-static uint16_t reorientationWatchdog = INITIAL_REORIENTATION_TICKS; // To reorient drone away from the swarm's center of mass
+// Timers (explore)
+static uint16_t reorientationWatchdog = INITIAL_REORIENTATION_TICKS; // To reorient away from the swarm's center of mass
 static uint8_t rotationChangeWatchdog; // To randomly change exploration rotation direction
 
-// Watchdogs (return to base)
+// Timers (return to base)
 static uint16_t returnWatchdog = MAXIMUM_RETURN_TICKS; // Prevent staying stuck in return state by exploring periodically
 static uint64_t maximumExploreTicks = INITIAL_EXPLORE_TICKS;
 static uint64_t exploreWatchdog = INITIAL_EXPLORE_TICKS; // Prevent staying stuck in forward state by attempting to beeline periodically

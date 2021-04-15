@@ -5,11 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python - Crazyflie",
+            "name": "Python - Drone",
             "type": "python",
             "request": "launch",
             "module": "server.main",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": ["drone"]
         },
         {
             "name": "Python - ARGoS",

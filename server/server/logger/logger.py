@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, TYPE_CHECKING
 import yaml
 from server.communication.web_socket_event import WebSocketEvent
-from server.tuples import Point
+from server.types.tuples import Point
 if TYPE_CHECKING:
     from server.communication.web_socket_server import WebSocketServer
 

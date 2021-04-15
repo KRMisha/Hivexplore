@@ -6,9 +6,9 @@ from server.communication.unix_socket_event import UnixSocketEvent
 from server.communication.web_socket_server import WebSocketServer
 from server.logger.logger import Logger
 from server.managers.drone_manager import DroneManager
-from server.managers.mission_state import MissionState
 from server.managers.map_generator import MapGenerator
-from server.tuples import Point
+from server.types.mission_state import MissionState
+from server.types.tuples import Point
 
 
 class ArgosManager(DroneManager):

@@ -29,7 +29,7 @@ class Logger:
 
     def setup_logging(self):
         global log_filename # pylint: disable=global-statement, invalid-name
-        log_filename = LOGS_DIRECTORY / f'hivexplore_{datetime.now().isoformat().replace(":", "")}.log'
+        log_filename = LOGS_DIRECTORY / f'hivexplore_{datetime.now().isoformat().replace(":", "_")}.log'
         with open('server/logging_config.yml', 'r') as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
             logging.config.dictConfig(config)

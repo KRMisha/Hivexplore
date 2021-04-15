@@ -17,6 +17,7 @@ namespace {
     static constexpr std::uint16_t meterToMillimeterFactor = 1000;
 
     // Explore constants
+    static constexpr std::uint8_t initialLowBatteryIgnoredTicks = 40;
     static constexpr std::uint16_t initialReorientationTicks = 20;
     static constexpr std::uint16_t maximumReorientationTicks = 600;
     static constexpr std::uint16_t stabilizeRotationTicks = 40;
@@ -82,11 +83,6 @@ void CCrazyflieController::ControlStep() {
                                             (m_missionState == MissionState::Emergency && m_emergencyState == EmergencyState::Idle);
     if (!shouldNotBroadcastPosition) {
         PingOtherDrones();
-    }
-
-    static constexpr std::uint8_t lowBatteryThreshold = 30;
-    if (m_batteryLevel < lowBatteryThreshold) {
-        m_isBatteryBelowMinimumThreshold = true;
     }
 
     switch (m_missionState) {
@@ -294,6 +290,16 @@ bool CCrazyflieController::AvoidObstaclesAndDrones() {
 }
 
 void CCrazyflieController::Explore() {
+    static constexpr std::uint8_t lowBatteryThreshold = 30;
+    if (m_batteryLevel < lowBatteryThreshold) {
+        if (m_lowBatteryIgnoredCounter == 0) {
+            m_isBatteryBelowMinimumThreshold = true;
+            DebugPrint("Low battery\n");
+        } else {
+            m_lowBatteryIgnoredCounter--;
+        }
+    }
+
     switch (m_exploringState) {
     case ExploringState::Idle: {
         m_droneStatus = DroneStatus::Standby;
@@ -672,6 +678,9 @@ void CCrazyflieController::ResetInternalStates() {
     m_exploringState = ExploringState::Idle;
     m_returningState = ReturningState::BrakeTowardsBase;
     m_emergencyState = EmergencyState::Land;
+
+    m_isBatteryBelowMinimumThreshold = false;
+    m_lowBatteryIgnoredCounter = initialLowBatteryIgnoredTicks;
 
     m_isAvoidingObstacle = false;
     m_exploringStateOnHold = ExploringState::Idle;

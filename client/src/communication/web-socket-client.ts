@@ -100,8 +100,8 @@ export class WebSocketClient {
             setTimeout(() => {
                 this.connect();
             }, this.timeout);
-            this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
             console.log(`Connection to ${serverUrl} closed, retrying after ${this.timeout / 1000} seconds`);
+            this.timeout = Math.min(this.timeout * 2, maxConnectionTimeout);
         };
 
         this.socket.onerror = (event: Event) => {

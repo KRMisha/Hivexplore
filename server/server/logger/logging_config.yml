@@ -7,7 +7,7 @@ formatters:
 
 filters:
     debug_info_filter:
-        (): ext://server.logger.DebugInfoFilter
+        (): ext://server.logger.logger.DebugInfoFilter
 
 handlers:
     console_stdout:
@@ -27,7 +27,7 @@ handlers:
         class: logging.FileHandler
         level: INFO
         formatter: hivexplore_formatter
-        filename: ext://server.logger.log_filename
+        filename: ext://server.logger.logger.log_filename
         encoding: utf8
 
 loggers:

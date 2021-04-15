@@ -5,11 +5,11 @@ import numpy as np
 from server.communication.param_name import ParamName
 from server.communication.web_socket_event import WebSocketEvent
 from server.communication.web_socket_server import WebSocketServer
-from server.logger import Logger
-from server.managers.drone_status import DroneStatus
-from server.managers.mission_state import MissionState
-from server.map_generator import MapGenerator
-from server.tuples import Orientation, Point, Range, Velocity
+from server.logger.logger import Logger
+from server.managers.map_generator import MapGenerator
+from server.types.drone_status import DroneStatus
+from server.types.mission_state import MissionState
+from server.types.tuples import Orientation, Point, Range, Velocity
 
 
 class DroneManager(ABC):

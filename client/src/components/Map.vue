@@ -227,7 +227,7 @@ export default defineComponent({
         });
 
         function saveAsImage() {
-            const filename = `hivexplore_map_${getLocalTimestamp().replaceAll(':', '')}.png`;
+            const filename = `hivexplore_map_${getLocalTimestamp().replaceAll(':', '_')}.png`;
             const url = renderer.domElement.toDataURL('image/png;base64');
             const link = document.createElement('a');
             link.download = filename;

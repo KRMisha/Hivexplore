@@ -8,11 +8,11 @@ from server.communication.log_name import LogName
 from server.communication.param_name import ParamName
 from server.communication.web_socket_event import WebSocketEvent
 from server.communication.web_socket_server import WebSocketServer
-from server.logger import Logger
+from server.logger.logger import Logger
 from server.managers.drone_manager import DroneManager
-from server.managers.mission_state import MissionState
-from server.map_generator import MapGenerator
-from server.tuples import Point
+from server.managers.map_generator import MapGenerator
+from server.types.mission_state import MissionState
+from server.types.tuples import Point
 from server.utils.config_parser import CRAZYFLIES_CONFIG_FILENAME, load_crazyflies_config
 
 

@@ -77,7 +77,7 @@ python3 -m server.scripts.assign_crazyflie_address radio://0/80/2M/E7E7E7E7E7 E7
 ### Set a Crazyflie's offset relative to the base
 
 When starting a mission, the Crazyflies' offsets relative to the base must be known before takeoff.
-You can change each Crazyflie's offset, in meters, by editing `server/config/crazyflies_config.json`.
+You can change each Crazyflie's offset, in meters, by editing `config/crazyflies_config.json`.
 
 The coordinate system is as follows:
 - X: Forward

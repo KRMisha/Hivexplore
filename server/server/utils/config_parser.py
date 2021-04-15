@@ -5,7 +5,7 @@ from cflib.crazyflie.mem.i2c_element import I2CElement
 from cflib.crazyflie import Crazyflie
 from cflib.utils.power_switch import PowerSwitch
 
-CRAZYFLIES_CONFIG_FILENAME = 'server/config/crazyflies_config.json'
+CRAZYFLIES_CONFIG_FILENAME = 'config/crazyflies_config.json'
 
 
 def load_crazyflies_config() -> Dict[str, Dict[str, Any]]:

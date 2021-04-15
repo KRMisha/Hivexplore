@@ -9,7 +9,7 @@ import uuid
 import websockets
 from server.communication.web_socket_event import WebSocketEvent
 if TYPE_CHECKING:
-    from server.logger import Logger
+    from server.logger.logger import Logger
 
 IP_ADDRESS = ''
 PORT = 5678

@@ -4,7 +4,7 @@ from server.communication.log_name import LogName
 from server.communication.unix_socket_client import UnixSocketClient
 from server.communication.unix_socket_event import UnixSocketEvent
 from server.communication.web_socket_server import WebSocketServer
-from server.logger import Logger
+from server.logger.logger import Logger
 from server.managers.drone_manager import DroneManager
 from server.managers.mission_state import MissionState
 from server.map_generator import MapGenerator

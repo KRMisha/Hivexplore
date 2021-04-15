@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 from typing import Any, Dict, List
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -200,6 +201,10 @@ class CrazyflieManager(DroneManager):
             self._set_mission_state(MissionState.Standby.name)
 
     def _connection_failed(self, link_uri: str, msg: str):
+        if msg.startswith('Couldn\'t load link driver: Cannot find a Crazyradio Dongle'):
+            self._logger.log_server_data(logging.ERROR, 'CrazyflieManager error: Crazyradio could not be found')
+            sys.exit(1)
+
         self._logger.log_server_data(logging.WARN, f'Connection to {link_uri} failed: {msg}')
         self._logger.log_drone_data(logging.WARN, link_uri, 'Connection failed')
         del self._pending_crazyflies[link_uri]

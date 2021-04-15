@@ -147,6 +147,7 @@ private:
     // Exploration variables
     bool m_isForwardCommandFinished = true;
     CVector3 m_forwardCommandReferencePosition;
+    std::uint8_t m_lowBatteryIgnoredCounter; // To protect from low voltage spikes triggering return
     std::uint16_t m_reorientationWatchdog; // To reorient away from the swarm's center of mass
 
     // Braking variables

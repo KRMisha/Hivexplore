@@ -56,7 +56,6 @@ class ArgosManager(DroneManager):
     def _get_drone_ids_callback(self, _drone_id: Optional[str], data: Any):
         self._drone_ids = data
         self._send_drone_ids()
-
         self._logger.log_server_data(logging.INFO, f'Received drone IDs: {self._drone_ids}')
 
     def _log_console_callback(self, drone_id: str, data: str):

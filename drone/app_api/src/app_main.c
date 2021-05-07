@@ -185,11 +185,10 @@ void appMain(void) {
             continue;
         }
 
-        const bool shouldNotBroadcastPosition =
-            missionState == MISSION_STANDBY ||
-            (missionState == MISSION_EXPLORING && exploringState == EXPLORING_IDLE) ||
-            (missionState == MISSION_RETURNING && returningState == RETURNING_IDLE) ||
-            (missionState == MISSION_EMERGENCY && emergencyState == EMERGENCY_IDLE);
+        const bool shouldNotBroadcastPosition = missionState == MISSION_STANDBY ||
+                                                (missionState == MISSION_EXPLORING && exploringState == EXPLORING_IDLE) ||
+                                                (missionState == MISSION_RETURNING && returningState == RETURNING_IDLE) ||
+                                                (missionState == MISSION_EMERGENCY && emergencyState == EMERGENCY_IDLE);
 
         static const uint8_t broadcastProbabilityPercentage = 2;
         if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {

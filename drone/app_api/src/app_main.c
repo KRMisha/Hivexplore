@@ -187,11 +187,11 @@ void appMain(void) {
 
         const bool shouldNotBroadcastPosition =
             missionState == MISSION_STANDBY ||
-            (missionState == MISSION_EXPLORING && (exploringState == EXPLORING_IDLE || exploringState == EXPLORING_LIFTOFF)) ||
+            (missionState == MISSION_EXPLORING && exploringState == EXPLORING_IDLE) ||
             (missionState == MISSION_RETURNING && returningState == RETURNING_IDLE) ||
             (missionState == MISSION_EMERGENCY && emergencyState == EMERGENCY_IDLE);
 
-        static const uint8_t broadcastProbabilityPercentage = 5;
+        static const uint8_t broadcastProbabilityPercentage = 2;
         if (!shouldNotBroadcastPosition && (rand() % 100) < broadcastProbabilityPercentage) {
             broadcastPosition();
         }
@@ -244,7 +244,7 @@ void avoidDrones(void) {
 
         const float vectorMagnitude = sqrtf(vectorAwayFromDrone.x * vectorAwayFromDrone.x + vectorAwayFromDrone.y * vectorAwayFromDrone.y +
                                             vectorAwayFromDrone.z * vectorAwayFromDrone.z);
-        static const float DRONE_AVOIDANCE_THRESHOLD = 1.0f;
+        static const float DRONE_AVOIDANCE_THRESHOLD = 0.5f;
         if (vectorMagnitude > DRONE_AVOIDANCE_THRESHOLD) {
             return;
         }
@@ -285,7 +285,7 @@ void avoidObstacles(void) {
 }
 
 void explore(void) {
-    static const uint8_t lowBatteryThreshold = 30;
+    static const uint8_t lowBatteryThreshold = 7;
     if (batteryLevel < lowBatteryThreshold) {
         if (lowBatteryIgnoredCounter == 0) {
             isBatteryBelowMinimumThreshold = true;

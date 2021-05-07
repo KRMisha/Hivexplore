@@ -285,7 +285,7 @@ void avoidObstacles(void) {
 }
 
 void explore(void) {
-    static const uint8_t lowBatteryThreshold = 7;
+    static const uint8_t lowBatteryThreshold = 10;
     if (batteryLevel < lowBatteryThreshold) {
         if (lowBatteryIgnoredCounter == 0) {
             isBatteryBelowMinimumThreshold = true;

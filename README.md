@@ -3,20 +3,23 @@
 Mapping rooms with drone swarms!
 
 The repo is structured as 4 subprojects:
-- `client`: the web front-end
-- `server`: the back-end server used to communicate with the drone swarm
-- `drone`: the Crazyflie drone firmware
-- `argos`: the ARGoS simulation used to test the drones
+
+- [`client`](client/README.md): the web front-end
+- [`server`](server/README.md): the back-end server used to communicate with the drone swarm
+- [`drone`](drone/README.md): the Crazyflie drone firmware
+- [`argos`](argos/README.md): the ARGoS simulation used to test the drones
 
 ## Setup
 
 Clone the repo with its submodules:
-```
+
+```sh
 git clone --recurse-submodules https://gitlab.com/KRMisha/Hivexplore
 ```
 
 Or, if you already cloned the repo but forgot the `--recurse-submodules` option, use the following command to fetch the submodules manually:
-```
+
+```sh
 git submodule update --init --recursive
 ```
 
@@ -44,7 +47,7 @@ git submodule update --init --recursive
 
 2. Start Hivexplore in *drone* mode:
 
-    ```
+    ```sh
     ./start.sh drone
     ```
 
@@ -54,7 +57,7 @@ git submodule update --init --recursive
 
 2. Start Hivexplore in *ARGoS* mode:
 
-    ```
+    ```sh
     ./start.sh argos
     ```
 
@@ -66,7 +69,7 @@ git submodule update --init --recursive
 
     1. Find your host machine's local network IP address with the following command:
 
-        ```
+        ```sh
         ip route get 1.2.3.4 | awk '{print $7}'
         ```
 
@@ -81,13 +84,13 @@ git submodule update --init --recursive
 
 - Rebuild containers after an update:
 
-    ```
+    ```sh
     ./start.sh build
     ```
 
 - See help information:
 
-    ```
+    ```sh
     ./start.sh --help
     ```
 
@@ -96,7 +99,8 @@ git submodule update --init --recursive
 ### Usage
 
 To open the project in VS Code, use the multi-root workspace for best results:
-```
+
+```sh
 code Hivexplore.code-workspace
 ```
 

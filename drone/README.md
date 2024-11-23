@@ -7,23 +7,23 @@ The Hivexplore drone logic is contained the `app_api` directory.
 ## Prerequisites
 
 - ARM embedded toolchain:
-    - Ubuntu 20.04+
+    - Ubuntu 20.04:
 
-        ```
+        ```sh
         sudo apt install gcc-arm-none-eabi
         ```
 
     - Ubuntu 16.04 & 18.04:
 
-        ```
+        ```sh
         sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
         sudo apt update
         sudo apt install gcc-arm-embedded
         ```
 
-    - Arch Linux
+    - Arch Linux:
 
-        ```
+        ```sh
         sudo pacman -S community/arm-none-eabi-gcc community/arm-none-eabi-gdb community/arm-none-eabi-newlib
         ```
 
@@ -34,17 +34,20 @@ The Hivexplore drone logic is contained the `app_api` directory.
 ## Setup
 
 Install the required packages to flash the drone with a virtual environment located at the project root:
-```
+
+```sh
 make venv
 ```
 
 The virtual environment must be activated once per shell session before running `make cload`:
-```
+
+```sh
 source ../.venv/bin/activate
 ```
 
 To install new packages needed for the drone build process, add them to `requirements.txt` and run the following command (with the venv activated):
-```
+
+```sh
 pip install -r requirements.txt
 ```
 
@@ -53,6 +56,7 @@ pip install -r requirements.txt
 ### Build the Hivexplore firmware
 
 Build the firmware with the logic defined in the `app_api` directory:
+
 ```sh
 cd app_api
 make
@@ -61,6 +65,7 @@ make
 ### Build the default (logic-less) firmware
 
 Build the default firmware from the root of the `drone` subproject:
+
 ```sh
 make
 ```
@@ -75,7 +80,7 @@ make
     3. The blue LED M3 should now start blinking as well
 4. Flash the drone using the wireless bootloader:
 
-    ```
+    ```sh
     make cload
     ```
 
@@ -88,7 +93,7 @@ Alternatively, you can use the Docker image to flash the drone with the `app_api
 1. `cd` into the `drone` directory.
 2. Build the Docker image:
 
-    ```
+    ```sh
     docker build -t hivexplore/drone .
     ```
 
@@ -99,13 +104,13 @@ Alternatively, you can use the Docker image to flash the drone with the `app_api
     3. The blue LED M3 should now start blinking as well
 5. Flash the drone using the containerized wireless bootloader:
 
-    ```
+    ```sh
     docker run --rm --device=/dev/bus/usb hivexplore/drone
     ```
 
 ### Make targets
 
-```
+```text
 all          Shortcut for build
 compile      Compile cflie.hex. WARNING: do NOT update version.c
 build        Update version.c and compile cflie.elf/hex
@@ -126,7 +131,8 @@ format       Format source files
 
 To create custom build options, create a file named `config.mk` in the `tools/make/`
 directory and fill it with options. For example:
-```
+
+```makefile
 PLATFORM=CF2
 DEBUG=1
 ```
@@ -138,14 +144,15 @@ More information can be found on the
 
 ### Running all unit tests
 
-```
+```sh
 make unit
 ```
 
 ### Running one unit test
 
 When working with one specific file, it is often convenient to run only one unit test. For example:
-```
+
+```sh
 make unit FILES=test/utils/src/test_num.c
 ```
 
@@ -154,6 +161,7 @@ make unit FILES=test/utils/src/test_num.c
 Defines are managed by Make and are passed on to the unit test code. Use the
 usual way of passing arguments to Make when running tests. For instance, to run tests
 for the Crazyflie 1:
-```
+
+```sh
 make unit LPS_TDOA_ENABLE=1
 ```

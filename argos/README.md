@@ -13,12 +13,14 @@ This section details how to simply run the simulation without making changes. If
 ### Setup
 
 Build the Docker image for production:
-```
+
+```sh
 make image
 ```
 
 ### Usage
-```
+
+```sh
 make start
 ```
 
@@ -36,7 +38,7 @@ This section details how to set up the project for rapid iteration and modificat
 
 1. Copy the VS Code attached container configuration reference into your local VS Code configuration:
 
-    ```
+    ```sh
     make copy-config
     ```
 
@@ -44,7 +46,7 @@ This section details how to set up the project for rapid iteration and modificat
 
 2. Build the Docker image for development:
 
-    ```
+    ```sh
     make image-dev
     ```
 
@@ -54,7 +56,7 @@ This section details how to set up the project for rapid iteration and modificat
 
 1. Start the container non-interactively with x11docker:
 
-    ```
+    ```sh
     make start-dev
     ```
 
@@ -64,7 +66,7 @@ This section details how to set up the project for rapid iteration and modificat
 
 3. Once in the container, you can make your changes and re-run the simulation:
 
-    ```
+    ```sh
     make run
     ```
 
@@ -75,30 +77,34 @@ This section details how to set up the project for rapid iteration and modificat
 4. When done making changes, simply close the VS Code window with the container and stop x11docker with `Ctrl+C`.
 
 #### Build simulation
-```
+
+```sh
 make build
 ```
 
 #### Build and run simulation
-```
+
+```sh
 make run
 ```
 
 > This will automatically run CMake if no Makefile exists and rebuild the program if the source files have changed.
 
 #### Format code
-```
+
+```sh
 make format
 ```
 
 #### Clean simulation build directory
-```
+
+```sh
 make clean
 ```
 
 #### See list of available commands
 
-```
+```sh
 make help
 ```
 

@@ -25,4 +25,4 @@ RUN make -j$(nproc)
 
 # Flash stage
 FROM build AS flash
-CMD [ "make", "cload" ]
+CMD ["make", "cload"]

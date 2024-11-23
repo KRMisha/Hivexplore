@@ -1,5 +1,12 @@
-# CMake build directory
-**/build/
+# Git
+**/.gitignore
+
+# Docker
+**/Dockerfile
+**/.dockerignore
+
+# Build output
+**/build
 
 # VS Code
 **/.vscode

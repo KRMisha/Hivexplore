@@ -70,4 +70,4 @@ RUN mkdir build && cd build && \
 # Production stage
 FROM base AS prod
 COPY --from=build-simulation /hivexplore .
-CMD [ "argos3", "-c", "experiments/hivexplore.argos" ]
+CMD ["argos3", "-c", "experiments/hivexplore.argos"]

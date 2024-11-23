@@ -1,3 +1,10 @@
+# Git
+**/.gitignore
+
+# Docker
+**/Dockerfile
+**/.dockerignore
+
 # Dependencies and build output
 **/node_modules
 **/dist

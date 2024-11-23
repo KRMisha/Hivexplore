@@ -28,4 +28,4 @@ RUN pip3 install -r requirements/prod.txt
 COPY server server
 COPY config config
 EXPOSE 5678
-ENTRYPOINT [ "python3", "-u", "-m", "server.main" ]
+ENTRYPOINT ["python3", "-u", "-m", "server.main"]

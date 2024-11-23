@@ -1,3 +1,10 @@
+# Git
+**/.gitignore
+
+# Docker
+**/Dockerfile
+**/.dockerignore
+
 # Compiled bytecode
 **/__pycache__
 
@@ -6,6 +13,9 @@
 
 # Mypy
 **/.mypy_cache
+
+# Rope
+**/.ropeproject
 
 # Crazyflie cache
 **/cache

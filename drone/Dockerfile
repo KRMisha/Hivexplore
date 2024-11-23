@@ -11,14 +11,14 @@ RUN apt-get update && apt-get install -y \
     python3-pip
 RUN pip install --upgrade pip
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 COPY . .
 RUN git init
 WORKDIR /hivexplore/app_api
 
 # Format stage
 FROM base AS format
-RUN clang-format --dry-run -Werror $(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
+RUN clang-format --dry-run --Werror $(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
 
 # Build stage
 FROM base AS build

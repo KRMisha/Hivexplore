@@ -48,7 +48,7 @@ WORKDIR /hivexplore
 FROM base AS format
 RUN apt-get update && apt-get install -y clang-format
 COPY . .
-RUN clang-format --dry-run -Werror $(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
+RUN clang-format --dry-run --Werror $(find . -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.inl')
 
 # Simulation build dependencies stage (also used for VS Code dev container)
 FROM base AS simulation-build-dependencies

@@ -12,7 +12,7 @@ The repo is structured as 4 subprojects:
 
 Clone the repo with its submodules:
 ```
-git clone --recurse-submodules https://gitlab.com/polytechnique-montr-al/inf3995/20211/equipe-102/hivexplore
+git clone --recurse-submodules https://gitlab.com/KRMisha/Hivexplore
 ```
 
 Or, if you already cloned the repo but forgot the `--recurse-submodules` option, use the following command to fetch the submodules manually:
